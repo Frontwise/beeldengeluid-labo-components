@@ -11,6 +11,7 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import CollectionStats from './components/collection/CollectionStats';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
 import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import {ResponsiveContainer, PieChart, Pie, Sector, Cell, Legend, Label, LabelList} from 'recharts';
 
 import PropTypes from 'prop-types';
 
@@ -155,10 +156,84 @@ class CollectionRecipe extends React.Component {
 		}
 		return null;
 	}
-
+    onPieEnter(){
+		// console.log('entering pie chart')
+	}
 	render() {
-		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 
+        let piecharts = null;
+        if (this.state.fieldAnalysisStats && this.state.fieldAnalysisStats.doc_stats) {
+            const COLORS = ['#468dcb', '#FF7F0E', '#FFBB28', '#FF8042'];
+            const RADIAN = Math.PI / 180;
+            const data = [
+                {name: 'Records that do contain the date field', value: this.state.fieldAnalysisStats.doc_stats.date_field},
+                {name: 'Records that do NOT contain the date field', value: (this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field)}];
+            const dataAnalysis = [
+                {name: 'Records that do contain the analysis field', value: this.state.fieldAnalysisStats.doc_stats.analysis_field},
+                {name: 'Records that do NOT contain the analysis field', value: (this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.analysis_field)}];
+            const renderDateField = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
+                    x = cx + radius * Math.cos(-midAngle * RADIAN),
+                    y = cy + radius * Math.sin(-midAngle * RADIAN),
+                    absDateField 		= this.state.fieldAnalysisStats.doc_stats.date_field,
+                    absNonDateField 	= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field;
+                return (
+                    <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
+                        <tspan fontSize="12" fontWeight="bold">{index ? absNonDateField :absDateField}</tspan>
+                        <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
+                    </text>
+                );
+            };
+            const renderAnalysisField = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
+                    x = cx + radius * Math.cos(-midAngle * RADIAN),
+                    y = cy + radius * Math.sin(-midAngle * RADIAN),
+                    analysisField 		= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.no_analysis_field,
+                    nonAnalysisField 	= this.state.fieldAnalysisStats.doc_stats.no_analysis_field;
+                return (
+                    <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="central">
+                        <tspan fontSize="12" fontWeight="bold">{index ? nonAnalysisField :analysisField}</tspan>
+                        <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
+                    </text>
+                );
+            };
+            let analysisFieldPieChart = null;
+            if (this.state.fieldAnalysisStats.analysis_field !== 'null__option') {
+                analysisFieldPieChart = (
+                    <ResponsiveContainer width="100%" height="24%">
+                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter}>
+                            <Pie data={dataAnalysis} cx="55%" cy="55%" labelLine={false}
+                                 label={renderAnalysisField} outerRadius={65} fill="#8884d8">
+                                {
+                                    dataAnalysis.map((entry, index) => <Cell fill={COLORS[index % COLORS.length]}/>)
+                                }
+                            </Pie>
+                            <Legend wrapperStyle={{fontSize: '10px'}} verticalAlign="bottom" align="left"/>
+                        </PieChart>
+                    </ResponsiveContainer>
+                )
+            }
+
+            console.log(this.state.fieldAnalysisStats.analysis_field)
+            piecharts = (
+                <div className={IDUtil.cssClassName('pieChart')}>
+                    <ResponsiveContainer width="100%" height="24%">
+                        <PieChart className="dateTypeField" onMouseEnter={this.onPieEnter}>
+                            <Pie data={data} cx="55%" cy="55%" labelLine={false}
+                                 label={renderDateField} outerRadius={65} fill="#8884d8">
+                                {
+                                    data.map((entry, index) => <Cell fill={COLORS[index % COLORS.length]}/>)
+                                }
+                            </Pie>
+                            <Legend wrapperStyle={{fontSize: '10px'}} verticalAlign="bottom" align="left"/>
+                        </PieChart>
+                    </ResponsiveContainer>
+					{analysisFieldPieChart}
+                </div>
+            )
+        }
+
+		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 		let collectionModal = null; //for selecting collections for the list
 		let collectionBlock = null; //shows all selected collections
 
@@ -310,9 +385,12 @@ class CollectionRecipe extends React.Component {
 					</div>
 				</div>
 				<div className="row">
-					<div className="col-md-12">
+					<div className="col-md-9">
 						{fieldAnalysisTimeline}
 					</div>
+                    <div className="col-md-3">
+                        {piecharts}
+                    </div>
 				</div>
 			</div>
 		)
