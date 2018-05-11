@@ -136,6 +136,10 @@ class ItemDetailsRecipe extends React.Component {
 			);
 		} else if(componentClass == 'BookmarkSelector') {
 			this.bookmarkToGroupInProject(data);
+		} else if(componentClass == 'FlexImageViewer') {
+			this.setActiveAnnotationTarget({
+				source : data.url //data => mediaObject
+			})
 		}
 	}
 
@@ -393,6 +397,32 @@ class ItemDetailsRecipe extends React.Component {
 		return false;
 	}
 
+	getSelectedMediaObject() {
+		let mediaObject = null;
+		if(this.props.params.fragmentUrl) {
+			mediaObject = {url : this.props.params.fragmentUrl};
+			if(this.props.params.s) {
+				mediaObject.start = this.props.params.s;
+			}
+			if(this.props.params.e) {
+				mediaObject.end = this.props.params.e;
+			}
+			if(this.props.params.x) {
+				mediaObject.x = this.props.params.x;
+			}
+			if(this.props.params.y) {
+				mediaObject.y = this.props.params.y;
+			}
+			if(this.props.params.w) {
+				mediaObject.w = this.props.params.w;
+			}
+			if(this.props.params.h) {
+				mediaObject.h = this.props.params.h;
+			}
+		}
+		return mediaObject;
+	}
+
 	getRenderedMediaContent() {
 		//first get all of the media contents per media type
 		let tabs = [
@@ -538,12 +568,19 @@ class ItemDetailsRecipe extends React.Component {
 					<FlexImageViewer
 						user={this.props.user} //current user
 						project={this.state.activeProject} //selected via the ProjectSelector
+
 						resourceId={this.state.itemData.resourceId}
 						collectionId={this.state.itemData.index}
+
 						mediaObjects={images}//TODO make this plural for playlist support
+						selectedMediaObject={this.getSelectedMediaObject()}
+
 						annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
 						annotationLayers={this.props.recipe.ingredients.annotationLayers} //so the player can distribute annotations in layers
+
 						editAnnotation={this.editAnnotation.bind(this)} //each annotation support should call this function
+
+						onOutput={this.onComponentOutput.bind(this)}
 					/>
 				)
 			}

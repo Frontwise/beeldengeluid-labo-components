@@ -247,7 +247,7 @@ const AnnotationUtil = {
 
 	//MAJOR TODO: DETERMINE WHERE TO SET THE TIDY MEDIA OBJECT URL!
 	removeSourceUrlParams(url) {
-		if(url.indexOf('?') != -1) {
+		if(url.indexOf('?') != -1 && url.indexOf('cgi?') == -1) {
 			return url.substring(0, url.indexOf('?'));
 		}
 		return url
@@ -337,7 +337,6 @@ const AnnotationUtil = {
 				selector: selector,
 				type: mediaType
 			}
-
 			annotation = {
 				id : null,
 				user : user.id, //TODO like the selector, generate the w3c stuff here?
