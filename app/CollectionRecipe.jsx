@@ -116,28 +116,6 @@ class CollectionRecipe extends React.Component {
 		);
 	}
 
-	submitToRecipe(e) {
-		e.preventDefault();
-		const recipeId = this.refs.recipe.value;
-		const cids = Object.keys(this.state.selectedCollections);
-		const recipe = this.getRecipe(recipeId);
-		if(cids && recipe) {
-			FlexRouter.gotoSearch(recipe.path, cids);
-		}
-	}
-
-	getRecipe(recipeId) {
-		if(this.props.recipe.ingredients.recipes) {
-			const tmp = this.props.recipe.ingredients.recipes.filter((r) => {
-				return r.id == recipeId;
-			});
-			if(tmp.length == 1) {
-				return tmp[0]
-			}
-		}
-		return null;
-	}
-
 	showCollectionStats(collectionId, e) {
 		e.stopPropagation();
 		const collectionData = this.getCollectionData(collectionId);
@@ -204,17 +182,6 @@ class CollectionRecipe extends React.Component {
 						<ul className="list-group">
 							{items}
 						</ul>
-						<form onSubmit={this.submitToRecipe.bind(this)}>
-							<select ref="recipe" className="form-control">
-								{recipes}
-							</select>
-							<br/>
-							<div className="text-right">
-								<button type="submit" className="btn btn-default">
-									Submit collections to  recipe
-								</button>
-							</div>
-						</form>
 					</div>
 				</FlexBox>
 			)
