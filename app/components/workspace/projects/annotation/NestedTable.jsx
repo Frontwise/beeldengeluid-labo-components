@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
 * Display a bookmark/annotation result list and handle the filtering and sorting
 */
-class NestedTable extends React.PureComponent {
+class NestedTable extends React.Component {
 
     constructor(props) {
         super(props);
@@ -22,8 +22,7 @@ class NestedTable extends React.PureComponent {
             visibleItems: [],
             loading: true,
             filter: {
-                keywords: '',
-                type: ''
+                keywords: '',                
             },
             order: 'created'
         };

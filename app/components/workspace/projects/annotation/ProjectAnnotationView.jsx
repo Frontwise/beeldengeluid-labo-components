@@ -48,7 +48,7 @@ class ProjectAnnotationView extends React.PureComponent {
 
     render() {
         let viewComponent = null;
-
+        console.log(this.state.view);
         // set viewComponent, based on the current state.view
 
         switch (this.state.view) {
@@ -56,12 +56,24 @@ class ProjectAnnotationView extends React.PureComponent {
                     <BookmarkTable user={this.props.user} project={this.props.project} />
                 );
                 break;
-            case 'annotation-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} />
+            case 'code-centric': viewComponent = (
+                <AnnotationTable user={this.props.user} project={this.props.project} key="code" type="classification" title="Codes" />
+                );
+                break;
+            case 'comment-centric': viewComponent = (
+                <AnnotationTable user={this.props.user} project={this.props.project} key="comments" type="comment" title="Comments" />
+                );
+                break;
+            case 'link-centric': viewComponent = (
+                <AnnotationTable user={this.props.user} project={this.props.project} key="links" type="link" title="Links"  />
+                );
+                break;
+            case 'metadata-centric': viewComponent = (
+                <AnnotationTable user={this.props.user} project={this.props.project} key="metadata" type="metadata" title="Metadata" />
                 );
                 break;
         }
-
+        
     return (
         <div className={IDUtil.cssClassName('project-annotation-view')}>
             <div className="tools">
@@ -76,17 +88,47 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'bookmark-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-bookmark">Bookmark-centric</label>
+                        <label htmlFor="view-bookmark">Bookmarks</label>
 
                         <input
                             type="radio"
                             name="view"
-                            value="annotation-centric"
-                            id="view-annotation"
-                            checked={this.state.view === 'annotation-centric'}
+                            value="code-centric"
+                            id="view-code"
+                            checked={this.state.view === 'code-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-annotation">Annotation-centric</label>
+                        <label htmlFor="view-code">Codes</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="comment-centric"
+                            id="view-comment"
+                            checked={this.state.view === 'comment-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-comment">Comments</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="link-centric"
+                            id="view-link"
+                            checked={this.state.view === 'link-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-link">Links</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="metadata-centric"
+                            id="view-metadata"
+                            checked={this.state.view === 'metadata-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-metadata">Metadata</label>
                     </div>
                 </div>
             </div>

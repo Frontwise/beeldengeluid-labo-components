@@ -42,8 +42,7 @@ class BookmarkTable extends React.PureComponent {
             { value: 'name-az', name: 'Title A-Z' },
             { value: 'name-za', name: 'Title Z-A' },
             { value: 'type', name: 'Type' },
-            { value: 'dataset', name: 'Dataset' },
-            { value: 'manual', name: 'Manual' }
+            { value: 'dataset', name: 'Dataset' }
         ];
 
         this.bulkActions = [
@@ -234,11 +233,6 @@ class BookmarkTable extends React.PureComponent {
         this.setState({
             detailBookmark: bookmark
         });
-    }
-
-    //change sort type (TODO change functio nanme)
-    sortChange(e) {
-        this.setSort(e.target.value);
     }
 
     selectAllChange(items, e) {

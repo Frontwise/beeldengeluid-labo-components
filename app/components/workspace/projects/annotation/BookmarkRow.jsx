@@ -58,6 +58,7 @@ class BookmarkRow extends React.PureComponent {
 
         //populate the foldable annotation block
         let foldableBlock = null;
+
         if(this.state.showAnnotations) {
             let blockContents = null;
             if(!hasAnnotations) {
@@ -120,55 +121,45 @@ class BookmarkRow extends React.PureComponent {
                             checked={this.props.selected}
                             onChange={this.onSelectChange.bind(this)}
                             title={'Select this bookmark with id:\n' + bookmark.id}/>
+                        <div className="delete" onClick={this.onDelete} title="Delete bookmark" />
                     </div>
 
                     <div className="image" style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
 
-                    <div className="info">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <h4 className="label">Title</h4>
-                                        <p className="bold">{bookmark.object.title}</p>
-                                    </td>
-                                    <td>
-                                        <h4 className="label">Date</h4>
-                                        <p>
-                                            {resourceDate}
-                                        </p>
-                                    </td>
-                                </tr>
-
-                                <tr className="subcol">
-                                    <td>
-                                        <h4 className="label">Type</h4>
-                                        <p>{bookmark.object.type}</p>
-                                    </td>
-                                    <td>
-                                        <h4 className="label">Dataset</h4>
-                                        <p>{bookmark.object.dataset}</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul className="info">
+                        <li className="primary">
+                            <h4 className="label">Title</h4>
+                            <p>{bookmark.object.title}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Date</h4>
+                            <p>{resourceDate}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Type</h4>
+                            <p>{bookmark.object.type}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Dataset</h4>
+                            <p>{bookmark.object.dataset}</p>
+                        </li>
+                    </ul>
 
                     <div className="actions">
-                        <div className="btn blank warning" onClick={this.onDelete}>
-                            Delete
-                        </div>
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
-                    </div>
 
-                    <div className={classNames('sublevel-button', {
+                        <div title="Annotations" className={classNames('sublevel-button', {
                             active: this.state.showAnnotations,
                             zero: !hasAnnotations
                         })} onClick={this.toggleAnnotations.bind(this)}>
-                        Annotations <span className="count">{annotations.length}</span>
+                            <span className="icon annotation"/>
+                            <span className="count">{annotations.length}</span>
+                        </div>
                     </div>
+
+                    
                 </div>
 
                 {foldableBlock}
