@@ -57,10 +57,9 @@
         flex-wrap: wrap;
       }
       
-      
       li{
         padding: 5px 10px 10px 10px;
-        min-height: 80px;
+        min-height: 50px;
         min-width: 120px;
         &.primary{
           flex-grow: 1.3;          

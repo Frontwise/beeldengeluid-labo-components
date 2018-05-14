@@ -48,28 +48,28 @@ class ProjectAnnotationView extends React.PureComponent {
 
     render() {
         let viewComponent = null;
-        console.log(this.state.view);
-        // set viewComponent, based on the current state.view
 
+        // set viewComponent, based on the current state.view
+        // key is required to force the component to update on changes
         switch (this.state.view) {
             case 'bookmark-centric': viewComponent = (
                     <BookmarkTable user={this.props.user} project={this.props.project} />
                 );
                 break;
             case 'code-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} key="code" type="classification" title="Codes" />
+                    <AnnotationTable user={this.props.user} project={this.props.project} key="code" type="classification" title="Codes" />
                 );
                 break;
             case 'comment-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} key="comments" type="comment" title="Comments" />
+                    <AnnotationTable user={this.props.user} project={this.props.project} key="comments" type="comment" title="Comments" />
                 );
                 break;
             case 'link-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} key="links" type="link" title="Links"  />
+                    <AnnotationTable user={this.props.user} project={this.props.project} key="links" type="link" title="Links"  />
                 );
                 break;
             case 'metadata-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} key="metadata" type="metadata" title="Metadata" />
+                    <AnnotationTable user={this.props.user} project={this.props.project} key="metadata" type="metadata" title="Metadata" />
                 );
                 break;
         }

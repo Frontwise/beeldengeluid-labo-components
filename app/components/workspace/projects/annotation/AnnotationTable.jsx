@@ -81,11 +81,11 @@ class AnnotationTable extends React.PureComponent {
     getFilters(items) {
         const filters = [];
         // only add existing types to the filter
-        this.annotationTypes.forEach(type => {
-            if (items.some(annotation => annotation.annotationType == type.value)) {
-                filters.push(type);
-            }
-        });
+        // this.annotationTypes.forEach(type => {
+        //     if (items.some(annotation => annotation.annotationType == type.value)) {
+        //         filters.push(type);
+        //     }
+        // });
         return filters;
     }
 
@@ -96,6 +96,12 @@ class AnnotationTable extends React.PureComponent {
             parentAnnotations
         );
 
+        // filter on type
+        if (this.props.type) {
+            annotations = annotations.filter(annotation =>
+                annotation.annotationType.toLowerCase().includes(this.props.type)
+            );
+        }
       
         this.setState({
                 parentAnnotations: data.annotations,
@@ -121,12 +127,7 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-        // always filter on type
-        if (this.props.type) {
-            annotations = annotations.filter(annotation =>
-                annotation.annotationType.toLowerCase().includes(this.props.type)
-            );
-        }
+        
 
         // filter on keywords in title, dataset or type
         if (filter.keywords) {
