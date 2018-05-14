@@ -759,6 +759,12 @@
 		box-shadow: 1px 2px 2px 2px #999;
 		margin-top:5px;
 		padding: 3rem;
+		.btn-primary {
+			border-radius: 6px;
+		}
+		.list-group-item{
+			border-radius: 6px;
+		}
 	}
 	.fieldAnalysisStats {
 		background-color: $subdued-bg;
