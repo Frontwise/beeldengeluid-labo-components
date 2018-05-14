@@ -527,14 +527,14 @@
 
 .bg__field-analysis-stats {
 	table {
-		font-size:85%;
+		font-size:95%;
 	}
 } /* FieldAnalysisStats */
 
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
-	background-color: #f9f9f9;
+	background-color: $subdued-bg;
 	border-radius: 6px;
 	box-shadow: 1px 2px 2px 2px #999;
 	padding: 10px;
@@ -755,11 +755,13 @@
 .bg__collection-recipe { /* CollectionRecipe.jsx */
 	.bg__rcp__cl__input-area {
 		background-color: $subdued-bg;
+		border-radius: 6px;
+		box-shadow: 1px 2px 2px 2px #999;
 		margin-top:5px;
-		padding: 10px;
+		padding: 3rem;
 	}
 	.fieldAnalysisStats {
-		background-color: #f9f9f9;
+		background-color: $subdued-bg;
 		border-radius: 6px;
 		box-shadow: 1px 2px 2px 2px #999;
 		margin: 3rem 0;
@@ -829,7 +831,7 @@
 	}
 }
 .bg__pieChart {
-	background-color: #f9f9f9;
+	background-color: $subdued-bg;
 	border-radius: 6px;
 	box-shadow: 1px 2px 2px 2px #999;
 	padding: 10px;
