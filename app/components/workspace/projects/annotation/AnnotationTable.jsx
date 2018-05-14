@@ -98,12 +98,12 @@ class AnnotationTable extends React.PureComponent {
                         options: createOptionList(items,  (i)=>(i['vocabulary']) ).sort()
                     }
                 break;
-                case 'bookmark-group':
+                case 'bookmarkGroup':
                     return {
                         title:'Bookmark group',
-                        key: 'bookmark-group',
+                        key: 'bookmarkGroup',
                         type: 'select',
-                        options: createOptionList(items, (i)=>(i['group'])).sort()
+                        options: createOptionList(items, (i)=>(i['bookmarkGroup'])).sort()
                     }
                 break;
                 case 'code':
@@ -158,6 +158,20 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
+
+        const simpleKeyCheck = (items, getValue, value) =>(items.filter((i)=>(getValue(i) === value)));
+        
+        if (filter.vocabulary){
+            annotations = simpleKeyCheck(annotations, (a)=>(a['vocabulary']), filter.vocabulary);
+        }
+
+        if (filter.code){
+            annotations = simpleKeyCheck(annotations, (a)=>(a['code']), filter.code);
+        }
+
+        if (filter.bookmarkGroup){
+            annotations = simpleKeyCheck(annotations, (a)=>(a['bookmarkGroup']), filter.bookmarkGroup);
+        }
 
         // filter on keywords in title, dataset or type
         if (filter.keywords) {
@@ -319,7 +333,7 @@ class AnnotationTable extends React.PureComponent {
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((annotation, index) => (
                         <AnnotationRow
-                            key={index}
+                            key={annotation.annotationId}
                             annotation={annotation}
                             onDelete={this.deleteAnnotations}
                             onView={this.viewBookmark}
@@ -334,6 +348,8 @@ class AnnotationTable extends React.PureComponent {
     }
 
     render() {
+        console.debug(this.state.annotations);
+
         let detailsModal = null;
         if(this.state.detailBookmark) {
             detailsModal = (

@@ -140,6 +140,13 @@ class BookmarkTable extends React.PureComponent {
     }
 
     filterBookmarks(bookmarks, filter) {
+          // filter on type
+        if (filter.type) {
+            bookmarks = bookmarks.filter(bookmark =>
+                bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
+            );
+        }
+
         // filter on keywords in title, dataset or type
         if (filter.keywords) {
             const keywords = filter.keywords.split(' ');
@@ -160,12 +167,7 @@ class BookmarkTable extends React.PureComponent {
             });
         }
 
-        // filter on type
-        if (filter.type) {
-            bookmarks = bookmarks.filter(bookmark =>
-                bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
-            );
-        }
+      
 
         return bookmarks;
     }
@@ -314,7 +316,7 @@ class BookmarkTable extends React.PureComponent {
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
-                            key={index}
+                            key={bookmark.id}
                             bookmark={bookmark}
                             onDelete={this.deleteBookmarks}
                             onView={this.viewBookmark}
