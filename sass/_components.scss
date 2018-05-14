@@ -498,8 +498,9 @@
 /* ==================== Collection package ============================================ */
 
 .bg__collection-analyser {
-
-
+		.react-autosuggest__input {
+			border-radius: 6px;
+		}
 } /* CollectionAnalyser.jsx */
 
 .bg__collection-selector { /* CollectionSelector.jsx */
@@ -718,7 +719,7 @@
 .bg__flex-box { /* FlexBox.jsx */
 	cursor:pointer;
 	margin-bottom: $default-margin;
-	padding: $default-margin;
+	padding: 10px 0;
 	.bg__fb__open {
 		float:right;
 		&:after {
