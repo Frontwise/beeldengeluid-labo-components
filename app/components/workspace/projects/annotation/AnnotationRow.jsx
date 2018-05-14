@@ -45,18 +45,20 @@ class AnnotationRow extends React.PureComponent {
     //Get a table row of info/metatdata for the given annotation
     //It renders different fields based on the annotationType
     getInfoRow(annotation) {
+        console.log(annotation);
         switch (annotation.annotationType) {
             case 'classification':
                 return (
                     <ul className="info classification">
+                        <li className="primary">
+                            <h4 className="label">Classification</h4>
+                            <p>{annotation.label}</p>
+                        </li>
                         <li className="vocabulary">
                             <h4 className="label">Vocabulary</h4>
                             <p>{annotation.vocabulary}</p>
                         </li>
-                        <li>
-                            <h4 className="label">Classification</h4>
-                            <p>{annotation.label}</p>
-                        </li>
+                       
                         <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
@@ -66,7 +68,7 @@ class AnnotationRow extends React.PureComponent {
             case 'comment':
                 return (
                     <ul className="info comment">
-                        <li>
+                        <li className="primary">
                             <h4 className="label">Comment</h4>
                             <p>{annotation.text}</p>
                         </li>
@@ -83,7 +85,7 @@ class AnnotationRow extends React.PureComponent {
                             <h4 className="label">Id</h4>
                             <p>{annotation.annotationId}</p>
                         </li>
-                        <li>
+                        <li className="primary">
                             <h4 className="label">?</h4>
                             <p>Todo: Implemement Link fields (unknown now)</p>
                         </li>
@@ -96,7 +98,7 @@ class AnnotationRow extends React.PureComponent {
             case 'metadata':
                 return (
                     <ul className="info metadata">
-                        <li className="template">
+                        <li className="template" className="primary">
                             <h4 className="label">Template</h4>
                             <p>{annotation.annotationTemplate}</p>
                         </li>

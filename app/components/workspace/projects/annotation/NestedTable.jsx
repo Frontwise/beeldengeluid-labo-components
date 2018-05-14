@@ -29,7 +29,7 @@ class NestedTable extends React.Component {
     }
 
 
-    componentWillMount() {
+    componentDidMount() {
         // instead of breaking out of the container, change the background color to a white and gray region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
     }
