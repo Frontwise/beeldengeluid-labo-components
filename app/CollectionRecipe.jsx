@@ -178,7 +178,7 @@ class CollectionRecipe extends React.Component {
                     absDateField 		= this.state.fieldAnalysisStats.doc_stats.date_field,
                     absNonDateField 	= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field;
                 return (
-                    <text x={x} y={y} fill="#000000" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
+                    <text x={x} y={y} fill="#1C435E" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
                         <tspan fontSize="12" fontWeight="bold">{index ? absNonDateField :absDateField}</tspan>
                         <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
                     </text>
@@ -195,7 +195,7 @@ class CollectionRecipe extends React.Component {
                     analysisFieldPer = (analysisField * 100)/total;
 
                 return (
-                    <text x={x} y={y} fill="#000000" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="left">
+                    <text x={x} y={y} fill="#1C435E" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="left">
                         <tspan fontSize="12" fontWeight="bold">{index ? nonAnalysisField :analysisField} </tspan>
                         <tspan fontSize="12" fontWeight="bold"> {index ? '(' + (Math.round(nonAnalysisFieldPer)) + '%)' : '(' + (Math.round(analysisFieldPer)) + '%)'}</tspan>
                     </text>
@@ -245,7 +245,7 @@ class CollectionRecipe extends React.Component {
 		let analysisBlock = null; //only shown after a collection has been selected
 
 		let fieldAnalysisTimeline = null; //show the timeline at the bottom
-
+        let fieldAnalysisStats = null; // Shows the analysis stats as a table
 		if(this.state.selectedCollections) {
 			const items = Object.keys(this.state.selectedCollections).map((key) => {
 				const c = this.state.selectedCollections[key];
@@ -332,7 +332,6 @@ class CollectionRecipe extends React.Component {
 		//TODO make sure that this is only shown when a collection has been selected
 		if(collectionConfig) {
 			let collectionAnalyser = null;
-			let fieldAnalysisStats = null;
 
 			//the collection analyser outputs the field analysis & timeline stats in onComponentOutput
 			collectionAnalyser = (
@@ -345,7 +344,9 @@ class CollectionRecipe extends React.Component {
 
 			if(this.state.fieldAnalysisStats) {
 				fieldAnalysisStats = (
-					<FieldAnalysisStats data={this.state.fieldAnalysisStats} collectionConfig={collectionConfig}/>
+					<div className="fieldAnalysisStats">
+                        <FieldAnalysisStats data={this.state.fieldAnalysisStats} collectionConfig={collectionConfig}/>
+					</div>
 				);
 			}
 
@@ -363,11 +364,6 @@ class CollectionRecipe extends React.Component {
 						<div className="row">
 							<div className="col-md-12">
 								{collectionAnalyser}
-							</div>
-						</div>
-						<div className="row">
-							<div className="col-md-12">
-								{fieldAnalysisStats}
 							</div>
 						</div>
 					</div>
@@ -394,6 +390,11 @@ class CollectionRecipe extends React.Component {
                     <div className="col-md-3">
                         {piecharts}
                     </div>
+				</div>
+				<div className="row">
+					<div className="col-md-12">
+						{fieldAnalysisStats}
+					</div>
 				</div>
 			</div>
 		)
