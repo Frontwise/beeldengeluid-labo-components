@@ -140,11 +140,15 @@ class BookmarkTable extends React.PureComponent {
                 k = k.toLowerCase();
                 bookmarks = bookmarks.filter(
                     bookmark =>
-                    bookmark.object.title.toLowerCase().includes(k) ||
-                    (bookmark.object.dataset &&
-                        bookmark.object.dataset.toLowerCase().includes(k)) ||
-                    (bookmark.object.type &&
-                        bookmark.object.type.toLowerCase().includes(k))
+                    // object
+                    (bookmark.object && Object.keys(bookmark.object).some((key)=>(
+                        typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k))
+                        ))
+                    || 
+                    // annotations
+                    (bookmark.annotations && bookmark.annotations.some((annotation)=>(
+                        Object.keys(annotation).some((key)=>(typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k)))
+                        )))
                 );
             });
         }

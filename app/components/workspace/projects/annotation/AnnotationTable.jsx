@@ -127,7 +127,6 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-        
 
         // filter on keywords in title, dataset or type
         if (filter.keywords) {
@@ -136,17 +135,15 @@ class AnnotationTable extends React.PureComponent {
                 k = k.toLowerCase();
                 annotations = annotations.filter(
                     annotation =>
-                        (annotation.text && annotation.text.toLowerCase().includes(k)) ||
-                        (annotation.vocabulary && annotation.vocabulary.toLowerCase().includes(k)) ||
-                        (annotation.label && annotation.label.toLowerCase().includes(k)) ||
-                        (annotation.template && annotation.template.toLowerCase().includes(k)) ||
-                        // search the properties of a metadata annotation; both key/value fields
-                        (
-                            annotation.properties &&
-                            annotation.properties.some(property =>
-                                (property.key && property.key.toLowerCase().includes(k)) ||
-                                (property.value && property.value.toLowerCase().includes(k))
-                        )
+                    // annotation
+                    (Object.keys(annotation).some((key)=>(
+                        typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k))
+                        ))
+                    || 
+                    // annotations
+                    (annotation.bookmarks && annotation.bookmarks.some((bookmark)=>(
+                        Object.keys(bookmark).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        ))
                     )
                 );
             });
@@ -272,7 +269,7 @@ class AnnotationTable extends React.PureComponent {
 
     
 
-    renderResults(renderState) {
+    renderResults(renderState) {        
         return (
             <div>
                 <h2>

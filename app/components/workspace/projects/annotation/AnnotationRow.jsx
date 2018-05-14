@@ -45,13 +45,12 @@ class AnnotationRow extends React.PureComponent {
     //Get a table row of info/metatdata for the given annotation
     //It renders different fields based on the annotationType
     getInfoRow(annotation) {
-        console.log(annotation);
         switch (annotation.annotationType) {
             case 'classification':
                 return (
-                    <ul className="info classification">
+                    <ul className="info annotation-classification">
                         <li className="primary">
-                            <h4 className="label">Classification</h4>
+                            <h4 className="label">Code</h4>
                             <p>{annotation.label}</p>
                         </li>
                         <li className="vocabulary">
@@ -67,7 +66,7 @@ class AnnotationRow extends React.PureComponent {
                 );
             case 'comment':
                 return (
-                    <ul className="info comment">
+                    <ul className="info annotation-comment">
                         <li className="primary">
                             <h4 className="label">Comment</h4>
                             <p>{annotation.text}</p>
@@ -80,14 +79,14 @@ class AnnotationRow extends React.PureComponent {
                 );
             case 'link':
                 return (
-                    <ul className="info link">
-                        <li>
-                            <h4 className="label">Id</h4>
-                            <p>{annotation.annotationId}</p>
-                        </li>
+                    <ul className="info annotation-link">
                         <li className="primary">
-                            <h4 className="label">?</h4>
-                            <p>Todo: Implemement Link fields (unknown now)</p>
+                            <h4 className="label">Label</h4>
+                            <p>{annotation.label}</p>
+                        </li>
+                        <li className="link">
+                            <h4 className="label">Link</h4>
+                            <p><a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a></p>
                         </li>
                         <li className="created">
                             <h4 className="label">Created</h4>
@@ -97,7 +96,7 @@ class AnnotationRow extends React.PureComponent {
                 );
             case 'metadata':
                 return (
-                    <ul className="info metadata">
+                    <ul className="info annotation-metadata">
                         <li className="template" className="primary">
                             <h4 className="label">Template</h4>
                             <p>{annotation.annotationTemplate}</p>

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
 * Display a bookmark/annotation result list and handle the filtering and sorting
 */
-class NestedTable extends React.Component {
+class NestedTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
@@ -170,13 +170,17 @@ class NestedTable extends React.Component {
 
 NestedTable.propTypes = {
     filterItems: PropTypes.func.isRequired,
-    filters: PropTypes.array.isRequired,
+    filters: PropTypes.object,
     items: PropTypes.array.isRequired,
     onExport: PropTypes.func.isRequired,
     orders: PropTypes.array.isRequired,
     renderResults: PropTypes.func.isRequired,
     selection: PropTypes.array,
     sortItems: PropTypes.func.isRequired
+};
+
+NestedTable.defaultProps = {
+    filters: {}
 };
 
 export default NestedTable;

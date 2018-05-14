@@ -114,6 +114,13 @@
 
         &.active{
           background-image: $arrowUpDarkUrl;
+          &:hover{
+            background-color: darken($clGreyTint, 6);
+            &:before{
+              border-right: 20px solid darken($clGreyTint, 6);
+              border-bottom: 20px solid darken($clGreyTint, 6);
+            }
+          }
         }
 
         .icon{
