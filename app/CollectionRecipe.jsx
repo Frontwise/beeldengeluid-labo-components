@@ -205,7 +205,7 @@ class CollectionRecipe extends React.Component {
             if (this.state.fieldAnalysisStats.analysis_field !== 'null__option') {
                 analysisFieldPieChart = (
                     <ResponsiveContainer width="100%" height="24%">
-                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter} key={key}>
+                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter} >
                             <Pie data={dataAnalysis} cx="55%" cy="55%" labelLine={false}
                                  label={renderAnalysisField} outerRadius={65} fill="#8884d8">
                                 {
