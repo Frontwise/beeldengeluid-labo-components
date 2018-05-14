@@ -534,6 +534,10 @@
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
+	background-color: #f9f9f9;
+	border-radius: 6px;
+	box-shadow: 1px 2px 2px 2px #999;
+	padding: 10px;
 	.axis path,	.axis line { /* overridden d3 class */
 		fill: none;
 		stroke: #e3e3e3;
@@ -818,6 +822,10 @@
 	}
 }
 .bg__pieChart {
+	background-color: #f9f9f9;
+	border-radius: 6px;
+	box-shadow: 1px 2px 2px 2px #999;
+	padding: 10px;
 	.recharts-default-legend {
 		margin-bottom: 0;
 		padding-left: 30px;

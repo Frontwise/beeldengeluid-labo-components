@@ -169,8 +169,8 @@ class CollectionRecipe extends React.Component {
                 {name: 'Records that do contain the date field', value: this.state.fieldAnalysisStats.doc_stats.date_field},
                 {name: 'Records that do NOT contain the date field', value: (this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field)}];
             const dataAnalysis = [
-                {name: 'Records that do contain the analysis field', value: this.state.fieldAnalysisStats.doc_stats.analysis_field},
-                {name: 'Records that do NOT contain the analysis field', value: (this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.analysis_field)}];
+                {name: 'Records that do contain the analysis field', value: this.state.fieldAnalysisStats.field_stats.analysis_field_count},
+                {name: 'Records that do NOT contain the analysis field', value: this.state.fieldAnalysisStats.doc_stats.no_analysis_field}];
             const renderDateField = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
                 const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
                     x = cx + radius * Math.cos(-midAngle * RADIAN),
@@ -178,7 +178,7 @@ class CollectionRecipe extends React.Component {
                     absDateField 		= this.state.fieldAnalysisStats.doc_stats.date_field,
                     absNonDateField 	= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field;
                 return (
-                    <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
+                    <text x={x} y={y} fill="#000000" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
                         <tspan fontSize="12" fontWeight="bold">{index ? absNonDateField :absDateField}</tspan>
                         <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
                     </text>
@@ -188,12 +188,16 @@ class CollectionRecipe extends React.Component {
                 const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
                     x = cx + radius * Math.cos(-midAngle * RADIAN),
                     y = cy + radius * Math.sin(-midAngle * RADIAN),
-                    analysisField 		= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.no_analysis_field,
-                    nonAnalysisField 	= this.state.fieldAnalysisStats.doc_stats.no_analysis_field;
+                    analysisField 		= this.state.fieldAnalysisStats.field_stats.analysis_field_count,
+                    nonAnalysisField 	= this.state.fieldAnalysisStats.doc_stats.no_analysis_field,
+					total = analysisField + nonAnalysisField,
+                    nonAnalysisFieldPer = (nonAnalysisField * 100)/total,
+                    analysisFieldPer = (analysisField * 100)/total;
+
                 return (
-                    <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="central">
-                        <tspan fontSize="12" fontWeight="bold">{index ? nonAnalysisField :analysisField}</tspan>
-                        <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
+                    <text x={x} y={y} fill="#000000" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="left">
+                        <tspan fontSize="12" fontWeight="bold">{index ? nonAnalysisField :analysisField} </tspan>
+                        <tspan fontSize="12" fontWeight="bold"> {index ? '(' + (Math.round(nonAnalysisFieldPer)) + '%)' : '(' + (Math.round(analysisFieldPer)) + '%)'}</tspan>
                     </text>
                 );
             };
@@ -201,7 +205,7 @@ class CollectionRecipe extends React.Component {
             if (this.state.fieldAnalysisStats.analysis_field !== 'null__option') {
                 analysisFieldPieChart = (
                     <ResponsiveContainer width="100%" height="24%">
-                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter}>
+                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter} key={key}>
                             <Pie data={dataAnalysis} cx="55%" cy="55%" labelLine={false}
                                  label={renderAnalysisField} outerRadius={65} fill="#8884d8">
                                 {
@@ -214,7 +218,6 @@ class CollectionRecipe extends React.Component {
                 )
             }
 
-            console.log(this.state.fieldAnalysisStats.analysis_field)
             piecharts = (
                 <div className={IDUtil.cssClassName('pieChart')}>
                     <ResponsiveContainer width="100%" height="24%">
