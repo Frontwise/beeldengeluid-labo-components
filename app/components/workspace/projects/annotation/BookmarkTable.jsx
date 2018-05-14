@@ -10,6 +10,7 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
+import { createOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -85,19 +86,25 @@ class BookmarkTable extends React.PureComponent {
         );
     }
 
-    //Get filter list of unique object types
+    //Get filter object
     getFilters(items) {
-        const result = [];
-        const hits = {};
+        return [
 
-        items.forEach(item => {
-            const t = item.object.type;
-            if (!(t in hits)) {
-                result.push({ value: t, name: t.charAt(0).toUpperCase() + t.slice(1) });
-                hits[t] = true;
+            // search filter
+            {
+                title:'',
+                key: 'keywords',
+                type: 'search'
+            },
+            
+            // type filter        
+            {
+                title:'Type',
+                key: 'type',
+                type: 'select',
+                options: createOptionList(items, (i)=>(i.object['type']) ).sort()
             }
-        });
-        return result.sort();
+        ];      
     }
 
     //Annotation load callback: set data to state

@@ -33,12 +33,15 @@ class ProjectAnnotationView extends React.PureComponent {
         };
 
         this.viewChange = this.viewChange.bind(this);
+        this.setView = this.setView.bind(this);
     }
 
     viewChange(e) {
-        const view = e.target.value;
+        this.setView(e.target.value);
+    }
 
-        // store view to session storage
+    setView(view){
+          // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
 
         this.setState({
@@ -48,28 +51,63 @@ class ProjectAnnotationView extends React.PureComponent {
 
     render() {
         let viewComponent = null;
-
+        const defaultOptions = {
+            user: this.props.user,
+            project: this.props.project,
+            setView: this.setView,
+        }
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
         switch (this.state.view) {
-            case 'bookmark-centric': viewComponent = (
-                    <BookmarkTable user={this.props.user} project={this.props.project} />
+            case 'bookmark-centric': 
+                viewComponent = (
+                    <BookmarkTable 
+                       {...defaultOptions}
+                    />
                 );
                 break;
-            case 'code-centric': viewComponent = (
-                    <AnnotationTable user={this.props.user} project={this.props.project} key="code" type="classification" title="Codes" />
+
+            case 'code-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="code" 
+                        type="classification" 
+                        title="Codes" 
+                        filters={["search","vocabulary","bookmark-group"]}
+                    />
                 );
                 break;
-            case 'comment-centric': viewComponent = (
-                    <AnnotationTable user={this.props.user} project={this.props.project} key="comments" type="comment" title="Comments" />
+
+            case 'comment-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="comments" 
+                        type="comment" 
+                        title="Comments" 
+                        filters={["search","code","bookmark-group"]}
+                    />
                 );
                 break;
-            case 'link-centric': viewComponent = (
-                    <AnnotationTable user={this.props.user} project={this.props.project} key="links" type="link" title="Links"  />
+
+            case 'link-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="links" 
+                        type="link" 
+                        title="Links"  
+                        filters={["search","code","bookmark-group"]}
+                    />
                 );
                 break;
-            case 'metadata-centric': viewComponent = (
-                    <AnnotationTable user={this.props.user} project={this.props.project} key="metadata" type="metadata" title="Metadata" />
+
+            case 'metadata-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="metadata" 
+                        type="metadata" 
+                        title="Metadata" 
+                        filters={["search","code","bookmark-group"]}
+                    />
                 );
                 break;
         }

@@ -9,6 +9,7 @@ import AnnotationUtil from '../../../../util/AnnotationUtil';
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import BulkActions from '../../helpers/BulkActions';
+import { createOptionList } from '../../helpers/OptionList';
 import { exportDataAsJSON } from '../../helpers/Export';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
@@ -77,16 +78,46 @@ class AnnotationTable extends React.PureComponent {
         );
     }
 
-    //Get filter list of existing annotation types
+    //Get filter object
     getFilters(items) {
-        const filters = [];
-        // only add existing types to the filter
-        // this.annotationTypes.forEach(type => {
-        //     if (items.some(annotation => annotation.annotationType == type.value)) {
-        //         filters.push(type);
-        //     }
-        // });
-        return filters;
+        return this.props.filters.map((filter)=>{
+            switch(filter){
+                case 'search':
+                    // search filter
+                    return {
+                        title:'',
+                        key: 'keywords',
+                        type: 'search'
+                    }                    
+                break;
+                case 'vocabulary':
+                    return {
+                        title:'Vocabulary',
+                        key: 'vocabulary',
+                        type: 'select',
+                        options: createOptionList(items,  (i)=>(i['vocabulary']) ).sort()
+                    }
+                break;
+                case 'bookmark-group':
+                    return {
+                        title:'Bookmark group',
+                        key: 'bookmark-group',
+                        type: 'select',
+                        options: createOptionList(items, (i)=>(i['group'])).sort()
+                    }
+                break;
+                case 'code':
+                    return {
+                        title:'Code',
+                        key: 'code',
+                        type: 'select',
+                        options: createOptionList(items, (i)=>(i['code'])).sort()
+                    }
+                break;
+                default:
+                    console.error('Unknown filter preset', filter);
+            }
+        })
     }
 
     onLoadAnnotations(data) {
@@ -107,7 +138,7 @@ class AnnotationTable extends React.PureComponent {
                 parentAnnotations: data.annotations,
                 annotations: annotations,
                 loading: false,
-                filters: [this.getFilters(annotations)]
+                filters: this.getFilters(annotations)
             },
             () => {
                 this.updateSelection(annotations)
@@ -338,6 +369,11 @@ AnnotationTable.propTypes = {
     user: PropTypes.object.isRequired,
     type: PropTypes.string,
     title: PropTypes.string,
+    filters: PropTypes.array.isRequired,
 };
+
+AnnotationTable.defaultTypes = {
+    filters: []
+}
 
 export default AnnotationTable;

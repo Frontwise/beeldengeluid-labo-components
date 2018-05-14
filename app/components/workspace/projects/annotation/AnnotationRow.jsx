@@ -196,6 +196,7 @@ class AnnotationRow extends React.PureComponent {
                     <div className="actions">
                         
                         <div
+                        title="Bookmarks"
                         className={
                             classNames('sublevel-button', {active: this.state.showBookmarks, zero: !hasBookmarks})
                         }
