@@ -10,7 +10,7 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList } from '../../helpers/OptionList';
+import { createOptionList, createGroupOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -105,14 +105,14 @@ class BookmarkTable extends React.PureComponent {
                 title:'Type',
                 key: 'type',
                 type: 'select',
-                options: createOptionList(items, (i)=>(i.object['type']) ).sort()
+                options: createOptionList(items, (i)=>(i.object.type) ).sort()
             },
             // group filter        
             {
                 title:'Group',
                 key: 'group',
                 type: 'select',
-                options: createOptionList(items, (i)=>(i.object['group']) ).sort()
+                options: createGroupOptionList(items).sort()
             },
 
         ];      
@@ -151,10 +151,17 @@ class BookmarkTable extends React.PureComponent {
     }
 
     filterBookmarks(bookmarks, filter) {
-          // filter on type
+        // filter on type
         if (filter.type) {
             bookmarks = bookmarks.filter(bookmark =>
                 bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
+            );
+        }
+
+        // filter on group
+        if (filter.group) {
+            bookmarks = bookmarks.filter(bookmark =>
+                bookmark.groups.some((g) => (g.annotationId == filter.group))
             );
         }
 

@@ -62,6 +62,11 @@ const AnnotationUtil = {
 					annotations: na.body ? na.body.filter(a => {
 						return a.vocabulary != 'clariahwp5-bookmark-group'
 					}) : null,
+
+					// bookmark groups
+					groups: na.body ? na.body.filter(a => {
+						return a.vocabulary == 'clariahwp5-bookmark-group'
+					}) : [],
 				}
 			}))
 		});

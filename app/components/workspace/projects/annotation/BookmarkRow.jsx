@@ -137,7 +137,12 @@ class BookmarkRow extends React.PureComponent {
                         </li>
                         <li>
                             <h4 className="label">Groups</h4>
-                            <p className="groups"><span>Haarlem</span><span>Watersnood</span><span>Dummy</span></p>
+                            <p className="groups">
+                            {/*<span>Haarlem</span><span>Watersnood</span><span>Dummy</span>*/}
+                                {bookmark.groups ? 
+                                bookmark.groups.map((g)=>(<span>{g.label}</span>))
+                                : null}
+                            </p>
                         </li>
                     </ul>
 
