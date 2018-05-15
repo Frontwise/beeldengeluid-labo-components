@@ -122,12 +122,12 @@ class BookmarkRow extends React.PureComponent {
                         <div className="delete" onClick={this.onDelete} title="Delete bookmark" />
                     </div>
 
-                    <div className="image" style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
+                    <div className="image" onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
 
                     <ul className="info">
                         <li className="primary">
                             <h4 className="label">Title</h4>
-                            <p>{bookmark.object.title}</p>
+                            <p onClick={this.onView}>{bookmark.object.title}</p>
                         </li>
                         <li>
                             <h4 className="label">Date</h4>

@@ -348,8 +348,6 @@ class AnnotationTable extends React.PureComponent {
     }
 
     render() {
-        console.debug(this.state.annotations);
-
         let detailsModal = null;
         if(this.state.detailBookmark) {
             detailsModal = (

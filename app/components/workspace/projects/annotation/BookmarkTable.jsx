@@ -316,7 +316,7 @@ class BookmarkTable extends React.PureComponent {
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
-                            key={bookmark.annotationId}
+                            key={bookmark.id}
                             bookmark={bookmark}
                             onDelete={this.deleteBookmarks}
                             onView={this.viewBookmark}

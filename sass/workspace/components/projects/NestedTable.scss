@@ -1,191 +1,209 @@
+
 .bg__nested-table{
+  
+  h2{
+    padding-bottom: 10px;
+  }
+
   .item-row{
-  margin: 10px 0 10px 0;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  border-radius: 2px;
-  border: 1px solid $clGreyTint;
+    margin: 10px 0 10px 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    border-radius: 2px;
+    border: 1px solid $clGreyTint;
 
-  .item{
-    width: 100%;
-    list-style: none;
-    position: relative;
-    
-    display: flex;
-    justify-content: flex-start;
-    align-items: stretch;
-    align-content: stretch;
+    &:first-child{
+      .item{
+        .info{
+          li{
+            .label{
+              margin-top: -26px;
+              display: block;
+              @media screen and (max-width: $break-small) {
+                margin-top: 0px;
+              }
 
-
-    .selector{
-      flex-shrink: 0;
-      flex-basis: 30px;
-      input{
-        margin-left: 10px;
-      }
-
-      .delete{
-        background-image: $iconDeleteUrl;
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 18px;
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        &:hover{
-          opacity: 0.8;
+            }
+          }
         }
       }
     }
 
-
-    .image{
-      flex-shrink: 0;
-    }
-
-    .info{
+    .item{
+      width: 100%;
+      list-style: none;
+      position: relative;
+      
       display: flex;
-      flex-grow:2;
-      box-sizing: border-box;
-      vertical-align: top;
-      padding-left: 10px;    
+      justify-content: flex-start;
+      align-items: stretch;
+      align-content: stretch;
 
-      li{
 
-        .label{
-          display: none;
+      .selector{
+        flex-shrink: 0;
+        flex-basis: 30px;
+        input{
+          margin-left: 10px;
         }
 
-        padding: 5px 10px 10px 10px;
-        min-height: 50px;
-        min-width: 120px;
-        flex: 1 1 0;          
-        &.primary{
-          p{
-            font-weight: bold;
-          }
-        }
-      }
-
-       @media screen and (max-width: $break-small) {
-        flex-wrap: wrap;
-        li{
-          .label{
-            display: block
-          }
-        }
-      }
-    }
-
-    .actions{
-      min-width:100px;
-      flex-shrink: 0;
-
-      .btn.primary{
-        margin: 7px;
-      }
-
-      .sublevel-button{
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        background-color: $clGreyTint;
-        color: $clDark;
-        text-transform: uppercase;
-        font-family: $fontHeading;
-        padding: 0px 30px 0px 0px;
-        background-position: center right 10px;
-        background-repeat: no-repeat;
-        background-image: $arrowDownDarkUrl;
-        cursor: pointer;
-
-        &:hover, &.active{
-          background-color: darken($clGreyTint, 3);
-          &:before{
-            border-right: 20px solid darken($clGreyTint, 3);
-            border-bottom: 20px solid darken($clGreyTint, 3);
-          }
-        }
-        
-        &:before{
-          content: " ";
-          position:absolute;
-          left: -40px;
-          top: 0px;
-          border-top: 20px solid transparent;
-          border-left: 20px solid transparent;
-          border-right: 20px solid $clGreyTint;
-          border-bottom: 20px solid $clGreyTint;
-        }
-
-        &.active{
-          background-image: $arrowUpDarkUrl;
+        .delete{
+          background-image: $iconDeleteUrl;
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: 18px;
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          width: 30px;
+          height: 30px;
+          cursor: pointer;
           &:hover{
-            background-color: darken($clGreyTint, 6);
-            &:before{
-              border-right: 20px solid darken($clGreyTint, 6);
-              border-bottom: 20px solid darken($clGreyTint, 6);
+            opacity: 0.8;
+          }
+        }
+      }
+
+
+
+      .info{
+        display: flex;
+        flex-grow:2;
+        box-sizing: border-box;
+        vertical-align: top;
+        padding-left: 10px;    
+        @media screen and (max-width: $break-small) {
+          flex-wrap: wrap;          
+        }
+
+        li{
+
+          .label{
+            display: none;
+            @media screen and (max-width: $break-small) {
+              display: block;
+            }
+          }
+
+          padding: 5px 10px 10px 10px;
+          min-height: 50px;
+          min-width: 120px;
+          flex: 1 1 0;          
+          &.primary{
+            p{
+              font-weight: bold;
             }
           }
         }
 
-        .icon{
-          display: inline-block;
+      }
+
+      .actions{
+        min-width:100px;
+        flex-shrink: 0;
+
+        .btn.primary{
+          margin: 7px;
+        }
+
+        .sublevel-button{
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          background-color: $clGreyTint;
+          color: $clDark;
+          text-transform: uppercase;
+          font-family: $fontHeading;
+          padding: 0px 30px 0px 0px;
+          background-position: center right 10px;
           background-repeat: no-repeat;
-          background-position: center center;          
-          
-          height: 40px;
+          background-image: $arrowDownDarkUrl;
+          cursor: pointer;
 
-          &.annotation{
-            width: 31px;
-            background-size: 31px;          
-            background-image: $iconAnnotationUrl;
+          &:hover, &.active{
+            background-color: darken($clGreyTint, 3);
+            &:before{
+              border-right: 20px solid darken($clGreyTint, 3);
+              border-bottom: 20px solid darken($clGreyTint, 3);
+            }
+          }
+          
+          &:before{
+            content: " ";
+            position:absolute;
+            left: -40px;
+            top: 0px;
+            border-top: 20px solid transparent;
+            border-left: 20px solid transparent;
+            border-right: 20px solid $clGreyTint;
+            border-bottom: 20px solid $clGreyTint;
           }
 
-          &.bookmark{
-            width: 21px;
-            background-size: 21px;          
-            background-image: $iconBookmarkUrl;
+          &.active{
+            background-image: $arrowUpDarkUrl;
+            &:hover{
+              background-color: darken($clGreyTint, 6);
+              &:before{
+                border-right: 20px solid darken($clGreyTint, 6);
+                border-bottom: 20px solid darken($clGreyTint, 6);
+              }
+            }
           }
-        }
-        @import '../_count.scss';
 
-        .count{
-          margin-left: 8px;
-          margin-top: 11px;
-        }
-        
-        &.zero {
-          opacity: 0.5;
-          
+          .icon{
+            display: inline-block;
+            background-repeat: no-repeat;
+            background-position: center center;          
+            
+            height: 40px;
+
+            &.annotation{
+              width: 31px;
+              background-size: 31px;          
+              background-image: $iconAnnotationUrl;
+            }
+
+            &.bookmark{
+              width: 21px;
+              background-size: 21px;          
+              background-image: $iconBookmarkUrl;
+            }
+          }
+          @import '../_count.scss';
+
           .count{
-            background-color: $clDarkGrey;        
+            margin-left: 8px;
+            margin-top: 11px;
+          }
+          
+          &.zero {
+            opacity: 0.5;
+            
+            .count{
+              background-color: $clDarkGrey;        
+            }
           }
         }
       }
     }
-  }
 
-  .sublevel{
-    background-color: $clGreyTint;
-    padding: 10px 20px;
-    table{
-      width: 100%;
-      th{
-        text-transform: uppercase;
-        font-family: $fontHeading;
-        padding: 5px 0 10px 0;
+    .sublevel{
+      background-color: $clGreyTint;
+      padding: 10px 20px;
+      table{
+        width: 100%;
+        th{
+          text-transform: uppercase;
+          font-family: $fontHeading;
+          padding: 5px 0 10px 0;
+        }
+
+        td{
+          padding: 5px 0px;
+          border-top: 1px solid darken($clGreyTint,3);
+        }
+
       }
-
-      td{
-        padding: 5px 0px;
-        border-top: 1px solid darken($clGreyTint,3);
-      }
-
     }
   }
-}
 }

@@ -9,6 +9,17 @@
     }
 
     .info li{         
+      .image{
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      &.primary p{
+        cursor: pointer;
+        &:hover{
+          text-decoration: underline;
+        }
+      }
     }
   }
 
