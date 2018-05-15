@@ -71,8 +71,8 @@ class BookmarkTable extends React.PureComponent {
 
         this.selectAllChange = this.selectAllChange.bind(this);
         this.selectItem = this.selectItem.bind(this);
-        this.toggleSub = this.toggleSub.bind(this);
         this.closeItemDetails = this.closeItemDetails.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
         this.unFoldAll = this.unFoldAll.bind(this);
         this.foldAll = this.foldAll.bind(this);
     }

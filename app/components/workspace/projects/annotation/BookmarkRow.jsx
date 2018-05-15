@@ -160,6 +160,7 @@ class BookmarkRow extends React.PureComponent {
 BookmarkRow.propTypes = {
     bookmark: PropTypes.object.isRequired,
     toggleSub: PropTypes.func.isRequired,
+    showSub: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,

@@ -51,7 +51,8 @@ class AnnotationTable extends React.PureComponent {
             selection: [],
             loading: true,
             detailBookmark: null,
-            filters: []       
+            filters: [],
+            showSub: {}
         };
 
         // bind functions (TODO get rid of these, they are unnecessary and confusing)
@@ -64,6 +65,9 @@ class AnnotationTable extends React.PureComponent {
         this.selectItem = this.selectItem.bind(this);
         this.sortAnnotations = this.sortAnnotations.bind(this);
         this.viewBookmark = this.viewBookmark.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
+        this.unFoldAll = this.unFoldAll.bind(this);
+        this.foldAll = this.foldAll.bind(this);
     }
 
     componentWillMount() {
@@ -312,7 +316,30 @@ class AnnotationTable extends React.PureComponent {
         }
     }
 
-    
+
+    // Toggle sublevel visibility
+    toggleSub(id){
+        const showSub = Object.assign({}, this.state.showSub);
+        if (id in showSub){
+            delete showSub[id];
+        } else{
+            showSub[id] = true;
+        }
+        console.log(showSub);
+        this.setState({showSub});
+    }
+
+    unFoldAll(){
+        const showSub = {};
+        this.state.annotations.forEach((b)=>{
+            showSub[b.annotationId] = true;    
+        });
+        this.setState({showSub});
+    }
+
+    foldAll(){
+        this.setState({showSub:{}});
+    }
 
     renderResults(renderState) {        
         return (
@@ -328,7 +355,10 @@ class AnnotationTable extends React.PureComponent {
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
 
-                        {this.title} {this.state.renders} :{' '}<span className="count">{renderState.visibleItems.length || 0}</span>
+                    {this.title} {this.state.renders} :{' '}<span className="count">{renderState.visibleItems.length || 0}</span>
+
+                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
+                    <div className="fold" onClick={this.foldAll}>Fold all</div>
                 </h2>
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((annotation, index) => (
@@ -338,7 +368,10 @@ class AnnotationTable extends React.PureComponent {
                             onDelete={this.deleteAnnotations}
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(annotation.annotationId)}
-                            onSelect={this.selectItem}/>
+                            onSelect={this.selectItem}
+                            showSub={annotation.annotationId in this.state.showSub}
+                            toggleSub={this.toggleSub}
+                            />
                         ))}
                 </div>
 
@@ -366,11 +399,14 @@ class AnnotationTable extends React.PureComponent {
                     filterItems={this.filterAnnotations}
                     filters={this.state.filters}
                     renderResults={this.renderResults}
-                    onExport={this.exportAnnotations}/>
+                    onExport={this.exportAnnotations}
+                    showSub={this.state.showSub}
+                    />
 
                 <BulkActions
                     bulkActions={this.bulkActions}
-                    selection={this.state.selection}/>
+                    selection={this.state.selection}
+                    />
 
                 {detailsModal}
             </div>

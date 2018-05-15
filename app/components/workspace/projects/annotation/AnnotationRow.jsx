@@ -15,13 +15,10 @@ class AnnotationRow extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {
-            showBookmarks: false // this.props.annotation.bookmarks && this.props.annotation.bookmarks.length > 0
-        };
-
         // bind functions
         this.onDelete = this.onDelete.bind(this);
         this.onView = this.onView.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
     }
 
     onDelete() {
@@ -36,10 +33,8 @@ class AnnotationRow extends React.PureComponent {
         this.props.onSelect(this.props.annotation, e.target.checked);
     }
 
-    toggleAnnotations() {
-        this.setState({
-            showBookmarks: !this.state.showBookmarks
-        });
+    toggleSub(e){
+        this.props.toggleSub(this.props.annotation.annotationId);
     }
 
     //Get a table row of info/metatdata for the given annotation
@@ -132,7 +127,7 @@ class AnnotationRow extends React.PureComponent {
 
         //populate the foldable block (containing a list of bookmarks)
         let foldableBlock = null;
-        if(this.state.showBookmarks) {
+        if(this.props.showSub) {
             let blockContents = null;
 
             if(!hasBookmarks) {
@@ -198,9 +193,9 @@ class AnnotationRow extends React.PureComponent {
                         <div
                         title="Bookmarks"
                         className={
-                            classNames('sublevel-button', {active: this.state.showBookmarks, zero: !hasBookmarks})
+                            classNames('sublevel-button', {active: this.props.showSub, zero: !hasBookmarks})
                         }
-                        onClick={this.toggleAnnotations.bind(this)}>
+                        onClick={this.toggleSub}>
 
                         <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
                     </div>
@@ -217,6 +212,8 @@ class AnnotationRow extends React.PureComponent {
 
 AnnotationRow.propTypes = {
     annotation: PropTypes.object.isRequired,
+    toggleSub: PropTypes.func.isRequired,
+    showSub: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onView: PropTypes.func.isRequired,
     selected: PropTypes.bool,
