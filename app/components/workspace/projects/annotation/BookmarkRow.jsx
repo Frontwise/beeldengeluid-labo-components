@@ -15,13 +15,10 @@ class BookmarkRow extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {
-            showAnnotations: false // this.props.bookmark.annotations && this.props.bookmark.annotations.length > 0
-        };
-
         // bind functions
         this.onDelete = this.onDelete.bind(this);
         this.onView = this.onView.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
     }
 
     onDelete() {
@@ -43,21 +40,18 @@ class BookmarkRow extends React.PureComponent {
         this.props.onSelect(this.props.bookmark, e.target.checked);
     }
 
-    toggleAnnotations() {
-        this.setState({
-            showAnnotations: !this.state.showAnnotations
-        });
+    toggleSub(e){
+        this.props.toggleSub(this.props.bookmark.annotationId);
     }
 
-    render() {
+   render() {
         const bookmark = this.props.bookmark;
         const annotations = bookmark.annotations || [];
         const hasAnnotations = annotations.length > 0;
 
         //populate the foldable annotation block
         let foldableBlock = null;
-
-        if(this.state.showAnnotations) {
+        if(this.props.showSub) {
             let blockContents = null;
             if(!hasAnnotations) {
                 blockContents = (
@@ -149,9 +143,9 @@ class BookmarkRow extends React.PureComponent {
                         </div>
 
                         <div title="Annotations" className={classNames('sublevel-button', {
-                                active: this.state.showAnnotations,
+                                active: this.props.showsub,
                                 zero: !hasAnnotations
-                            })} onClick={this.toggleAnnotations.bind(this)}>
+                            })} onClick={this.toggleSub}>
                             <span className="icon annotation"/>
                             <span className="count">{annotations.length}</span>
                         </div>
@@ -165,6 +159,7 @@ class BookmarkRow extends React.PureComponent {
 
 BookmarkRow.propTypes = {
     bookmark: PropTypes.object.isRequired,
+    toggleSub: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,

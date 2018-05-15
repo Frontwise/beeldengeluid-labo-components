@@ -55,6 +55,7 @@ class BookmarkTable extends React.PureComponent {
             annotations : null,
             bookmarks: [],
             selection: [],
+            showSub: {},
             loading: true,
             detailBookmark: null,
             filters: []
@@ -70,8 +71,10 @@ class BookmarkTable extends React.PureComponent {
 
         this.selectAllChange = this.selectAllChange.bind(this);
         this.selectItem = this.selectItem.bind(this);
-
+        this.toggleSub = this.toggleSub.bind(this);
         this.closeItemDetails = this.closeItemDetails.bind(this);
+        this.unFoldAll = this.unFoldAll.bind(this);
+        this.foldAll = this.foldAll.bind(this);
     }
 
     componentWillMount() {
@@ -297,6 +300,30 @@ class BookmarkTable extends React.PureComponent {
         this.loadBookmarks();
     }
 
+    // Toggle sublevel visibility
+    toggleSub(id){
+        const showSub = Object.assign({}, this.state.showSub);
+        if (id in showSub){
+            delete showSub[id];
+        } else{
+            showSub[id] = true;
+        }
+        console.log(showSub);
+        this.setState({showSub});
+    }
+
+    unFoldAll(){
+        const showSub = {};
+        this.state.bookmarks.forEach((b)=>{
+            showSub[b.annotationId] = true;    
+        });
+        this.setState({showSub});
+    }
+
+    foldAll(){
+        this.setState({showSub:{}});
+    }
+
     renderResults(renderState) {
         return (
             <div>
@@ -312,7 +339,10 @@ class BookmarkTable extends React.PureComponent {
 
                     Bookmarks:{' '}
                     <span className="count">{renderState.visibleItems.length || 0}</span>
+                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
+                    <div className="fold" onClick={this.foldAll}>Fold all</div>
                 </h2>
+
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
@@ -321,7 +351,10 @@ class BookmarkTable extends React.PureComponent {
                             onDelete={this.deleteBookmarks}
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(bookmark.annotationId)}
-                            onSelect={this.selectItem}/>
+                            onSelect={this.selectItem}
+                            showSub={bookmark.annotationId in this.state.showSub}
+                            toggleSub={this.toggleSub}
+                            />
                     ))}
                 </div>
             </div>
@@ -347,7 +380,9 @@ class BookmarkTable extends React.PureComponent {
                     filterItems={this.filterBookmarks}
                     filters={this.state.filters}
                     renderResults={this.renderResults}
-                    onExport={exportDataAsJSON}/>
+                    onExport={exportDataAsJSON}
+                    showSub={this.state.showSub}
+                    />
 
                 <BulkActions
                     bulkActions={this.bulkActions}
