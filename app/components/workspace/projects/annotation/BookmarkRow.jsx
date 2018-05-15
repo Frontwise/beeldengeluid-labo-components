@@ -149,17 +149,14 @@ class BookmarkRow extends React.PureComponent {
                         </div>
 
                         <div title="Annotations" className={classNames('sublevel-button', {
-                            active: this.state.showAnnotations,
-                            zero: !hasAnnotations
-                        })} onClick={this.toggleAnnotations.bind(this)}>
+                                active: this.state.showAnnotations,
+                                zero: !hasAnnotations
+                            })} onClick={this.toggleAnnotations.bind(this)}>
                             <span className="icon annotation"/>
                             <span className="count">{annotations.length}</span>
                         </div>
                     </div>
-
-                    
                 </div>
-
                 {foldableBlock}
             </div>
         );
