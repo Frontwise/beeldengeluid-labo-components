@@ -77,18 +77,22 @@
         }
 
         li{
-
+          padding: 5px 10px 10px 10px;
+          min-height: 50px;
+          min-width: 120px;
+          flex: 1 1 0;          
+          
           .label{
             display: none;
             @media screen and (max-width: $break-small) {
               display: block;
             }
           }
-
-          padding: 5px 10px 10px 10px;
-          min-height: 50px;
-          min-width: 120px;
-          flex: 1 1 0;          
+          p{
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+          }
+          
           &.primary{
             p{
               font-weight: bold;
@@ -104,6 +108,10 @@
 
         .btn.primary{
           margin: 7px;
+          padding-left: 17px;
+          padding-right: 30px;
+          margin-right: 6px;
+          float: right;
         }
 
         .sublevel-button{
