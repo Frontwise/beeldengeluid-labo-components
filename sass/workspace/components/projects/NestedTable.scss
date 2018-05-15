@@ -58,12 +58,12 @@
       }
       
       li{
+
         padding: 5px 10px 10px 10px;
         min-height: 50px;
         min-width: 120px;
-        flex-grow: 1;          
+        flex: 1 1 0;          
         &.primary{
-          flex-grow: 2;          
           p{
             font-weight: bold;
           }

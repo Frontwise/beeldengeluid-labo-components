@@ -16,9 +16,7 @@ class BookmarkRow extends React.PureComponent {
         super(props);
 
         this.state = {
-            showAnnotations:
-            this.props.bookmark.annotations &&
-            this.props.bookmark.annotations.length > 0
+            showAnnotations: false // this.props.bookmark.annotations && this.props.bookmark.annotations.length > 0
         };
 
         // bind functions

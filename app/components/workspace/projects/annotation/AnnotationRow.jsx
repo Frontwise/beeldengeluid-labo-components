@@ -16,7 +16,7 @@ class AnnotationRow extends React.PureComponent {
         super(props);
 
         this.state = {
-            showBookmarks: this.props.annotation.bookmarks && this.props.annotation.bookmarks.length > 0
+            showBookmarks: false // this.props.annotation.bookmarks && this.props.annotation.bookmarks.length > 0
         };
 
         // bind functions
