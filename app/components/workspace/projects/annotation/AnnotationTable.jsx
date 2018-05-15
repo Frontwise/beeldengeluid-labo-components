@@ -325,14 +325,15 @@ class AnnotationTable extends React.PureComponent {
         } else{
             showSub[id] = true;
         }
-        console.log(showSub);
         this.setState({showSub});
     }
 
     unFoldAll(){
         const showSub = {};
         this.state.annotations.forEach((b)=>{
-            showSub[b.annotationId] = true;    
+            if (b.bookmarks && b.bookmarks.length > 0){
+                showSub[b.annotationId] = true;    
+            }
         });
         this.setState({showSub});
     }

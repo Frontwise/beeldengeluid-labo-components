@@ -308,14 +308,15 @@ class BookmarkTable extends React.PureComponent {
         } else{
             showSub[id] = true;
         }
-        console.log(showSub);
         this.setState({showSub});
     }
 
     unFoldAll(){
         const showSub = {};
         this.state.bookmarks.forEach((b)=>{
-            showSub[b.annotationId] = true;    
+            if (b.annotations && b.annotations.length > 0){
+                showSub[b.annotationId] = true;        
+            }            
         });
         this.setState({showSub});
     }
