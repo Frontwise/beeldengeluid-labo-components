@@ -106,7 +106,15 @@ class BookmarkTable extends React.PureComponent {
                 key: 'type',
                 type: 'select',
                 options: createOptionList(items, (i)=>(i.object['type']) ).sort()
-            }
+            },
+            // group filter        
+            {
+                title:'Group',
+                key: 'group',
+                type: 'select',
+                options: createOptionList(items, (i)=>(i.object['group']) ).sort()
+            },
+
         ];      
     }
 

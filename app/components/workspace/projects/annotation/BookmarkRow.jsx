@@ -135,6 +135,10 @@ class BookmarkRow extends React.PureComponent {
                             <h4 className="label">Dataset</h4>
                             <p>{bookmark.object.dataset}</p>
                         </li>
+                        <li>
+                            <h4 className="label">Groups</h4>
+                            <p className="groups"><span>Haarlem</span><span>Watersnood</span><span>Dummy</span></p>
+                        </li>
                     </ul>
 
                     <div className="actions">
