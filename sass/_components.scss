@@ -504,8 +504,9 @@
 /* ==================== Collection package ============================================ */
 
 .bg__collection-analyser {
-
-
+		.react-autosuggest__input {
+			border-radius: 6px;
+		}
 } /* CollectionAnalyser.jsx */
 
 .bg__collection-selector { /* CollectionSelector.jsx */
@@ -533,13 +534,17 @@
 
 .bg__field-analysis-stats {
 	table {
-		font-size:85%;
+		font-size:95%;
 	}
 } /* FieldAnalysisStats */
 
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
+	background-color: $subdued-bg;
+	border-radius: 6px;
+	box-shadow: 1px 2px 2px 2px #999;
+	padding: 10px;
 	.axis path,	.axis line { /* overridden d3 class */
 		fill: none;
 		stroke: #e3e3e3;
@@ -720,7 +725,7 @@
 .bg__flex-box { /* FlexBox.jsx */
 	cursor:pointer;
 	margin-bottom: $default-margin;
-	padding: $default-margin;
+	padding: 10px 0;
 	.bg__fb__open {
 		float:right;
 		&:after {
@@ -757,8 +762,23 @@
 .bg__collection-recipe { /* CollectionRecipe.jsx */
 	.bg__rcp__cl__input-area {
 		background-color: $subdued-bg;
+		border-radius: 6px;
+		box-shadow: 1px 2px 2px 2px #999;
 		margin-top:5px;
-		padding: 10px;
+		padding: 3rem;
+		.btn-primary {
+			border-radius: 6px;
+		}
+		.list-group-item{
+			border-radius: 6px;
+		}
+	}
+	.fieldAnalysisStats {
+		background-color: $subdued-bg;
+		border-radius: 6px;
+		box-shadow: 1px 2px 2px 2px #999;
+		margin: 3rem 0;
+		padding: 4rem;
 	}
 }
 
@@ -823,7 +843,23 @@
 		padding-top: 2rem;
 	}
 }
+.bg__pieChart {
+	background-color: $subdued-bg;
+	border-radius: 6px;
+	box-shadow: 1px 2px 2px 2px #999;
+	padding: 10px;
+	.recharts-default-legend {
+		margin-bottom: 0;
+		padding-left: 30px;
+		li {
+			padding-top: 0;
+		}
 
+	}
+	.recharts-legend-wrapper {
+		margin: 0 auto;
+	}
+}
 
 /* ==================== Workspace ============================================ */
 
