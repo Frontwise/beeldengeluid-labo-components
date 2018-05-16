@@ -397,6 +397,8 @@ class ItemDetailsRecipe extends React.Component {
 		return false;
 	}
 
+
+	//TODO this function is almost the same as checkMediaObjectIsSelected, remove the latter
 	getSelectedMediaObject() {
 		let mediaObject = null;
 		if(this.props.params.fragmentUrl) {
@@ -557,13 +559,14 @@ class ItemDetailsRecipe extends React.Component {
 					cors = false;
 				}
 			})
+			//CORS is required for OpenSeaDragon support!
 			if(cors === false) {
-				//for now simply draw a bunch of images on the screen (no annotation support!)
+				//for now simply draw a bunch of images on the screen (which means: no annotation support!)
 				content = images.map((i) => {
 					return (<img src={i.url}/>);
 				})
 			} else {
-				//use openseadragon with annotation support (TODO has to be fixed again)
+				//use openseadragon with annotation support
 				content = (
 					<FlexImageViewer
 						user={this.props.user} //current user

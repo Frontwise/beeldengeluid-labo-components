@@ -333,7 +333,10 @@ const AnnotationUtil = {
 
 			//this is basically the OLD target. It will be transformed using generateTarget
 			let target = {
+				//FIXME the source params can be important for resolving the URL! In some cases however not.
+				//Think of something to tackle this!
 				source: AnnotationUtil.removeSourceUrlParams(mediaObject.url), //TODO It should be a PID!
+				assetId: mediaObject.assetId || mediaobject.url.substring(target.source.lastIndexOf('/') + 1),
 				selector: selector,
 				type: mediaType
 			}
@@ -405,7 +408,7 @@ const AnnotationUtil = {
 				representationTypes.push('Segment')
 			}
 			selector.value.push({
-				id: target.source.substring(target.source.lastIndexOf('/') + 1),
+				id: target.assetId,
 				type: representationTypes,
 				property: 'isRepresentation'
 			})
@@ -414,6 +417,7 @@ const AnnotationUtil = {
 		return {
 			type : targetType,
 			source : target.source,
+			assetId: target.assetId,
 			selector : selector
 		}
 	},
