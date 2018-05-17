@@ -76,7 +76,9 @@ class ItemDetailsRecipe extends React.Component {
 
 			resourceAnnotations : [],
 
-			awaitingProcess : null
+			awaitingProcess : null,
+
+			collectionConfig : null
 		}
 		this.tabListeners = false;
 		this.CLASS_PREFIX = 'rcp__id'
@@ -172,7 +174,8 @@ class ItemDetailsRecipe extends React.Component {
 							itemData : itemDetailData,
 							annotationTarget : this.getAnnotationTarget.call(this, itemDetailData), //for the list
 							found : true,
-							activeMediaTab : activeMediaTab
+							activeMediaTab : activeMediaTab,
+							collectionConfig : config
 						}
 						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
 							PlayoutAPI.requestAccess(
@@ -491,6 +494,7 @@ class ItemDetailsRecipe extends React.Component {
 				return (
 					<FlexPlayer
 						user={this.props.user} //current user
+						useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 						project={this.state.activeProject} //selected via the ProjectSelector
 						resourceId={this.state.itemData.resourceId}
                         transcript={transcript}

@@ -653,12 +653,14 @@ class FlexPlayer extends React.Component {
 				} else {
 					player = (
 						<HTML5VideoPlayer mediaObject={this.props.mediaObject}
+						useCredentials={this.props.useCredentials}
 						eventCallbacks={playerEventCallbacks}
 						onPlayerReady={this.onPlayerReady.bind(this)}/>
 					);
 				}
 			} else if(this.props.mediaObject.mimeType.indexOf('audio') != -1) {
 				player = (<HTML5AudioPlayer mediaObject={this.props.mediaObject}
+					useCredentials={this.props.useCredentials}
 					eventCallbacks={playerEventCallbacks}
 					onPlayerReady={this.onPlayerReady.bind(this)}/>
 				);
