@@ -24,7 +24,6 @@ class JWPlayer extends React.Component {
 			type : type,
 			image: null
 		}]
-		console.debug(playList);
 		const playerAPI = jwplayer('video_player__' + this.props.mediaObject.id).setup({
 			playlist: playList,
 			// height:'100%',
