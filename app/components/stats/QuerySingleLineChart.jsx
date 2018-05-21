@@ -26,17 +26,13 @@ class QuerySingleLineChart extends React.Component {
             data: this.props.data || null,
             isSearching: false
         }
-        this.originalData = null;
-    }
-    componentWillMount() {
-        this.originalData = this.props.data || null
     }
 
     onOutput(data) {
         if (data && !data.error) {
             this.setState({
                 isSearching: false,
-                data: data.aggregations[data.query.dateRange.field]
+                data: this.commonData(data.aggregations[data.query.dateRange.field], this.props.data)
             });
         }
     }
@@ -53,16 +49,17 @@ class QuerySingleLineChart extends React.Component {
         )
     }
 
-    getRelativeValues() {
+    commonData(relative, absolute) {
+        return  absolute.map((x,y) => {
+             return relative.find(function(element) {
+                 return element.key === x.key;
+             });
+        });
+    }
+    getRelativeValues(){
         if (this.state.viewMode === 'relative') {
             this.setState({
-                    viewMode: 'absolute',
-                    query: {
-                        ...this.state.query,
-                        term: ''
-                    }
-                }, () => {
-                    this.doSearch(this.state.query, false)
+                    viewMode: 'absolute'
                 }
             )
         } else {
@@ -81,41 +78,40 @@ class QuerySingleLineChart extends React.Component {
 
     //TODO better ID!! (include some unique part based on the query)
     render() {
-        // console.log(this.originalData);
-        // if this.state.data draw data ELSE make a call using the props query and collectionConfig.
-        // If there is data already draw the line chart.
-        // if(this.state.data || this.state.viewMode === 'absolute') {
-        //
-        // } else {
-        //     console.log('no data')
-        //     // make a query with using this.state.query + this.props.collectionConfig
-        //     this.doSearch(this.state.query, false)
-        // }
+        const viewModeLabel = this.state.viewMode;
+        let dataPrettyfied = null;
 
-        const dataPrettyfied = this.state.data.map(function (dataRow, i) {
-            const point = {};
-            if (this.state.viewMode === 'relative') {
-                point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                point["count"] = dataRow.doc_count ? (dataRow.doc_count / this.originalData[i].doc_count)*100 : 0; // compare this one to the total !!! with the previous query
-            } else {
+        if(this.props.data && this.state.viewMode === 'absolute') {
+            dataPrettyfied = this.props.data.map(function (dataRow, i) {
+                const point = {};
                 point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
                 point["count"] = dataRow.doc_count;
-            }
-            return point;
-        }, this);
-        let viewModeLabel = this.state.viewMode;
+                return point;
+            }, this);
+        } else {
+            dataPrettyfied = this.props.data.map(function (dataRow, i) {
+                const point = {};
+                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
+                    point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
+                        ? (dataRow.doc_count / this.state.data[i].doc_count)*100
+                        : 0;
+                return point;
+            }, this);
+        }
 
         return (
             <div className={IDUtil.cssClassName('query-line-chart')}>
-                <button type="button" onClick={this.getRelativeValues.bind(this)} className="btn btn-primary btn-xs">{viewModeLabel}</button>
-
+                <span className="ms_toggle_btn" >
+                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
+                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
+                </span>
                 <ResponsiveContainer width="100%" height="40%">
-                    <LineChart width={600} height={300} data={dataPrettyfied} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+                    <LineChart  key={viewModeLabel}  width={600} height={300} data={dataPrettyfied} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
                         <XAxis dataKey="date"/>
                         <YAxis/>
                         <Tooltip/>
                         <Legend />
-                        <Line type="monotone" dataKey="count" stroke="#8884d8" activeDot={{r: 8}}/>
+                        <Line type="monotone" isAnimationActive={true} dataKey="count" stroke="#8884d8" activeDot={{r: 8}}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>
