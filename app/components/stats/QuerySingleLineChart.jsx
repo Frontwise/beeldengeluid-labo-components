@@ -133,7 +133,6 @@ const CustomTooltip = React.createClass({
             const {payload, label} = this.props,
                 relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
                 dataType = payload[0].payload.dataType;
-            console.log(dataType)
             if (dataType === 'relative') {
                 return (
                     <div className="ms__custom-tooltip">
