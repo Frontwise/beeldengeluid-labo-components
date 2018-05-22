@@ -541,7 +541,7 @@
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
-	background-color: $subdued-bg;
+	background-color: #efefef;
 	border-radius: 6px;
 	box-shadow: 1px 2px 2px 2px #999;
 	padding: 10px;
@@ -867,8 +867,7 @@
 	margin-top: 40px;
 }
 
-
-// stylings for switch btn (move to a separated file)
+/* ==================== stylings for switch btn (move to a separated file) ============================================ */
 $transition-time : .8s;
 .ms_toggle_btn{
 	input.checkbox-toggle {
@@ -991,4 +990,17 @@ $transition-time : .8s;
 	}
 }
 
-
+/* ==================== Custom tooltip stylings for line charts ============================================ */
+.ms__custom-tooltip {
+	background-color: rgba(0, 0, 0, 0.6);
+	border-radius: 8px;
+	box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
+	color: #f3f3f3;
+	padding: 1rem 3rem;
+	text-transform: capitalize;
+	.rightAlign {
+		float: right;
+		margin-left: 10px;
+		right: 0;
+	}
+}

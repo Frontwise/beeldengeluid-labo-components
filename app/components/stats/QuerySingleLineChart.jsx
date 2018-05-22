@@ -1,9 +1,8 @@
 import IDUtil from '../../util/IDUtil';
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Label, ResponsiveContainer, BarChart, Legend, Bar} from 'recharts';
 import TimeUtil from '../../util/TimeUtil';
-import QueryBuilder from '../search/QueryBuilder';
 import SearchAPI from '../../api/SearchAPI';
-
+import PropTypes from 'prop-types';
 /*
 See:
 	- http://rawgraphs.io/
@@ -56,6 +55,7 @@ class QuerySingleLineChart extends React.Component {
              });
         });
     }
+
     getRelativeValues(){
         if (this.state.viewMode === 'relative') {
             this.setState({
@@ -78,12 +78,15 @@ class QuerySingleLineChart extends React.Component {
 
     //TODO better ID!! (include some unique part based on the query)
     render() {
-        const viewModeLabel = this.state.viewMode;
+        const viewModeLabel = this.state.viewMode,
+            strokeColors = ['#8884d8', 'green'];
         let dataPrettyfied = null;
 
         if(this.props.data && this.state.viewMode === 'absolute') {
             dataPrettyfied = this.props.data.map(function (dataRow, i) {
                 const point = {};
+                point["dataType"] = 'absolute';
+                point["strokeColor"] = strokeColors[0];
                 point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
                 point["count"] = dataRow.doc_count;
                 return point;
@@ -91,10 +94,12 @@ class QuerySingleLineChart extends React.Component {
         } else {
             dataPrettyfied = this.props.data.map(function (dataRow, i) {
                 const point = {};
-                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
-                        ? (dataRow.doc_count / this.state.data[i].doc_count)*100
-                        : 0;
+                point["dataType"] = 'relative';
+                point["strokeColor"] = strokeColors[1];
+                point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
+                point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
+                    ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
+                    : 0;
                 return point;
             }, this);
         }
@@ -109,9 +114,9 @@ class QuerySingleLineChart extends React.Component {
                     <LineChart  key={viewModeLabel}  width={600} height={300} data={dataPrettyfied} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
                         <XAxis dataKey="date"/>
                         <YAxis/>
-                        <Tooltip/>
+                        <Tooltip content={<CustomTooltip/>}/>
                         <Legend />
-                        <Line type="monotone" isAnimationActive={true} dataKey="count" stroke="#8884d8" activeDot={{r: 8}}/>
+                        <Line type="monotone" isAnimationActive={true} dataKey="count" stroke={dataPrettyfied[0].strokeColor} activeDot={{r: 8}}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>
@@ -119,4 +124,42 @@ class QuerySingleLineChart extends React.Component {
     }
 }
 
+// Custom tooltip.
+// TODO: Make it a separated component more customizable.
+const CustomTooltip = React.createClass({
+    render() {
+        const {active} = this.props;
+        if (active) {
+            const {payload, label} = this.props,
+                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                dataType = payload[0].payload.dataType;
+            console.log(dataType)
+            if (dataType === 'relative') {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                    </div>
+                );
+            }
+
+        }
+
+        return null;
+    }
+});
+CustomTooltip.propTypes = {
+    dataType: PropTypes.string,
+    payload: PropTypes.array,
+    label: PropTypes.string
+};
 export default QuerySingleLineChart;
