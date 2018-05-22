@@ -3,6 +3,7 @@ import FlexModal from '../FlexModal';
 
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
+import ReactTooltip from 'react-tooltip';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import Histogram from '../stats/Histogram';
 
@@ -23,6 +24,13 @@ class AggregationBox extends React.Component {
 		}
 		this.CLASS_PREFIX = 'agb'
 	}
+
+    componentDidUpdate(prevProps, prevState){
+		// Rebuild tooltip bindings only when they change (to avoid rebuilding for every non-related update).
+		if(prevProps.aggregations !== this.props.aggregations) {
+            ReactTooltip.rebuild()
+        }
+    }
 
 	onComponentOutput(componentClass, data) {
 		if(componentClass == 'AggregationCreator' && data) {
@@ -109,6 +117,10 @@ class AggregationBox extends React.Component {
             return (
                 <li key={index + '__tab'} className={index == 0 ? 'active' : ''}>
                     <a data-toggle="tab" href={'#__aggr_' + IDUtil.hashCode(this.props.queryId + '-' + index)}>
+						<span data-for={'__ci_tooltip'} data-tip={aggr.field} data-html={true}>
+							<i className="fa fa-info-circle"></i>
+						</span>
+                        &nbsp;
                         {aggr.title}
                         &nbsp;
                         <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, aggr.field)}></span>
@@ -202,6 +214,7 @@ class AggregationBox extends React.Component {
 					</ul>
 					<div className="tab-content">
 						{tabContents}
+                        <ReactTooltip id={'__ci_tooltip'}/>
 					</div>
 				</div>
 			)

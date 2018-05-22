@@ -1,7 +1,6 @@
 const PlayoutAPI = {
 
 	requestAccess : function(collectionId, videoId, desiredState, callback) {
-		console.debug('requesting access to video');
 		var data = {
 			videoId: videoId,
 			clientId: _clientId,

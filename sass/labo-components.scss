@@ -7,6 +7,8 @@
 /* then import the component variables */
 @import "./_variables.scss";
 
+/* Mixins contain generic, useful CSS components, which are used in the _components.scss */
+@import "./_mixins.scss";
 
 /* finally import the actual component styles that use the component variables, you can change the variables at the top */
 @import "./_components.scss";
@@ -26,11 +28,7 @@
 @import './powerSelect';
 
 
-/* Custom styling for Workspace components */
-.bg__workpace{
-  margin-top: 40px;
-
-  /* Note: There is a reset in on workspace to disable bootstrap for its components */
-  @import './workspace/index.scss';  
+/* Disables bootstrap styling; only works with custom styles */
+.bg__no-bootstrap-custom-styling {
+  @import './workspace/index.scss';
 }
-

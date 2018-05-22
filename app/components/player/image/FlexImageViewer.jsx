@@ -26,7 +26,8 @@ class FlexImageViewer extends React.Component {
 		this.annotationIdCount = 0;//TODO do this differently later on
 		this.state = {
 			annotations : [],
-			viewerLoaded : false
+			viewerLoaded : false,
+			currentPage : this.getInitialPage()
 		}
 		this.CLASS_PREFIX = 'fiv';
 	}
@@ -37,24 +38,19 @@ class FlexImageViewer extends React.Component {
 
 	componentDidMount() {
 		if(this.props.annotationSupport) {
-			//load the initial annotations
-			this.loadAnnotations();
-
-			//then listen to any changes that happen in the API
-
-			//TODO!! nu moeten alle mediaobjecten in de gaten gehouden worden -> optimaliseren
-
-			/*
-			AppAnnotationStore.bind(
-				AnnotationUtil.removeSourceUrlParams(this.props.mediaObject.url),
-				this.onChange.bind(this)
-			);*/
-		} else {
-			this.initViewer();
+			//listen to any changes made on the media objects
+			this.props.mediaObjects.forEach((mo) => {
+				AppAnnotationStore.bind(
+					AnnotationUtil.removeSourceUrlParams(mo.url),
+					this.onMediaObjectChange.bind(this)
+				);
+			})
 		}
+		this.initViewer(this.onViewerInitialized.bind(this));
 	}
 
-	onChange(eventType, data, annotation) {
+	//TODO make sure everything is updated properly
+	onMediaObjectChange(eventType, data, annotation) {
 		if(eventType) {
 			if(eventType == 'update') {
 				this.loadAnnotations();
@@ -71,78 +67,20 @@ class FlexImageViewer extends React.Component {
 		}
 	}
 
-	loadAnnotations() {
-		this.initViewer();
-		/*
-		AppAnnotationStore.getMediaObjectAnnotations(
-			this.props.mediaObject.url,
-			this.props.user,
-			this.props.project,
-			this.onLoadAnnotations.bind(this)
-		);*/
-	}
-
-	//FIXME make sure this works again for the new annotations
-	onLoadAnnotations(annotationData) {
-		if(!this.state.viewerLoaded) {
-			this.setState((previousState, currentProps) => {
-  				return {annotations : this.deleteOldOverlays.call(this, previousState.annotations, annotationData.annotations)};
-			}, this.initViewer.bind(this));
-
-			//this.setState(annotationData, this.initViewer.bind(this));
-		} else {
-			this.setState((previousState, currentProps) => {
-  				return {annotations : this.deleteOldOverlays.call(this, previousState.annotations, annotationData.annotations)};
-			});
-		}
-	}
-
-	deleteAnnotation(annotation, event) {
-		if(event) {
-			event.preventDefault();
-			event.stopPropagation();
-		}
-		if(annotation && annotation.id) {
-			AnnotationActions.delete(annotation);
-		}
-	}
-
 	/* --------------------------------------------------------------
 	-------------------------- VIEWER INITIALIZATION ----------------
 	---------------------------------------------------------------*/
 
-	getSources() {
-		return this.props.mediaObjects.map(mo => {
-			const index = mo.url.indexOf('.tif');
-			let moClone = JSON.parse(JSON.stringify(mo));
-			if(index == -1) {
-				moClone.infoUrl = mo.url;
-			} else {
-				moClone.infoUrl = mo.url.substring(0, index + 4) + '/info.json';
-        	}
-        	return moClone;
-		})
-	}
-
-	//the mediaObject with a width & height is the one selected via the URL and should be highlighted
-	getInitialPage(sources) {
-		let index = -1;
-		for(let i=0;i<sources.length;i++) {
-			if(sources[i].w && sources[i].h) {
-				index = i;
-				break;
-			}
-		}
-		return index;
-	}
-
-	initViewer() {
+	//first load the viewer using the provided this.props.mediaObjects
+	initViewer(callback) {
 		//const i = this.props.mediaObject.url.indexOf('.tif');
         //const infoUrl = this.props.mediaObject.url.substring(0, i + 4) + '/info.json'
 		//setup the basic viewer
 
-		const sources = this.getSources();
-		const initialPage = this.getInitialPage(sources);
+		//map the media objects to sources OpenSeaDragon likes
+		const sources = this.props.mediaObjects.map(mo => {
+			return this.toOSDUrl(mo);
+		});
 		this.viewer = OpenSeadragon({
 			//id: 'img_viewer__' + this.props.mediaObject.id,
 			id: 'img_viewer' ,
@@ -154,7 +92,7 @@ class FlexImageViewer extends React.Component {
 
 			//in case of a simple image
 			tileSources: sources.map(s => s.infoUrl),
-			initialPage : initialPage != -1 ? initialPage : 0
+			initialPage : this.state.currentPage
 		});
 
 		//make sure the selection button tooltips have translations (otherwise annoying debug messages)
@@ -173,15 +111,15 @@ class FlexImageViewer extends React.Component {
 	        console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
 	    }.bind(this));
 
-		//create an overlay of the selected region on the selected page
-		if(initialPage != -1) {
-		    let activeMediaObject = sources[initialPage];
+		//create an overlay of the selected region on the selected page (using this.props.selectedMediaObject)
+		//TEST THIS CHANGE LATER
+		if(this.props.selectedMediaObject) {
 		    this.viewer.addHandler('open', function(target, info) {
 		        const r = this.viewer.viewport.imageToViewportRectangle(
-		            parseInt(activeMediaObject.x),
-		            parseInt(activeMediaObject.y),
-		            parseInt(activeMediaObject.w),
-		            parseInt(activeMediaObject.h)
+		            parseInt(this.props.selectedMediaObject.x),
+		            parseInt(this.props.selectedMediaObject.y),
+		            parseInt(this.props.selectedMediaObject.w),
+		            parseInt(this.props.selectedMediaObject.h)
 		        );
 		        const elt = document.createElement("div");
 		        elt.className = IDUtil.cssClassName('highlight', this.CLASS_PREFIX);
@@ -201,7 +139,7 @@ class FlexImageViewer extends React.Component {
 				startRotatedHeight: 0.1, // only used if startRotated=true; value is relative to image height
 				restrictToImage: false, // true = do not allow any part of the selection to be outside the image
 				onSelection: function(rect) {
-					/*
+					//user, project, collectionId, resourceId, mediaObject = null, segmentParams = null
 					this.addEmptyAnnotation.call(
 						this,
 						AnnotationUtil.generateW3CEmptyAnnotation(
@@ -209,7 +147,7 @@ class FlexImageViewer extends React.Component {
 							this.props.project,
 							this.props.collectionId,
 							this.props.resourceId,
-							this.props.mediaObject,
+							this.props.mediaObjects[this.state.currentPage],
 							{
 								rect : {
 									x : rect.x,
@@ -221,7 +159,7 @@ class FlexImageViewer extends React.Component {
 							}
 
 						)
-					);*/
+					);
 				}.bind(this), // callback
 				prefixUrl: '/static/vendor/openseadragonselection-master/images/',
 				navImages: { // overwrites OpenSeadragon's options
@@ -247,18 +185,92 @@ class FlexImageViewer extends React.Component {
 			});
 
 			this.viewer.addHandler('open', function(target, info) {
-				this.renderAll.bind(this);
-				this.setState({viewerLoaded : true});
+				callback();
+			}.bind(this));
+
+			//make sure the annotations are updated per page/image
+			this.viewer.addHandler('page', function(e) {
+				this.setState(
+					{currentPage : e.page},
+					() => {
+						this.onOutput();
+					}
+				)
 			}.bind(this));
 		}
 
+	}
+
+	//when initialized, load the annotations
+	onViewerInitialized() {
+		this.loadAnnotations();
+	}
+
+	loadAnnotations() {
+		AppAnnotationStore.getMediaObjectAnnotations(
+			this.props.mediaObjects[this.state.currentPage].url,
+			this.props.user,
+			this.props.project,
+			this.onLoadAnnotations.bind(this)
+		);
+	}
+
+	//FIXME make sure this works again for the new annotations
+	onLoadAnnotations(annotationData) {
+		this.setState(
+			(previousState, currentProps) => {
+				return { //before setting the new annotations, delete the old overlays
+					annotations : this.deleteOldOverlays.call(
+						this, previousState.annotations, annotationData.annotations
+					)
+				};
+			},
+			() => { //then render the new overlays
+				this.renderOverlays();
+			}
+		);
+	}
+
+
+	//the mediaObject with a width & height is the one selected via the URL and should be highlighted
+	//FIXME this is a quite ugly way to check this
+	getInitialPage() {
+		let index = 0;
+		for(let i=0;i<this.props.mediaObjects.length;i++) {
+			if(this.props.mediaObjects[i].w && this.props.mediaObjects[i].h) {
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
+
+	toOSDUrl(mediaObject) {
+		const index = mediaObject.url.indexOf('.tif');
+		let moClone = JSON.parse(JSON.stringify(mediaObject));
+		if(index == -1) {
+			moClone.infoUrl = mediaObject.url;
+		} else {
+			moClone.infoUrl = mediaObject.url.substring(0, index + 4) + '/info.json';
+    	}
+    	return moClone;
+	}
+
+	deleteAnnotation(annotation, event) {
+		if(event) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		if(annotation && annotation.id) {
+			AnnotationActions.delete(annotation);
+		}
 	}
 
 	/* --------------------------------------------------------------
 	-------------------------- ANNOTATION CRUD ----------------------
 	---------------------------------------------------------------*/
 
-	renderAll() {
+	renderOverlays() {
 		this.state.annotations.forEach((annotation) => {
 			if(!this.viewer.getOverlayById(annotation.id)) {
 				this.renderAnnotation(annotation);
@@ -299,12 +311,12 @@ class FlexImageViewer extends React.Component {
 	}
 
 	renderAnnotation(annotation) {
-		const area = AnnotationUtil.extractSpatialFragmentFromURI(annotation.target.selector.value);
-		const rect = this.viewer.viewport.imageToViewportRectangle(
-			parseInt(area.x),
-			parseInt(area.y),
-			parseInt(area.w),
-			parseInt(area.h)
+		const selectedArea = annotation.target.selector.refinedBy.rect;
+		const translatedArea = this.viewer.viewport.imageToViewportRectangle(
+			parseInt(selectedArea.x),
+			parseInt(selectedArea.y),
+			parseInt(selectedArea.w),
+			parseInt(selectedArea.h)
 		);
 		const elt = document.createElement('div');
 		elt.className = IDUtil.cssClassName('overlay', this.CLASS_PREFIX);
@@ -337,7 +349,7 @@ class FlexImageViewer extends React.Component {
 
 		this.viewer.addOverlay({
 			element: elt,
-			location: rect
+			location: translatedArea
 		});
 	}
 
@@ -355,15 +367,15 @@ class FlexImageViewer extends React.Component {
 	------------------------------- COMMUNICATION WITH OWNER/RECIPE -----------------
 	------------------------------------------------------------------------------- */
 
-	//TODO this should 'play' props.playingAnnotation
-	playAnnotation(annotation) {
-		console.debug('to be implemented: playAnnotation()');
+	//send back the active mediaObject to the owner, so it can update related components (such as the annotation list)
+	onOutput() {
+		if(this.props.onOutput) {
+			this.props.onOutput(this.constructor.name, this.props.mediaObjects[this.state.currentPage])
+		}
+		this.loadAnnotations();
 	}
 
 	render() {
-		if(this.state.viewerLoaded) {
-			this.renderAll();
-		}
 		return (
 			<div id="img_viewer" className={IDUtil.cssClassName('flex-image-viewer')}></div>
 		)

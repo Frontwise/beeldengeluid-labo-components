@@ -10,7 +10,7 @@ class AnnotationStore {
 
 	/* --------------- FOR FETCHING ANNOTATIONS ------------------- */
 
-	getDirectResourceAnnotations(resourceId, user, project, callback, offset = 0, size = 10, sort = null, dateRange = null) {
+	getDirectResourceAnnotations(resourceId, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let filter = {
 			'target.type' : 'Resource', //indicates this annotations target is the resource
 			'target.selector.value.id' : resourceId,
@@ -22,7 +22,7 @@ class AnnotationStore {
 		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
 	}
 
-	getAllAnnotationsOfResource(resourceId, user, project, callback, offset = 0, size = 10, sort = null, dateRange = null) {
+	getAllAnnotationsOfResource(resourceId, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let filter = {
 			'target.selector.value.id' : resourceId,
 			'user.keyword' : user.id
@@ -34,7 +34,7 @@ class AnnotationStore {
 	}
 
 	//TODO rename later getDirectMediaObjectAnnotations
-	getMediaObjectAnnotations(mediaObjectURI, user, project, callback, offset = 0, size = 10, sort = null, dateRange = null) {
+	getMediaObjectAnnotations(mediaObjectURI, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let filter = {
 			'target.source' : AnnotationUtil.removeSourceUrlParams(mediaObjectURI),
 			'user.keyword' : user.id
@@ -45,7 +45,7 @@ class AnnotationStore {
 		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
 	}
 
-	getUserProjectAnnotations(user, project, callback, offset = 0, size = 10, sort = null, dateRange = null) {
+	getUserProjectAnnotations(user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let filter = {
 			'user.keyword' : user.id,
 			'project' : project.id

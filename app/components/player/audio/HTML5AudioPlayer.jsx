@@ -9,7 +9,8 @@ class HTML5AudioPlayer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			playerAPI : null
+			playerAPI : null,
+			initialSeekDone : false
 		}
 	}
 
@@ -24,6 +25,8 @@ class HTML5AudioPlayer extends React.Component {
 			vid.onseeked = this.props.eventCallbacks.onSeek.bind(this);
 			vid.oncanplay = this.onReady.bind(this, vid);
 		}
+		//needed until React will support the controlsList attribute of the video tag
+		vid.setAttribute("controlsList","nodownload");
 	}
 
 	onReady(playerAPI) {
@@ -33,17 +36,25 @@ class HTML5AudioPlayer extends React.Component {
 			}
 			const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
 			if(start > 0) {
-				this.state.playerAPI.currentTime = start / 1000;
+				//FIXME super ugly, but somehow onReady kept being triggered over and over in some cases!
+				if(!this.state.initialSeekDone) {
+					this.state.playerAPI.currentTime = start / 1000;
+					this.setState({initialSeekDone : true})
+				} else {
+					console.debug('already seeked, so something is not right');
+				}
 			}
 		}.bind(this));
 	}
 
 	render() {
 		return (
-			<video className={IDUtil.cssClassName('html5-audio-player')}
-				id={'audio_player__' + this.props.mediaObject.id} controls>
+			<audio
+				className={IDUtil.cssClassName('html5-audio-player')}
+				id={'audio_player__' + this.props.mediaObject.id}
+				controls controlsList="nodownload" crossOrigin="use-credentials">
 				<source src={this.props.mediaObject.url}></source>
-			</video>
+			</audio>
 		)
 	}
 

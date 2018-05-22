@@ -48,7 +48,8 @@ module.exports = {
                                         forceAllTransforms: true
                                     }
                                 ]
-                            ]
+                            ],
+                            plugins: [ 'transform-object-rest-spread' ]
                         }
                     }
                 ]

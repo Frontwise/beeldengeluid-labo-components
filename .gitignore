@@ -7,3 +7,4 @@ app/collection/mappings
 !app/collection/mappings/ExampleCollectionMapping.js
 !app/collection/mappings/CollectionConfig.js
 .idea
+transcript.json

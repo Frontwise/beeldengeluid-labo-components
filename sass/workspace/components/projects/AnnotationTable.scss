@@ -1,0 +1,10 @@
+.bg__annotation-table{
+  @import '../_resultTop.scss';
+
+  .type-list{
+    margin-top: 10px;
+    border-top: 2px solid $clGreyTint;
+  }
+
+  @import '../_modal.scss';
+}

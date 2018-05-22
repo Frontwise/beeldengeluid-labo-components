@@ -17,7 +17,7 @@ class AggregationCreator extends React.Component {
 		super(props);
 		const fieldList = this.getFieldList();
 		this.state = {
-			selectedField : fieldList ? fieldList[0] : null
+			selectedField : fieldList && fieldList.length > 0 ? fieldList[0].value : null
 		}
 	}
 

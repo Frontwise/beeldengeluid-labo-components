@@ -154,6 +154,7 @@ class CollectionAnalyser extends React.Component {
     }
 
     onSuggestionsClearRequested() {
+        this.analyseField(this.state.value);
         this.setState({
             suggestions : []
         });

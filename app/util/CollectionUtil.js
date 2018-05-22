@@ -12,23 +12,26 @@ In general what needs to be considered is:
 
 */
 
+import PersonalCollectionAPI from '../api/PersonalCollectionAPI';
 import CollectionAPI from '../api/CollectionAPI';
-import CollectionConfig from '../collection/mappings/CollectionConfig';
-import CollectionMapping from '../collection/mappings/CollectionMapping';
+import CKANAPI from '../api/CKANAPI';
 
 import TimeUtil from '../util/TimeUtil';
+
+import CollectionConfig from '../collection/mappings/CollectionConfig';
+import CollectionMapping from '../collection/mappings/CollectionMapping';
 
 const CollectionUtil = {
 
 	//returns the correct CollectionConfig instance based on the collectionId
-	getCollectionClass(collectionId, lookupMapping = true) {
+	getCollectionClass(clientId, user, collectionId, lookupMapping = true) {
 		let configClass = null;
 		if(lookupMapping) {
 			configClass = CollectionMapping[collectionId];
 			if(configClass == null) { //go through the wildcard mappings
 				const temp = Object.keys(CollectionMapping).filter(k => {
-					if(k.indexOf('*') != -1) {
-						return collectionId.startsWith(k.substring(0, k.length -2))
+					if(k.indexOf('*') != -1) {						
+						return collectionId && collectionId.startsWith(k.substring(0, k.length -2))
 					}
 					return false;
 				})
@@ -42,16 +45,16 @@ const CollectionUtil = {
 	},
 
 	//called by the CollectionSelector
-	createCollectionConfig : function(collectionId, collectionStats, collectionInfo) {
-		const configClass = CollectionUtil.getCollectionClass(collectionId, true);
-		return new configClass(collectionId, collectionStats, collectionInfo)
+	createCollectionConfig : function(clientId, user, collectionId, collectionStats, collectionInfo) {
+		const configClass = CollectionUtil.getCollectionClass(clientId, user, collectionId, true);
+		return new configClass(clientId, user, collectionId, collectionStats, collectionInfo)
 	},
 
 
-	generateCollectionConfigs : function(collectionIds, callback, lookupMapping = true) {
+	generateCollectionConfigs : function(clientId, user, collectionIds, callback, lookupMapping = true) {
 		const configs = [];
 		collectionIds.forEach((cid) => {
-			CollectionUtil.generateCollectionConfig(cid, (config) => {
+			CollectionUtil.generateCollectionConfig(clientId, user, cid, (config) => {
 				configs.push(config);
 				if(configs.length == collectionIds.length) {
 					callback(configs);
@@ -61,26 +64,58 @@ const CollectionUtil = {
 	},
 
 	//make sure this works also by passing the stats
-	generateCollectionConfig : function(collectionId, callback, lookupMapping = true) {
-		const configClass = CollectionUtil.getCollectionClass(collectionId, lookupMapping);
+	generateCollectionConfig : function(clientId, user, collectionId, callback, lookupMapping = true) {
+		const configClass = CollectionUtil.getCollectionClass(clientId, user, collectionId, lookupMapping, user);
 
 		//load the stats & information asynchronously TODO (rewrite to promise is nicer)
-		CollectionUtil.loadCollectionStats(collectionId, callback, configClass)
+		CollectionUtil.__loadCollectionStats(clientId, user, collectionId, callback, configClass)
 	},
 
 	//loads the Elasticsearch stats of the provided collection
-	loadCollectionStats(collectionId, callback, configClass) {
+	__loadCollectionStats(clientId, user, collectionId, callback, configClass) {
 		CollectionAPI.getCollectionStats(collectionId, function(collectionStats) {
-			CollectionUtil.loadCollectionInfo(collectionId, collectionStats, callback, configClass);
+			CollectionUtil.__loadCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass);
 		});
 	},
 
+	//checks first whether the collection is a personal collection or not,
+	//then either asks CKAN or the workspace API for info
+	__loadCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass) {
+		if(collectionId.startsWith('pc__')) {
+			CollectionUtil.__loadPersonalCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass);
+		} else if(user){
+			CollectionUtil.__loadCKANInfo(clientId, user, collectionId, collectionStats, callback, configClass);
+		} else {
+			callback(new configClass(clientId, user, collectionId, collectionStats, null));
+		}
+	},
+
 	//loads the CKAN metadata of the provided collection
-	loadCollectionInfo(collectionId, collectionStats, callback, configClass) {
-		CollectionAPI.getCollectionInfo(collectionId, function(collectionInfo) {
-			callback(new configClass(collectionId, collectionStats, collectionInfo));
+	__loadCKANInfo(clientId, user, collectionId, collectionStats, callback, configClass) {
+		CKANAPI.getCollectionInfo(collectionId, function(collectionInfo) {
+			callback(new configClass(clientId, user, collectionId, collectionStats, collectionInfo));
 		});
 	},
+
+	//loads the (personal) collection metadata from the workspace API
+	__loadPersonalCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass) {
+		//extract the workspace collection ID from the collectionID (by stripping off the user id + prefix)
+		const cid = CollectionUtil.__toWorkspaceAPICollectionId(clientId, user, collectionId);
+		PersonalCollectionAPI.get(user.id, cid, function(collectionInfo) {
+			callback(new configClass(clientId, user, collectionId, collectionStats, collectionInfo));
+		});
+	},
+
+	__toWorkspaceAPICollectionId(clientId, user, collectionId) {
+		if(collectionId.indexOf('pc__') != -1 && user) {
+			return collectionId.substring('pc__'.length + clientId.length + user.id.length + 2);
+		}
+		return collectionId
+	},
+
+	/*------------------------------------------------------------------------
+	------------------------ MISC FUNCTIONS TO BE (RE)MOVED ------------------
+	------------------------------------------------------------------------*/
 
 	SEARCH_LAYER_MAPPING : {
 		'srt' : 'Subtitles',
@@ -105,6 +140,24 @@ const CollectionUtil = {
 			}
 		}
 		return label;
+	},
+
+	//for pruning long descriptions; makes sure to return the snippet that contains the search term
+	highlightSearchTermInDescription(text, searchTerm=null, maxWords=35) {
+		if(text) {
+			let regex = new RegExp(searchTerm.toLowerCase(), 'gi');
+			let index = text.toLowerCase().search(regex);
+			index = index > 50 ? index - 50 : 0;
+			text = text.substring(index);
+			let words = text.split(' ');
+			if(words.length > maxWords) {
+				words = words.slice(index == 0 ? 0 : 1, maxWords);
+			} else if(index != 0) {
+				words.splice(0,1);
+			}
+			return words.join(' ')
+		}
+		return null;
 	}
 
 }

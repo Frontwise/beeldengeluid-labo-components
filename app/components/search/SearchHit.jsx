@@ -42,12 +42,24 @@ class SearchHit extends React.Component {
 		return resourceId.replace(/@/g, '').replace(/:/g, '').replace(/./g, '') + '__modal'
 	}
 
+	select(e) {
+		e.stopPropagation();
+		if(this.props.onOutput) {
+			this.props.onOutput(this.constructor.name, {
+				resourceId : this.props.result._id,
+				selected : !this.props.isSelected
+			})
+		}
+	}
+
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
 		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
 		const modalID = this.safeModalId(result.resourceId);
+
 		let modal = null;
+
 		if(this.state.showModal && this.state.previewMode) {
 			modal = (
 				<FlexModal
@@ -61,6 +73,17 @@ class SearchHit extends React.Component {
 				</FlexModal>
 			)
 		}
+
+		//draw the checkbox using the props.isSelected to determine whether it is selected or not
+		let checkBox = (
+			<div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} onClick={this.select.bind(this)}>
+				<input type="checkbox" checked={
+					this.props.isSelected ? 'checked' : ''
+				} id={'cb__' + modalID}/>
+				<label for={'cb__' + modalID}><span></span></label>
+			</div>
+		)
+
 		const classNames = [IDUtil.cssClassName('search-hit')];
 		if(snippet.type == 'media_fragment') {
 			classNames.push('fragment')
@@ -68,12 +91,16 @@ class SearchHit extends React.Component {
 		return (
 			<div id={result.resourceId} className={classNames.join(' ')}>
 				<div onClick={this.gotoItemDetails.bind(this, result)}>
+					{checkBox}
 					<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
-						<button className="btn btn-default fa fa-eye"
+						<button className="btn btn-default fa fa-file-text"
 							onClick={this.quickView.bind(this)} title="Quick view">
 						</button>
 					</div>
-					<SearchSnippet data={snippet} searchTerm={this.props.searchTerm}/>
+					<SearchSnippet
+						data={snippet}
+						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
+						searchTerm={this.props.searchTerm}/>
 				</div>
 				{modal}
 			</div>

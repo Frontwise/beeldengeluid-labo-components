@@ -1,6 +1,10 @@
+import CKANAPI from '../../api/CKANAPI';
 import CollectionAPI from '../../api/CollectionAPI';
+
 import CollectionUtil from '../../util/CollectionUtil';
 import IDUtil from '../../util/IDUtil';
+
+import PropTypes from 'prop-types';
 import { PowerSelect } from 'react-power-select';
 /*
 
@@ -24,10 +28,15 @@ class CollectionSelector extends React.Component {
 	}
 
 	componentDidMount() {
-		//load the collections
-		CollectionAPI.listCollections((collections) => {
+		//load the collections from CKAN (TODO build option to choose collection endpoint)
+		CKANAPI.listCollections((collections) => {
 			this.setState({collectionList :  collections});
 		});
+		//TODO add collections to the list!!
+		CollectionAPI.listCollections('personalcollection__clariah_test', (collections) => {
+			console.debug('got my personal collections back!')
+			console.debug(collections);
+		})
 	}
 
 	//only works if a collection has been properly indexed!
@@ -62,9 +71,19 @@ class CollectionSelector extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	onOutput(collectionId, collectionStats, collectionInfo) {
-		const collectionConfig = CollectionUtil.createCollectionConfig(collectionId, collectionStats, collectionInfo);
+		console.debug(collectionId)
+		console.debug(collectionStats)
+		console.debug(collectionInfo)
+		const collectionConfig = CollectionUtil.createCollectionConfig(
+			this.props.clientId,
+			this.props.user,
+			collectionId,
+			collectionStats,
+			collectionInfo
+		);
 		if(this.props.onOutput) {
 			if(collectionId) {
+				console.debug('dit is het hoor', collectionConfig);
 				this.props.onOutput(this.constructor.name, collectionConfig);
 			} else {
 				console.debug('No collection selected...');
@@ -145,6 +164,15 @@ class CollectionSelector extends React.Component {
 			</div>
 		)
 	}
+
+};
+
+CollectionSelector.propTypes = {
+	clientId : PropTypes.string,
+
+    user: PropTypes.shape({
+        id: PropTypes.number.isRequired
+    })
 
 };
 

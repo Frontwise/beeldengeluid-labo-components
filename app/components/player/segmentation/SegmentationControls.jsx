@@ -16,7 +16,7 @@ class SegmentationControls extends React.Component {
 		if(this.props.annotation == null && (nextProps.annotation && nextProps.annotation.id)) {
 			return true;
 		}
-		if(nextProps.annotation == null) {
+		if(nextProps.annotation == null && (this.props.annotation && this.props.annotation.id)) {
 			return true;
 		}
 		return false;

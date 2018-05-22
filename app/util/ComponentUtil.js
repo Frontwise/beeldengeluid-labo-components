@@ -10,13 +10,17 @@ const ComponentUtil = {
 	},
 
 	//hides a FlexModal (used in AggregationBox, ItemDetailsRecipe, SearchHit)
-	hideModal(component, stateVariable, elementId, manualCloseRequired) {
+	hideModal(component, stateVariable, elementId, manualCloseRequired, callback) {
 		const stateObj = {}
 		stateObj[stateVariable] = false
 		if(elementId && manualCloseRequired) {
 			$('#' + elementId).modal('hide');
 		}
-		component.setState(stateObj);
+		component.setState(stateObj, () => {
+			if(callback) {
+				callback()
+			}
+		});
 	},
 
 	supportsHTML5Storage() {

@@ -2,7 +2,7 @@
 const CollectionAPI = {
 
 	getCollectionStats: function(collectionId, callback) {
-	    const url = _config.SEARCH_API_BASE + "/collections/show_stats?collectionId=" + collectionId;
+	    const url = _config.COLLECTION_API_BASE + '/show_stats/' + collectionId;
 	    const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -21,7 +21,7 @@ const CollectionAPI = {
 		}
 		xhr.open("POST", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify({collectionId : collectionId}));
+		xhr.send();
 	},
 
 	__filterAggregationStatusDocumentType(stats) {
@@ -32,70 +32,14 @@ const CollectionAPI = {
 		return stats;
 	},
 
-	/*
-	//THIS ONE FETCHES THE COLLECTIONS VIA THE SEARCH_API (check if other projects, like motu/arttube still need this)
-	listCollections: function(callback) {
-	    var url = _config.SEARCH_API_BASE  + "/collections/list_collections";
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					callback(JSON.parse(xhr.responseText));
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("GET", url);
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send();
-	},*/
-
-	//Fetches the list of collections via the LABO proxy (which harvests directly from CKAN)
-	listCollections: function(callback) {
-	    const url = _config.SEARCH_API_BASE + '/ckan/list_collections';
-		const xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					callback(JSON.parse(xhr.responseText));
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("GET", url);
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send();
-	},
-
-	getCollectionInfo : function(collectionId, callback) {
-		const url = _config.SEARCH_API_BASE + '/ckan/collection_info/' + collectionId;
-		const xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					const respData = JSON.parse(xhr.responseText);
-					if(respData && !respData.error) {
-						callback(respData);
-					} else {
-						callback(null);
-					}
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("GET", url);
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send();
-	},
-
 	getCollectionTimeLine(collectionId, docType, dateField, callback) {
-		let url = _config.SEARCH_API_BASE + '/collections/show_timeline';
-		url += '?collectionId=' + collectionId;
-		url += '&docType=' + docType;
-		url += '&dateField=' + dateField;
+		let url = _config.COLLECTION_API_BASE + '/show_timeline/' + collectionId;
+		const postData = {
+			docType: docType,
+			dateField : dateField,
+			facetField : null, //not yet implemented by the server
+			facetValue : null //not yet implemented by the server
+		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -108,18 +52,17 @@ const CollectionAPI = {
 		}
 		xhr.open("GET", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send();
+		xhr.send(JSON.stringify(postData));
 	},
 
 	analyseField: function(collectionId, docType, dateField, analysisField, facets, minYear, callback) {
-		const url = _config.SEARCH_API_BASE + '/collections/analyse_field';
-		const query = {
-			'collectionId': collectionId,
-			'docType': docType,
-			'dateField': dateField,
-			'analysisField': analysisField,
-			'facets': facets,
-			'minYear' : minYear
+		const url = _config.COLLECTION_API_BASE + '/analyse_field/' + collectionId;
+		const postData = {
+			docType : docType,
+			dateField : dateField,
+			analysisField : analysisField,
+			facets : facets,
+			minYear : minYear
 		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
@@ -133,7 +76,29 @@ const CollectionAPI = {
 		}
 		xhr.open("POST", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(query));
+		xhr.send(JSON.stringify(postData));
+	},
+
+
+	//THIS ONE FETCHES THE COLLECTIONS VIA THE SEARCH_API
+	listCollections: function(collectionPrefix, callback) {
+	    var url = _config.COLLECTION_API_BASE  + "/list_collections";
+	    if(collectionPrefix) {
+	    	url += '/' + collectionPrefix
+	    }
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback(null);
+				}
+			}
+		}
+		xhr.open("POST", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
 	}
 }
 

@@ -28,6 +28,8 @@ class HTML5VideoPlayer extends React.Component {
 			vid.onseeked = this.props.eventCallbacks.onSeek.bind(this);
 			vid.onloadedmetadata = this.onReady.bind(this, vid);
 		}
+		//needed until React will support the controlsList attribute of the video tag
+		vid.setAttribute("controlsList","nodownload");
 	}
 
 	onReady(playerAPI) {
@@ -48,8 +50,10 @@ class HTML5VideoPlayer extends React.Component {
 
 	render() {
 		return (
-			<video className={IDUtil.cssClassName('html5-video-player')}
-				id={'video_player__' + this.props.mediaObject.id} controls crossOrigin="use-credentials">
+			<video
+				className={IDUtil.cssClassName('html5-video-player')}
+				id={'video_player__' + this.props.mediaObject.id}
+				controls controlsList="nodownload" crossOrigin="use-credentials">
 				<source src={this.props.mediaObject.url}></source>
 				Your browser does not support the video tag
 			</video>

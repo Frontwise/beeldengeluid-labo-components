@@ -1,0 +1,15 @@
+.bg__collection-table{
+
+  @import '../_tools.scss';
+
+  .error{
+    padding:10px;
+  }
+
+  table{
+
+    &.access{
+      text-transform: capitalize;
+    }
+  }
+}

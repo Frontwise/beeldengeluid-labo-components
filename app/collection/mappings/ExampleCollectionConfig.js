@@ -5,8 +5,8 @@ import CollectionConfig from './CollectionConfig';
 */
 
 class ExampleCollectionConfig extends CollectionConfig {
-	constructor(collectionId, stats, info) {
-		super(collectionId, stats, info);
+	constructor(clientId, user, collectionId, stats, info) {
+		super(clientId, user, collectionId, stats, info);
 	}
 
 	getVideoBaseUrl() {
@@ -30,7 +30,7 @@ class ExampleCollectionConfig extends CollectionConfig {
 				id : 'CLIENT SIDE ID',
 				operator : 'AND/OR',
 				size : 10,
-				type : 'string/date',
+				type : 'string/date_histogram/nested',
 				display: true
 			}
 		];
@@ -47,7 +47,8 @@ class ExampleCollectionConfig extends CollectionConfig {
 		formattedResult.title = result.title; //OVERRIDE IF NEEDED
 		formattedResult.description = result.description; //OVERRIDE IF NEEDED
 		formattedResult.date = result.date; //OVERRIDE IF NEEDED
-		formattedResult.sourceURL = null; //IS THERE A LINK POINTING TO THE ORIGINAL SOURCE CATALOGUE?
+		//IS THERE A LINK POINTING TO THE ORIGINAL SOURCE CATALOGUE? {url : '', message : ''}
+		formattedResult.externalSourceInfo = null;
 		formattedResult.specialProperties = [] //ARE THERE PROPERTIES THAT SHOULD BE PUT FORWARD ON THE DETAIL PAGE?
 
 

@@ -87,7 +87,7 @@ const AnnotationAPI = {
 		xhr.send();
 	},
 
-	getFilteredAnnotations : function(filters, callback, offset = 0, size = 10, sort = null, dateRange = null) {
+	getFilteredAnnotations : function(filters, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let url = _config.ANNOTATION_API_BASE + '/annotations/filter';
 		const postData = {
 			clientId : _clientId,

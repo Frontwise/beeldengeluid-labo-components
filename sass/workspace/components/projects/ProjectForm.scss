@@ -1,12 +1,12 @@
 .bg__project-edit, .bg__project-create{
 
-  @import './infoBar.scss';
+  @import '../infoBar.scss';
 
   form{
     margin-left: 40px;
 
     input[type=text], textarea{
-      display:block;          
+      display:block;
       min-width: 400px;
       max-width: 100%;
     }

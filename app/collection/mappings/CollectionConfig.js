@@ -15,10 +15,12 @@ TODO:
 class CollectionConfig {
 
 	//requires the output of [SEARCH_API]/api/v1/collections/show_stats?collectionId=[ID]
-	constructor(collectionId, collectionStats, collectionInfo) {
+	constructor(clientId, user, collectionId, collectionStats, collectionInfo) {
+		this.clientId = clientId;
+		this.user = user;
 		this.collectionId = collectionId; //based on the ES index name
 		this.collectionStats = collectionStats; //ES stats (mostly about field types)
-		this.collectionInfo = collectionInfo; //CKAN metadata
+		this.collectionInfo = collectionInfo; //CKAN metadata (null for personal collections or outside of CLARIAH)
 
 		this.docType = null;
 		this.stringFields = null;
@@ -61,8 +63,20 @@ class CollectionConfig {
 		}
 	}
 
+	getCollectionMediaTypes() {
+		return [];
+	}
+
 	//TODO see if this is necessary or we just directly access the global variable
 	getCollectionId() {
+		return this.collectionId;
+	}
+
+	//checks if there is a proper title / name from CKAN / workspace API, otherwise just returns the ID
+	getCollectionTitle() {
+		if(this.collectionInfo) {
+			return this.collectionInfo.title || this.collectionInfo.name;
+		}
 		return this.collectionId;
 	}
 
@@ -75,11 +89,16 @@ class CollectionConfig {
 	}
 
 	//TODO this will become a much more important function later on
+	//FIXME make the difference between CKAN / workspace API versions of the collectionInfo less weird
 	getSearchIndex() {
+		let searchIndex = this.collectionId;
 		if(this.collectionInfo) {
-			return this.collectionInfo.index;
+			searchIndex = this.collectionInfo.index
+			if(!searchIndex && this.collectionInfo.user && this.collectionInfo.id) {
+				searchIndex = 'pc__' + this.clientId + '__' + this.collectionInfo.user + '__' + this.collectionInfo.id;
+			}
 		}
-		return this.collectionId;
+		return searchIndex
 	}
 
 	getImageBaseUrl() {
@@ -224,6 +243,10 @@ class CollectionConfig {
 		//first flatten the pure ES response
 		result = this.formatSearchResult(result);
 
+		if(!result) {
+			return null;
+		}
+
 		//initiate the formatted result with the most basic data from ES
 		let formattedResult = {
 			resourceId : result._id,
@@ -259,10 +282,13 @@ class CollectionConfig {
 		if(formattedResult.date == null) {
 			if(currentDateField && result[currentDateField]) {
 				formattedResult.date = result[currentDateField];//TODO nested fields can't be found in this way!! fix this
+				formattedResult.dateField = currentDateField;
 			} else if(this.dateFields != null && this.dateFields.length > 0) {
 				formattedResult.date = result[this.dateFields[0]];
+				formattedResult.dateField = this.dateFields[0];
 			} else {
-				formattedResult.date = '<No date available>'
+				formattedResult.date = '<No date available>';
+				formattedResult.dateField = '<None available>'
 			}
 		}
 
@@ -281,6 +307,7 @@ class CollectionConfig {
 			date: result.date,
 			description: result.description,
 			posterURL : result.posterURL,
+			mediaFragment : result.mediaFragment,
 			tags : result.tags ? result.tags : [],
 			mediaTypes : result.mediaTypes ? result.mediaTypes : []
 		}

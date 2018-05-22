@@ -23,14 +23,16 @@ const IconUtil = {
 
 	getMimeTypeIcon(mimeType, border, muted, interactive) {
 		let iconClass = 'fa fa-question';
-		if(mimeType.indexOf('video') != -1) {
-			iconClass = 'fa fa-film';
-		} else if(mimeType.indexOf('audio') != -1) {
-			iconClass = 'fa fa-headphones';
-		} else if(mimeType.indexOf('image') != -1) {
-			iconClass = 'fa fa-photo';
-		} else if(mimeType.indexOf('fragment') != -1) {
-			iconClass = 'fa fa-puzzle-piece';
+		if(mimeType) {
+			if(mimeType.indexOf('video') != -1) {
+				iconClass = 'fa fa-film';
+			} else if(mimeType.indexOf('audio') != -1) {
+				iconClass = 'fa fa-headphones';
+			} else if(mimeType.indexOf('image') != -1) {
+				iconClass = 'fa fa-photo';
+			} else if(mimeType.indexOf('fragment') != -1) {
+				iconClass = 'fa fa-puzzle-piece';
+			}
 		}
 		return IconUtil.__addExtraStyling(iconClass, border, muted, interactive);
 	},
@@ -55,6 +57,16 @@ const IconUtil = {
 			iconClass = 'fa fa-comment'
 		} else if(action.indexOf('link') != -1) {
 			iconClass = 'fa fa-link'
+		}
+		return IconUtil.__addExtraStyling(iconClass, border, muted, interactive);
+	},
+
+	getMediaObjectAccessIcon(present, interalAccess, border, muted, interactive) {
+		let iconClass = ''
+		if(present) {
+			iconClass = interalAccess ? 'fa fa-eye' : 'fa fa-link';
+		} else {
+			iconClass = 'fa fa-eye-slash'
 		}
 		return IconUtil.__addExtraStyling(iconClass, border, muted, interactive);
 	},

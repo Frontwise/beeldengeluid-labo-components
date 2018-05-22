@@ -31,6 +31,10 @@ const IDUtil = {
 			return 'bg__' + componentPrefix + '__' + componentAttribute;
 		}
 		return 'bg__' + componentAttribute;
+	},
+
+	personalCollectionId(clientId, userId, collectionId) {
+		return 'pc__' + [clientId, userId, collectionId].join('__');
 	}
 }
 

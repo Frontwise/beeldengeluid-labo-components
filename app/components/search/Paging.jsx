@@ -72,14 +72,14 @@ class Paging extends React.Component {
 			}
 			if(showNext) {
 				pagingButtons.push(
-					<button key="__next_pages" type="button" className="btn btn-default"
+					<button key="__next_pages" type="button" className="btn btn-default next-last-page"
 						onClick={this.gotoPage.bind(this, end + 1)}>
 						Next
 					</button>);
 			}
 			if(showLast) {
 				pagingButtons.push(
-					<button key="__last_page" type="button" className="btn btn-default"
+					<button key="__last_page" type="button" className="btn btn-default next-last-page"
 						onClick={this.gotoPage.bind(this, this.props.numPages)}>
 						Last
 					</button>);

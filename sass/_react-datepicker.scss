@@ -308,6 +308,19 @@ height:20rem;
 .react-datepicker__input-container {
   position: relative;
   display: inline-block;
+  margin-left: 2px;
+  .fa {
+    position: absolute;
+    top: 0;
+    right: 6px;
+    z-index: -1;
+  }
+  input {
+    background: none;
+    &:disabled {
+      opacity: .6;
+    }
+  }
 }
 
 .react-datepicker__year-read-view,
@@ -498,4 +511,14 @@ height:20rem;
 
 .react-datepicker__portal .react-datepicker__navigation--next:hover {
   border-left-color: #b3b2b2;
+}
+
+.date-picker-container {
+  position: relative;
+  .fa {
+    position: absolute;
+    top: 9px;
+    right: 6px;
+    z-index: -1;
+  }
 }

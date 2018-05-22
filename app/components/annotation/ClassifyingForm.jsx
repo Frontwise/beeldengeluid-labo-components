@@ -35,8 +35,8 @@ class ClassifyingForm extends React.Component {
 	/* ------------------- CRUD / loading of classifications ------------------- */
 
 	addClassification(e) {
+		e.preventDefault();
 		if(this.state.value != '') {
-			e.preventDefault();
 			const cs = this.state.data;
 			let suggestionId = this.state.suggestionId;
 			if(this.state.vocabulary && this.state.vocabulary == 'custom') {

@@ -1,5 +1,6 @@
 import JSONFormatter from 'json-formatter-js'
 import IDUtil from '../../util/IDUtil';
+import ReactTooltip from 'react-tooltip';
 
 //See: https://github.com/mohsen1/json-formatter-js
 
@@ -35,7 +36,7 @@ class MetadataTable extends React.Component {
 		//get the poster if any
 		if(this.props.data.posterURL) {
 			poster = (<tr className={IDUtil.cssClassName('poster', this.CLASS_PREFIX)}>
-				<td><label>Poster</label></td>
+				<td><label>Keyframe</label></td>
 				<td>
 					<div style={{width: '200px'}}>
 						<img src={this.props.data.posterURL} alt="poster" style={{width:'100%'}}/>
@@ -44,12 +45,20 @@ class MetadataTable extends React.Component {
 			</tr>);
 		}
 
-		//get the source URL if any
-		if(this.props.data.sourceURL) {
-			source = (<tr className={IDUtil.cssClassName('source', this.CLASS_PREFIX)}>
-				<td><label>Source</label></td>
-				<td><a href={this.props.data.sourceURL} target="_source">View in catalogue</a></td>
-			</tr>)
+		//get the external source information if any
+		if(this.props.data.externalSourceInfo) {
+			let externalSourceInfo = null;
+			if(this.props.data.externalSourceInfo.url) {
+				externalSourceInfo = (<a href={this.props.data.externalSourceInfo.url} target="_source">View in catalogue</a>)
+			} else if(this.props.data.externalSourceInfo.message) {
+				externalSourceInfo = (<span>{this.props.data.externalSourceInfo.message}</span>)
+			}
+			if(externalSourceInfo) {
+				source = (<tr className={IDUtil.cssClassName('source', this.CLASS_PREFIX)}>
+					<td><label>Source</label></td>
+					<td>{externalSourceInfo}</td>
+				</tr>)
+			}
 		}
 
 		//determine the component's main css classes
@@ -71,16 +80,22 @@ class MetadataTable extends React.Component {
 						<td><label>Title</label></td>
 						<td>{this.props.data.title ? this.props.data.title : 'No title available'}</td>
 					</tr>
-					<tr className={IDUtil.cssClassName('date', this.CLASS_PREFIX)}>
-						<td><label>Date</label></td>
-						<td>{this.props.data.date}</td>
-					</tr>
+                    <tr className={IDUtil.cssClassName('date', this.CLASS_PREFIX)}>
+                        <td><label>Date <span data-for={'__ci_tooltip'}
+                                              data-tip={this.props.data.dateField}
+                                              data-html={false}>
+							<i className="fa fa-info-circle"></i>
+						</span>
+                        </label></td>
+                        <td>{this.props.data.date}</td>
+                    </tr>
 					<tr className={IDUtil.cssClassName('description', this.CLASS_PREFIX)}>
 						<td><label>Description</label></td>
 						<td>{this.props.data.description ? this.props.data.description : 'No description available'}</td>
 					</tr>
 					{source}
 					{specialProperties}
+                    <ReactTooltip id={'__ci_tooltip'}/>
 					<tr>
 						<td><label>All data</label></td>
 						<td>

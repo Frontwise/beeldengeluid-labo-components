@@ -1,6 +1,6 @@
 .bg__project-table{
 
-  @import '_tools.scss';
+  @import '../_tools.scss';
 
   .error{
     padding:10px;
@@ -28,5 +28,5 @@
     &.access{
       text-transform: capitalize;
     }
-  } 
+  }
 }

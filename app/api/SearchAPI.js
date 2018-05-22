@@ -1,155 +1,51 @@
 import ElasticsearchDataUtil from '../util/ElasticsearchDataUtil';
 import IDUtil from '../util/IDUtil';
+import QueryModel from '../model/QueryModel';
 
 const SearchAPI = {
 
-	//TODO define some sort of query object holding these parameters
-	//TODO properly handle null results in each component
-	search(queryId, collectionConfig, searchLayers, searchString, fieldCategory, desiredFacets, selectedFacets, dateRange,
-		sortParams, offset, pageSize, callback, updateUrl, innerHitsSize=5, innerHitsOffset=0) {
-		if(offset + pageSize <= 10000) {
-			SearchAPI.__fragmentSearch(
-				collectionConfig.getSearchIndex(),
-				searchString,
-				fieldCategory,
-				searchLayers,
-				selectedFacets,
-				SearchAPI.__formatDateRange(dateRange), //format just before calling the API
-				sortParams,
-				desiredFacets,
-				function(data) { //send the results to the component output (see onOutput())
-					if(data && data.params) {
-						//calculate the current page
-						const pageNumber = Math.ceil(offset / pageSize) + 1;
-						data.currentPage = data.results ? pageNumber : -1;
+	search(query, collectionConfig, callback, updateUrl = false) {
+		if(query.offset + query.size <= 10000) {
+			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId
+			const xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					if(xhr.status == 200) {
+						const data = JSON.parse(xhr.responseText);
+						if(data && data.params) {
+							//always add a fresh search ID, so the UI knows when to refresh certain components
+							data.searchId = IDUtil.guid(); //still a bit weird, has to go probably
 
-						//add the currently selected date field
-						data.dateField = collectionConfig.getPreferredDateField();
-						if(dateRange && dateRange.field) {
-							data.dateField = dateRange.field;
+							//for convenience add the collection config to the resulting data
+							data.collectionConfig = collectionConfig;
+
+							//tell the receiving component to update the URL (still weird to do here)
+							data.updateUrl = updateUrl;
+
+							//UNNECESSARY REMOVE (calculates the current page)
+							const pageNumber = Math.ceil(query.offset / query.size) + 1;
+							data.currentPage = data.results ? pageNumber : -1;
+
+							//make sure the query returned by the server is compatible with the client side model
+							//TODO some validation!
+							data.query = QueryModel.ensureQuery(data.params, collectionConfig);
+							delete data.params
+
+							callback(data);
 						}
-						//add default sort when no sort was defined
-						if(!data.params.sort) {
-							data.params.sort = {
-								field  :'_score',
-								order : 'desc'
-							}
-						}
-						data.searchLayers = searchLayers;
-						data.fieldCategory = fieldCategory;
-						data.selectedDateRange = dateRange;
-						data.selectedFacets = selectedFacets;
-						data.desiredFacets = desiredFacets;
-						data.queryId = queryId; //to uniquely relate this query to interested components
-						data.searchId = IDUtil.guid(); //still a bit weird, has to go probably
-						data.collectionConfig = collectionConfig;
-						data.updateUrl = updateUrl; //this one is still a bit weird to add here
+					} else {
+						callback(null);
 					}
-					//no data means an internal server error (TODO check API to make sure)
-					callback(data);
-				},
-				offset,
-				pageSize,
-				innerHitsSize,
-				innerHitsOffset,
-				collectionConfig.getFragmentPath(),
-				collectionConfig.getFragmentTextFields()
-			);
+				}
+			}
+			xhr.open("POST", url);
+			xhr.timeout = 50000;
+			xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			xhr.send(JSON.stringify(query));
 		} else {
 			console.debug('Currently the search engine cannot look beyond this point, please narrow your search terms');
 			callback({pagingOutOfBounds : true})
 		}
-	},
-
-	//returns null if the dateRange has -1 for start & end times
-	__formatDateRange(dateRange) {
-		const dr = null
-		if(dateRange) {
-			//then create the dateRange object for the Search API
-			if(dateRange.start != -1 && dateRange.end != -1) {
-				return dateRange
-			}
-		}
-		return dr;
-	},
-
-	//Calls the layered search function in the Search API, used by the MultiLayeredSearchComponent
-	//TODO (maandag) add the sorting stuff
-	__fragmentSearch :function(collectionId, term, fieldCategory, searchLayers, selectedFacets, dateRange, sortParams, desiredFacets,
-		callback, offset=0 , size=10, innerHitsSize=3, innerHitsOffset=0, fragmentPath=null, fragmentFields=null) {
-		let url = _config.SEARCH_API_BASE + '/layered_search/' + collectionId
-		url += '?cid=' + _clientId + '&at=' + _chickenStock;
-		const params = {
-			term : term,
-			fieldCategory : fieldCategory,
-			searchLayers : searchLayers,
-			selectedFacets : selectedFacets,
-			offset : offset,
-			size : size,
-			desiredFacets : desiredFacets,
-			dateRange : dateRange,
-			sort : sortParams,
-			innerHitsSize : innerHitsSize,
-			innerHitsOffset : innerHitsOffset,
-			fragmentPath : fragmentPath,
-			fragmentFields : fragmentFields
-		}
-		const xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					callback(JSON.parse(xhr.responseText));
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("POST", url);
-		xhr.timeout = 50000;
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(params));
-	},
-
-	//Primarily called by the ItemDetailsRecipe for fetching all metadata of a single collection item (ES document)
-	getItemDetails :function(collectionId, itemId, callback) {
-		const url = _config.SEARCH_API_BASE + '/document/get_doc/' + collectionId;
-		const xhr = new XMLHttpRequest();
-		const postData = {
-			id : itemId
-		}
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					callback(collectionId, itemId, JSON.parse(xhr.responseText));
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("POST", url);
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(postData));
-	},
-
-	//Primarily called by the ItemDetailsRecipe for fetching all metadata of a single collection item (ES document)
-	getItemDetailsMultiple :function(collectionId, idList, callback) {
-		const url = _config.SEARCH_API_BASE + '/document/get_docs/' + collectionId;
-		const xhr = new XMLHttpRequest();
-		const postData = {
-			ids : idList
-		}
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == XMLHttpRequest.DONE) {
-				if(xhr.status == 200) {
-					callback(collectionId, idList, JSON.parse(xhr.responseText));
-				} else {
-					callback(null);
-				}
-			}
-		}
-		xhr.open("POST", url);
-		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(postData));
 	}
 
 }

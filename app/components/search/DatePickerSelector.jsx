@@ -47,7 +47,7 @@ class DatePickerSelector extends React.Component {
                 <div className="col-md-12">
                     <table>
                         <tr>
-                            <td>
+                            <td className="date-picker-container">
                                 <DatePicker
                                     disabled={this.props.disabled}
                                     selected={startDate}
@@ -61,13 +61,10 @@ class DatePickerSelector extends React.Component {
                                     dropdownMode="select"
                                     className="form-control"
                                     placeholderText="Start date"/>
-                            </td>
-                            <td>
-                                &nbsp;
                                 <i className="fa fa-calendar" ariaHidden="true"></i>
-                                &nbsp;
+
                             </td>
-                            <td>
+                            <td className="date-picker-container">
                                 <DatePicker
                                     disabled={this.props.disabled}
                                     selected={endDate}
@@ -81,11 +78,7 @@ class DatePickerSelector extends React.Component {
                                     dropdownMode="select"
                                     className="form-control"
                                     placeholderText="End date"/>
-                            </td>
-                            <td>
-                                &nbsp;
                                 <i className="fa fa-calendar" ariaHidden="true"></i>
-                                &nbsp;
                             </td>
                         </tr>
                     </table>

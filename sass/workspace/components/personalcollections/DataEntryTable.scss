@@ -1,0 +1,17 @@
+.bg__entry-table{
+
+  @import '../_tools.scss';
+
+  @import '../_modal.scss';
+
+  .error{
+    padding:10px;
+  }
+
+  table{
+
+    &.access{
+      text-transform: capitalize;
+    }
+  }
+}
