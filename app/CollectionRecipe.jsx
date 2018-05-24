@@ -11,6 +11,7 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import CollectionStats from './components/collection/CollectionStats';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
 import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import {ResponsiveContainer, PieChart, Pie, Sector, Cell, Legend, Label, LabelList} from 'recharts';
 
 import PropTypes from 'prop-types';
 
@@ -133,10 +134,87 @@ class CollectionRecipe extends React.Component {
 		}
 		return null;
 	}
-
+    onPieEnter(){
+		// console.log('entering pie chart')
+	}
 	render() {
-		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 
+        let piecharts = null;
+        if (this.state.fieldAnalysisStats && this.state.fieldAnalysisStats.doc_stats) {
+            const COLORS = ['#468dcb', '#FF7F0E', '#FFBB28', '#FF8042'];
+            const RADIAN = Math.PI / 180;
+            const data = [
+                {name: 'Records that do contain the date field', value: this.state.fieldAnalysisStats.doc_stats.date_field},
+                {name: 'Records that do NOT contain the date field', value: (this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field)}];
+            const dataAnalysis = [
+                {name: 'Records that do contain the analysis field', value: this.state.fieldAnalysisStats.field_stats.analysis_field_count},
+                {name: 'Records that do NOT contain the analysis field', value: this.state.fieldAnalysisStats.doc_stats.no_analysis_field}];
+            const renderDateField = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
+                    x = cx + radius * Math.cos(-midAngle * RADIAN),
+                    y = cy + radius * Math.sin(-midAngle * RADIAN),
+                    absDateField 		= this.state.fieldAnalysisStats.doc_stats.date_field,
+                    absNonDateField 	= this.state.fieldAnalysisStats.doc_stats.total - this.state.fieldAnalysisStats.doc_stats.date_field;
+                return (
+                    <text x={x} y={y} fill="#1C435E" textAnchor={x > cx ? 'middle' : 'middle'} 	dominantBaseline="central">
+                        <tspan fontSize="12" fontWeight="bold">{index ? absNonDateField :absDateField}</tspan>
+                        <tspan fontSize="12" fontWeight="bold"> ({`${(percent * 100).toFixed(0)}%`})</tspan>
+                    </text>
+                );
+            };
+            const renderAnalysisField = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5,
+                    x = cx + radius * Math.cos(-midAngle * RADIAN),
+                    y = cy + radius * Math.sin(-midAngle * RADIAN),
+                    analysisField 		= this.state.fieldAnalysisStats.field_stats.analysis_field_count,
+                    nonAnalysisField 	= this.state.fieldAnalysisStats.doc_stats.no_analysis_field,
+					total = analysisField + nonAnalysisField,
+                    nonAnalysisFieldPer = (nonAnalysisField * 100)/total,
+                    analysisFieldPer = (analysisField * 100)/total;
+
+                return (
+                    <text x={x} y={y} fill="#1C435E" textAnchor={x > cx ? 'middle' : 'middle'} dominantBaseline="left">
+                        <tspan fontSize="12" fontWeight="bold">{index ? nonAnalysisField :analysisField} </tspan>
+                        <tspan fontSize="12" fontWeight="bold"> {index ? '(' + (Math.round(nonAnalysisFieldPer)) + '%)' : '(' + (Math.round(analysisFieldPer)) + '%)'}</tspan>
+                    </text>
+                );
+            };
+            let analysisFieldPieChart = null;
+            if (this.state.fieldAnalysisStats.analysis_field !== 'null__option') {
+                analysisFieldPieChart = (
+                    <ResponsiveContainer width="100%" height="24%">
+                        <PieChart className="analisysTypeField" onMouseEnter={this.onPieEnter} >
+                            <Pie data={dataAnalysis} cx="55%" cy="55%" labelLine={false}
+                                 label={renderAnalysisField} outerRadius={65} fill="#8884d8">
+                                {
+                                    dataAnalysis.map((entry, index) => <Cell fill={COLORS[index % COLORS.length]}/>)
+                                }
+                            </Pie>
+                            <Legend wrapperStyle={{fontSize: '10px'}} verticalAlign="bottom" align="left"/>
+                        </PieChart>
+                    </ResponsiveContainer>
+                )
+            }
+
+            piecharts = (
+                <div className={IDUtil.cssClassName('pieChart')}>
+                    <ResponsiveContainer width="100%" height="24%">
+                        <PieChart className="dateTypeField" onMouseEnter={this.onPieEnter}>
+                            <Pie data={data} cx="55%" cy="55%" labelLine={false}
+                                 label={renderDateField} outerRadius={65} fill="#8884d8">
+                                {
+                                    data.map((entry, index) => <Cell fill={COLORS[index % COLORS.length]}/>)
+                                }
+                            </Pie>
+                            <Legend wrapperStyle={{fontSize: '10px'}} verticalAlign="bottom" align="left"/>
+                        </PieChart>
+                    </ResponsiveContainer>
+					{analysisFieldPieChart}
+                </div>
+            )
+        }
+
+		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 		let collectionModal = null; //for selecting collections for the list
 		let collectionBlock = null; //shows all selected collections
 
@@ -145,7 +223,7 @@ class CollectionRecipe extends React.Component {
 		let analysisBlock = null; //only shown after a collection has been selected
 
 		let fieldAnalysisTimeline = null; //show the timeline at the bottom
-
+        let fieldAnalysisStats = null; // Shows the analysis stats as a table
 		if(this.state.selectedCollections) {
 			const items = Object.keys(this.state.selectedCollections).map((key) => {
 				const c = this.state.selectedCollections[key];
@@ -221,7 +299,6 @@ class CollectionRecipe extends React.Component {
 		//TODO make sure that this is only shown when a collection has been selected
 		if(collectionConfig) {
 			let collectionAnalyser = null;
-			let fieldAnalysisStats = null;
 
 			//the collection analyser outputs the field analysis & timeline stats in onComponentOutput
 			collectionAnalyser = (
@@ -234,7 +311,9 @@ class CollectionRecipe extends React.Component {
 
 			if(this.state.fieldAnalysisStats) {
 				fieldAnalysisStats = (
-					<FieldAnalysisStats data={this.state.fieldAnalysisStats} collectionConfig={collectionConfig}/>
+					<div className="fieldAnalysisStats">
+                        <FieldAnalysisStats data={this.state.fieldAnalysisStats} collectionConfig={collectionConfig}/>
+					</div>
 				);
 			}
 
@@ -252,11 +331,6 @@ class CollectionRecipe extends React.Component {
 						<div className="row">
 							<div className="col-md-12">
 								{collectionAnalyser}
-							</div>
-						</div>
-						<div className="row">
-							<div className="col-md-12">
-								{fieldAnalysisStats}
 							</div>
 						</div>
 					</div>
@@ -277,8 +351,16 @@ class CollectionRecipe extends React.Component {
 					</div>
 				</div>
 				<div className="row">
-					<div className="col-md-12">
+					<div className="col-md-9">
 						{fieldAnalysisTimeline}
+					</div>
+                    <div className="col-md-3">
+                        {piecharts}
+                    </div>
+				</div>
+				<div className="row">
+					<div className="col-md-12">
+						{fieldAnalysisStats}
 					</div>
 				</div>
 			</div>

@@ -82,7 +82,6 @@ class FlexImageViewer extends React.Component {
 			return this.toOSDUrl(mo);
 		});
 		this.viewer = OpenSeadragon({
-			//id: 'img_viewer__' + this.props.mediaObject.id,
 			id: 'img_viewer' ,
 			prefixUrl: '/static/node_modules/openseadragon/build/openseadragon/images/',
 			showSelectionControl: true,
@@ -133,6 +132,7 @@ class FlexImageViewer extends React.Component {
 				showConfirmDenyButtons: true,
 				styleConfirmDenyButtons: true,
 				returnPixelCoordinates: true,
+				//crossOriginPolicy: 'Anonymous',
 				keyboardShortcut: 'c', // key to toggle selection mode
 				rect: null, // initial selection as an OpenSeadragon.SelectionRect object
 				startRotated: false, // alternative method for drawing the selection; useful for rotated crops

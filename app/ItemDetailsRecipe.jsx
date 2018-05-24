@@ -76,7 +76,9 @@ class ItemDetailsRecipe extends React.Component {
 
 			resourceAnnotations : [],
 
-			awaitingProcess : null
+			awaitingProcess : null,
+
+			collectionConfig : null
 		}
 		this.tabListeners = false;
 		this.CLASS_PREFIX = 'rcp__id'
@@ -172,7 +174,8 @@ class ItemDetailsRecipe extends React.Component {
 							itemData : itemDetailData,
 							annotationTarget : this.getAnnotationTarget.call(this, itemDetailData), //for the list
 							found : true,
-							activeMediaTab : activeMediaTab
+							activeMediaTab : activeMediaTab,
+							collectionConfig : config
 						}
 						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
 							PlayoutAPI.requestAccess(
@@ -397,6 +400,8 @@ class ItemDetailsRecipe extends React.Component {
 		return false;
 	}
 
+
+	//TODO this function is almost the same as checkMediaObjectIsSelected, remove the latter
 	getSelectedMediaObject() {
 		let mediaObject = null;
 		if(this.props.params.fragmentUrl) {
@@ -489,6 +494,7 @@ class ItemDetailsRecipe extends React.Component {
 				return (
 					<FlexPlayer
 						user={this.props.user} //current user
+						useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 						project={this.state.activeProject} //selected via the ProjectSelector
 						resourceId={this.state.itemData.resourceId}
                         transcript={transcript}
@@ -557,13 +563,14 @@ class ItemDetailsRecipe extends React.Component {
 					cors = false;
 				}
 			})
+			//CORS is required for OpenSeaDragon support!
 			if(cors === false) {
-				//for now simply draw a bunch of images on the screen (no annotation support!)
+				//for now simply draw a bunch of images on the screen (which means: no annotation support!)
 				content = images.map((i) => {
 					return (<img src={i.url}/>);
 				})
 			} else {
-				//use openseadragon with annotation support (TODO has to be fixed again)
+				//use openseadragon with annotation support
 				content = (
 					<FlexImageViewer
 						user={this.props.user} //current user

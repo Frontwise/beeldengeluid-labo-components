@@ -67,6 +67,11 @@ class CollectionConfig {
 		return [];
 	}
 
+	//Important for generating replacable PIDs for playable content; should override!
+	getNamespace() {
+		return 'http://' + this.collectionId.replace(/-/g, '.'); + '.clariah.nl#';
+	}
+
 	//TODO see if this is necessary or we just directly access the global variable
 	getCollectionId() {
 		return this.collectionId;

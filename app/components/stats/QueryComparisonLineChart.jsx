@@ -94,7 +94,7 @@ class QueryComparisonLineChart extends React.Component {
         //TODO fix the stupid manual multiple lines
 		return (
 			<div className={IDUtil.cssClassName('query-line-chart')}>
-				<ResponsiveContainer width="100%" height="40%">
+				<ResponsiveContainer width="100%" height="50%">
 					<LineChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
 						{lines[0]}
 						{lines[1]}

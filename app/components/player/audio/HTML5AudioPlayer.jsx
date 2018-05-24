@@ -52,7 +52,9 @@ class HTML5AudioPlayer extends React.Component {
 			<audio
 				className={IDUtil.cssClassName('html5-audio-player')}
 				id={'audio_player__' + this.props.mediaObject.id}
-				controls controlsList="nodownload" crossOrigin="use-credentials">
+				controls controlsList="nodownload" crossOrigin={
+					this.props.useCredentials ? "use-credentials" : "anonymous"
+				}>
 				<source src={this.props.mediaObject.url}></source>
 			</audio>
 		)
