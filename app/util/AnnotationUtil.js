@@ -21,9 +21,8 @@ const AnnotationUtil = {
 			resourceList = resourceList.concat(targets.map((t) => {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
-				//console.debug(resourceInfo, collectionInfo)
 				return {
-					id : IDUtil.guid(), // unique bookmark id, used for referencing
+					id : IDUtil.guid(), // unique bookmark id
 
 					resourceId: resourceInfo ? resourceInfo.id : t.source, //needed for deleting, displaying, selecting, merging
 
@@ -50,8 +49,10 @@ const AnnotationUtil = {
 						dataset: collectionInfo ? collectionInfo.id : null,
 
 						// placeholder image if available
-						placeholderImage: "http://localhost:5304/static/images/placeholder.2b77091b.svg"
+						placeholderImage: "/static/images/placeholder.2b77091b.svg",
 
+						// media types
+						mediaTypes: [],
 					},
 
 					// Bookmark created
@@ -149,9 +150,8 @@ const AnnotationUtil = {
 				resourceIds[key], //all resourceIds for this collection
 				(collectionId, idList, resourceData) => {
 					//reconsile and callback the "client"
-					const configClass = CollectionUtil.getCollectionClass(collectionId, true);
+					const configClass = CollectionUtil.getCollectionClass(undefined,undefined,collectionId, true);
 					const collectionConfig = new configClass(collectionId);
-
 					const mappedResourceData = resourceData  && !resourceData.error ? resourceData.map((doc) => {
 						return doc.found ? collectionConfig.getItemDetailData(doc) : null;
 					}) : [];
@@ -168,6 +168,7 @@ const AnnotationUtil = {
 
 	//TODO FINISH THIS AND WE'RE ALL DONE!
 	reconsileAll(resourceList, resourceData) {
+		// console.debug(resourceData);
 		resourceList.forEach((x) => {
 			let temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
@@ -177,6 +178,13 @@ const AnnotationUtil = {
 			if(temp.length == 1) {
 				x.object.title = temp[0].title;
 				x.object.date = temp[0].date;
+
+				x.object.mediaTypes=temp[0].mediaTypes || [];
+				
+				if (temp[0].placeholderImage){
+					x.object.placeholderImage = temp[0].placeholderImage;
+				} 
+				
 				if(temp[0].posterURL) {
 					x.object.placeholderImage = temp[0].posterURL
 				}

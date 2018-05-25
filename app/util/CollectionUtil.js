@@ -24,6 +24,7 @@ import CollectionMapping from '../collection/mappings/CollectionMapping';
 const CollectionUtil = {
 
 	//returns the correct CollectionConfig instance based on the collectionId
+	// TODO: Please note: clientId / user are not used in the call.
 	getCollectionClass(clientId, user, collectionId, lookupMapping = true) {
 		let configClass = null;
 		if(lookupMapping) {
