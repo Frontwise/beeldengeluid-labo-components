@@ -10,7 +10,7 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList, createGroupOptionList } from '../../helpers/OptionList';
+import { createOptionList, createGroupOptionList, createSimpleArrayOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -131,17 +131,17 @@ class BookmarkTable extends React.PureComponent {
             
             // type filter        
             {
-                title:'Type',
-                key: 'type',
+                title:'Media',
+                key: 'mediaTypes',
                 type: 'select',
-                options: createOptionList(items, (i)=>(i.object.type) ).sort()
+                options: createSimpleArrayOptionList(items, (i)=>(i.object.mediaTypes) )
             },
             // group filter        
             {
                 title:'Group',
                 key: 'group',
                 type: 'select',
-                options: createGroupOptionList(items).sort()
+                options: createGroupOptionList(items)
             },
 
         ];      
@@ -160,9 +160,9 @@ class BookmarkTable extends React.PureComponent {
 
     filterBookmarks(bookmarks, filter) {
         // filter on type
-        if (filter.type) {
+        if (filter.mediaType) {
             bookmarks = bookmarks.filter(bookmark =>
-                bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
+                bookmark.object.mediaTypes.includes(filter.type)
             );
         }
 
@@ -387,6 +387,8 @@ class BookmarkTable extends React.PureComponent {
     }
 
     render() {
+        console.log(this.state.bookmarks);
+
         let detailsModal = null;
         if(this.state.detailBookmark) {
             detailsModal = (

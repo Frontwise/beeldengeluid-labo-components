@@ -133,8 +133,8 @@ class BookmarkRow extends React.PureComponent {
                             <p>{resourceDate}</p>                            
                         </li>
                         <li>
-                            <h4 className="label">Type</h4>
-                            <p>{bookmark.object.type}</p>
+                            <h4 className="label">Media</h4>
+                            <p>{bookmark.object.mediaTypes.join(",")}</p>
                         </li>
                         <li>
                             <h4 className="label">Dataset</h4>

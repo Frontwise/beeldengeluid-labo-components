@@ -11,11 +11,11 @@ export const createOptionList = (items, getValue) =>{
       }
   });
 
-  return options;
+  return valueSort(options);
 }
 
 
-// Create a {value/name} list based on given bookmarks
+// Create a {value/name} group list based on given bookmarks
 export const createGroupOptionList = (items) =>{
   const groups = items.reduce((acc, i)=>(acc.concat(i.groups)), []);
   const hits = {};
@@ -28,5 +28,24 @@ export const createGroupOptionList = (items) =>{
       }
   });
 
-  return options;
+  return valueSort(options);
+}
+
+// Create a {value/name} array list based on given bookmarks
+export const createSimpleArrayOptionList = (items, getValue) => {
+  const all = items.reduce((acc, i)=>(acc.concat(getValue(i))), []);
+  const hits = {};
+  const options = [];
+  all.forEach(t => {      
+      if (t && !(t in hits)) {
+          options.push({ value: t, name: t });
+          hits[t] = true;
+      }
+  });
+
+  return valueSort(options);
+}
+
+const valueSort = (list) =>{
+  return list.sort((a,b) => {a.value > b.value});
 }
