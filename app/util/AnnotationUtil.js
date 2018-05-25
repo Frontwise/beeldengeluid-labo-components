@@ -48,7 +48,7 @@ const AnnotationUtil = {
 						// dataset the object originates from
 						dataset: collectionInfo ? collectionInfo.id : null,
 
-						// placeholder image if available
+						// placeholder image
 						placeholderImage: "/static/images/placeholder.2b77091b.svg",
 
 						// media types
@@ -195,13 +195,13 @@ const AnnotationUtil = {
 
 	//extracts all contained annotations into a list for the annotation-centric view
 	//TODO update this so each body is an item. Use parentAnnotationId to refer to the parent
-	generateAnnotationCentricList(annotations) {
+	generateAnnotationCentricList(annotations, type) {
 		// check for empty: can't reduce an empty array
 		if (annotations.length === 0){
 			return [];
 		}
-
 		return annotations.filter(an => an.body).map((an) => {
+			
 
 			//create a list of bookmarks from the parent annotation's targets
 			let targets = an.target;
@@ -228,7 +228,12 @@ const AnnotationUtil = {
 			return an.body
 		}).reduce((acc, cur) => { //concat all annotation bodies into a single array
 			return acc.concat(cur);
-		});
+		},[]).filter((a)=>(
+					// only given type
+					a.annotationType === type
+					// exclude bookmark groups
+					&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
+			));
 	},
 
 	//the Collection & Resource should always be part of the annotation target

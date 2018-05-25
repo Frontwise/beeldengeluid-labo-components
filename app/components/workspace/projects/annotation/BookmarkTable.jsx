@@ -387,8 +387,6 @@ class BookmarkTable extends React.PureComponent {
     }
 
     render() {
-        console.log(this.state.bookmarks);
-
         let detailsModal = null;
         if(this.state.detailBookmark) {
             detailsModal = (

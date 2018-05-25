@@ -82,6 +82,26 @@ class AnnotationTable extends React.PureComponent {
         );
     }
 
+
+    onLoadAnnotations(data) {
+        const parentAnnotations = data.annotations || [];
+
+        let annotations = AnnotationUtil.generateAnnotationCentricList(
+            parentAnnotations, this.props.type
+        );
+      
+        this.setState({
+                parentAnnotations: data.annotations,
+                annotations: annotations,
+                loading: false,
+                filters: this.getFilters(annotations)
+            },
+            () => {
+                this.updateSelection(annotations)
+            }
+        );
+    }
+
     //Get filter object
     getFilters(items) {
         return this.props.filters.map((filter)=>{
@@ -99,7 +119,7 @@ class AnnotationTable extends React.PureComponent {
                         title:'Vocabulary',
                         key: 'vocabulary',
                         type: 'select',
-                        options: createOptionList(items,  (i)=>(i['vocabulary']) ).sort()
+                        options: createOptionList(items,  (i)=>(i['vocabulary']) )
                     }
                 break;
                 case 'bookmarkGroup':
@@ -107,7 +127,7 @@ class AnnotationTable extends React.PureComponent {
                         title:'Bookmark group',
                         key: 'bookmarkGroup',
                         type: 'select',
-                        options: createOptionList(items, (i)=>(i['bookmarkGroup'])).sort()
+                        options: createOptionList(items, (i)=>(i['bookmarkGroup']))
                     }
                 break;
                 case 'code':
@@ -115,7 +135,7 @@ class AnnotationTable extends React.PureComponent {
                         title:'Code',
                         key: 'code',
                         type: 'select',
-                        options: createOptionList(items, (i)=>(i['code'])).sort()
+                        options: createOptionList(items, (i)=>(i['code']))
                     }
                 break;
                 default:
@@ -123,33 +143,6 @@ class AnnotationTable extends React.PureComponent {
             }
         })
     }
-
-    onLoadAnnotations(data) {
-        const parentAnnotations = data.annotations || [];
-
-        let annotations = AnnotationUtil.generateAnnotationCentricList(
-            parentAnnotations
-        );
-
-        // filter on type
-        if (this.props.type) {
-            annotations = annotations.filter(annotation =>
-                annotation.annotationType.toLowerCase().includes(this.props.type)
-            );
-        }
-      
-        this.setState({
-                parentAnnotations: data.annotations,
-                annotations: annotations,
-                loading: false,
-                filters: this.getFilters(annotations)
-            },
-            () => {
-                this.updateSelection(annotations)
-            }
-        );
-    }
-
 
     //Update Selection list, based on available items
     updateSelection(items) {
@@ -162,7 +155,7 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-
+        
         const simpleKeyCheck = (items, getValue, value) =>(items.filter((i)=>(getValue(i) === value)));
         
         if (filter.vocabulary){
