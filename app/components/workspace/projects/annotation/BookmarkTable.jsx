@@ -52,7 +52,6 @@ class BookmarkTable extends React.PureComponent {
         ];
 
         this.state = {
-            annotations : null,
             bookmarks: [],
             selection: [],
             showSub: {},
@@ -88,6 +87,20 @@ class BookmarkTable extends React.PureComponent {
             this.onLoadBookmarks.bind(this)
         );
     }
+    //Annotation load callback: set data to state
+    onLoadBookmarks(data) {
+        if (data && data.annotations && data.annotations.length){
+            AnnotationUtil.generateBookmarkCentricList(
+                    data.annotations || [],
+                    this.onLoadResourceList.bind(this)
+            );
+        } else{
+            this.setState({
+                bookmarks: []
+            });
+        }
+        
+    }
 
     //Get filter object
     getFilters(items) {
@@ -118,17 +131,6 @@ class BookmarkTable extends React.PureComponent {
         ];      
     }
 
-    //Annotation load callback: set data to state
-    onLoadBookmarks(data) {
-        this.setState({
-            annotations : data.annotations || null
-        }, () => {
-            AnnotationUtil.generateBookmarkCentricList(
-                data.annotations || [],
-                this.onLoadResourceList.bind(this)
-            );
-        })
-    }
 
     //The resource list now also contains the data of the resources
     onLoadResourceList(bookmarks) {
@@ -144,7 +146,7 @@ class BookmarkTable extends React.PureComponent {
     //Update Selection list, based on available items
     updateSelection(items) {
         this.setState({
-            selection: items.map(item => item.annotationId).filter(
+            selection: items.map(item => item.resourceId).filter(
                 itemId => this.state.selection.includes(itemId)
             )
         });
@@ -225,8 +227,9 @@ class BookmarkTable extends React.PureComponent {
 
     //delete multiple bookmarks
     deleteBookmarks(bookmarkIds) {
+
         if(bookmarkIds) {
-            let msg = 'Are you sure you want to remove the selected bookmark';
+            let msg = 'Are you sure you want to remove the selected bookmarks and all its annotations?';
             msg += bookmarkIds.length == 1 ? '?' : 's?';
             if (!confirm(msg)) {
                 return;
@@ -234,12 +237,14 @@ class BookmarkTable extends React.PureComponent {
 
             // delete each bookmark
             BookmarkUtil.deleteBookmarks(
-                this.state.annotations,
                 this.state.bookmarks,
                 bookmarkIds,
                 (success) => {
                     console.debug('reloading bookmark-list', this)
-                    setTimeout(this.loadBookmarks.call(this), 250);
+
+                    // add a time out, because sometimes it may take a while for
+                    // the changes to be reflected in the data
+                    setTimeout(this.loadBookmarks.bind(this), 500);
                 }
             )
         }
@@ -247,7 +252,7 @@ class BookmarkTable extends React.PureComponent {
 
     exportBookmarks(selection) {
         const data = this.state.bookmarks.filter(item =>
-            selection.includes(item.annotationId)
+            selection.includes(item.resourceId)
             );
         exportDataAsJSON(data);
     }
@@ -270,8 +275,8 @@ class BookmarkTable extends React.PureComponent {
         if (e.target.checked) {
             const newSelection = this.state.selection.slice();
             items.forEach(item => {
-                if (!newSelection.includes(item.annotationId)) {
-                    newSelection.push(item.annotationId);
+                if (!newSelection.includes(item.resourceId)) {
+                    newSelection.push(item.resourceId);
                 }
             });
             // set
@@ -279,7 +284,7 @@ class BookmarkTable extends React.PureComponent {
                 selection: newSelection
             });
         } else {
-            items = items.map(item => item.annotationId);
+            items = items.map(item => item.resourceId);
             // unset
             this.setState({
                 selection: this.state.selection.filter(item => !items.includes(item))
@@ -289,10 +294,10 @@ class BookmarkTable extends React.PureComponent {
 
     selectItem(item, select) {
         if (select) {
-            if (!this.state.selection.includes(item.annotationId)) {
+            if (!this.state.selection.includes(item.resourceId)) {
                 // add to selection
                 this.setState({
-                    selection: [...this.state.selection, item.annotationId]
+                    selection: [...this.state.selection, item.resourceId]
                 });
             }
             return;
@@ -301,7 +306,7 @@ class BookmarkTable extends React.PureComponent {
         // remove from selection
         if (!select) {
             this.setState({
-                selection: this.state.selection.filter(selected => selected !== item.annotationId)
+                selection: this.state.selection.filter(selected => selected !== item.resourceId)
             });
         }
     }
@@ -330,7 +335,7 @@ class BookmarkTable extends React.PureComponent {
         const showSub = {};
         this.state.bookmarks.forEach((b)=>{
             if (b.annotations && b.annotations.length > 0){
-                showSub[b.annotationId] = true;        
+                showSub[b.resourceId] = true;        
             }            
         });
         this.setState({showSub});
@@ -348,7 +353,7 @@ class BookmarkTable extends React.PureComponent {
                         type="checkbox"
                         checked={
                             renderState.visibleItems.length > 0 && renderState.visibleItems.every(item =>
-                                this.state.selection.includes(item.annotationId)
+                                this.state.selection.includes(item.resourceId)
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
@@ -362,13 +367,13 @@ class BookmarkTable extends React.PureComponent {
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
-                            key={bookmark.id}
+                            key={bookmark.resourceId}
                             bookmark={bookmark}
                             onDelete={this.deleteBookmarks}
                             onView={this.viewBookmark}
-                            selected={this.state.selection.includes(bookmark.annotationId)}
+                            selected={this.state.selection.includes(bookmark.resourceId)}
                             onSelect={this.selectItem}
-                            showSub={bookmark.annotationId in this.state.showSub}
+                            showSub={bookmark.resourceId in this.state.showSub}
                             toggleSub={this.toggleSub}
                             />
                     ))}

@@ -2,61 +2,62 @@ import AnnotationAPI from '../api/AnnotationAPI';
 
 const BookmarkUtil = {
 
-	deleteBookmarks : function(annotationList, bookmarkList, bookmarkIds, callback) {
-		let count = 0;
-		const bookmarks = bookmarkList.filter(item =>
-			bookmarkIds.includes(item.id)
-        )
+	// delete a bookmark and all its annotations
+	deleteBookmarks : function(bookmarkList, bookmarkIds, callback) {
 
+		// get the bookmarks to delete
+		const bookmarks = bookmarkList.filter(b =>
+			bookmarkIds.includes(b.id)
+     );
+		
+		// get all annotations to delete
+		// as bookmarks are actually annotations, we should collect them here
+		
+		const deleteAnnotations = {};
 		bookmarks.forEach((b) => {
-			const targets = bookmarkList.filter(
-				bookmark => b.annotationId == bookmark.annotationId
-				);
-			bookmarkList = bookmarkList.filter(
-				bookmark => b.targetId != bookmark.targetId
-				);
+			// add original bookmark
+			deleteAnnotations[b.annotationId] = {
+					id: b.annotationId
+				};
 
-			//if there is only one target it means the selected bookmark was the last target of the parent annotation
-			if(targets.length == 1) {
-				//set the id to the annotationId so the API knows which actual annotation needs to be deleted
-				b.id = b.annotationId;
+			// add all the annotations
+			b.annotations.forEach((a)=>{
+				// skip elements already marked
+				if (a.parentAnnotationId in deleteAnnotations){
+					return;
+				}
+			
+				deleteAnnotations[a.parentAnnotationId] = {
+					id: a.parentAnnotationId
+				};
+												 	
+			});
+		});
+				
+		console.debug(deleteAnnotations);
+		
+		// delete the annotations	
+			 
+		const deleteCount = Object.keys(deleteAnnotations).length;
+		let count = 0;
 
-				//delete the bookmark
-				AnnotationAPI.deleteAnnotation(b, data => {
-					if (data && data.status) {
-						if (data.status == 'success') {
-							console.debug('success');
-						} else {
-							console.debug('error');
-						}
+		Object.keys(deleteAnnotations).map((key)=>(deleteAnnotations[key])).forEach((a)=>{
+			AnnotationAPI.deleteAnnotation(a, data => {
+				if (data && data.status) {
+					if (data.status == 'success') {
+						console.debug('success');
 					} else {
 						console.debug('error');
 					}
-					if(++count == bookmarks.length) {
-						console.debug('all done calling back the caller');
-						callback(true)
-					}
-				});
-			} else {
-				const annotation = annotationList.filter(a => a.id == b.annotationId)[0];
-				annotation.target = annotation.target.filter(t => t.source != b.targetId);
-				AnnotationAPI.saveAnnotation(annotation, data => {
-					if (data && data.status) {
-						if (data.status == 'success') {
-							console.debug('success');
-						} else {
-							console.debug('error');
-						}
-					} else {
-						console.debug('error');
-					}
-					if(++count == bookmarks.length) {
-						console.debug('all done calling back the caller');
-						callback(true)
-					}
-				});
-			}
-	  	});
+				} else {
+					console.debug('error');
+				}
+				if(++count == deleteCount) {					
+					console.debug('all done calling back the caller');
+					callback(true)
+				}
+			});
+		});
 	},
 
 	deleteAnnotations(parentAnnotations, annotationList, annotationIds, callback) {

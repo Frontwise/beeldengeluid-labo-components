@@ -25,9 +25,11 @@ const AnnotationUtil = {
 				return {
 					id : IDUtil.guid(), // unique bookmark id, used for referencing
 
+					resourceId: resourceInfo ? resourceInfo.id : t.source, //needed for deleting, displaying, selecting, merging
+
 					annotationId: na.id, //needed for deleting
 
-					targetId: t.source, //needed for deleting
+					targetId: t.source, //needed for deleting, displaying, selecting, merging
 
 					// general object (document,fragment,entity) data
 					object: {
@@ -70,6 +72,42 @@ const AnnotationUtil = {
 				}
 			}))
 		});
+
+
+		// Merge bookmarks and annotations for same resources
+		// If only an annotation is available without the resource being bookmarked,
+		// offer a fallback, and create this bookmark
+		const uniqueList={};
+
+		// move resources to top
+		resourceList.sort((a,b)=>(a.object.type == 'Resource' ? -1 : 1));
+
+		resourceList.forEach((b)=>{
+			// save information about the annotation origin
+			
+			b.annotations = b.annotations ? 
+				// augment annotations
+				b.annotations.map((a)=>(Object.assign({},a,{
+					origin: b.object.type,
+					parentAnnotationId: b.annotationId
+				}))) : 
+				// empty annotation, required for deleting
+				[{
+					origin: 'Empty',
+					parentAnnotationId: b.annotationId
+				}];
+
+			if (b.resourceId in uniqueList){				
+				uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
+				uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
+			} else{
+				// always make the main bookmark a resource
+				b.object.type = "Resource";
+				uniqueList[b.resourceId] = b;
+			}
+		});
+		resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
+
 		if(callback && resourceList.length > 0) {
 			return AnnotationUtil.reconsileResourceList(resourceList, callback)
 		}
@@ -125,7 +163,7 @@ const AnnotationUtil = {
 				}
 			)
 		});
-		//TODO merge bookmarks that target the same resource!
+		
 	},
 
 	//TODO FINISH THIS AND WE'RE ALL DONE!

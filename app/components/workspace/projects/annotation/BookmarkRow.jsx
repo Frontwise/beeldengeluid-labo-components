@@ -41,7 +41,7 @@ class BookmarkRow extends React.PureComponent {
     }
 
     toggleSub(e){
-        this.props.toggleSub(this.props.bookmark.annotationId);
+        this.props.toggleSub(this.props.bookmark.resourceId);
     }
 
    render() {
@@ -67,6 +67,7 @@ class BookmarkRow extends React.PureComponent {
                                 <th>Type</th>
                                 <th>Details</th>
                                 <th>Content</th>
+                                <th>Origin</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,12 +75,16 @@ class BookmarkRow extends React.PureComponent {
                                 <tr>
                                     <td>{annotation.annotationType}</td>
                                     <td>
-                                        {annotation.vocabulary ? annotation.vocabulary : ''}
-                                        {annotation.annotationType === 'comment' ? annotation.created : ''}
+                                        {annotation.vocabulary ? annotation.vocabulary : null}
+                                        {annotation.annotationType === 'comment' ? annotation.created : null}
+                                        {annotation.url ? <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a> : null}
                                     </td>
                                     <td>
-                                        {annotation.text ? annotation.text.substring(0, 200) : ''}
-                                        {annotation.label ? annotation.label : ''}
+                                        {annotation.text ? annotation.text.substring(0, 200) : null}
+                                        {annotation.label ? annotation.label : null}
+                                    </td>
+                                     <td>
+                                        {annotation.origin ? annotation.origin: null}
                                     </td>
                                 </tr>
                             ))}
@@ -124,8 +129,8 @@ class BookmarkRow extends React.PureComponent {
                             <p onClick={this.onView}>{bookmark.object.title}</p>
                         </li>
                         <li>
-                            <h4 className="label">Date</h4>
-                            <p>{resourceDate}</p>
+                            <h4 className="label" title="Resource date">Date</h4>
+                            <p>{resourceDate}</p>                            
                         </li>
                         <li>
                             <h4 className="label">Type</h4>
