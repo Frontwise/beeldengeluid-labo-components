@@ -6,13 +6,10 @@
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
+      flex-shrink: 0;
+      cursor: pointer;
     }
-
     .info li{         
-      .image{
-        flex-shrink: 0;
-        cursor: pointer;
-      }
 
       .groups{
         span{
