@@ -132,7 +132,7 @@ class BookmarkTable extends React.PureComponent {
             // type filter        
             {
                 title:'Media',
-                key: 'mediaTypes',
+                key: 'mediaType',
                 type: 'select',
                 options: createSimpleArrayOptionList(items, (i)=>(i.object.mediaTypes) )
             },
@@ -162,7 +162,7 @@ class BookmarkTable extends React.PureComponent {
         // filter on type
         if (filter.mediaType) {
             bookmarks = bookmarks.filter(bookmark =>
-                bookmark.object.mediaTypes.includes(filter.type)
+                bookmark.object.mediaTypes.includes(filter.mediaType)
             );
         }
 
