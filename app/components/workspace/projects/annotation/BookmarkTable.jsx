@@ -81,6 +81,10 @@ class BookmarkTable extends React.PureComponent {
     }
 
     loadBookmarks() {
+        this.setState({
+            loading:true
+        });
+
         AnnotationStore.getUserProjectAnnotations(
             this.props.user,
             this.props.project,
@@ -96,10 +100,22 @@ class BookmarkTable extends React.PureComponent {
             );
         } else{
             this.setState({
-                bookmarks: []
+                bookmarks: [],
+                selection: [],
+                filters: this.getFilters([])
             });
         }
         
+    }
+    //The resource list now also contains the data of the resources
+    onLoadResourceList(bookmarks) {
+        this.setState({
+            bookmarks: bookmarks,
+            loading: false,
+            filters: this.getFilters(bookmarks)
+        });
+
+        this.updateSelection(bookmarks);
     }
 
     //Get filter object
@@ -132,16 +148,6 @@ class BookmarkTable extends React.PureComponent {
     }
 
 
-    //The resource list now also contains the data of the resources
-    onLoadResourceList(bookmarks) {
-        this.setState({
-            bookmarks: bookmarks,
-            loading: false,
-            filters: this.getFilters(bookmarks)
-        });
-
-        this.updateSelection(bookmarks);
-    }
 
     //Update Selection list, based on available items
     updateSelection(items) {
@@ -227,10 +233,8 @@ class BookmarkTable extends React.PureComponent {
 
     //delete multiple bookmarks
     deleteBookmarks(bookmarkIds) {
-
         if(bookmarkIds) {
             let msg = 'Are you sure you want to remove the selected bookmarks and all its annotations?';
-            msg += bookmarkIds.length == 1 ? '?' : 's?';
             if (!confirm(msg)) {
                 return;
             }

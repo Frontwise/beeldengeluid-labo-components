@@ -6,10 +6,10 @@ const BookmarkUtil = {
 	deleteBookmarks : function(bookmarkList, bookmarkIds, callback) {
 
 		// get the bookmarks to delete
-		const bookmarks = bookmarkList.filter(b =>
-			bookmarkIds.includes(b.id)
+		const bookmarks = bookmarkList.filter(b =>			
+			bookmarkIds.includes(b.resourceId)
      );
-		
+
 		// get all annotations to delete
 		// as bookmarks are actually annotations, we should collect them here
 		
