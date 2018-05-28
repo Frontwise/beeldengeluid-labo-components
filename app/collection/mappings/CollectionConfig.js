@@ -126,10 +126,11 @@ class CollectionConfig {
 		return this.docType;
 	}
 
+	//CURRENT this gets the layers from additional indices with the __[LAYER NAME] suffix
 	getCollectionIndices() {
 		const indices = [this.getCollectionId()];
 		const stats = this.getCollectionStats();
-		if(stats && stats.hasOwnProperty('collection_annotation_indices')) {
+		if(stats && stats['collection_annotation_indices']) {
 			return indices.concat(
 				stats['collection_annotation_indices'].map((i) => {
 					return i.collection;

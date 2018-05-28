@@ -107,7 +107,6 @@ const QueryModel = {
 
 	//TODO add support for missing params such as: desiredFacets
 	toUrlParams(query) {
-		console.debug(query)
 		const params = {
 			fr : query.offset,
 			sz : query.size,
@@ -162,7 +161,6 @@ const QueryModel = {
 
 	//TODO probably better to return a default query instead of null whenever the urlParams are null
 	urlParamsToQuery : function(urlParams, collectionConfig) {
-		console.debug('THE URL PARAMS', urlParams)
 		if(urlParams) {
 			const numParams = Object.keys(urlParams).length;
 			if(numParams == 0) {

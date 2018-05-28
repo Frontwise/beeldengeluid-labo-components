@@ -71,9 +71,9 @@ class CollectionSelector extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	onOutput(collectionId, collectionStats, collectionInfo) {
-		console.debug(collectionId)
-		console.debug(collectionStats)
-		console.debug(collectionInfo)
+		// console.debug(collectionId)
+		// console.debug(collectionStats)
+		// console.debug(collectionInfo)
 		const collectionConfig = CollectionUtil.createCollectionConfig(
 			this.props.clientId,
 			this.props.user,

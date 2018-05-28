@@ -498,6 +498,7 @@ class ItemDetailsRecipe extends React.Component {
 						project={this.state.activeProject} //selected via the ProjectSelector
 						resourceId={this.state.itemData.resourceId}
                         transcript={transcript}
+                        initialSearchTerm={this.props.params.st} //every player could interpret highlighting a search term
 						collectionId={this.state.itemData.index}
 						mediaObject={mediaObject} //TODO make this plural for playlist support
 						active={this.state.activeMediaTab == index}
@@ -531,6 +532,7 @@ class ItemDetailsRecipe extends React.Component {
 						project={this.state.activeProject} //selected via the ProjectSelector
 						resourceId={this.state.itemData.resourceId}
                         transcript={transcript}
+                        initialSearchTerm={this.props.params.st} //every player could interpret highlighting a search term
 						collectionId={this.state.itemData.index}
 						mediaObject={mediaObject} //TODO make this plural for playlist support
 						active={this.state.activeMediaTab == index}

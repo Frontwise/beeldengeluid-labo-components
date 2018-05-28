@@ -1,6 +1,7 @@
 import IDUtil from '../../../util/IDUtil';
 import TimeUtil from "../../../util/TimeUtil";
 
+//TODO replace all the css javascript selection and replace with pure React
 class Transcriber extends React.PureComponent {
 
     constructor(props) {
@@ -38,17 +39,25 @@ class Transcriber extends React.PureComponent {
         if (searchHitscontainer) {
             searchHitscontainer.style.display = 'none';
         }
+
+        if(this.props.initialSearchTerm && this.props.initialSearchTerm.length > 0) {
+            this.filterList(this.props.initialSearchTerm, this.onInitialFilter.bind(this));
+        }
     }
 
-    gotoLine(index) {
+    onInitialFilter() {
+        this.gotoLine(this.state.transcript[0].sequenceNr);
+    }
+
+    gotoLine(sequenceNr) {
         //find object based on sequenceNr
         this.state.transcript.find(function(element, i) {
-            if(element.sequenceNr === index) {
+            if(element.sequenceNr === sequenceNr) {
                 this.userHasScrolled = false;
                 this.props.playerAPI.seek(element.start / 1000);
                 return;
             }
-        },this);
+        }, this);
     }
 
     getSegmentByStartTime(time) {
@@ -98,22 +107,27 @@ class Transcriber extends React.PureComponent {
         );
     }
 
-    filterList(event) {
-        const searchedTerm = event.target.value;
-        if(searchedTerm.length === 0) {
+    //called when typing into the search box
+    doFilter(event) {
+        this.filterList(event.target.value, null);
+    }
+
+    //TODO put this in a search function, then call that function when mounted with the initial search term
+    filterList(searchTerm, callback) {
+        if(searchTerm.length === 0) {
             this.resetTranscriber();
             return;
         }
-        if (searchedTerm.length > 2 || (this.state.prevSearchLength > searchedTerm.length)) {
+        if (searchTerm.length > 2 || (this.state.prevSearchLength > searchTerm.length)) {
             let replacementText = '',
                 word = '',
                 copiedItem = {},
-                regex = new RegExp(searchedTerm, 'gi');
+                regex = new RegExp(searchTerm, 'gi');
             const updatedList = this.props.transcript.filter(function (item) {
                 return item.words.toLowerCase().search(
-                    searchedTerm.toLowerCase()) !== -1;
+                    searchTerm.toLowerCase()) !== -1;
             }).map((item) => {
-                replacementText = "<span class='highLightText'>" + searchedTerm + "</span>";
+                replacementText = "<span class='highLightText'>" + searchTerm + "</span>";
                 word = item.words.replace(regex, replacementText);
                 copiedItem = Object.assign({}, item);
                 copiedItem.words = word;
@@ -123,7 +137,7 @@ class Transcriber extends React.PureComponent {
             if (updatedList.length !== 0) {
                 this.setState({
                         transcript: updatedList,
-                        prevSearchLength: searchedTerm.length
+                        prevSearchLength: searchTerm.length
                     },
                     () => {
                         if ((updatedList.length === 0) || (updatedList.length === this.props.transcript.length)) {
@@ -132,11 +146,21 @@ class Transcriber extends React.PureComponent {
                             document.querySelector('.numberOfMatches').style.display = 'inline';
                             document.querySelector('.numberOfHits').innerHTML = updatedList.length;
                         }
+                        if(callback) {
+                            callback();
+                        }
                     });
             } else {
-                this.setState({transcript: this.props.transcript},
-                    console.log('update to full list and display message for no matches!'));
-                document.querySelector('.numberOfMatches').style.display = 'none';
+                this.setState(
+                    {transcript: this.props.transcript},
+                    () => {
+                        document.querySelector('.numberOfMatches').style.display = 'none';
+                        if(callback) {
+                            callback();
+                        }
+                    }
+                );
+
             }
         }
     }
@@ -164,7 +188,7 @@ class Transcriber extends React.PureComponent {
                 <div className="transcript_search_box">
                     <span className="glyphicon glyphicon-search"></span>
                     <input data-transcriberSearch="search-transcriptLine" type="text"
-                           onChange={this.filterList.bind(this)} name="search-transcriptLine"
+                           onChange={this.doFilter.bind(this)} name="search-transcriptLine"
                            placeholder="Zoek.."/>
                     <span className="numberOfMatches">
                         <span className="numberOfHits"></span> HITS

@@ -666,9 +666,10 @@ class FlexPlayer extends React.Component {
 				);
 			}
 
-			if(this.props.transcript) {
+			if(this.props.transcript && this.state.playerAPI) { //player API must be ready!
 				transcriber = (
 					<Transcriber
+						initialSearchTerm={this.props.initialSearchTerm}
 						transcript={this.props.transcript}
 						curPosition={this.state.curPosition}
 						playerAPI={this.state.playerAPI}
