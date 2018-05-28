@@ -363,8 +363,10 @@ const AnnotationUtil = {
 
 		// retrieve bookmark data			
 		// The objects in the annotations array are the same objects that have been enriched with the document data; 
-		// we don't have to store/merge any data; just run reconsileResourcelist with the callback
-		AnnotationUtil.reconsileResourceList(bookmarks, callback);
+		// we don't have to store/merge any data; just run reconsileResourcelist callback
+		AnnotationUtil.reconsileResourceList(bookmarks, ()=>{
+			callback(annotations);
+		});
 
 	},
 
