@@ -369,7 +369,8 @@ class BookmarkTable extends React.PureComponent {
                 </h2>
 
                 <div className="bookmark-table">
-                    {renderState.visibleItems.map((bookmark, index) => (
+                    {renderState.visibleItems.length ? 
+                        renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
                             key={bookmark.resourceId}
                             bookmark={bookmark}
@@ -380,7 +381,9 @@ class BookmarkTable extends React.PureComponent {
                             showSub={bookmark.resourceId in this.state.showSub}
                             toggleSub={this.toggleSub}
                             />
-                    ))}
+                    ))
+                    : <h3>No results</h3>
+                }
                 </div>
             </div>
         )

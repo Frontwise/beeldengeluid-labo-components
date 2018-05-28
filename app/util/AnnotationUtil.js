@@ -335,6 +335,16 @@ const AnnotationUtil = {
 		let count = 0;
 		let bookmarkCount = 0;
 
+		
+		// -----------------------------------------------
+		// Handle empty results
+		// -----------------------------------------------
+				// if no results are available, call the callback function
+		if (annotations.length === 0){
+			callback(annotations);
+			return;
+		}
+
 		// -----------------------------------------------
 		// Add object data to annotation bookmarks
 		// -----------------------------------------------
@@ -355,6 +365,8 @@ const AnnotationUtil = {
 			});	
 		
 		});
+
+
 	},
 
 	//the Collection & Resource should always be part of the annotation target

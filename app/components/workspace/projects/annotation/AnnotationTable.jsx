@@ -357,7 +357,8 @@ class AnnotationTable extends React.PureComponent {
                     <div className="fold" onClick={this.foldAll}>Fold all</div>
                 </h2>
                 <div className="bookmark-table">
-                    {renderState.visibleItems.map((annotation, index) => (
+                    {renderState.visibleItems.length ? 
+                        renderState.visibleItems.map((annotation, index) => (
                         <AnnotationRow
                             key={annotation.annotationId}
                             annotation={annotation}
@@ -368,7 +369,9 @@ class AnnotationTable extends React.PureComponent {
                             showSub={annotation.annotationId in this.state.showSub}
                             toggleSub={this.toggleSub}
                             />
-                        ))}
+                        ))
+                        : <h3>No results</h3>
+                    }
                 </div>
 
                
