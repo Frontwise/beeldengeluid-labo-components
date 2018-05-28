@@ -222,17 +222,19 @@ class BookmarkTable extends React.PureComponent {
             case 'name-za':
                 sorted.sort((a, b) => a.object.title < b.object.title);
                 break;
-            case 'mediatype':
-                const e = '~';
-                sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
-                break;
+            case 'mediatype':{
+                    let e = '~';
+                    sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
+                    break;
+                }
             case 'dataset':
                 sorted.sort((a, b) => a.object.dataset > b.object.dataset);
                 break;
-            case 'group':
-                const e = {label:'~'};
-                sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
-                break;
+            case 'group':{
+                    let e = {label:'~'};
+                    sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
+                    break;
+                }
             default: return sorted;
         }
 
