@@ -166,7 +166,6 @@ const AnnotationUtil = {
 		
 	},
 
-	//TODO FINISH THIS AND WE'RE ALL DONE!
 	reconsileAll(resourceList, resourceData) {
 		resourceList.forEach((x) => {
 			let temp = resourceData[x.object.dataset].filter((doc) => {
@@ -200,8 +199,6 @@ const AnnotationUtil = {
 			return [];
 		}
 		
-
-
 		// create list of annotations with bookmarks
 		annotations = annotations.filter(an => an.body).map((an) => {
 		
@@ -241,14 +238,50 @@ const AnnotationUtil = {
 		},[]);
 
 		// WTODO: store bookmark group and code information to the annotation
+		// console.log(annotations);
 
-		// filter on selected type
+
+		// Filter annotations on selected type
 		annotations = annotations.filter((a)=>( 
 				a.annotationType === type
 				// and exclude bookmark groups
 				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
 		));
 
+		
+		let uniqAnnotations = {};
+		let newAnnotations = [];
+		let id;
+
+		// merge equal annotations (classifications, links)
+		switch (type){
+			case 'classification':{
+					// merge classifications with same id
+					annotations.forEach((a)=>{
+						if (a.id in uniqAnnotations){
+							uniqAnnotations[a.id].bookmarks = uniqAnnotations[a.id].bookmarks.concat(a.bookmarks);
+						} else{
+							uniqAnnotations[a.id] = a;
+							newAnnotations.push(a);
+						}
+					});
+					annotations = newAnnotations;
+				}
+			break;
+			case 'link':{
+					// merge links with same url				
+					annotations.forEach((a)=>{
+						if (a.url in uniqAnnotations){
+							uniqAnnotations[a.url].bookmarks = uniqAnnotations[a.url].bookmarks.concat(a.bookmarks);
+						} else{
+							uniqAnnotations[a.url] = a;
+							newAnnotations.push(a);
+						}
+					});
+					annotations = newAnnotations;
+				}
+			break;				
+		}
 
 		let count = 0;
 		let bookmarkCount = 0;
@@ -257,12 +290,12 @@ const AnnotationUtil = {
 		// The objects in the annotations array are the same objects that have been enriched
 		// with the document data; we don't have to store/merge any data; just run reconsileResourcelist
 		annotations.forEach((a)=>{
-			bookmarkCount+= a.bookmarks.length;
+			bookmarkCount++;
 
 			// retrieve bookmark data
 			AnnotationUtil.reconsileResourceList(a.bookmarks, (b)=>{
 				// last return
-				if (++count === bookmarkCount){
+				if (++count === bookmarkCount){					
 						// Just return the annotations with the callback
 					 callback(annotations);
 				}
