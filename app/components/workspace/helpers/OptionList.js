@@ -17,6 +17,7 @@ export const createOptionList = (items, getValue) =>{
 
 // Create a {value/name} classification list based on given bookmarks
 export const createClassificationOptionList = (items, key) =>{
+    if (!items){ return []; }
     items = items.reduce((acc, i)=>(acc.concat(i[key])), []);
     const hits = {};
     const options = [];
