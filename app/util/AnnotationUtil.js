@@ -124,7 +124,7 @@ const AnnotationUtil = {
 			}
 		})
 		const resourceIds = temp.reduce((acc, cur) => {
-			//the first accumulator is the same as the current object...
+			//the first accumulator is the same as the current object...|
 			if(acc.resourceId) {
 				let temp = {}
 				temp[acc.collectionId] = [acc.resourceId];
@@ -166,11 +166,11 @@ const AnnotationUtil = {
 		
 	},
 
-	reconsileAll(resourceList, resourceData) {
+	reconsileAll(resourceList, resourceData) {		
 		resourceList.forEach((x) => {
 			let temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
-			});
+			});			
 			x.object.title = 'Resource not found';
 			x.object.date = 'N/A';
 			if(temp.length == 1) {
@@ -348,25 +348,23 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		// Add object data to annotation bookmarks
 		// -----------------------------------------------
-		 
+		let bookmarks = [];
+		let hits = {};
+		
 		annotations.forEach((a)=>{
-			bookmarkCount++;			
-
-			// retrieve bookmark data
-			// WTODO: prevent duplicate calls?
-			AnnotationUtil.reconsileResourceList(a.bookmarks, (b)=>{
-				// The objects in the annotations array are the same objects that have been enriched
-				// with the document data; we don't have to store/merge any data; just run reconsileResourcelist
-		
-				// last return
-				if (++count === bookmarkCount){					
-						// Just return the annotations with the callback
-					 callback(annotations);
+			a.bookmarks.forEach((b)=>{
+				let id = b.collectionId + b.resourceId;	
+				if (!(id in hits)){
+					hits[id] = true;
+					bookmarks.push(b);
 				}
-			});	
-		
+			})
 		});
 
+		// retrieve bookmark data			
+		// The objects in the annotations array are the same objects that have been enriched with the document data; 
+		// we don't have to store/merge any data; just run reconsileResourcelist with the callback
+		AnnotationUtil.reconsileResourceList(bookmarks, callback);
 
 	},
 
