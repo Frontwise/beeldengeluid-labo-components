@@ -199,6 +199,11 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
+        const getMediaType = (a)=>(
+            // '~' > move empty to bottom
+            a.length > 0 ? a[0] : '~' 
+            );
+
         const sorted = bookmarks;
         switch (field) {
             case 'created':
@@ -217,7 +222,7 @@ class BookmarkTable extends React.PureComponent {
                 sorted.sort((a, b) => a.object.title < b.object.title);
                 break;
             case 'type':
-                sorted.sort((a, b) => a.object.type > b.object.type);
+                sorted.sort((a, b) => getMediaType(a.object.mediaTypes) > getMediaType(b.object.mediaTypes));
                 break;
             case 'dataset':
                 sorted.sort((a, b) => a.object.dataset > b.object.dataset);
