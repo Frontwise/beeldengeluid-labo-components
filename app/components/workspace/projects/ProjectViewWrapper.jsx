@@ -92,7 +92,8 @@ class ProjectViewWrapper extends React.PureComponent {
                 window.sessionStorage.setItem(this.keys.annotationCount, annotationCount);
 
                 this.setState({
-                    bookmarkCount, annotationCount
+                    bookmarkCount, 
+                    annotationCount,
                 });        
             }
         );
