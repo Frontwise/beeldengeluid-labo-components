@@ -200,8 +200,7 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
-        const getFirst = (a, empty)=>(
-            // '~' > move empty to bottom
+        const getFirst = (a, empty)=>(            
             a.length > 0 ? a[0] : empty
             );
 
@@ -223,6 +222,7 @@ class BookmarkTable extends React.PureComponent {
                 sorted.sort((a, b) => a.object.title < b.object.title);
                 break;
             case 'mediatype':{
+                    // '~' > move empty to bottom
                     let e = '~';
                     sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
                     break;
@@ -231,6 +231,7 @@ class BookmarkTable extends React.PureComponent {
                 sorted.sort((a, b) => a.object.dataset > b.object.dataset);
                 break;
             case 'group':{
+                    // '~' > move empty to bottom
                     let e = {label:'~'};
                     sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
                     break;
