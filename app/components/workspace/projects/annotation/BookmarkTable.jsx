@@ -387,7 +387,7 @@ class BookmarkTable extends React.PureComponent {
                             toggleSub={this.toggleSub}
                             />
                     ))
-                    : <h3>No results</h3>
+                    : <h3>∅ No results</h3>
                 }
                 </div>
             </div>
@@ -415,6 +415,7 @@ class BookmarkTable extends React.PureComponent {
                     renderResults={this.renderResults}
                     onExport={exportDataAsJSON}
                     showSub={this.state.showSub}
+                    uid={this.props.project.id + "-bookmarks"}
                     />
 
                 <BulkActions

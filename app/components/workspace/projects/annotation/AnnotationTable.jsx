@@ -197,7 +197,6 @@ class AnnotationTable extends React.PureComponent {
         }
 
         // filter on keywords in title, dataset or type
-        // WTODO: filter on bookmarks
         if (filter.keywords) {
             const keywords = filter.keywords.split(' ');
             keywords.forEach(k => {
@@ -214,7 +213,7 @@ class AnnotationTable extends React.PureComponent {
                         // bookmark
                         Object.keys(bookmark).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
                         // bookmark-object
-                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k)))
                         // bookmark-groups
                         || bookmark.groups.some((g)=>(g.label.toLowerCase().includes(k)))
                         // bookmark-groups
@@ -402,7 +401,7 @@ class AnnotationTable extends React.PureComponent {
                             toggleSub={this.toggleSub}
                             />
                         ))
-                        : <h3>No results</h3>
+                        : <h3>∅ No results</h3>
                     }
                 </div>
 
@@ -432,6 +431,7 @@ class AnnotationTable extends React.PureComponent {
                     renderResults={this.renderResults}
                     onExport={this.exportAnnotations}
                     showSub={this.state.showSub}
+                    uid={this.props.project.id + "-annotation-"+this.props.type}
                     />
 
                 <BulkActions

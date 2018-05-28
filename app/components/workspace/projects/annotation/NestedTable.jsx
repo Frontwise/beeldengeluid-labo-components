@@ -1,6 +1,7 @@
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import AnnotationUtil from '../../../../util/AnnotationUtil';
+import ComponentUtil from '../../../../util/ComponentUtil';
 import IDUtil from '../../../../util/IDUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
@@ -17,14 +18,17 @@ class NestedTable extends React.PureComponent {
     constructor(props) {
         super(props);
 
+        // retrieve persistent filters from localstorage
+        this.filterKey = props.uid + '-filter';
+        let filter = ComponentUtil.getJSONFromLocalStorage(this.filterKey);
+        filter = filter ? filter : {keywords:''};
+
         this.state = {
             filteredItems: [],
             visibleItems: [],
             loading: true,
-            filter: {
-                keywords: '',                
-            },
-            order: 'created'
+            order: 'created',
+            filter,
         };
     }
 
@@ -90,10 +94,18 @@ class NestedTable extends React.PureComponent {
 
     // user changes a filter
     filterChange(key, e) {
-        const filter = {};
+        let filter = {};
         filter[key] = e.target.value;
+
+        // create filter
+        filter = Object.assign({}, this.state.filter, filter);
+
+        // persistent filters: Store to localstorage
+        ComponentUtil.storeJSONInLocalStorage(this.filterKey, filter);
+
+        // update state
         this.setState({
-            filter: Object.assign({}, this.state.filter, filter)
+            filter
         });
     }
 
@@ -124,7 +136,7 @@ class NestedTable extends React.PureComponent {
                         <select
                             disabled={filter.options.length == 0}
                             className="type-select"
-                            value={this.state.type}
+                            value={this.state.filter[filter.key]}
                             onChange={this.filterChange.bind(this, filter.key)}>
                                 <option />
                                 {filter.options.map((option, index) => (
