@@ -209,9 +209,16 @@ class AnnotationTable extends React.PureComponent {
                         typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k))
                         ))
                     || 
-                    // annotations
+                    // bookmarks
                     (annotation.bookmarks && annotation.bookmarks.some((bookmark)=>(
+                        // bookmark
                         Object.keys(bookmark).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        // bookmark-object
+                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        // bookmark-groups
+                        || bookmark.groups.some((g)=>(g.label.toLowerCase().includes(k)))
+                        // bookmark-groups
+                        || bookmark.classifications.some((g)=>(g.label.toLowerCase().includes(k)))
                         ))
                     )
                 );
