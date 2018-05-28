@@ -55,6 +55,7 @@ class ProjectAnnotationView extends React.PureComponent {
             user: this.props.user,
             project: this.props.project,
             setView: this.setView,
+            loadBookmarkCount: this.props.loadBookmarkCount,
         }
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
@@ -178,7 +179,8 @@ class ProjectAnnotationView extends React.PureComponent {
 
 ProjectAnnotationView.propTypes = {
     user: PropTypes.object.isRequired,
-    project: PropTypes.object.isRequired
+    project: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func,
 };
 
 class WrappedProjectAnnotationView extends React.PureComponent {

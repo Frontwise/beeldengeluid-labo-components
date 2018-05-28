@@ -96,8 +96,8 @@ class BookmarkTable extends React.PureComponent {
     onLoadBookmarks(data) {
         if (data && data.annotations && data.annotations.length){
             AnnotationUtil.generateBookmarkCentricList(
-                    data.annotations || [],
-                    this.onLoadResourceList.bind(this)
+                data.annotations || [],
+                this.onLoadResourceList.bind(this)
             );
         } else{
             this.setState({
@@ -105,8 +105,7 @@ class BookmarkTable extends React.PureComponent {
                 selection: [],
                 filters: this.getFilters([])
             });
-        }
-        
+        }        
     }
     //The resource list now also contains the data of the resources
     onLoadResourceList(bookmarks) {
@@ -255,11 +254,16 @@ class BookmarkTable extends React.PureComponent {
                 this.state.bookmarks,
                 bookmarkIds,
                 (success) => {
-                    console.debug('reloading bookmark-list', this)
-
                     // add a time out, because sometimes it may take a while for
                     // the changes to be reflected in the data
-                    setTimeout(this.loadBookmarks.bind(this), 500);
+                    setTimeout(()=>{
+                            // load new data
+                            this.loadBookmarks.bind(this);
+
+                            // update bookmark count in project menu
+                            this.props.loadBookmarkCount();
+                        }
+                        , 500);
                 }
             )
         }
@@ -330,6 +334,9 @@ class BookmarkTable extends React.PureComponent {
     closeItemDetails() {
         // set viewbookmark to null
         this.viewBookmark(null);
+
+        // update bookmark count in project menu
+        this.props.loadBookmarkCount();
 
         // refresh data
         this.loadBookmarks();

@@ -38,12 +38,13 @@ class ProjectViewWrapper extends React.PureComponent {
             bookmarkCount: bookmarkCount,
             annotationCount: annotationCount,
         };
+
+        this.loadBookmarkCount = this.loadBookmarkCount.bind(this);
     }
 
     componentDidMount() {
         this.loadProject();
     }
-
 
     //Load project from url id and load it to the state
     loadProject() {
@@ -74,6 +75,9 @@ class ProjectViewWrapper extends React.PureComponent {
 
     // Load bookmark count from annotation store
     loadBookmarkCount(project) {
+        if (!project){
+            project = this.state.project;
+        }
         AnnotationStore.getUserProjectAnnotations(
             this.props.user,
             project,
@@ -145,7 +149,10 @@ class ProjectViewWrapper extends React.PureComponent {
                         </div>
 
                         <div class="component">
-                            <RenderComponent {...this.props} project={this.state.project} />
+                            <RenderComponent {...this.props} 
+                                            project={this.state.project} 
+                                            loadBookmarkCount={this.loadBookmarkCount}
+                                            />
                         </div>
                     </div>
                 )
