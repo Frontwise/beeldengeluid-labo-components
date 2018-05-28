@@ -17,7 +17,7 @@
   }
 
   .item-row{
-    margin: 10px 0 10px 0;
+    margin: 10px 0;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     border-radius: 2px;
@@ -78,6 +78,7 @@
 
 
       .info{
+        max-width: calc(100% - 130px);
         display: flex;
         flex-grow:2;
         box-sizing: border-box;

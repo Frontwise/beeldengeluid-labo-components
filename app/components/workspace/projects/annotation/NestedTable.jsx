@@ -122,6 +122,7 @@ class NestedTable extends React.PureComponent {
                         <label className="type-label">{filter.title}</label>
 
                         <select
+                            disabled={filter.options.length == 0}
                             className="type-select"
                             value={this.state.type}
                             onChange={this.filterChange.bind(this, filter.key)}>

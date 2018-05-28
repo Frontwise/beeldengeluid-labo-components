@@ -144,7 +144,7 @@ class AnnotationRow extends React.PureComponent {
                                 <th>Type</th>
                                 <th>Title</th>
                                 <th>Dataset</th>
-                                <th>Groups</th>
+                                <th>☆ Groups</th>
                             </tr>
                         </thead>
                         <tbody>

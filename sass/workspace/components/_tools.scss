@@ -68,6 +68,9 @@
         box-shadow: 0 2px 2px rgba(0,0,0,0.1);
         border-radius: 2px;
         background-color: #fff;  
+        &:disabled{
+          background-color: $clGrey;
+        }
       }
       max-width: 160px;
       
@@ -75,4 +78,5 @@
         
       
     }
+
   }

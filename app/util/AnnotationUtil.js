@@ -353,6 +353,7 @@ const AnnotationUtil = {
 			bookmarkCount++;			
 
 			// retrieve bookmark data
+			// WTODO: prevent duplicate calls?
 			AnnotationUtil.reconsileResourceList(a.bookmarks, (b)=>{
 				// The objects in the annotations array are the same objects that have been enriched
 				// with the document data; we don't have to store/merge any data; just run reconsileResourcelist

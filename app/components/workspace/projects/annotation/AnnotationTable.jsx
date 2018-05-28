@@ -9,7 +9,7 @@ import AnnotationUtil from '../../../../util/AnnotationUtil';
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList } from '../../helpers/OptionList';
+import { createOptionList, createAnnotationClassificationOptionList } from '../../helpers/OptionList';
 import { exportDataAsJSON } from '../../helpers/Export';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
@@ -86,7 +86,6 @@ class AnnotationTable extends React.PureComponent {
 
     onLoadAnnotations(data) {
         const parentAnnotations = data.annotations || [];
-
         let annotations = AnnotationUtil.generateAnnotationCentricList(
             parentAnnotations, this.props.type, (annotations)=>{
                 this.setState({
@@ -125,19 +124,20 @@ class AnnotationTable extends React.PureComponent {
                     }
                 break;
                 case 'bookmarkGroup':
+                    
                     return {
-                        title:'Bookmark group',
+                        title:'☆ Group',
                         key: 'bookmarkGroup',
-                        type: 'select',
-                        options: createOptionList(items, (i)=>(i['bookmarkGroup']))
+                        type: 'select',                         
+                        options: createAnnotationClassificationOptionList(items, 'groups'),
                     }
                 break;
                 case 'code':
                     return {
-                        title:'Code',
-                        key: 'code',
+                        title:'☆ Code',
+                        key: 'bookmarkClassification',
                         type: 'select',
-                        options: createOptionList(items, (i)=>(i['code']))
+                        options: createAnnotationClassificationOptionList(items, 'classifications'),
                     }
                 break;
                 default:
@@ -155,24 +155,49 @@ class AnnotationTable extends React.PureComponent {
         });
     }
 
+
+    filterByKeyValue(items, getValue, value) {
+        return items.filter((i)=>(getValue(i) === value))
+    };
+
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
         
-        const simpleKeyCheck = (items, getValue, value) =>(items.filter((i)=>(getValue(i) === value)));
-        
+        // check the annotation vocabulary
         if (filter.vocabulary){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['vocabulary']), filter.vocabulary);
+            annotations = annotations.filter((a)=>(a.vocabulary === filter.vocabulary));
         }
-
-        if (filter.code){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['code']), filter.code);
-        }
-
+        
+        // check the groups for each bookmark of each annotation
         if (filter.bookmarkGroup){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['bookmarkGroup']), filter.bookmarkGroup);
+            annotations = annotations.filter((a)=>(
+                    a.bookmarks.some(
+                        (b)=>(
+                            b.groups.some(
+                                (c) => (c.annotationId === filter.bookmarkGroup)
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // check the classifications for each bookmark of each annotation
+        if (filter.bookmarkClassification){
+            annotations = annotations.filter((a)=>(
+                    a.bookmarks.some(
+                        (b)=>(
+                            b.classifications.some(
+                                (c) => (c.annotationId === filter.bookmarkClassification)
+                            )
+                        )
+                    )
+                )
+            );
         }
 
         // filter on keywords in title, dataset or type
+        // WTODO: filter on bookmarks
         if (filter.keywords) {
             const keywords = filter.keywords.split(' ');
             keywords.forEach(k => {

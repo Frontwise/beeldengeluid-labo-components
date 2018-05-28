@@ -10,7 +10,7 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList, createGroupOptionList, createSimpleArrayOptionList } from '../../helpers/OptionList';
+import { createOptionList, createClassificationOptionList, createSimpleArrayOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -141,7 +141,7 @@ class BookmarkTable extends React.PureComponent {
                 title:'Group',
                 key: 'group',
                 type: 'select',
-                options: createGroupOptionList(items)
+                options: createClassificationOptionList(items,'groups')
             },
 
         ];      
