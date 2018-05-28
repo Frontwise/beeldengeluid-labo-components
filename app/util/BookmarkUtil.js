@@ -1,60 +1,125 @@
+
+
 import AnnotationAPI from '../api/AnnotationAPI';
 
 const BookmarkUtil = {
 
+
 	// delete a bookmark and all its annotations
-	deleteBookmarks : function(bookmarkList, bookmarkIds, callback) {
+	deleteBookmarks : function(annotationList, bookmarkList, bookmarkIds, callback) {
+		console.log(annotationList, bookmarkList, bookmarkIds);
+
+		const getAnnotations = (id) => (
+			annotationList.filter((a)=>(a.id === id))
+		);
+
 
 		// get the bookmarks to delete
 		const bookmarks = bookmarkList.filter(b =>			
 			bookmarkIds.includes(b.resourceId)
-     );
+    );
+
+		// get annotations belonging to each bookmark
+		bookmarks.forEach((b) => {
+				let hits = {};
+				b.annotationData = getAnnotations(b.annotationId).concat(
+					b.annotations.filter((a)=>{
+						if (a.parentAnnotationId in hits){ return false; }
+						hits[a.parentAnnotationId] = true; 
+						return true;
+					})
+				);		
+		});
 
 		// get all annotations to delete
-		// as bookmarks are actually annotations, we should collect them here
-		
-		const deleteAnnotations = {};
 		bookmarks.forEach((b) => {
-			// add original bookmark
-			deleteAnnotations[b.annotationId] = {
-					id: b.annotationId
-				};
+			console.log(b.annotationData);
+			// mark the target for removal
+			b.annotationData.forEach((annotation)=>{ 
+				if (Array.isArray(annotation.target)){
+					annotation.target.forEach((t)=>{
+						if (t.source === b.resourceId){
+							console.log(annotation,t,b);
+							t.removeMe = true;
+						}
+					});
+				} else{
 
-			// add all the annotations
-			b.annotations.forEach((a)=>{
-				// skip elements already marked
-				if (a.parentAnnotationId in deleteAnnotations){
-					return;
+					// add default annotation for removal
+					if (!annotation.target){
+					 	annotation.target={};
+					 	annotation.id = annotation.parentAnnotationId;
+					}
+					annotation.target.removeMe = true;						
+
 				}
-			
-				deleteAnnotations[a.parentAnnotationId] = {
-					id: a.parentAnnotationId
-				};
-												 	
 			});
+	
 		});
-				
-		console.debug(deleteAnnotations);
-		
-		// delete the annotations	
-			 
-		const deleteCount = Object.keys(deleteAnnotations).length;
+
+		// Fully delete, or update annotations
+		let remainingTargets = [];
+		let fullyDelete = false;
+		let deleteCount = 0;
 		let count = 0;
 
-		Object.keys(deleteAnnotations).map((key)=>(deleteAnnotations[key])).forEach((a)=>{
-			AnnotationAPI.deleteAnnotation(a, data => {
-				if (data && data.status) {
-					if (data.status == 'success') {
-						console.debug('success');
-					} else {
-						console.debug('error');
+		bookmarks.forEach((b) => {
+				console.log(b.annotationData);
+				b.annotationData.forEach((annotation)=>{
+
+				deleteCount++;
+
+				fullyDelete = true;
+
+				// If all the targets are marked for removal, remove the full annotation
+				if (Array.isArray(annotation.target)){
+					annotation.target = annotation.target.filter((t)=>(!t.removeMe));
+					if (annotation.target.length > 0){
+						fullyDelete = false;
 					}
-				} else {
-					console.debug('error');
 				}
-				if(++count == deleteCount) {					
-					console.debug('all done calling back the caller');
-					callback(true)
+
+				if (fullyDelete){
+
+					// Complete removal of the annotation
+					console.debug('fully', annotation); 
+					//return true;
+					AnnotationAPI.deleteAnnotation(annotation, data => {
+						if (data && data.status) {
+							if (data.status == 'success') {
+								console.debug('success');
+							} else {
+								console.debug('error');
+							}
+						} else {
+							console.debug('error');
+						}
+						if(++count == deleteCount) {					
+							console.debug('all done calling back the caller');
+							callback(true)
+						}
+					});
+
+				} else{
+
+					// Update current annotation without the bookmark as target
+					console.debug('update',annotation); 
+					//return true;
+					AnnotationAPI.saveAnnotation(annotation, data => {
+						if (data && data.status) {
+							if (data.status == 'success') {
+								console.debug('success');
+							} else {
+								console.debug('error');
+							}
+						} else {
+							console.debug('error');
+						}
+						if(++count == deleteCount) {
+							console.debug('all done calling back the caller');
+							callback(true)
+						}
+					});
 				}
 			});
 		});

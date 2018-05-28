@@ -250,6 +250,8 @@ class SingleSearchRecipe extends React.Component {
 					dedupedTargets.push(t);
 				}
 			})
+
+			console.log(annotation);
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API

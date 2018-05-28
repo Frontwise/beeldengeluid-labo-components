@@ -12,7 +12,6 @@ const AnnotationUtil = {
 	//TODO add the parentAnnotationId, so the UI knows how to do CRUD
 	generateBookmarkCentricList(annotations, callback) {
 		let resourceList = [];
-
 		annotations.forEach((na, index) => {
 			let targets = na.target;
 			if(na.target.selector) {
@@ -22,13 +21,15 @@ const AnnotationUtil = {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
 				return {
+					na: na, // dev
+
 					id : IDUtil.guid(), // unique bookmark id
 
 					resourceId: resourceInfo ? resourceInfo.id : t.source, //needed for deleting, displaying, selecting, merging
 
 					annotationId: na.id, //needed for deleting
-
-					targetId: t.source, //needed for deleting, displaying, selecting, merging
+					
+					targetId: t.source, //needed for deleting
 
 					// general object (document,fragment,entity) data
 					object: {
@@ -84,8 +85,8 @@ const AnnotationUtil = {
 		resourceList.sort((a,b)=>(a.object.type == 'Resource' ? -1 : 1));
 
 		resourceList.forEach((b)=>{
-			// save information about the annotation origin
-			
+
+			// save information about the annotation origin			
 			b.annotations = b.annotations ? 
 				// augment annotations
 				b.annotations.map((a)=>(Object.assign({},a,{
@@ -109,9 +110,13 @@ const AnnotationUtil = {
 		});
 		resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
 
-		if(callback && resourceList.length > 0) {
-			return AnnotationUtil.reconsileResourceList(resourceList, callback)
-		}
+		if(callback){
+			if (resourceList.length > 0) {
+				return AnnotationUtil.reconsileResourceList(resourceList, callback)
+			} else{
+				callback([]);
+			}
+ 		}
 		return resourceList;
 	},
 

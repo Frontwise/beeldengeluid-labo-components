@@ -26,7 +26,7 @@ const AnnotationAPI = {
 		xhr.send(JSON.stringify(annotation));
 	},
 
-	getAnnotation : function(annotationId) {
+	getAnnotation : function(annotationId, callback) {
 		if(annotationId) {
 			const url = _config.ANNOTATION_API_BASE + '/annotation/' + annotationId;
 			const xhr = new XMLHttpRequest();

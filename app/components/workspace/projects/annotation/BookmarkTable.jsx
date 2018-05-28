@@ -53,6 +53,7 @@ class BookmarkTable extends React.PureComponent {
         ];
 
         this.state = {
+            annotations: [],
             bookmarks: [],
             selection: [],
             showSub: {},
@@ -94,13 +95,19 @@ class BookmarkTable extends React.PureComponent {
     }
     //Annotation load callback: set data to state
     onLoadBookmarks(data) {
+        
+        // create bookmark lists
         if (data && data.annotations && data.annotations.length){
+            // store annotation data
+            this.setState({annotations:data.annotations});
+
             AnnotationUtil.generateBookmarkCentricList(
-                data.annotations || [],
+                data.annotations,
                 this.onLoadResourceList.bind(this)
             );
         } else{
             this.setState({
+                annotations: [],
                 bookmarks: [],
                 selection: [],
                 filters: this.getFilters([])
@@ -109,6 +116,7 @@ class BookmarkTable extends React.PureComponent {
     }
     //The resource list now also contains the data of the resources
     onLoadResourceList(bookmarks) {
+        console.log(bookmarks);
         this.setState({
             bookmarks: bookmarks,
             loading: false,
@@ -251,6 +259,7 @@ class BookmarkTable extends React.PureComponent {
 
             // delete each bookmark
             BookmarkUtil.deleteBookmarks(
+                this.state.annotations,
                 this.state.bookmarks,
                 bookmarkIds,
                 (success) => {
