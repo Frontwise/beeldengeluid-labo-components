@@ -42,8 +42,9 @@ class BookmarkTable extends React.PureComponent {
             { value: 'oldest', name: 'Oldest objects first' },
             { value: 'name-az', name: 'Title A-Z' },
             { value: 'name-za', name: 'Title Z-A' },
-            { value: 'type', name: 'Type' },
-            { value: 'dataset', name: 'Dataset' }
+            { value: 'mediatype', name: 'Media' },
+            { value: 'dataset', name: 'Dataset' },
+            { value: 'group', name: 'Groups' },
         ];
 
         this.bulkActions = [
@@ -199,9 +200,9 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
-        const getMediaType = (a)=>(
+        const getFirst = (a, empty)=>(
             // '~' > move empty to bottom
-            a.length > 0 ? a[0] : '~' 
+            a.length > 0 ? a[0] : empty
             );
 
         const sorted = bookmarks;
@@ -221,14 +222,16 @@ class BookmarkTable extends React.PureComponent {
             case 'name-za':
                 sorted.sort((a, b) => a.object.title < b.object.title);
                 break;
-            case 'type':
-                sorted.sort((a, b) => getMediaType(a.object.mediaTypes) > getMediaType(b.object.mediaTypes));
+            case 'mediatype':
+                const e = '~';
+                sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
                 break;
             case 'dataset':
                 sorted.sort((a, b) => a.object.dataset > b.object.dataset);
                 break;
-            case 'manual':
-                sorted.sort((a, b) => a.sort > b.sort);
+            case 'group':
+                const e = {label:'~'};
+                sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
                 break;
             default: return sorted;
         }
