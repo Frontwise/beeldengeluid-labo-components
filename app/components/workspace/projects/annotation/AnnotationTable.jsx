@@ -87,19 +87,20 @@ class AnnotationTable extends React.PureComponent {
         const parentAnnotations = data.annotations || [];
 
         let annotations = AnnotationUtil.generateAnnotationCentricList(
-            parentAnnotations, this.props.type
+            parentAnnotations, this.props.type, (annotations)=>{
+                this.setState({
+                    parentAnnotations: data.annotations,
+                    annotations: annotations,
+                    loading: false,
+                    filters: this.getFilters(annotations)
+                },
+                () => {
+                    this.updateSelection(annotations)
+                }
+            )
+        }
         );
       
-        this.setState({
-                parentAnnotations: data.annotations,
-                annotations: annotations,
-                loading: false,
-                filters: this.getFilters(annotations)
-            },
-            () => {
-                this.updateSelection(annotations)
-            }
-        );
     }
 
     //Get filter object

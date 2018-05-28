@@ -142,7 +142,7 @@ class AnnotationRow extends React.PureComponent {
                         <thead>
                             <tr>
                                 <th>Type</th>
-                                <th>Resource ID</th>
+                                <th>Title</th>
                                 <th>Dataset</th>
                             </tr>
                         </thead>
@@ -150,7 +150,7 @@ class AnnotationRow extends React.PureComponent {
                             {bookmarks.map(bookmark => (
                                 <tr>
                                     <td>{bookmark.type}</td>
-                                    <td>{bookmark.title}</td>
+                                    <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
                                     <td className="actions">
                                         <div className="btn primary" onClick={this.onView.bind(this, bookmark)}>

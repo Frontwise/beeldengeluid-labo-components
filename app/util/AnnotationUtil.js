@@ -168,7 +168,6 @@ const AnnotationUtil = {
 
 	//TODO FINISH THIS AND WE'RE ALL DONE!
 	reconsileAll(resourceList, resourceData) {
-		// console.debug(resourceData);
 		resourceList.forEach((x) => {
 			let temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
@@ -195,14 +194,17 @@ const AnnotationUtil = {
 
 	//extracts all contained annotations into a list for the annotation-centric view
 	//TODO update this so each body is an item. Use parentAnnotationId to refer to the parent
-	generateAnnotationCentricList(annotations, type) {
+	generateAnnotationCentricList(annotations, type, callback) {
 		// check for empty: can't reduce an empty array
 		if (annotations.length === 0){
 			return [];
 		}
-		return annotations.filter(an => an.body).map((an) => {
-			
+		
 
+
+		// create list of annotations with bookmarks
+		annotations = annotations.filter(an => an.body).map((an) => {
+		
 			//create a list of bookmarks from the parent annotation's targets
 			let targets = an.target;
 			if(an.target.selector) {
@@ -212,28 +214,61 @@ const AnnotationUtil = {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
 				return {
-					resourceId : resourceInfo ? resourceInfo.id : null,
 					collectionId : collectionInfo ? collectionInfo.id : null,
 					type : t.type,
-					title : resourceInfo ? resourceInfo.id : null
+					title : resourceInfo ? resourceInfo.id : null,
+					resourceId : resourceInfo ? resourceInfo.id : null,
+
+					// also build the document object, so it can be preview in the annotation list
+					// and be used for filtering
+					object:{
+						id: resourceInfo ? resourceInfo.id : null,
+						dataset : collectionInfo ? collectionInfo.id : null,
+					},
 				}
 			})
-
+			
 			//assign the targets as a list of bookmarks to each body/annotation
 			an.body.forEach((b) => {
 				b.bookmarks = bookmarks;
 				b.parentAnnotationId = an.id;
 			});
+
 			//assign the parent annotation ID to this (sub)annotation
 			return an.body
 		}).reduce((acc, cur) => { //concat all annotation bodies into a single array
 			return acc.concat(cur);
-		},[]).filter((a)=>(
-					// only given type
-					a.annotationType === type
-					// exclude bookmark groups
-					&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
-			));
+		},[]);
+
+		// WTODO: store bookmark group and code information to the annotation
+
+		// filter on selected type
+		annotations = annotations.filter((a)=>( 
+				a.annotationType === type
+				// and exclude bookmark groups
+				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
+		));
+
+
+		let count = 0;
+		let bookmarkCount = 0;
+
+		// Add object data to annotation bookmarks
+		// The objects in the annotations array are the same objects that have been enriched
+		// with the document data; we don't have to store/merge any data; just run reconsileResourcelist
+		annotations.forEach((a)=>{
+			bookmarkCount+= a.bookmarks.length;
+
+			// retrieve bookmark data
+			AnnotationUtil.reconsileResourceList(a.bookmarks, (b)=>{
+				// last return
+				if (++count === bookmarkCount){
+						// Just return the annotations with the callback
+					 callback(annotations);
+				}
+			});	
+		
+		});
 	},
 
 	//the Collection & Resource should always be part of the annotation target
@@ -274,7 +309,6 @@ const AnnotationUtil = {
 					}
 					i++;
 				}
-
 			}
 		}
 		return null;
