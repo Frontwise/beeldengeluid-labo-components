@@ -16,6 +16,7 @@ import ResourceViewerModal from '../../ResourceViewerModal';
 
 import NestedTable from './NestedTable';
 import AnnotationRow from './AnnotationRow';
+import classNames from 'classnames';
 
 import PropTypes from 'prop-types';
 
@@ -385,7 +386,7 @@ class AnnotationTable extends React.PureComponent {
             )
         }
         return (
-            <div className={IDUtil.cssClassName('annotation-table')}>
+            <div className={classNames(IDUtil.cssClassName('annotation-table'),{loading:this.state.loading})}>
                 <NestedTable
                     items={this.state.annotations}
                     selection={this.state.selection}

@@ -16,7 +16,7 @@ import ResourceViewerModal from '../../ResourceViewerModal';
 
 import BookmarkRow from './BookmarkRow';
 import NestedTable from './NestedTable';
-
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 /**
@@ -396,7 +396,7 @@ class BookmarkTable extends React.PureComponent {
             )
         }
         return (
-            <div className={IDUtil.cssClassName('bookmark-table')}>
+            <div className={classNames(IDUtil.cssClassName('bookmark-table'),{loading:this.state.loading})}>
                 <NestedTable
                     items={this.state.bookmarks}
                     selection={this.state.selection}

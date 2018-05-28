@@ -199,7 +199,9 @@ const AnnotationUtil = {
 			return [];
 		}
 		
-		// create list of annotations with bookmarks
+		// -----------------------------------------------
+		// Create list of annotations with bookmarks
+		// -----------------------------------------------
 		annotations = annotations.filter(an => an.body).map((an) => {
 		
 			//create a list of bookmarks from the parent annotation's targets
@@ -221,6 +223,8 @@ const AnnotationUtil = {
 					object:{
 						id: resourceInfo ? resourceInfo.id : null,
 						dataset : collectionInfo ? collectionInfo.id : null,
+						groups: [], // added later, for filtering
+						classifications: [], // added later, for filtering
 					},
 				}
 			})
@@ -237,23 +241,54 @@ const AnnotationUtil = {
 			return acc.concat(cur);
 		},[]);
 
-		// WTODO: store bookmark group and code information to the annotation
-		// console.log(annotations);
+		// -----------------------------------------------
+		// Store bookmark groups and classifications to the objects
+		// -----------------------------------------------
+		
+		let objectAnnotations = {};
+		
+		// Store classification and group data for each bookmark.
+		// After filtering and merging the annotations, the data will be merged
+		annotations.forEach((a)=>{
+			if (a.annotationType === 'classification'){
 
+					a.bookmarks.forEach((b)=>{
+						let id = b.collectionId + b.resourceId;						
+						if (!(id in objectAnnotations)){
+							objectAnnotations[id] = {
+								groups: [],
+								classifications: [],
+							}
+						} 
+						switch(a.vocabulary){
+						case 'clariahwp5-bookmark-group':
+							objectAnnotations[id].groups.push(a);
+						break;
+						default:
+							objectAnnotations[id].classifications.push(a);
+						}
+			});
+			}
+		});
 
+		// -----------------------------------------------
 		// Filter annotations on selected type
+		// -----------------------------------------------
+		
 		annotations = annotations.filter((a)=>( 
 				a.annotationType === type
 				// and exclude bookmark groups
 				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
 		));
 
-		
+			
 		let uniqAnnotations = {};
 		let newAnnotations = [];
 		let id;
 
-		// merge equal annotations (classifications, links)
+		// -----------------------------------------------
+		// Merge equal annotations (classifications, links)
+		// -----------------------------------------------
 		switch (type){
 			case 'classification':{
 					// merge classifications with same id
@@ -283,17 +318,35 @@ const AnnotationUtil = {
 			break;				
 		}
 
+
+		// -----------------------------------------------
+		// Apply the groups/classifications data to the bookmarks in the annotations list
+		// -----------------------------------------------
+		annotations.forEach((a)=>{
+			a.bookmarks.forEach((b)=>{
+				let id = b.collectionId + b.resourceId;	
+				if (id in objectAnnotations){
+					b.groups = objectAnnotations[id].groups;
+					b.classifications = objectAnnotations[id].classifications;
+				}
+			});
+		});
+
 		let count = 0;
 		let bookmarkCount = 0;
 
+		// -----------------------------------------------
 		// Add object data to annotation bookmarks
-		// The objects in the annotations array are the same objects that have been enriched
-		// with the document data; we don't have to store/merge any data; just run reconsileResourcelist
+		// -----------------------------------------------
+		 
 		annotations.forEach((a)=>{
-			bookmarkCount++;
+			bookmarkCount++;			
 
 			// retrieve bookmark data
 			AnnotationUtil.reconsileResourceList(a.bookmarks, (b)=>{
+				// The objects in the annotations array are the same objects that have been enriched
+				// with the document data; we don't have to store/merge any data; just run reconsileResourcelist
+		
 				// last return
 				if (++count === bookmarkCount){					
 						// Just return the annotations with the callback

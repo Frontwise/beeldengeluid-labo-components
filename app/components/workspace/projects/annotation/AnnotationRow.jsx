@@ -144,6 +144,7 @@ class AnnotationRow extends React.PureComponent {
                                 <th>Type</th>
                                 <th>Title</th>
                                 <th>Dataset</th>
+                                <th>Groups</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,6 +153,11 @@ class AnnotationRow extends React.PureComponent {
                                     <td>{bookmark.type}</td>
                                     <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
+                                    <td className="groups">
+                                        {bookmark.groups ? 
+                                            bookmark.groups.map((g)=>(<span>{g.label}</span>))
+                                            : null}
+                                    </td>
                                     <td className="actions">
                                         <div className="btn primary" onClick={this.onView.bind(this, bookmark)}>
                                             View
