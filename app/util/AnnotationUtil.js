@@ -217,15 +217,16 @@ const AnnotationUtil = {
 					type : t.type,
 					title : resourceInfo ? resourceInfo.id : null,
 					resourceId : resourceInfo ? resourceInfo.id : null,
+					groups: [], // populated later, for filtering
+					classifications: [], // populated later, for filtering
 
 					// also build the document object, so it can be preview in the annotation list
 					// and be used for filtering
 					object:{
 						id: resourceInfo ? resourceInfo.id : null,
-						dataset : collectionInfo ? collectionInfo.id : null,
-						groups: [], // added later, for filtering
-						classifications: [], // added later, for filtering
+						dataset : collectionInfo ? collectionInfo.id : null,						
 					},
+
 				}
 			})
 			

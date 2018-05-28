@@ -258,7 +258,7 @@ class BookmarkTable extends React.PureComponent {
                     // the changes to be reflected in the data
                     setTimeout(()=>{
                             // load new data
-                            this.loadBookmarks.bind(this);
+                            this.loadBookmarks();
 
                             // update bookmark count in project menu
                             this.props.loadBookmarkCount();
