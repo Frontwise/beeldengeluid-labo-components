@@ -73,7 +73,7 @@ export const createAnnotationOptionList = (items) =>{
         i.annotations.forEach((a)=>{
             if (!(a.annotationType in hits)){
                 hits[a.annotationType] = true;
-                list.push({value:a.annotationType, name: a.annotationType});
+                list.push({value:a.annotationType, name: "⊆ " + a.annotationType});
             }
         });
     });
