@@ -128,7 +128,7 @@ const AnnotationUtil = {
 		const resourceIds = temp.reduce((acc, cur) => {
 			//the first accumulator is the same as the current object...|
 			if(acc.resourceId) {
-				let temp = {}
+				const temp = {}
 				temp[acc.collectionId] = [acc.resourceId];
 				acc = temp;
 			} else {
@@ -170,7 +170,7 @@ const AnnotationUtil = {
 
 	reconsileAll(resourceList, resourceData) {		
 		resourceList.forEach((x) => {
-			let temp = resourceData[x.object.dataset].filter((doc) => {
+			const temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
 			});			
 			x.object.title = 'Resource not found';
@@ -248,7 +248,7 @@ const AnnotationUtil = {
 		// Store bookmark groups and classifications to the objects
 		// -----------------------------------------------
 		
-		let objectAnnotations = {};
+		const objectAnnotations = {};
 		
 		// Store classification and group data for each bookmark.
 		// After filtering and merging the annotations, the data will be merged
@@ -256,7 +256,7 @@ const AnnotationUtil = {
 			if (a.annotationType === 'classification'){
 
 					a.bookmarks.forEach((b)=>{
-						let id = b.collectionId + b.resourceId;						
+						const id = b.collectionId + b.resourceId;						
 						if (!(id in objectAnnotations)){
 							objectAnnotations[id] = {
 								groups: [],
@@ -285,8 +285,8 @@ const AnnotationUtil = {
 		));
 
 			
-		let uniqAnnotations = {};
-		let newAnnotations = [];
+		const uniqAnnotations = {};
+		const newAnnotations = [];
 		let id;
 
 		// -----------------------------------------------
@@ -327,7 +327,7 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		annotations.forEach((a)=>{
 			a.bookmarks.forEach((b)=>{
-				let id = b.collectionId + b.resourceId;	
+				const id = b.collectionId + b.resourceId;	
 				if (id in objectAnnotations){
 					b.groups = objectAnnotations[id].groups;
 					b.classifications = objectAnnotations[id].classifications;
@@ -335,8 +335,8 @@ const AnnotationUtil = {
 			});
 		});
 
-		let count = 0;
-		let bookmarkCount = 0;
+		const count = 0;
+		const bookmarkCount = 0;
 
 		
 		// -----------------------------------------------
@@ -351,12 +351,12 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		// Add object data to annotation bookmarks
 		// -----------------------------------------------
-		let bookmarks = [];
-		let hits = {};
+		const bookmarks = [];
+		const hits = {};
 		
 		annotations.forEach((a)=>{
 			a.bookmarks.forEach((b)=>{
-				let id = b.collectionId + b.resourceId;	
+				const id = b.collectionId + b.resourceId;	
 				if (!(id in hits)){
 					hits[id] = true;
 					bookmarks.push(b);
@@ -448,7 +448,7 @@ const AnnotationUtil = {
 
 	//currently only used for bookmarking lots of resources
 	generateEmptyW3CMultiTargetAnnotation : function(user, project, collectionId, resourceIds, motivation='bookmarking') {
-		let annotation = {
+		const annotation = {
 			id : null,
 			user : user.id,
 			project : project ? project.id : null, //no suitable field found in W3C so far
@@ -525,7 +525,7 @@ const AnnotationUtil = {
 			}
 
 			//this is basically the OLD target. It will be transformed using generateTarget
-			let target = {
+			const target = {
 				//FIXME the source params can be important for resolving the URL! In some cases however not.
 				//Think of something to tackle this!
 				source: AnnotationUtil.removeSourceUrlParams(mediaObject.url), //TODO It should be a PID!
@@ -574,7 +574,7 @@ const AnnotationUtil = {
 	//TODO make this suitable for resource annotations too (now it's currently only for mediaobject annotations)
 	generateTarget : function(collectionId, resourceId, target) {
 		let targetType = 'MediaObject';
-		let selector = {
+		const selector = {
 			type: 'NestedPIDSelector',
 			value: [
 				{

@@ -146,7 +146,7 @@ const CollectionUtil = {
 	//for pruning long descriptions; makes sure to return the snippet that contains the search term
 	highlightSearchTermInDescription(text, searchTerm=null, maxWords=35) {
 		if(text) {
-			let regex = new RegExp(searchTerm.toLowerCase(), 'gi');
+			const regex = new RegExp(searchTerm.toLowerCase(), 'gi');
 			let index = text.toLowerCase().search(regex);
 			index = index > 50 ? index - 50 : 0;
 			text = text.substring(index);

@@ -53,7 +53,7 @@ const valueSort = (list) =>{
 
 // Create a {value/name} classification list based on given annotations
 export const createAnnotationClassificationOptionList = (items, key) =>{
-    let hits = {};
+    const hits = {};
     return items.reduce((a,b)=>(
         a.concat(createClassificationOptionList(b.bookmarks,key))
         ),[]).filter((o)=>{

@@ -86,7 +86,7 @@ class AnnotationTable extends React.PureComponent {
 
     onLoadAnnotations(data) {
         const parentAnnotations = data.annotations || [];
-        let annotations = AnnotationUtil.generateAnnotationCentricList(
+        const annotations = AnnotationUtil.generateAnnotationCentricList(
             parentAnnotations, this.props.type, (annotations)=>{
                 this.setState({
                     parentAnnotations: data.annotations,

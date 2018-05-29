@@ -28,14 +28,6 @@ class BookmarkTable extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.bookmarkTypes = [
-            'Video',
-            'Video-Fragment',
-            'Image',
-            'Audio',
-            'Entity'
-        ];
-
         this.orders = [
             { value: 'created', name: 'Bookmark created' },
             { value: 'newest', name: 'Newest objects first' },
@@ -229,7 +221,7 @@ class BookmarkTable extends React.PureComponent {
                 break;
             case 'mediatype':{
                     // '~' > move empty to bottom
-                    let e = '~';
+                    const e = '~';
                     sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
                     break;
                 }
@@ -238,7 +230,7 @@ class BookmarkTable extends React.PureComponent {
                 break;
             case 'group':{
                     // '~' > move empty to bottom
-                    let e = {label:'~'};
+                    const e = {label:'~'};
                     sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
                     break;
                 }
@@ -251,8 +243,7 @@ class BookmarkTable extends React.PureComponent {
     //delete multiple bookmarks
     deleteBookmarks(bookmarkIds) {
         if(bookmarkIds) {
-            let msg = 'Are you sure you want to remove the selected bookmarks and all its annotations?';
-            if (!confirm(msg)) {
+            if (!confirm('Are you sure you want to remove the selected bookmarks and all its annotations?')) {
                 return;
             }
 
@@ -452,7 +443,8 @@ class BookmarkTable extends React.PureComponent {
 
 BookmarkTable.propTypes = {
     user: PropTypes.object.isRequired,
-    project: PropTypes.object.isRequired
+    project: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func.isRequired,
 };
 
 export default BookmarkTable;
