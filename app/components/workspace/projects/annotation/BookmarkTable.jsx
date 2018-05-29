@@ -120,7 +120,6 @@ class BookmarkTable extends React.PureComponent {
     //Get filter object
     getFilters(items) {
         return [
-
             // search filter
             {
                 title:'',
@@ -141,6 +140,13 @@ class BookmarkTable extends React.PureComponent {
                 key: 'group',
                 type: 'select',
                 options: createClassificationOptionList(items,'groups')
+            },
+            // annotations filter        
+            {
+                title:'Annotations',
+                key: 'annotations',
+                type: 'select',
+                options: [{value:'yes',name:'Yes'},{value:'no',name:'No'}],
             },
 
         ];      
@@ -170,6 +176,20 @@ class BookmarkTable extends React.PureComponent {
             bookmarks = bookmarks.filter(bookmark =>
                 bookmark.groups.some((g) => (g.annotationId == filter.group))
             );
+        }
+
+        // filter on annotations
+        if (filter.annotations) {
+            if (filter.annotations === 'yes'){
+                bookmarks = bookmarks.filter(bookmark =>
+                   bookmark.annotations.length > 0
+                );
+            }
+            else{ // no
+                bookmarks = bookmarks.filter(bookmark =>
+                   bookmark.annotations.length === 0
+                );
+            }
         }
 
         // filter on keywords in title, dataset or type
