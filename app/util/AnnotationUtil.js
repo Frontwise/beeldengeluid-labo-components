@@ -21,15 +21,11 @@ const AnnotationUtil = {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
 				return {
-					na: na, // dev
-
 					id : IDUtil.guid(), // unique bookmark id
 
 					resourceId: resourceInfo ? resourceInfo.id : t.source, //needed for deleting, displaying, selecting, merging
 
-					annotationId: na.id, //needed for deleting
-					
-					targetId: t.source, //needed for deleting
+					annotationIds: [na.id], //needed for deleting
 
 					// general object (document,fragment,entity) data
 					object: {
@@ -102,6 +98,7 @@ const AnnotationUtil = {
 			if (b.resourceId in uniqueList){				
 				uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
 				uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
+				uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
 			} else{
 				// always make the main bookmark a resource
 				b.object.type = "Resource";

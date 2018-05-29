@@ -116,7 +116,6 @@ class BookmarkTable extends React.PureComponent {
     }
     //The resource list now also contains the data of the resources
     onLoadResourceList(bookmarks) {
-        console.log(bookmarks);
         this.setState({
             bookmarks: bookmarks,
             loading: false,

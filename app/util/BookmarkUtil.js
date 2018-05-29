@@ -7,65 +7,47 @@ const BookmarkUtil = {
 
 	// delete a bookmark and all its annotations
 	deleteBookmarks : function(annotationList, bookmarkList, bookmarkIds, callback) {
-		console.log(annotationList, bookmarkList, bookmarkIds);
-
-		const getAnnotations = (id) => (
-			annotationList.filter((a)=>(a.id === id))
-		);
-
 
 		// get the bookmarks to delete
-		const bookmarks = bookmarkList.filter(b =>			
+		const bookmarks = bookmarkList.filter(b =>
 			bookmarkIds.includes(b.resourceId)
     );
 
 		// get annotations belonging to each bookmark
 		bookmarks.forEach((b) => {
-				let hits = {};
-				b.annotationData = getAnnotations(b.annotationId).concat(
-					b.annotations.filter((a)=>{
-						if (a.parentAnnotationId in hits){ return false; }
-						hits[a.parentAnnotationId] = true; 
-						return true;
-					})
-				);		
+				b.annotationData = annotationList.filter((a)=>(b.annotationIds.includes(a.id)));
 		});
 
-		// get all annotations to delete
+		// Mark target(s) for removal
 		bookmarks.forEach((b) => {
-			console.log(b.annotationData);
-			// mark the target for removal
-			b.annotationData.forEach((annotation)=>{ 
+			b.annotationData.forEach((annotation)=>{
 				if (Array.isArray(annotation.target)){
+
+					// multiple targets (bookmark group)
 					annotation.target.forEach((t)=>{
 						if (t.source === b.resourceId){
-							console.log(annotation,t,b);
 							t.removeMe = true;
 						}
 					});
 				} else{
 
-					// add default annotation for removal
+					// single target, annotation on segment/mediaobject
 					if (!annotation.target){
 					 	annotation.target={};
 					 	annotation.id = annotation.parentAnnotationId;
 					}
-					annotation.target.removeMe = true;						
-
+					annotation.target.removeMe = true;
 				}
 			});
-	
 		});
 
 		// Fully delete, or update annotations
-		let remainingTargets = [];
 		let fullyDelete = false;
 		let deleteCount = 0;
 		let count = 0;
 
 		bookmarks.forEach((b) => {
-				console.log(b.annotationData);
-				b.annotationData.forEach((annotation)=>{
+			b.annotationData.forEach((annotation)=>{
 
 				deleteCount++;
 
@@ -82,20 +64,17 @@ const BookmarkUtil = {
 				if (fullyDelete){
 
 					// Complete removal of the annotation
-					console.debug('fully', annotation); 
+
+					console.debug('Fully delete', annotation);
 					//return true;
 					AnnotationAPI.deleteAnnotation(annotation, data => {
 						if (data && data.status) {
-							if (data.status == 'success') {
-								console.debug('success');
-							} else {
-								console.debug('error');
-							}
+							console.debug(data.status == 'success' ? 'success' : 'error');
 						} else {
-							console.debug('error');
+							console.debug('failed');
 						}
-						if(++count == deleteCount) {					
-							console.debug('all done calling back the caller');
+						if(++count == deleteCount) {
+							console.debug('Delete ready, calling callback');
 							callback(true)
 						}
 					});
@@ -103,26 +82,25 @@ const BookmarkUtil = {
 				} else{
 
 					// Update current annotation without the bookmark as target
-					console.debug('update',annotation); 
+
+					console.debug('Just remove target',annotation);
 					//return true;
 					AnnotationAPI.saveAnnotation(annotation, data => {
 						if (data && data.status) {
-							if (data.status == 'success') {
-								console.debug('success');
-							} else {
-								console.debug('error');
-							}
+							console.debug(data.status == 'success' ? 'success' : 'error');
 						} else {
-							console.debug('error');
+							console.debug('failed');
 						}
 						if(++count == deleteCount) {
-							console.debug('all done calling back the caller');
+							console.debug('Delete ready, calling callback');
 							callback(true)
 						}
 					});
 				}
+
 			});
 		});
+	
 	},
 
 	deleteAnnotations(parentAnnotations, annotationList, annotationIds, callback) {
@@ -146,6 +124,7 @@ const BookmarkUtil = {
 				pa => pa.id == annotation.parentAnnotationId
 			);
 			parentAnnotation = parentAnnotation.length == 1 ? parentAnnotation[0] : null;
+
 			if(parentAnnotation) {
 				if(childCount == 1) {
 					//delete the parent annotation entirely since the annotation was the last of its body
@@ -167,7 +146,7 @@ const BookmarkUtil = {
 				} else {
 					//update the parent annotation, removing the annotation from its body
 					parentAnnotation.body =  parentAnnotation.body.filter(
-						b => b.annotationId != annotation.annotationId
+						a => a.annotationIds != annotation.annotationId
 					);
 
 					AnnotationAPI.saveAnnotation(parentAnnotation, data => {
