@@ -32,13 +32,6 @@ class AnnotationTable extends React.PureComponent {
 
         this.title = props.title;
 
-        this.annotationTypes = [
-            { value: 'classification', name: 'Code' },
-            { value: 'comment', name: 'Comment' },
-            { value: 'link', name: 'Link' },
-            { value: 'metadata', name: 'Metadata' }
-        ];
-
         this.orders = [{ value: 'created', name: 'Annotation created' }];
 
         this.bulkActions = [
@@ -251,8 +244,13 @@ class AnnotationTable extends React.PureComponent {
                 this.state.annotations,
                 annotationIds,
                 (success) => {
-                    console.debug('reloading annotation-list', this)
-                    setTimeout(this.loadAnnotations.call(this), 250);
+                    setTimeout(()=>{
+                        // load new data
+                        this.loadAnnotations();
+
+                        // update bookmark count in project menu
+                        this.props.loadBookmarkCount();
+                    }, 500);                    
                 }
             )
         }
@@ -294,6 +292,9 @@ class AnnotationTable extends React.PureComponent {
 
         // refresh data
         this.loadAnnotations();
+
+        // update bookmark count in project menu
+        this.props.loadBookmarkCount();
     }
 
     sortChange(e) {
@@ -451,6 +452,7 @@ AnnotationTable.propTypes = {
     type: PropTypes.string,
     title: PropTypes.string,
     filters: PropTypes.array.isRequired,
+    loadBookmarkCount: PropTypes.func.isRequired,
 };
 
 AnnotationTable.defaultTypes = {
