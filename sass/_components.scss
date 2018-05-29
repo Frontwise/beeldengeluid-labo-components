@@ -541,7 +541,7 @@
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
-	background-color: $subdued-bg;
+	background-color: #efefef;
 	border-radius: 6px;
 	box-shadow: 1px 2px 2px 2px #999;
 	padding: 10px;
@@ -834,8 +834,8 @@
 .cl_switchBtnCharts {
 	float: right;
 	position: relative;
-	right: .3rem;
-	top: .3rem;
+	right: 12px;
+	top: 12px;
 	z-index: 10;
 }
 .recharts-default-legend {
@@ -865,4 +865,142 @@
 
 .bg__workpace{
 	margin-top: 40px;
+}
+
+/* ==================== stylings for switch btn (move to a separated file) ============================================ */
+$transition-time : .8s;
+.ms_toggle_btn{
+	input.checkbox-toggle {
+		position: absolute;
+		left: -9999px;
+		opacity: 0;
+	}
+
+	.checkbox-toggle + label {
+		display: block;
+		position: relative;
+		cursor: pointer;
+		outline: none;
+		user-select: none;
+		font-family: 'helvetica';
+		font-size: 13px;
+	}
+
+	input.checkbox-toggle:checked + label:before {
+		text-align: center;
+		content: attr(data-on);
+		padding: 3px 30px 0px 0;
+	}
+
+	input.checkbox-toggle:not(:checked) + label:before {
+		text-align: center;
+		content: attr(data-off);
+		padding: 3px 0 0px 30px;
+	}
+
+	input.checkbox-toggle-round + label {
+		padding: 2px;
+		width: 100px;
+		height: 25px;
+		background-color: #dddddd;
+		border-radius: 25px;
+	}
+
+	input.checkbox-toggle-round + label:before,
+	input.checkbox-toggle-round + label:after {
+		display: block;
+		position: absolute;
+		top: 1px;
+		left: 1px;
+		bottom: 1px;
+		content: '';
+	}
+
+	input.checkbox-toggle-round + label:before {
+		right: 1px;
+		border-radius: 25px;
+		transition: background $transition-time;
+	}
+
+	input.checkbox-toggle-round + label:after {
+		width: 30px;
+		background-color: #fff;
+		border-radius: 100%;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+		transition: margin $transition-time;
+	}
+
+	input.checkbox-toggle-round:checked + label:after {
+		margin-left: 67px
+	}
+
+	input.checkbox-toggle-round:checked + label:before {
+		background-color: #4DB346;
+		color: white;
+	}
+
+	input.checkbox-toggle-round:not(:checked) + label:before {
+		background-color: #468dcb;
+		color: white;
+	}
+
+	input.checkbox-toggle-round-flat + label {
+		padding: 2px;
+		width: 100px;
+		height: 25px;
+		background-color: #dddddd;
+		border-radius: 35px;
+		transition: background $transition-time;
+	}
+
+	input.checkbox-toggle-round-flat + label:before,
+	input.checkbox-toggle-round-flat + label:after {
+		display: block;
+		position: absolute;
+		content: "";
+	}
+
+	input.checkbox-toggle-round-flat + label:before {
+		top: 2px;
+		left: 2px;
+		bottom: 2px;
+		right: 2px;
+		background-color: #fff;
+		border-radius: 25px;
+		transition: background $transition-time;
+	}
+
+	input.checkbox-toggle-round-flat + label:after {
+		top: 4px;
+		left: 4px;
+		bottom: 4px;
+		width: 27px;
+		background-color: #bbb;
+		border-radius: 35px;
+		transition: margin $transition-time, background $transition-time;
+	}
+
+	input.checkbox-toggle-round-flat:checked + label {
+		background-color: #8ce196;
+	}
+
+	input.checkbox-toggle-round-flat:checked + label:after {
+		margin-left: 42px;
+		background-color: #8ce196;
+	}
+}
+
+/* ==================== Custom tooltip stylings for line charts ============================================ */
+.ms__custom-tooltip {
+	background-color: rgba(0, 0, 0, 0.6);
+	border-radius: 8px;
+	box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
+	color: #f3f3f3;
+	padding: 1rem 3rem;
+	text-transform: capitalize;
+	.rightAlign {
+		float: right;
+		margin-left: 10px;
+		right: 0;
+	}
 }
