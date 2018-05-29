@@ -46,7 +46,9 @@ class Transcriber extends React.PureComponent {
     }
 
     onInitialFilter() {
-        this.gotoLine(this.state.transcript[0].sequenceNr);
+        if(this.state.transcript.length > 0) {
+            this.gotoLine(this.state.transcript[0].sequenceNr);
+        }
     }
 
     gotoLine(sequenceNr) {
@@ -55,13 +57,6 @@ class Transcriber extends React.PureComponent {
             if(element.sequenceNr === sequenceNr) {
                 this.userHasScrolled = false;
                 this.props.playerAPI.seek(element.start / 1000);
-                this.props.playerAPI.isPaused(paused => {
-                    if(paused) {
-                        this.props.playerAPI.play();
-                    }
-                })
-
-
                 return;
             }
         }, this);
@@ -90,9 +85,11 @@ class Transcriber extends React.PureComponent {
         if(this.state.transcript[index] && this.state.transcript[index].start > currentTime) {
             index = index <= 0 ? 0 : index -1;
         }
-        const segment = this.getSegmentByStartTime(this.state.transcript[index].start || 0);
-        if(segment) {
-            return segment.sequenceNr || 0;
+        if(this.state.transcript[index]) {
+            const segment = this.getSegmentByStartTime(this.state.transcript[index].start || 0);
+            if(segment) {
+                return segment.sequenceNr || 0;
+            }
         }
         return 0;
     }

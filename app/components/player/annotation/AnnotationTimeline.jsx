@@ -40,7 +40,6 @@ class AnnotationTimeline extends React.Component {
 
 	//TODO
 	componentWillUnmount() {
-		console.debug('removing this event listener');
 		window.removeEventListener('resize', this.updateCanvasDimensions.bind(this));
 	}
 
