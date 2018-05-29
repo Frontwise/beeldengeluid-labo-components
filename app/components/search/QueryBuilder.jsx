@@ -316,7 +316,7 @@ class QueryBuilder extends React.Component {
 			)
 
 			//draw the checkboxes for selecting layers
-			if(this.state.query.searchLayers) {
+			if(this.state.query.searchLayers && 1==2) {
 				const layers = Object.keys(this.state.query.searchLayers).map((layer, index) => {
 					return (
 						<label key={'layer__' + index} className="checkbox-inline">

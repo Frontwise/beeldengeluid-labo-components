@@ -142,6 +142,10 @@ class ItemDetailsRecipe extends React.Component {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
+		} else if(componentClass == 'FlexPlayer') {
+			this.setActiveAnnotationTarget({
+				source : data.url //data => mediaObject
+			})
 		}
 	}
 
@@ -505,6 +509,8 @@ class ItemDetailsRecipe extends React.Component {
 						enableFragmentMode={false} //add this to config
 						annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
 						annotationLayers={this.props.recipe.ingredients.annotationLayers} //so the player can distribute annotations in layers
+
+						onOutput={this.onComponentOutput.bind(this)}
 					/>
 				);
 			});
@@ -514,7 +520,7 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//each audio item will get a separate video player (for now)
-	getAudioTabContents() {
+	/*getAudioTabContents() {
 		let isActive = false;
 		const audios = this.state.itemData.playableContent.filter(content => {
 			return content.mimeType.indexOf('audio') != -1;
@@ -543,6 +549,40 @@ class ItemDetailsRecipe extends React.Component {
 				);
 			});
 			return {type : 'audio', content : content, active : isActive}
+		}
+		return null;
+	}*/
+
+	getAudioTabContents() {
+		const mediaObjects = this.state.itemData.playableContent.filter(content => {
+			return content.mimeType.indexOf('audio') != -1;
+		})
+		if(mediaObjects.length > 0) {
+			const content = (
+				<FlexPlayer
+					mediaObjects={mediaObjects}
+					mediaType='audio'
+
+					transcript={this.state.itemData.rawData.layer__asr || null}
+
+					initialSearchTerm={this.props.params.st} //every player could interpret highlighting a search term
+
+					user={this.props.user} //current user
+					project={this.state.activeProject} //selected via the ProjectSelector
+					resourceId={this.state.itemData.resourceId}
+					collectionId={this.state.itemData.index}
+
+					active={true}
+
+					enableFragmentMode={false} //TODO get rid of this stupid property
+
+					annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
+					annotationLayers={this.props.recipe.ingredients.annotationLayers} //so the player can distribute annotations in layers
+
+					onOutput={this.onComponentOutput.bind(this)}
+				/>
+			);
+			return {type : 'audio', content : content, active : true}
 		}
 		return null;
 	}

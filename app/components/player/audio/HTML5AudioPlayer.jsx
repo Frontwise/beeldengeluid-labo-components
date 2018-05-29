@@ -15,7 +15,7 @@ class HTML5AudioPlayer extends React.Component {
 	}
 
 	componentDidMount() {
-		const vid = document.getElementById('audio_player__' + this.props.mediaObject.id);
+		const vid = document.getElementById('audio_player__' + this.props.mediaObject.assetId);
 		if(this.props.eventCallbacks) {
 			vid.onprogress = this.props.eventCallbacks.loadProgress.bind(this);
 			vid.ontimeupdate = this.props.eventCallbacks.playProgress.bind(this);
@@ -51,7 +51,7 @@ class HTML5AudioPlayer extends React.Component {
 		return (
 			<audio
 				className={IDUtil.cssClassName('html5-audio-player')}
-				id={'audio_player__' + this.props.mediaObject.id}
+				id={'audio_player__' + this.props.mediaObject.assetId}
 				controls controlsList="nodownload" crossOrigin={
 					this.props.useCredentials ? "use-credentials" : "anonymous"
 				}>

@@ -55,6 +55,13 @@ class Transcriber extends React.PureComponent {
             if(element.sequenceNr === sequenceNr) {
                 this.userHasScrolled = false;
                 this.props.playerAPI.seek(element.start / 1000);
+                this.props.playerAPI.isPaused(paused => {
+                    if(paused) {
+                        this.props.playerAPI.play();
+                    }
+                })
+
+
                 return;
             }
         }, this);
