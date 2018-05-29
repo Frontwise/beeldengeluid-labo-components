@@ -75,6 +75,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="classification" 
                         title="Codes" 
                         filters={["search","vocabulary","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label","vocabulary"]}
                     />
                 );
                 break;
@@ -86,6 +87,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="comment" 
                         title="Comments" 
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-text","z-a-text"]}
                     />
                 );
                 break;
@@ -97,6 +99,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="link" 
                         title="Links"  
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label"]}
                     />
                 );
                 break;
@@ -108,6 +111,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="metadata" 
                         title="Metadata" 
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","template"]}
                     />
                 );
                 break;

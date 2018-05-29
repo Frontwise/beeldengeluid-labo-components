@@ -32,7 +32,7 @@ class AnnotationTable extends React.PureComponent {
 
         this.title = props.title;
 
-        this.orders = [{ value: 'created', name: 'Annotation created' }];
+        this.orders = this.getOrders();
 
         this.bulkActions = [
             { title: 'Delete', onApply: this.deleteAnnotations.bind(this) },
@@ -95,6 +95,45 @@ class AnnotationTable extends React.PureComponent {
         );
       
     }
+
+    //Get sort orders
+    getOrders(items){
+        const sortNames = {
+            'created': 'Created at',
+            // a-z
+            'a-z-label': 'A-Z',
+            'a-z-text': 'A-Z',
+            // z-a
+            'z-a-label': 'Z-A',
+            'z-a-text': 'Z-A',
+
+            'vocabulary': 'Vocabulary',
+            'template': 'Template',
+        };
+
+        return this.props.sort.map((sort)=>({ 
+                value: sort,
+                name: (sort in sortNames) ? sortNames[sort] : '!! ' + sort
+            })
+        );
+    }
+
+    sortAnnotations(annotations, field) {
+        const safeToLowerCase= (s)=>(
+            s && typeof s === 'string' ? s.toLowerCase() : ''
+        )
+        switch (field) {
+            case 'created': return annotations.sort((a, b) => a.created > b.created); 
+            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label)); 
+            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label)); 
+            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text)); 
+            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text)); 
+            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary)); 
+            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template)); 
+            default: return annotations;
+        }
+    }
+
 
     //Get filter object
     getFilters(items) {
@@ -220,15 +259,6 @@ class AnnotationTable extends React.PureComponent {
         return annotations;
     }
 
-    sortAnnotations(annotations, field) {
-        const sorted = annotations;
-        switch (field) {
-            case 'created': sorted.sort((a, b) => a.created > b.created); break;
-            default: return sorted;
-        }
-
-        return sorted;
-    }
 
     deleteAnnotations(annotationIds) {
         if(annotationIds) {
@@ -343,7 +373,6 @@ class AnnotationTable extends React.PureComponent {
         }
     }
 
-
     // Toggle sublevel visibility
     toggleSub(id){
         const showSub = Object.assign({}, this.state.showSub);
@@ -448,15 +477,17 @@ class AnnotationTable extends React.PureComponent {
 
 AnnotationTable.propTypes = {
     api: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired,
-    type: PropTypes.string,
-    title: PropTypes.string,
     filters: PropTypes.array.isRequired,
     loadBookmarkCount: PropTypes.func.isRequired,
+    sort: PropTypes.array,
+    title: PropTypes.string,
+    type: PropTypes.string,
+    user: PropTypes.object.isRequired,
 };
 
 AnnotationTable.defaultTypes = {
-    filters: []
+    filters: [],
+    sort: [],
 }
 
 export default AnnotationTable;
