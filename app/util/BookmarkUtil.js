@@ -74,7 +74,7 @@ const BookmarkUtil = {
 							console.debug('failed');
 						}
 						if(++count == deleteCount) {
-							console.debug('Delete ready, calling callback');
+							console.debug('Delete bookmark ready, calling callback');
 							callback(true)
 						}
 					});
@@ -92,7 +92,7 @@ const BookmarkUtil = {
 							console.debug('failed');
 						}
 						if(++count == deleteCount) {
-							console.debug('Delete ready, calling callback');
+							console.debug('Delete bookmark ready, calling callback');
 							callback(true)
 						}
 					});
@@ -104,7 +104,7 @@ const BookmarkUtil = {
 	},
 
 	deleteAnnotations(parentAnnotations, annotationList, annotationIds, callback) {
-		//intialize the list of annotations
+		//initialize the list of annotations
 		let count = 0;
 		const annotations = annotationList.filter(
 			item => annotationIds.includes(item.annotationId)
@@ -112,13 +112,9 @@ const BookmarkUtil = {
 
 		annotations.forEach(annotation => {
 
-			console.debug(annotation)
-
 			const childCount = annotationList.filter(
 				a => a.parentAnnotationId == annotation.parentAnnotationId
 			).length;
-
-			console.debug('CHILD COUNT: ' + childCount)
 
 			let parentAnnotation = parentAnnotations.filter(
 				pa => pa.id == annotation.parentAnnotationId
@@ -130,16 +126,12 @@ const BookmarkUtil = {
 					//delete the parent annotation entirely since the annotation was the last of its body
 					AnnotationAPI.deleteAnnotation(parentAnnotation, data => {
 						if (data && data.status) {
-							if (data.status == 'success') {
-								console.debug('success');
-							} else {
-								console.debug('error');
-							}
+							console.debug(data.status == 'success' ? 'success' : 'error');
 						} else {
-							console.debug('error');
+							console.debug('failed');
 						}
 						if(++count == annotations.length) {
-							console.debug('all done calling back the caller');
+							console.debug('Delete annotation ready, calling callback');
 							callback(true)
 						}
 					});
@@ -150,20 +142,16 @@ const BookmarkUtil = {
 					);
 
 					AnnotationAPI.saveAnnotation(parentAnnotation, data => {
-						if (data.status == 'success') {
-							console.debug('success');
-						} else {
-							console.debug('error');
-						}
+						console.debug(data.status == 'success' ? 'success' : 'error');
 						if(++count == annotations.length) {
-							console.debug('all done calling back the caller');
+							console.debug('Delete annotation ready, calling callback');
 							callback(true)
 						}
 					});
 				}
 			} else {
 				if(++count == annotations.length) {
-					console.debug('all done calling back the caller');
+					console.debug('Delete annotation ready, calling callback');
 					callback(false)
 				}
 			}
