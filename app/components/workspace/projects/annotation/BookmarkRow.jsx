@@ -46,7 +46,13 @@ class BookmarkRow extends React.PureComponent {
 
    render() {
         const bookmark = this.props.bookmark;
-        const annotations = bookmark.annotations || [];
+        let annotations = bookmark.annotations || [];
+
+        // only show annotations of the type specified by the current filter
+        if (this.props.annotationTypeFilter){
+            annotations = annotations.filter((a)=>(a.annotationType === this.props.annotationTypeFilter));
+        }
+
         const hasAnnotations = annotations.length > 0;
 
         //populate the foldable annotation block
@@ -179,7 +185,8 @@ BookmarkRow.propTypes = {
     onExport: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
     onView: PropTypes.func.isRequired,
-    selected: PropTypes.bool
+    selected: PropTypes.bool,
+    annotationTypeFilter: PropTypes.string
 };
 
 export default BookmarkRow;

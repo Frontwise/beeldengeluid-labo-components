@@ -10,7 +10,7 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList, createClassificationOptionList, createSimpleArrayOptionList } from '../../helpers/OptionList';
+import { createAnnotationOptionList, createOptionList, createClassificationOptionList, createSimpleArrayOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -146,7 +146,11 @@ class BookmarkTable extends React.PureComponent {
                 title:'Annotations',
                 key: 'annotations',
                 type: 'select',
-                options: [{value:'yes',name:'Yes'},{value:'no',name:'No'}],
+                options: [
+                    {value:'yes',name:'Yes'},
+                    {value:'no',name:'No'},
+                    {value:'',name:'-----------', disabled: true}
+                ].concat(createAnnotationOptionList(items)),
             },
 
         ];      
@@ -180,15 +184,21 @@ class BookmarkTable extends React.PureComponent {
 
         // filter on annotations
         if (filter.annotations) {
-            if (filter.annotations === 'yes'){
-                bookmarks = bookmarks.filter(bookmark =>
-                   bookmark.annotations.length > 0
-                );
-            }
-            else{ // no
-                bookmarks = bookmarks.filter(bookmark =>
-                   bookmark.annotations.length === 0
-                );
+            switch(filter.annotations){
+                case 'yes':
+                    bookmarks = bookmarks.filter(bookmark =>
+                        bookmark.annotations.length > 0
+                    );
+                break;
+                case 'no':            
+                    bookmarks = bookmarks.filter(bookmark =>
+                        bookmark.annotations.length === 0
+                    );
+                break;
+                default:
+                    bookmarks = bookmarks.filter(bookmark => 
+                        bookmark.annotations.some((a) => (a.annotationType === filter.annotations))
+                    );
             }
         }
 
@@ -387,6 +397,8 @@ class BookmarkTable extends React.PureComponent {
     }
 
     renderResults(renderState) {
+        const annotationTypeFilter = renderState.filter.annotations && !['yes','no'].includes(renderState.filter.annotations) ? renderState.filter.annotations : '';
+     
         return (
             <div>
                 <h2>
@@ -417,6 +429,7 @@ class BookmarkTable extends React.PureComponent {
                             onSelect={this.selectItem}
                             showSub={bookmark.resourceId in this.state.showSub}
                             toggleSub={this.toggleSub}
+                            annotationTypeFilter={annotationTypeFilter}
                             />
                     ))
                     : <h3>∅ No results</h3>

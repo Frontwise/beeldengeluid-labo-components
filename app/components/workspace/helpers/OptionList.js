@@ -64,3 +64,18 @@ export const createAnnotationClassificationOptionList = (items, key) =>{
             return false;
         });
 }
+
+// Create a {value/name} list based on given annotations of given bookmarks
+export const createAnnotationOptionList = (items) =>{
+    const hits = {};
+    const list = [];
+    items.forEach((i)=>{
+        i.annotations.forEach((a)=>{
+            if (!(a.annotationType in hits)){
+                hits[a.annotationType] = true;
+                list.push({value:a.annotationType, name: a.annotationType});
+            }
+        });
+    });
+    return list.sort();
+}

@@ -140,7 +140,7 @@ class NestedTable extends React.PureComponent {
                             onChange={this.filterChange.bind(this, filter.key)}>
                                 <option />
                                 {filter.options.map((option, index) => (
-                                    <option key={index} value={option.value}>
+                                    <option key={index} value={option.value} disabled={option.disabled}>
                                         {option.name}
                                     </option>
                                 ))}
@@ -167,7 +167,6 @@ class NestedTable extends React.PureComponent {
                     <div className="filters">
                         <div className="left">
                             <h3>Filters</h3>
-
                             {this.renderFilters(this.props.filters)}
                         </div>
 
