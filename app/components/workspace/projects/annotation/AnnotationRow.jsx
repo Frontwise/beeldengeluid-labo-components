@@ -15,13 +15,10 @@ class AnnotationRow extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {
-            showBookmarks: this.props.annotation.bookmarks && this.props.annotation.bookmarks.length > 0
-        };
-
         // bind functions
         this.onDelete = this.onDelete.bind(this);
         this.onView = this.onView.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
     }
 
     onDelete() {
@@ -36,10 +33,8 @@ class AnnotationRow extends React.PureComponent {
         this.props.onSelect(this.props.annotation, e.target.checked);
     }
 
-    toggleAnnotations() {
-        this.setState({
-            showBookmarks: !this.state.showBookmarks
-        });
+    toggleSub(e){
+        this.props.toggleSub(this.props.annotation.annotationId);
     }
 
     //Get a table row of info/metatdata for the given annotation
@@ -48,78 +43,84 @@ class AnnotationRow extends React.PureComponent {
         switch (annotation.annotationType) {
             case 'classification':
                 return (
-                    <tr className="classification">
-                        <td className="vocabulary">
+                    <ul className="info annotation-classification">
+                        <li className="primary">
+                            <h4 className="label">Code</h4>
+                            <p>{annotation.label}</p>
+                        </li>
+                        <li className="vocabulary">
                             <h4 className="label">Vocabulary</h4>
                             <p>{annotation.vocabulary}</p>
-                        </td>
-                        <td>
-                            <h4 className="label">Classification</h4>
-                            <p>{annotation.label}</p>
-                        </td>
-                        <td className="created">
+                        </li>
+                       
+                        <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
-                        </td>
-                    </tr>
+                        </li>
+                    </ul>
                 );
             case 'comment':
                 return (
-                    <tr className="comment">
-                        <td>
+                    <ul className="info annotation-comment">
+                        <li className="primary">
                             <h4 className="label">Comment</h4>
                             <p>{annotation.text}</p>
-                        </td>
-                        <td className="created">
+                        </li>
+                        <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
-                        </td>
-                    </tr>
+                        </li>
+                    </ul>
                 );
             case 'link':
                 return (
-                    <tr className="link">
-                        <td>
-                            <h4 className="label">Id</h4>
-                            <p>{annotation.annotationId}</p>
-                        </td>
-                        <td>
-                            <h4 className="label">?</h4>
-                            <p>Todo: Implemement Link fields (unknown now)</p>
-                        </td>
-                        <td className="created">
+                    <ul className="info annotation-link">
+                        <li className="primary">
+                            <h4 className="label">Label</h4>
+                            <p>{annotation.label}</p>
+                        </li>
+                        <li className="link">
+                            <h4 className="label">Link</h4>
+                            <p><a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a></p>
+                        </li>
+                        <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
-                        </td>
-                    </tr>
+                        </li>
+                    </ul>
                 );
             case 'metadata':
                 return (
-                    <tr className="metadata">
-                        <td className="template">
+                    <ul className="info annotation-metadata">
+                        <li className="template" className="primary">
                             <h4 className="label">Template</h4>
-                            <p>{annotation.annotationTemplate}</p>
-                        </td>
+                            <p>{annotation.annotationTemplate || '-'}</p>
+                        </li>
 
-                        {annotation.properties ? annotation.properties.map((property, index) => (
-                            <td key={index}>
-                                <h4 className="label">{property.key}</h4>
-                                <p>{property.value}</p>
-                            </td>
-                            )) : '-'
-                        }
+                        <li className="template">
+                            <h4 className="label">Fields</h4>
+                            <ul>
+                            {annotation.properties ? annotation.properties.map((property, index) => (
+                                <li key={index}>
+                                    <h4>{property.key}</h4>
+                                    <p>{property.value}</p>
+                                </li>
+                                )) : '-'
+                            }
+                            </ul>
+                        </li>
 
-                        <td className="created">
+                        <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
-                        </td>
-                    </tr>
+                        </li>
+                    </ul>
                 );
             default:
                 return (
-                <tr>
-                    <td>Unknown annotation type: {annotation.annotationType}</td>
-                </tr>
+                <ul>
+                    <li>Unknown annotation type: {annotation.annotationType}</li>
+                </ul>
             );
         }
     }
@@ -131,8 +132,9 @@ class AnnotationRow extends React.PureComponent {
 
         //populate the foldable block (containing a list of bookmarks)
         let foldableBlock = null;
-        if(this.state.showBookmarks) {
+        if(this.props.showSub) {
             let blockContents = null;
+
             if(!hasBookmarks) {
                 blockContents = (
                     <p>
@@ -145,16 +147,22 @@ class AnnotationRow extends React.PureComponent {
                         <thead>
                             <tr>
                                 <th>Type</th>
-                                <th>Resource ID</th>
+                                <th>Title</th>
                                 <th>Dataset</th>
+                                <th>☆ Groups</th>
                             </tr>
                         </thead>
                         <tbody>
                             {bookmarks.map(bookmark => (
                                 <tr>
                                     <td>{bookmark.type}</td>
-                                    <td>{bookmark.title}</td>
+                                    <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
+                                    <td className="groups">
+                                        {bookmark.groups ? 
+                                            bookmark.groups.map((g)=>(<span>{g.label}</span>))
+                                            : null}
+                                    </td>
                                     <td className="actions">
                                         <div className="btn primary" onClick={this.onView.bind(this, bookmark)}>
                                             View
@@ -167,6 +175,7 @@ class AnnotationRow extends React.PureComponent {
                     </table>
                 )
             }
+
             foldableBlock = (
                 <div className="sublevel">
                     {blockContents}
@@ -185,30 +194,25 @@ class AnnotationRow extends React.PureComponent {
                             title={
                                 'Select this annotation with id:\n' + annotation.annotationId
                             }/>
+                        <div className="delete" onClick={this.onDelete} title="Delete annotation" />
                     </div>
 
-                    <div className="info">
-                        <table>
-                            <tbody>{this.getInfoRow(annotation)}</tbody>
-                        </table>
-                    </div>
-
+                    {this.getInfoRow(annotation)}
+                    
                     <div className="actions">
-                        <div className="btn blank warning" onClick={this.onDelete}>
-                            Delete
-                        </div>
-                        {/*<div className="btn"
-                        onClick={this.onView}>View</div> */}
-                    </div>
-
-                    <div
+                        
+                        <div
+                        title="Bookmarks"
                         className={
-                            classNames('sublevel-button', {active: this.state.showBookmarks, zero: !hasBookmarks})
+                            classNames('sublevel-button', {active: this.props.showSub, zero: !hasBookmarks})
                         }
-                        onClick={this.toggleAnnotations.bind(this)}>
+                        onClick={this.toggleSub}>
 
-                        Bookmarks <span className="count">{bookmarks.length}</span>
+                        <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
                     </div>
+                    </div>
+
+                    
                 </div>
 
                 {foldableBlock}
@@ -219,6 +223,8 @@ class AnnotationRow extends React.PureComponent {
 
 AnnotationRow.propTypes = {
     annotation: PropTypes.object.isRequired,
+    toggleSub: PropTypes.func.isRequired,
+    showSub: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onView: PropTypes.func.isRequired,
     selected: PropTypes.bool,

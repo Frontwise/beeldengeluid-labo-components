@@ -1,6 +1,7 @@
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import AnnotationUtil from '../../../../util/AnnotationUtil';
+import ComponentUtil from '../../../../util/ComponentUtil';
 import IDUtil from '../../../../util/IDUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
@@ -17,20 +18,22 @@ class NestedTable extends React.PureComponent {
     constructor(props) {
         super(props);
 
+        // retrieve persistent filters from localstorage
+        this.filterKey = props.uid + '-filter';
+        let filter = ComponentUtil.getJSONFromLocalStorage(this.filterKey);
+        filter = filter ? filter : {keywords:''};
+
         this.state = {
             filteredItems: [],
             visibleItems: [],
             loading: true,
-            filter: {
-                keywords: '',
-                type: ''
-            },
-            order: 'created'
+            order: 'created',
+            filter,
         };
     }
 
 
-    componentWillMount() {
+    componentDidMount() {
         // instead of breaking out of the container, change the background color to a white and gray region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
     }
@@ -89,27 +92,67 @@ class NestedTable extends React.PureComponent {
         }
     }
 
-    //when the user types in the filter field
-    keywordsChange(e) {
-        this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                keywords: e.target.value
-            })
-        });
-    }
+    // user changes a filter
+    filterChange(key, e) {
+        let filter = {};
+        filter[key] = e.target.value;
 
-    //when the type pull down value changes
-    typeChange(e) {
+        // create filter
+        filter = Object.assign({}, this.state.filter, filter);
+
+        // persistent filters: Store to localstorage
+        ComponentUtil.storeJSONInLocalStorage(this.filterKey, filter);
+
+        // update state
         this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                type: e.target.value
-            })
+            filter
         });
     }
 
     //when the sort type changes
     sortChange(e) {
         this.setSort(e.target.value);
+    }
+
+    // render filters
+    renderFilters(filters){
+        return filters.map((filter, index)=>{
+            switch(filter.type){
+                case 'search':
+                    return(<input
+                        key={index}
+                        className="search"
+                        type="text"
+                        placeholder="Search"
+                        value={this.state.filter[filter.key]}
+                        onChange={this.filterChange.bind(this, filter.key)}
+                        />)
+
+                break;
+                case 'select':
+                    return (<span key={index}>
+                        <label className="type-label">{filter.title}</label>
+
+                        <select
+                            disabled={filter.options.length == 0}
+                            className="type-select"
+                            value={this.state.filter[filter.key]}
+                            onChange={this.filterChange.bind(this, filter.key)}>
+                                <option />
+                                {filter.options.map((option, index) => (
+                                    <option key={index} value={option.value} disabled={option.disabled}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                        </select>
+                    </span>)
+                break;
+                default: 
+                    console.error("Unknown filter type", filter);
+
+            }
+            return null
+        });
     }
 
     render() {
@@ -124,27 +167,7 @@ class NestedTable extends React.PureComponent {
                     <div className="filters">
                         <div className="left">
                             <h3>Filters</h3>
-
-                            <input
-                                className="search"
-                                type="text"
-                                placeholder="Search"
-                                value={this.state.filter.keywords}
-                                onChange={this.keywordsChange.bind(this)}/>
-
-                            <label className="type-label">Type</label>
-
-                            <select
-                                className="type-select"
-                                value={this.state.type}
-                                onChange={this.typeChange.bind(this)}>
-                                    <option />
-                                    {this.props.filters.map((filter, index) => (
-                                        <option key={index} value={filter.value}>
-                                            {filter.name}
-                                        </option>
-                                    ))}
-                            </select>
+                            {this.renderFilters(this.props.filters)}
                         </div>
 
                         <div className="right">
@@ -171,13 +194,17 @@ class NestedTable extends React.PureComponent {
 
 NestedTable.propTypes = {
     filterItems: PropTypes.func.isRequired,
-    filters: PropTypes.array.isRequired,
+    filters: PropTypes.object,
     items: PropTypes.array.isRequired,
     onExport: PropTypes.func.isRequired,
     orders: PropTypes.array.isRequired,
     renderResults: PropTypes.func.isRequired,
     selection: PropTypes.array,
     sortItems: PropTypes.func.isRequired
+};
+
+NestedTable.defaultProps = {
+    filters: {}
 };
 
 export default NestedTable;

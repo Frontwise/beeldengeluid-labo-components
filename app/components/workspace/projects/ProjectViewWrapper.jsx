@@ -22,23 +22,29 @@ class ProjectViewWrapper extends React.PureComponent {
 
         // unique keys used for storage
         this.keys = {
-            bookmarkCount: 'bg__project-bookmarks-count'
+            bookmarkCount: 'bg__project-bookmarks-count',
+            annotationCount: 'bg__project-annotation-count',
         };
 
         const bookmarkCount =
         window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
+        
+        const annotationCount =
+        window.sessionStorage.getItem(this.keys.annotationCount) || 0;
 
         this.state = {
             loading: true,
             project: null,
-            bookmarkCount: bookmarkCount
+            bookmarkCount: bookmarkCount,
+            annotationCount: annotationCount,
         };
+
+        this.loadBookmarkCount = this.loadBookmarkCount.bind(this);
     }
 
     componentDidMount() {
         this.loadProject();
     }
-
 
     //Load project from url id and load it to the state
     loadProject() {
@@ -69,6 +75,9 @@ class ProjectViewWrapper extends React.PureComponent {
 
     // Load bookmark count from annotation store
     loadBookmarkCount(project) {
+        if (!project){
+            project = this.state.project;
+        }
         AnnotationStore.getUserProjectAnnotations(
             this.props.user,
             project,
@@ -79,13 +88,20 @@ class ProjectViewWrapper extends React.PureComponent {
     //Set bookmark count to state
     setBookmarkCount(data) {
         const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            data.annotations || []
+            data.annotations || [], (bookmarks) =>{
+                const bookmarkCount = bookmarks ? bookmarks.length : 0;
+                window.sessionStorage.setItem(this.keys.bookmarkCount, bookmarkCount);
+
+                const annotationCount = bookmarks ? bookmarks.reduce((a,cur)=>(a + (cur.annotations ? cur.annotations.length : 0) ),0) : 0;
+                window.sessionStorage.setItem(this.keys.annotationCount, annotationCount);
+
+                this.setState({
+                    bookmarkCount, 
+                    annotationCount,
+                });        
+            }
         );
-        const bookmarkCount = bookmarks ? bookmarks.length : 0;
-        window.sessionStorage.setItem(this.keys.bookmarkCount, bookmarkCount);
-        this.setState({
-            bookmarkCount
-        });
+        
     }
 
     render() {
@@ -109,7 +125,7 @@ class ProjectViewWrapper extends React.PureComponent {
                                     '/workspace/projects/' +
                                     encodeURIComponent(project.id) +
                                     '/bookmarks'}>
-                                    Bookmarks & Annotations<span className="count">{this.state.bookmarkCount}</span>
+                                    Bookmarks & Annotations<span className="count">{this.state.bookmarkCount} / {this.state.annotationCount}</span>
                                 </NavLink>
                                 <NavLink activeClassName="active" to={
                                     '/workspace/projects/' +
@@ -133,7 +149,10 @@ class ProjectViewWrapper extends React.PureComponent {
                         </div>
 
                         <div class="component">
-                            <RenderComponent {...this.props} project={this.state.project} />
+                            <RenderComponent {...this.props} 
+                                            project={this.state.project} 
+                                            loadBookmarkCount={this.loadBookmarkCount}
+                                            />
                         </div>
                     </div>
                 )

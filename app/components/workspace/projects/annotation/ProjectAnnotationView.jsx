@@ -33,12 +33,15 @@ class ProjectAnnotationView extends React.PureComponent {
         };
 
         this.viewChange = this.viewChange.bind(this);
+        this.setView = this.setView.bind(this);
     }
 
     viewChange(e) {
-        const view = e.target.value;
+        this.setView(e.target.value);
+    }
 
-        // store view to session storage
+    setView(view){
+          // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
 
         this.setState({
@@ -48,20 +51,72 @@ class ProjectAnnotationView extends React.PureComponent {
 
     render() {
         let viewComponent = null;
-
+        const defaultOptions = {
+            user: this.props.user,
+            project: this.props.project,
+            setView: this.setView,
+            loadBookmarkCount: this.props.loadBookmarkCount,
+        }
         // set viewComponent, based on the current state.view
-
+        // key is required to force the component to update on changes
         switch (this.state.view) {
-            case 'bookmark-centric': viewComponent = (
-                    <BookmarkTable user={this.props.user} project={this.props.project} />
+            case 'bookmark-centric': 
+                viewComponent = (
+                    <BookmarkTable 
+                       {...defaultOptions}
+                    />
                 );
                 break;
-            case 'annotation-centric': viewComponent = (
-                <AnnotationTable user={this.props.user} project={this.props.project} />
+
+            case 'code-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="code" 
+                        type="classification" 
+                        title="Codes" 
+                        filters={["search","vocabulary","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label","vocabulary"]}
+                    />
+                );
+                break;
+
+            case 'comment-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="comments" 
+                        type="comment" 
+                        title="Comments" 
+                        filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-text","z-a-text"]}
+                    />
+                );
+                break;
+
+            case 'link-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="links" 
+                        type="link" 
+                        title="Links"  
+                        filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label"]}
+                    />
+                );
+                break;
+
+            case 'metadata-centric': 
+                viewComponent = (
+                    <AnnotationTable {...defaultOptions}
+                        key="metadata" 
+                        type="metadata" 
+                        title="Metadata" 
+                        filters={["search","code","bookmarkGroup"]}
+                        sort={["created","template"]}
+                    />
                 );
                 break;
         }
-
+        
     return (
         <div className={IDUtil.cssClassName('project-annotation-view')}>
             <div className="tools">
@@ -76,17 +131,47 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'bookmark-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-bookmark">Bookmark-centric</label>
+                        <label htmlFor="view-bookmark">Bookmarks</label>
 
                         <input
                             type="radio"
                             name="view"
-                            value="annotation-centric"
-                            id="view-annotation"
-                            checked={this.state.view === 'annotation-centric'}
+                            value="code-centric"
+                            id="view-code"
+                            checked={this.state.view === 'code-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-annotation">Annotation-centric</label>
+                        <label htmlFor="view-code">Codes</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="comment-centric"
+                            id="view-comment"
+                            checked={this.state.view === 'comment-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-comment">Comments</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="link-centric"
+                            id="view-link"
+                            checked={this.state.view === 'link-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-link">Links</label>
+
+                         <input
+                            type="radio"
+                            name="view"
+                            value="metadata-centric"
+                            id="view-metadata"
+                            checked={this.state.view === 'metadata-centric'}
+                            onChange={this.viewChange}/>
+
+                        <label htmlFor="view-metadata">Metadata</label>
                     </div>
                 </div>
             </div>
@@ -98,7 +183,8 @@ class ProjectAnnotationView extends React.PureComponent {
 
 ProjectAnnotationView.propTypes = {
     user: PropTypes.object.isRequired,
-    project: PropTypes.object.isRequired
+    project: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func,
 };
 
 class WrappedProjectAnnotationView extends React.PureComponent {
