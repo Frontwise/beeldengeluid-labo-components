@@ -4,6 +4,9 @@ import QueryModel from '../model/QueryModel';
 
 const SearchAPI = {
 
+	//TODO combined search instead of a single query to multiple indices for each layer
+	//TODO field specific search in search term syntax
+	//TODO query should become a list of queries for each selected index
 	search(query, collectionConfig, callback, updateUrl = false) {
 		if(query.offset + query.size <= 10000) {
 			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId

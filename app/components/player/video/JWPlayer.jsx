@@ -4,6 +4,7 @@ import IDUtil from '../../../util/IDUtil';
 //key: cp1KvUB8slrOvOjg+U8melMoNwxOm/honmDwGg==
 //https://developer.jwplayer.com/jw-player/docs/developer-guide/api/javascript_api_reference
 
+//@deprecated, don't use this player anymore. Just use the HTML5VideoPlayer
 class JWPlayer extends React.Component {
 
 	constructor(props) {
@@ -14,17 +15,18 @@ class JWPlayer extends React.Component {
 	}
 
 	componentDidMount() {
+		console.debug('MOUNTING JW PLAYER')
 		let type = 'mp4';
 		if (this.props.mediaObject.mimeType && this.props.mediaObject.mimeType.indexOf('audio') != -1) {
 			type = 'mp3';
 		}
 		const playList = [{
 			file : this.props.mediaObject.url,
-			withCredentials : true,
+			withCredentials : this.props.useCredentials,
 			type : type,
 			image: null
 		}]
-		const playerAPI = jwplayer('video_player__' + this.props.mediaObject.id).setup({
+		const playerAPI = jwplayer('jw_player').setup({
 			playlist: playList,
 			// height:'100%',
 			// width: 'auto',
@@ -45,26 +47,54 @@ class JWPlayer extends React.Component {
 	}
 
 	onReady(playerAPI) {
-		this.setState({playerAPI : playerAPI}, function() {
-			if(this.props.onPlayerReady) {
-				this.props.onPlayerReady(new JWPlayerAPI(this.state.playerAPI));
-			}
-			const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
-			if(start > 0) {
-				this.state.playerAPI.seek(start / 1000);
-			}
-		}.bind(this));
+		console.debug('READY JW')
+		if(this.state.playerAPI == null) {
+			this.setState(
+				{playerAPI : playerAPI},
+				() => {
+					this.onSourceLoaded();
+				}
+			);
+		} else {
+			this.onSourceLoaded();
+		}
+	}
+
+	onSourceLoaded() {
+		//then seek to the starting point
+		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
+		if(start > 0) {
+			this.state.playerAPI.seek(start / 1000);
+		}
+
+		//notify the owner
+		if(this.props.onPlayerReady) {
+			this.props.onPlayerReady(new JWPlayerAPI(this.state.playerAPI));
+		}
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			return false
+		}
+		return true
+	}
+
+	componentDidUpdate() {
+		console.debug('make sure the new media object ' + this.props.mediaObject.assetId + ' is loaded')
 	}
 
 	componentWillUnmount() {
 		if(this.state.playerAPI) {
+			console.debug('unmounting the JW player?')
 			this.state.playerAPI.remove();
 		}
 	}
 
 	render() {
+		console.debug('rerendering???')
 		return (
-			<div id={'video_player__' + this.props.mediaObject.id} className={IDUtil.cssClassName('jw-player')}/>
+			<div id={'jw_player'} className={IDUtil.cssClassName('jw-player')}/>
 		);
 	}
 
