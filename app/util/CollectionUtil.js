@@ -30,8 +30,8 @@ const CollectionUtil = {
 			configClass = CollectionMapping[collectionId];
 			if(configClass == null) { //go through the wildcard mappings
 				const temp = Object.keys(CollectionMapping).filter(k => {
-					if(k.indexOf('*') != -1) {						
-						return collectionId && collectionId.startsWith(k.substring(0, k.length -2))
+					if(k.indexOf('*') != -1) {
+						return collectionId.startsWith(k.substring(0, k.length -2))
 					}
 					return false;
 				})

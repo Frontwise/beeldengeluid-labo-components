@@ -10,7 +10,6 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList, createGroupOptionList } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
@@ -43,7 +42,8 @@ class BookmarkTable extends React.PureComponent {
             { value: 'name-az', name: 'Title A-Z' },
             { value: 'name-za', name: 'Title Z-A' },
             { value: 'type', name: 'Type' },
-            { value: 'dataset', name: 'Dataset' }
+            { value: 'dataset', name: 'Dataset' },
+            { value: 'manual', name: 'Manual' }
         ];
 
         this.bulkActions = [
@@ -55,7 +55,6 @@ class BookmarkTable extends React.PureComponent {
             annotations : null,
             bookmarks: [],
             selection: [],
-            showSub: {},
             loading: true,
             detailBookmark: null,
             filters: []
@@ -71,10 +70,8 @@ class BookmarkTable extends React.PureComponent {
 
         this.selectAllChange = this.selectAllChange.bind(this);
         this.selectItem = this.selectItem.bind(this);
+
         this.closeItemDetails = this.closeItemDetails.bind(this);
-        this.toggleSub = this.toggleSub.bind(this);
-        this.unFoldAll = this.unFoldAll.bind(this);
-        this.foldAll = this.foldAll.bind(this);
     }
 
     componentWillMount() {
@@ -89,33 +86,19 @@ class BookmarkTable extends React.PureComponent {
         );
     }
 
-    //Get filter object
+    //Get filter list of unique object types
     getFilters(items) {
-        return [
+        const result = [];
+        const hits = {};
 
-            // search filter
-            {
-                title:'',
-                key: 'keywords',
-                type: 'search'
-            },
-            
-            // type filter        
-            {
-                title:'Type',
-                key: 'type',
-                type: 'select',
-                options: createOptionList(items, (i)=>(i.object.type) ).sort()
-            },
-            // group filter        
-            {
-                title:'Group',
-                key: 'group',
-                type: 'select',
-                options: createGroupOptionList(items).sort()
-            },
-
-        ];      
+        items.forEach(item => {
+            const t = item.object.type;
+            if (!(t in hits)) {
+                result.push({ value: t, name: t.charAt(0).toUpperCase() + t.slice(1) });
+                hits[t] = true;
+            }
+        });
+        return result.sort();
     }
 
     //Annotation load callback: set data to state
@@ -144,27 +127,13 @@ class BookmarkTable extends React.PureComponent {
     //Update Selection list, based on available items
     updateSelection(items) {
         this.setState({
-            selection: items.map(item => item.annotationId).filter(
+            selection: items.map(item => item.id).filter(
                 itemId => this.state.selection.includes(itemId)
             )
         });
     }
 
     filterBookmarks(bookmarks, filter) {
-        // filter on type
-        if (filter.type) {
-            bookmarks = bookmarks.filter(bookmark =>
-                bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
-            );
-        }
-
-        // filter on group
-        if (filter.group) {
-            bookmarks = bookmarks.filter(bookmark =>
-                bookmark.groups.some((g) => (g.annotationId == filter.group))
-            );
-        }
-
         // filter on keywords in title, dataset or type
         if (filter.keywords) {
             const keywords = filter.keywords.split(' ');
@@ -172,20 +141,21 @@ class BookmarkTable extends React.PureComponent {
                 k = k.toLowerCase();
                 bookmarks = bookmarks.filter(
                     bookmark =>
-                    // object
-                    (bookmark.object && Object.keys(bookmark.object).some((key)=>(
-                        typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k))
-                        ))
-                    || 
-                    // annotations
-                    (bookmark.annotations && bookmark.annotations.some((annotation)=>(
-                        Object.keys(annotation).some((key)=>(typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k)))
-                        )))
+                    bookmark.object.title.toLowerCase().includes(k) ||
+                    (bookmark.object.dataset &&
+                        bookmark.object.dataset.toLowerCase().includes(k)) ||
+                    (bookmark.object.type &&
+                        bookmark.object.type.toLowerCase().includes(k))
                 );
             });
         }
 
-      
+        // filter on type
+        if (filter.type) {
+            bookmarks = bookmarks.filter(bookmark =>
+                bookmark.object.type.toLowerCase().includes(filter.type.toLowerCase())
+            );
+        }
 
         return bookmarks;
     }
@@ -247,7 +217,7 @@ class BookmarkTable extends React.PureComponent {
 
     exportBookmarks(selection) {
         const data = this.state.bookmarks.filter(item =>
-            selection.includes(item.annotationId)
+            selection.includes(item.id)
             );
         exportDataAsJSON(data);
     }
@@ -266,12 +236,17 @@ class BookmarkTable extends React.PureComponent {
         });
     }
 
+    //change sort type (TODO change functio nanme)
+    sortChange(e) {
+        this.setSort(e.target.value);
+    }
+
     selectAllChange(items, e) {
         if (e.target.checked) {
             const newSelection = this.state.selection.slice();
             items.forEach(item => {
-                if (!newSelection.includes(item.annotationId)) {
-                    newSelection.push(item.annotationId);
+                if (!newSelection.includes(item.id)) {
+                    newSelection.push(item.id);
                 }
             });
             // set
@@ -279,7 +254,7 @@ class BookmarkTable extends React.PureComponent {
                 selection: newSelection
             });
         } else {
-            items = items.map(item => item.annotationId);
+            items = items.map(item => item.id);
             // unset
             this.setState({
                 selection: this.state.selection.filter(item => !items.includes(item))
@@ -289,10 +264,10 @@ class BookmarkTable extends React.PureComponent {
 
     selectItem(item, select) {
         if (select) {
-            if (!this.state.selection.includes(item.annotationId)) {
+            if (!this.state.selection.includes(item.id)) {
                 // add to selection
                 this.setState({
-                    selection: [...this.state.selection, item.annotationId]
+                    selection: [...this.state.selection, item.id]
                 });
             }
             return;
@@ -301,7 +276,7 @@ class BookmarkTable extends React.PureComponent {
         // remove from selection
         if (!select) {
             this.setState({
-                selection: this.state.selection.filter(selected => selected !== item.annotationId)
+                selection: this.state.selection.filter(selected => selected !== item.id)
             });
         }
     }
@@ -315,31 +290,6 @@ class BookmarkTable extends React.PureComponent {
         this.loadBookmarks();
     }
 
-    // Toggle sublevel visibility
-    toggleSub(id){
-        const showSub = Object.assign({}, this.state.showSub);
-        if (id in showSub){
-            delete showSub[id];
-        } else{
-            showSub[id] = true;
-        }
-        this.setState({showSub});
-    }
-
-    unFoldAll(){
-        const showSub = {};
-        this.state.bookmarks.forEach((b)=>{
-            if (b.annotations && b.annotations.length > 0){
-                showSub[b.annotationId] = true;        
-            }            
-        });
-        this.setState({showSub});
-    }
-
-    foldAll(){
-        this.setState({showSub:{}});
-    }
-
     renderResults(renderState) {
         return (
             <div>
@@ -348,29 +298,23 @@ class BookmarkTable extends React.PureComponent {
                         type="checkbox"
                         checked={
                             renderState.visibleItems.length > 0 && renderState.visibleItems.every(item =>
-                                this.state.selection.includes(item.annotationId)
+                                this.state.selection.includes(item.id)
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
 
                     Bookmarks:{' '}
                     <span className="count">{renderState.visibleItems.length || 0}</span>
-                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
-                    <div className="fold" onClick={this.foldAll}>Fold all</div>
                 </h2>
-
                 <div className="bookmark-table">
                     {renderState.visibleItems.map((bookmark, index) => (
                         <BookmarkRow
-                            key={bookmark.id}
+                            key={index}
                             bookmark={bookmark}
                             onDelete={this.deleteBookmarks}
                             onView={this.viewBookmark}
-                            selected={this.state.selection.includes(bookmark.annotationId)}
-                            onSelect={this.selectItem}
-                            showSub={bookmark.annotationId in this.state.showSub}
-                            toggleSub={this.toggleSub}
-                            />
+                            selected={this.state.selection.includes(bookmark.id)}
+                            onSelect={this.selectItem}/>
                     ))}
                 </div>
             </div>
@@ -396,9 +340,7 @@ class BookmarkTable extends React.PureComponent {
                     filterItems={this.filterBookmarks}
                     filters={this.state.filters}
                     renderResults={this.renderResults}
-                    onExport={exportDataAsJSON}
-                    showSub={this.state.showSub}
-                    />
+                    onExport={exportDataAsJSON}/>
 
                 <BulkActions
                     bulkActions={this.bulkActions}
