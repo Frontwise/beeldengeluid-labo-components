@@ -63,11 +63,6 @@ const AnnotationUtil = {
 					annotations: na.body ? na.body.filter(a => {
 						return a.vocabulary != 'clariahwp5-bookmark-group'
 					}) : null,
-
-					// bookmark groups
-					groups: na.body ? na.body.filter(a => {
-						return a.vocabulary == 'clariahwp5-bookmark-group'
-					}) : [],
 				}
 			}))
 		});
@@ -116,10 +111,9 @@ const AnnotationUtil = {
 					//TODO get the client ID + user ID!!
 					const configClass = CollectionUtil.getCollectionClass(null, null, collectionId, true);
 					const collectionConfig = new configClass(collectionId);
-
-					const mappedResourceData = resourceData  && !resourceData.error ? resourceData.map((doc) => {
+					const mappedResourceData = resourceData.map((doc) => {
 						return doc.found ? collectionConfig.getItemDetailData(doc) : null;
-					}) : [];
+					})
 
 					accumulatedData[collectionId] = mappedResourceData;
 					if(Object.keys(resourceIds).length == Object.keys(accumulatedData).length) {

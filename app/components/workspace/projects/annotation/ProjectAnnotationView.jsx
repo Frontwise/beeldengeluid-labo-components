@@ -33,15 +33,12 @@ class ProjectAnnotationView extends React.PureComponent {
         };
 
         this.viewChange = this.viewChange.bind(this);
-        this.setView = this.setView.bind(this);
     }
 
     viewChange(e) {
-        this.setView(e.target.value);
-    }
+        const view = e.target.value;
 
-    setView(view){
-          // store view to session storage
+        // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
 
         this.setState({
@@ -51,67 +48,20 @@ class ProjectAnnotationView extends React.PureComponent {
 
     render() {
         let viewComponent = null;
-        const defaultOptions = {
-            user: this.props.user,
-            project: this.props.project,
-            setView: this.setView,
-        }
+
         // set viewComponent, based on the current state.view
-        // key is required to force the component to update on changes
+
         switch (this.state.view) {
-            case 'bookmark-centric': 
-                viewComponent = (
-                    <BookmarkTable 
-                       {...defaultOptions}
-                    />
+            case 'bookmark-centric': viewComponent = (
+                    <BookmarkTable user={this.props.user} project={this.props.project} />
                 );
                 break;
-
-            case 'code-centric': 
-                viewComponent = (
-                    <AnnotationTable {...defaultOptions}
-                        key="code" 
-                        type="classification" 
-                        title="Codes" 
-                        filters={["search","vocabulary","bookmarkGroup"]}
-                    />
-                );
-                break;
-
-            case 'comment-centric': 
-                viewComponent = (
-                    <AnnotationTable {...defaultOptions}
-                        key="comments" 
-                        type="comment" 
-                        title="Comments" 
-                        filters={["search","code","bookmarkGroup"]}
-                    />
-                );
-                break;
-
-            case 'link-centric': 
-                viewComponent = (
-                    <AnnotationTable {...defaultOptions}
-                        key="links" 
-                        type="link" 
-                        title="Links"  
-                        filters={["search","code","bookmarkGroup"]}
-                    />
-                );
-                break;
-
-            case 'metadata-centric': 
-                viewComponent = (
-                    <AnnotationTable {...defaultOptions}
-                        key="metadata" 
-                        type="metadata" 
-                        title="Metadata" 
-                        filters={["search","code","bookmarkGroup"]}
-                    />
+            case 'annotation-centric': viewComponent = (
+                <AnnotationTable user={this.props.user} project={this.props.project} />
                 );
                 break;
         }
-        
+
     return (
         <div className={IDUtil.cssClassName('project-annotation-view')}>
             <div className="tools">
@@ -126,47 +76,17 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'bookmark-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-bookmark">Bookmarks</label>
+                        <label htmlFor="view-bookmark">Bookmark-centric</label>
 
                         <input
                             type="radio"
                             name="view"
-                            value="code-centric"
-                            id="view-code"
-                            checked={this.state.view === 'code-centric'}
+                            value="annotation-centric"
+                            id="view-annotation"
+                            checked={this.state.view === 'annotation-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-code">Codes</label>
-
-                         <input
-                            type="radio"
-                            name="view"
-                            value="comment-centric"
-                            id="view-comment"
-                            checked={this.state.view === 'comment-centric'}
-                            onChange={this.viewChange}/>
-
-                        <label htmlFor="view-comment">Comments</label>
-
-                         <input
-                            type="radio"
-                            name="view"
-                            value="link-centric"
-                            id="view-link"
-                            checked={this.state.view === 'link-centric'}
-                            onChange={this.viewChange}/>
-
-                        <label htmlFor="view-link">Links</label>
-
-                         <input
-                            type="radio"
-                            name="view"
-                            value="metadata-centric"
-                            id="view-metadata"
-                            checked={this.state.view === 'metadata-centric'}
-                            onChange={this.viewChange}/>
-
-                        <label htmlFor="view-metadata">Metadata</label>
+                        <label htmlFor="view-annotation">Annotation-centric</label>
                     </div>
                 </div>
             </div>
