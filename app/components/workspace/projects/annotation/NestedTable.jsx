@@ -22,15 +22,14 @@ class NestedTable extends React.PureComponent {
             visibleItems: [],
             loading: true,
             filter: {
-                keywords: '',
-                type: ''
+                keywords: '',                
             },
             order: 'created'
         };
     }
 
 
-    componentWillMount() {
+    componentDidMount() {
         // instead of breaking out of the container, change the background color to a white and gray region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
     }
@@ -89,27 +88,58 @@ class NestedTable extends React.PureComponent {
         }
     }
 
-    //when the user types in the filter field
-    keywordsChange(e) {
+    // user changes a filter
+    filterChange(key, e) {
+        const filter = {};
+        filter[key] = e.target.value;
         this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                keywords: e.target.value
-            })
-        });
-    }
-
-    //when the type pull down value changes
-    typeChange(e) {
-        this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                type: e.target.value
-            })
+            filter: Object.assign({}, this.state.filter, filter)
         });
     }
 
     //when the sort type changes
     sortChange(e) {
         this.setSort(e.target.value);
+    }
+
+    // render filters
+    renderFilters(filters){
+        return filters.map((filter, index)=>{
+            switch(filter.type){
+                case 'search':
+                    return(<input
+                        key={index}
+                        className="search"
+                        type="text"
+                        placeholder="Search"
+                        value={this.state.filter[filter.key]}
+                        onChange={this.filterChange.bind(this, filter.key)}
+                        />)
+
+                break;
+                case 'select':
+                    return (<span key={index}>
+                        <label className="type-label">{filter.title}</label>
+
+                        <select
+                            className="type-select"
+                            value={this.state.type}
+                            onChange={this.filterChange.bind(this, filter.key)}>
+                                <option />
+                                {filter.options.map((option, index) => (
+                                    <option key={index} value={option.value}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                        </select>
+                    </span>)
+                break;
+                default: 
+                    console.error("Unknown filter type", filter);
+
+            }
+            return null
+        });
     }
 
     render() {
@@ -125,26 +155,7 @@ class NestedTable extends React.PureComponent {
                         <div className="left">
                             <h3>Filters</h3>
 
-                            <input
-                                className="search"
-                                type="text"
-                                placeholder="Search"
-                                value={this.state.filter.keywords}
-                                onChange={this.keywordsChange.bind(this)}/>
-
-                            <label className="type-label">Type</label>
-
-                            <select
-                                className="type-select"
-                                value={this.state.type}
-                                onChange={this.typeChange.bind(this)}>
-                                    <option />
-                                    {this.props.filters.map((filter, index) => (
-                                        <option key={index} value={filter.value}>
-                                            {filter.name}
-                                        </option>
-                                    ))}
-                            </select>
+                            {this.renderFilters(this.props.filters)}
                         </div>
 
                         <div className="right">
@@ -171,13 +182,17 @@ class NestedTable extends React.PureComponent {
 
 NestedTable.propTypes = {
     filterItems: PropTypes.func.isRequired,
-    filters: PropTypes.array.isRequired,
+    filters: PropTypes.object,
     items: PropTypes.array.isRequired,
     onExport: PropTypes.func.isRequired,
     orders: PropTypes.array.isRequired,
     renderResults: PropTypes.func.isRequired,
     selection: PropTypes.array,
     sortItems: PropTypes.func.isRequired
+};
+
+NestedTable.defaultProps = {
+    filters: {}
 };
 
 export default NestedTable;

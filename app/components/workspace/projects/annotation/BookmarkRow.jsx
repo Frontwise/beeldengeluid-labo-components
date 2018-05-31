@@ -15,15 +15,10 @@ class BookmarkRow extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {
-            showAnnotations:
-            this.props.bookmark.annotations &&
-            this.props.bookmark.annotations.length > 0
-        };
-
         // bind functions
         this.onDelete = this.onDelete.bind(this);
         this.onView = this.onView.bind(this);
+        this.toggleSub = this.toggleSub.bind(this);
     }
 
     onDelete() {
@@ -45,20 +40,18 @@ class BookmarkRow extends React.PureComponent {
         this.props.onSelect(this.props.bookmark, e.target.checked);
     }
 
-    toggleAnnotations() {
-        this.setState({
-            showAnnotations: !this.state.showAnnotations
-        });
+    toggleSub(e){
+        this.props.toggleSub(this.props.bookmark.annotationId);
     }
 
-    render() {
+   render() {
         const bookmark = this.props.bookmark;
         const annotations = bookmark.annotations || [];
         const hasAnnotations = annotations.length > 0;
 
         //populate the foldable annotation block
         let foldableBlock = null;
-        if(this.state.showAnnotations) {
+        if(this.props.showSub) {
             let blockContents = null;
             if(!hasAnnotations) {
                 blockContents = (
@@ -120,57 +113,53 @@ class BookmarkRow extends React.PureComponent {
                             checked={this.props.selected}
                             onChange={this.onSelectChange.bind(this)}
                             title={'Select this bookmark with id:\n' + bookmark.id}/>
+                        <div className="delete" onClick={this.onDelete} title="Delete bookmark" />
                     </div>
 
-                    <div className="image" style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
+                    <div className="image" onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
 
-                    <div className="info">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <h4 className="label">Title</h4>
-                                        <p className="bold">{bookmark.object.title}</p>
-                                    </td>
-                                    <td>
-                                        <h4 className="label">Date</h4>
-                                        <p>
-                                            {resourceDate}
-                                        </p>
-                                    </td>
-                                </tr>
-
-                                <tr className="subcol">
-                                    <td>
-                                        <h4 className="label">Type</h4>
-                                        <p>{bookmark.object.type}</p>
-                                    </td>
-                                    <td>
-                                        <h4 className="label">Dataset</h4>
-                                        <p>{bookmark.object.dataset}</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul className="info">
+                        <li className="primary">
+                            <h4 className="label">Title</h4>
+                            <p onClick={this.onView}>{bookmark.object.title}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Date</h4>
+                            <p>{resourceDate}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Type</h4>
+                            <p>{bookmark.object.type}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Dataset</h4>
+                            <p>{bookmark.object.dataset}</p>
+                        </li>
+                        <li>
+                            <h4 className="label">Groups</h4>
+                            <p className="groups">
+                            {/*<span>Haarlem</span><span>Watersnood</span><span>Dummy</span>*/}
+                                {bookmark.groups ? 
+                                bookmark.groups.map((g)=>(<span>{g.label}</span>))
+                                : null}
+                            </p>
+                        </li>
+                    </ul>
 
                     <div className="actions">
-                        <div className="btn blank warning" onClick={this.onDelete}>
-                            Delete
-                        </div>
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
-                    </div>
 
-                    <div className={classNames('sublevel-button', {
-                            active: this.state.showAnnotations,
-                            zero: !hasAnnotations
-                        })} onClick={this.toggleAnnotations.bind(this)}>
-                        Annotations <span className="count">{annotations.length}</span>
+                        <div title="Annotations" className={classNames('sublevel-button', {
+                                active: this.props.showsub,
+                                zero: !hasAnnotations
+                            })} onClick={this.toggleSub}>
+                            <span className="icon annotation"/>
+                            <span className="count">{annotations.length}</span>
+                        </div>
                     </div>
                 </div>
-
                 {foldableBlock}
             </div>
         );
@@ -179,6 +168,8 @@ class BookmarkRow extends React.PureComponent {
 
 BookmarkRow.propTypes = {
     bookmark: PropTypes.object.isRequired,
+    toggleSub: PropTypes.func.isRequired,
+    showSub: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
