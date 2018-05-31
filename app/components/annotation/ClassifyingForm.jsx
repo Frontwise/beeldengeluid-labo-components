@@ -2,6 +2,7 @@ import Autosuggest from 'react-autosuggest'; //See: https://github.com/moroshko/
 import Classification from './Classification';
 import IDUtil from '../../util/IDUtil';
 import ExternalAPI from '../../api/ExternalAPI';
+import debounce from 'debounce';
 
 /*
 Input:
@@ -30,6 +31,8 @@ class ClassifyingForm extends React.Component {
 			vocabulary : vocabulary
 		}
 		this.xhrs = [];
+
+		this.getSuggestions = debounce(this.getSuggestions.bind(this), 400);
 	}
 
 	/* ------------------- CRUD / loading of classifications ------------------- */

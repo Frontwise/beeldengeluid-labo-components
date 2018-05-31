@@ -13,6 +13,7 @@ import ProjectEditView from './components/workspace/projects/crud/ProjectEditVie
 
 //session view
 import ProjectSessionView from './components/workspace/projects/session/ProjectSessionView';
+import ProjectSessionCreateView from './components/workspace/projects/session/ProjectSessionCreateView';
 
 //queries view
 import ProjectQueriesView from './components/workspace/projects/query/ProjectQueriesView';
@@ -45,6 +46,9 @@ class WorkspaceProjects extends Component {
         return(
             <Router>
                 <Switch>
+                    <Route exact path="/workspace/projects/session/create/:tool"
+                        render={this.getPropsRenderer(ProjectSessionCreateView, this.props, {api: ProjectAPI})} />
+
                     <Route exact path="/workspace/projects"
                         render={this.getPropsRenderer(ProjectListView, this.props, {api: ProjectAPI} )} />
                     <Route exact path="/workspace/projects/create"
@@ -55,7 +59,7 @@ class WorkspaceProjects extends Component {
                     )} />
 
                     <Route path="/workspace/projects/:id/bookmarks"
-                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />
+                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />                    
                     <Route path="/workspace/projects/:id/sessions"
                         render={this.getPropsRenderer(ProjectSessionView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/queries"

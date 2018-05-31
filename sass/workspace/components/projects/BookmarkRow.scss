@@ -6,26 +6,10 @@
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
+      flex-shrink: 0;
+      cursor: pointer;
     }
-
     .info li{         
-      .image{
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-
-      .groups{
-        span{
-          display: inline-block;
-          background-color: $clGrey;
-          text-transform: uppercase;
-          font-size: 11px;
-          margin: 3px;
-          border-radius: 2px;          
-          padding: 1px 4px; 
-        }
-      }
-
       &.primary p{
         cursor: pointer;
         &:hover{

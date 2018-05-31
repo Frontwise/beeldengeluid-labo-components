@@ -250,6 +250,8 @@ class SingleSearchRecipe extends React.Component {
 					dedupedTargets.push(t);
 				}
 			})
+
+			console.log(annotation);
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API
@@ -397,7 +399,7 @@ class SingleSearchRecipe extends React.Component {
 		}
 
 		//only draw when a collection config is properly loaded
-		if(this.state.collectionId && this.state.collectionConfig && this.state.query) {
+		if(this.state.collectionId && this.state.collectionConfig) { // && this.state.query
 
 			//this components outputs: search results, aggregations & sorting & paging functions!
 			searchComponent = (
@@ -410,7 +412,7 @@ class SingleSearchRecipe extends React.Component {
 					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
 					showTimeLine={true}
 
-					query={this.state.query}
+					query={this.state.query || QueryModel.ensureQuery(null, this.state.collectionConfig) }
 					collectionConfig={this.state.collectionConfig}
 
 					onOutput={this.onComponentOutput.bind(this)}/>

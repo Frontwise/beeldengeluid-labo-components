@@ -55,6 +55,7 @@ class ProjectAnnotationView extends React.PureComponent {
             user: this.props.user,
             project: this.props.project,
             setView: this.setView,
+            loadBookmarkCount: this.props.loadBookmarkCount,
         }
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
@@ -74,6 +75,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="classification" 
                         title="Codes" 
                         filters={["search","vocabulary","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label","vocabulary"]}
                     />
                 );
                 break;
@@ -85,6 +87,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="comment" 
                         title="Comments" 
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-text","z-a-text"]}
                     />
                 );
                 break;
@@ -96,6 +99,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="link" 
                         title="Links"  
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","a-z-label","z-a-label"]}
                     />
                 );
                 break;
@@ -107,6 +111,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         type="metadata" 
                         title="Metadata" 
                         filters={["search","code","bookmarkGroup"]}
+                        sort={["created","template"]}
                     />
                 );
                 break;
@@ -178,7 +183,8 @@ class ProjectAnnotationView extends React.PureComponent {
 
 ProjectAnnotationView.propTypes = {
     user: PropTypes.object.isRequired,
-    project: PropTypes.object.isRequired
+    project: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func,
 };
 
 class WrappedProjectAnnotationView extends React.PureComponent {

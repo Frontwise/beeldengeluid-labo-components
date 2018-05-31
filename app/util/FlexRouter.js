@@ -29,7 +29,11 @@ const FlexRouter = {
 				FIXME the URL should be a "safe" URL, so for B&G only the safe play-out link should be shown.
 				Also the resource viewer must be able to identify the right media object using this safe URL
 			*/
+
+			//TODO test this change to assetId thoroughly!
 			if(searchResult.mediaFragment.hasOwnProperty('url')) { url += '&fragmentUrl=' + searchResult.mediaFragment.url; }
+			//if(searchResult.mediaFragment.hasOwnProperty('assetId')) { url += '&assetId=' + searchResult.mediaFragment.assetId; }
+
 			if(searchResult.mediaFragment.hasOwnProperty('start')) { url += '&s=' + searchResult.mediaFragment.start; }
 			if(searchResult.mediaFragment.hasOwnProperty('end')) { url += '&e=' + searchResult.mediaFragment.end; }
 			if(searchResult.mediaFragment.hasOwnProperty('x')) { url += '&x=' + searchResult.mediaFragment.x; }
@@ -67,7 +71,7 @@ const FlexRouter = {
 	//TODO extend this function so it is optional to put the params in the URL
 	setBrowserHistory : function(params, stateTitle) {
 		let url = document.location.pathname;
-		let paramList = FlexRouter.__toUrlParamList(params);
+		const paramList = FlexRouter.__toUrlParamList(params);
 		if(paramList) {
 			url += '?' + paramList.join('&');
 		}

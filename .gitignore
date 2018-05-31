@@ -5,6 +5,7 @@ dist
 app/collection/mappings
 !app/collection/mappings/ExampleCollectionConfig.js
 !app/collection/mappings/ExampleCollectionMapping.js
+!app/collection/mappings/GenericPersonalCollectionConfig.js
 !app/collection/mappings/CollectionConfig.js
 .idea
 transcript.json

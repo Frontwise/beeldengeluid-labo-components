@@ -94,16 +94,21 @@ class AnnotationRow extends React.PureComponent {
                     <ul className="info annotation-metadata">
                         <li className="template" className="primary">
                             <h4 className="label">Template</h4>
-                            <p>{annotation.annotationTemplate}</p>
+                            <p>{annotation.annotationTemplate || '-'}</p>
                         </li>
 
-                        {annotation.properties ? annotation.properties.map((property, index) => (
-                            <li key={index}>
-                                <h4 className="label">{property.key}</h4>
-                                <p>{property.value}</p>
-                            </li>
-                            )) : '-'
-                        }
+                        <li className="template">
+                            <h4 className="label">Fields</h4>
+                            <ul>
+                            {annotation.properties ? annotation.properties.map((property, index) => (
+                                <li key={index}>
+                                    <h4>{property.key}</h4>
+                                    <p>{property.value}</p>
+                                </li>
+                                )) : '-'
+                            }
+                            </ul>
+                        </li>
 
                         <li className="created">
                             <h4 className="label">Created</h4>
@@ -142,16 +147,22 @@ class AnnotationRow extends React.PureComponent {
                         <thead>
                             <tr>
                                 <th>Type</th>
-                                <th>Resource ID</th>
+                                <th>Title</th>
                                 <th>Dataset</th>
+                                <th>☆ Groups</th>
                             </tr>
                         </thead>
                         <tbody>
                             {bookmarks.map(bookmark => (
                                 <tr>
                                     <td>{bookmark.type}</td>
-                                    <td>{bookmark.title}</td>
+                                    <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
+                                    <td className="groups">
+                                        {bookmark.groups ? 
+                                            bookmark.groups.map((g)=>(<span>{g.label}</span>))
+                                            : null}
+                                    </td>
                                     <td className="actions">
                                         <div className="btn primary" onClick={this.onView.bind(this, bookmark)}>
                                             View

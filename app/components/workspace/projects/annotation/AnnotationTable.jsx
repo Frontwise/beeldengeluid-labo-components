@@ -9,13 +9,14 @@ import AnnotationUtil from '../../../../util/AnnotationUtil';
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import BulkActions from '../../helpers/BulkActions';
-import { createOptionList } from '../../helpers/OptionList';
+import { createOptionList, createAnnotationClassificationOptionList } from '../../helpers/OptionList';
 import { exportDataAsJSON } from '../../helpers/Export';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
 import NestedTable from './NestedTable';
 import AnnotationRow from './AnnotationRow';
+import classNames from 'classnames';
 
 import PropTypes from 'prop-types';
 
@@ -31,14 +32,7 @@ class AnnotationTable extends React.PureComponent {
 
         this.title = props.title;
 
-        this.annotationTypes = [
-            { value: 'classification', name: 'Code' },
-            { value: 'comment', name: 'Comment' },
-            { value: 'link', name: 'Link' },
-            { value: 'metadata', name: 'Metadata' }
-        ];
-
-        this.orders = [{ value: 'created', name: 'Annotation created' }];
+        this.orders = this.getOrders();
 
         this.bulkActions = [
             { title: 'Delete', onApply: this.deleteAnnotations.bind(this) },
@@ -82,6 +76,65 @@ class AnnotationTable extends React.PureComponent {
         );
     }
 
+
+    onLoadAnnotations(data) {
+        const parentAnnotations = data.annotations || [];
+        const annotations = AnnotationUtil.generateAnnotationCentricList(
+            parentAnnotations, this.props.type, (annotations)=>{
+                this.setState({
+                    parentAnnotations: data.annotations,
+                    annotations: annotations,
+                    loading: false,
+                    filters: this.getFilters(annotations)
+                },
+                () => {
+                    this.updateSelection(annotations)
+                }
+            )
+        }
+        );
+      
+    }
+
+    //Get sort orders
+    getOrders(items){
+        const sortNames = {
+            'created': 'Created at',
+            // a-z
+            'a-z-label': 'A-Z',
+            'a-z-text': 'A-Z',
+            // z-a
+            'z-a-label': 'Z-A',
+            'z-a-text': 'Z-A',
+
+            'vocabulary': 'Vocabulary',
+            'template': 'Template',
+        };
+
+        return this.props.sort.map((sort)=>({ 
+                value: sort,
+                name: (sort in sortNames) ? sortNames[sort] : '!! ' + sort
+            })
+        );
+    }
+
+    sortAnnotations(annotations, field) {
+        const safeToLowerCase= (s)=>(
+            s && typeof s === 'string' ? s.toLowerCase() : ''
+        )
+        switch (field) {
+            case 'created': return annotations.sort((a, b) => a.created > b.created); 
+            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label)); 
+            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label)); 
+            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text)); 
+            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text)); 
+            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary)); 
+            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template)); 
+            default: return annotations;
+        }
+    }
+
+
     //Get filter object
     getFilters(items) {
         return this.props.filters.map((filter)=>{
@@ -99,23 +152,24 @@ class AnnotationTable extends React.PureComponent {
                         title:'Vocabulary',
                         key: 'vocabulary',
                         type: 'select',
-                        options: createOptionList(items,  (i)=>(i['vocabulary']) ).sort()
+                        options: createOptionList(items,  (i)=>(i['vocabulary']) )
                     }
                 break;
                 case 'bookmarkGroup':
+                    
                     return {
-                        title:'Bookmark group',
+                        title:'☆ Group',
                         key: 'bookmarkGroup',
-                        type: 'select',
-                        options: createOptionList(items, (i)=>(i['bookmarkGroup'])).sort()
+                        type: 'select',                         
+                        options: createAnnotationClassificationOptionList(items, 'groups'),
                     }
                 break;
                 case 'code':
                     return {
-                        title:'Code',
-                        key: 'code',
+                        title:'☆ Code',
+                        key: 'bookmarkClassification',
                         type: 'select',
-                        options: createOptionList(items, (i)=>(i['code'])).sort()
+                        options: createAnnotationClassificationOptionList(items, 'classifications'),
                     }
                 break;
                 default:
@@ -123,33 +177,6 @@ class AnnotationTable extends React.PureComponent {
             }
         })
     }
-
-    onLoadAnnotations(data) {
-        const parentAnnotations = data.annotations || [];
-
-        let annotations = AnnotationUtil.generateAnnotationCentricList(
-            parentAnnotations
-        );
-
-        // filter on type
-        if (this.props.type) {
-            annotations = annotations.filter(annotation =>
-                annotation.annotationType.toLowerCase().includes(this.props.type)
-            );
-        }
-      
-        this.setState({
-                parentAnnotations: data.annotations,
-                annotations: annotations,
-                loading: false,
-                filters: this.getFilters(annotations)
-            },
-            () => {
-                this.updateSelection(annotations)
-            }
-        );
-    }
-
 
     //Update Selection list, based on available items
     updateSelection(items) {
@@ -160,21 +187,45 @@ class AnnotationTable extends React.PureComponent {
         });
     }
 
+
+    filterByKeyValue(items, getValue, value) {
+        return items.filter((i)=>(getValue(i) === value))
+    };
+
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-
-        const simpleKeyCheck = (items, getValue, value) =>(items.filter((i)=>(getValue(i) === value)));
         
+        // check the annotation vocabulary
         if (filter.vocabulary){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['vocabulary']), filter.vocabulary);
+            annotations = annotations.filter((a)=>(a.vocabulary === filter.vocabulary));
         }
-
-        if (filter.code){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['code']), filter.code);
-        }
-
+        
+        // check the groups for each bookmark of each annotation
         if (filter.bookmarkGroup){
-            annotations = simpleKeyCheck(annotations, (a)=>(a['bookmarkGroup']), filter.bookmarkGroup);
+            annotations = annotations.filter((a)=>(
+                    a.bookmarks.some(
+                        (b)=>(
+                            b.groups.some(
+                                (c) => (c.annotationId === filter.bookmarkGroup)
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // check the classifications for each bookmark of each annotation
+        if (filter.bookmarkClassification){
+            annotations = annotations.filter((a)=>(
+                    a.bookmarks.some(
+                        (b)=>(
+                            b.classifications.some(
+                                (c) => (c.annotationId === filter.bookmarkClassification)
+                            )
+                        )
+                    )
+                )
+            );
         }
 
         // filter on keywords in title, dataset or type
@@ -189,9 +240,16 @@ class AnnotationTable extends React.PureComponent {
                         typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k))
                         ))
                     || 
-                    // annotations
+                    // bookmarks
                     (annotation.bookmarks && annotation.bookmarks.some((bookmark)=>(
+                        // bookmark
                         Object.keys(bookmark).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        // bookmark-object
+                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k)))
+                        // bookmark-groups
+                        || bookmark.groups.some((g)=>(g.label.toLowerCase().includes(k)))
+                        // bookmark-groups
+                        || bookmark.classifications.some((g)=>(g.label.toLowerCase().includes(k)))
                         ))
                     )
                 );
@@ -201,15 +259,6 @@ class AnnotationTable extends React.PureComponent {
         return annotations;
     }
 
-    sortAnnotations(annotations, field) {
-        const sorted = annotations;
-        switch (field) {
-            case 'created': sorted.sort((a, b) => a.created > b.created); break;
-            default: return sorted;
-        }
-
-        return sorted;
-    }
 
     deleteAnnotations(annotationIds) {
         if(annotationIds) {
@@ -225,8 +274,13 @@ class AnnotationTable extends React.PureComponent {
                 this.state.annotations,
                 annotationIds,
                 (success) => {
-                    console.debug('reloading annotation-list', this)
-                    setTimeout(this.loadAnnotations.call(this), 250);
+                    setTimeout(()=>{
+                        // load new data
+                        this.loadAnnotations();
+
+                        // update bookmark count in project menu
+                        this.props.loadBookmarkCount();
+                    }, 500);                    
                 }
             )
         }
@@ -268,6 +322,9 @@ class AnnotationTable extends React.PureComponent {
 
         // refresh data
         this.loadAnnotations();
+
+        // update bookmark count in project menu
+        this.props.loadBookmarkCount();
     }
 
     sortChange(e) {
@@ -316,7 +373,6 @@ class AnnotationTable extends React.PureComponent {
         }
     }
 
-
     // Toggle sublevel visibility
     toggleSub(id){
         const showSub = Object.assign({}, this.state.showSub);
@@ -362,7 +418,8 @@ class AnnotationTable extends React.PureComponent {
                     <div className="fold" onClick={this.foldAll}>Fold all</div>
                 </h2>
                 <div className="bookmark-table">
-                    {renderState.visibleItems.map((annotation, index) => (
+                    {renderState.visibleItems.length ? 
+                        renderState.visibleItems.map((annotation, index) => (
                         <AnnotationRow
                             key={annotation.annotationId}
                             annotation={annotation}
@@ -373,7 +430,9 @@ class AnnotationTable extends React.PureComponent {
                             showSub={annotation.annotationId in this.state.showSub}
                             toggleSub={this.toggleSub}
                             />
-                        ))}
+                        ))
+                        : <h3>∅ No results</h3>
+                    }
                 </div>
 
                
@@ -391,7 +450,7 @@ class AnnotationTable extends React.PureComponent {
             )
         }
         return (
-            <div className={IDUtil.cssClassName('annotation-table')}>
+            <div className={classNames(IDUtil.cssClassName('annotation-table'),{loading:this.state.loading})}>
                 <NestedTable
                     items={this.state.annotations}
                     selection={this.state.selection}
@@ -402,6 +461,7 @@ class AnnotationTable extends React.PureComponent {
                     renderResults={this.renderResults}
                     onExport={this.exportAnnotations}
                     showSub={this.state.showSub}
+                    uid={this.props.project.id + "-annotation-"+this.props.type}
                     />
 
                 <BulkActions
@@ -417,14 +477,17 @@ class AnnotationTable extends React.PureComponent {
 
 AnnotationTable.propTypes = {
     api: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired,
-    type: PropTypes.string,
-    title: PropTypes.string,
     filters: PropTypes.array.isRequired,
+    loadBookmarkCount: PropTypes.func.isRequired,
+    sort: PropTypes.array,
+    title: PropTypes.string,
+    type: PropTypes.string,
+    user: PropTypes.object.isRequired,
 };
 
 AnnotationTable.defaultTypes = {
-    filters: []
+    filters: [],
+    sort: [],
 }
 
 export default AnnotationTable;

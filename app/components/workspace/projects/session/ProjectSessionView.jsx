@@ -23,17 +23,17 @@ class ProjectSessionView extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        // Add dummy data
-        const exampleUrl = '/tool/exploratory-search?path=/browser/session%3Fid=an-1acf4520-f414-4198-a61f-a91a44fd7408';
-        if (!props.project.sessions) {
-            props.project.sessions = [{
-                id: 'abcd12349',
-                name: 'Session example: Wereldreis',
-                tool: 'MS: DIVE+',
-                data: { url: exampleUrl },
-                created: '2017-12-08T18:31:47Z'
-            }];
-        }
+        // // Add dummy data
+        // const exampleUrl = '/tool/exploratory-search?path=/browser/session%3Fid=an-1acf4520-f414-4198-a61f-a91a44fd7408';
+        // if (!props.project.sessions) {
+        //     props.project.sessions = [{
+        //         id: 'abcd12349',
+        //         name: 'Session example: Wereldreis',
+        //         tool: 'MS: DIVE+',
+        //         data: { url: exampleUrl },
+        //         created: '2017-12-08T18:31:47Z'
+        //     }];
+        // }
 
         this.defaultSort = {
             field: 'name',
@@ -159,6 +159,25 @@ class ProjectSessionView extends React.PureComponent {
         return sort.order === 'desc' ? sorted.reverse() : sorted;
     }
 
+    // based on the session, decide which url to generate
+    generateSessionUrl(session){
+        switch(session.tool){
+
+            // dive-vu via within media suite
+            case 'dive-vu':
+                return "/tool/exploratory-search?path=/browser/session%3F"+encodeURIComponent(session.data.annotationId);
+            break;
+
+            // dive frontwise open beelden
+            case 'dive-fw':
+                return "http://openbeelden.diveplus.frontwise.com/browser/session?id="+encodeURIComponent(session.data.annotationId);
+            break;
+
+            default:
+                console.error("Could not generate a Url for ", session);
+        }
+    }
+
     render() {
         const sessions = this.state.sessions;
         const currentUser = this.props.user;
@@ -194,7 +213,7 @@ class ProjectSessionView extends React.PureComponent {
                         content: <Link to={session.id}>{session.name}</Link>
                     },
                     { content: session.tool },
-                    { content: session.created.substring(0, 10) },
+                    { content: session.created ? session.created.substring(0, 10)  : '-'},
                     {
                         content: (
                             <a className="btn blank warning" onClick={this.deleteSession.bind(this, session)}>
@@ -211,7 +230,7 @@ class ProjectSessionView extends React.PureComponent {
                     },
                     {
                         content: (
-                            <a href={session.data.url ? session.data.url : '#no-url-found'} className="btn">
+                            <a href={this.generateSessionUrl(session)} className="btn" target="_blank" rel="noopener noreferrer">
                                 Open
                             </a>
                         )
