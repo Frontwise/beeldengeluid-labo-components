@@ -148,6 +148,31 @@ class FlexPlayer extends React.Component {
 		});
 	}
 
+	checkFocus(f, args) {
+		const inputs = document.getElementsByTagName('input');
+		for(const i of inputs) {
+			if(i == document.activeElement) {
+				return true;
+			}
+		}
+	    if(f) {
+	        f.call(this, args);
+	    }
+	}
+
+	//called by the playerAPI (this component is an observer of that. I know it's ugly, will make it pretty later)
+	//TODO is this still necessary?
+	update() {
+		const activeSegment = this.state.playerAPI.getActiveSegment();
+		this.setState({
+			segmentStart : activeSegment.start,
+			segmentEnd : activeSegment.end
+		})
+	}
+
+	/*************************************** Player event callbacks ***************************************/
+
+	//called after the underlying player implemtation has loaded a video
 	onPlayerReady(playerAPI) {
 		//remove this instance as an observer from the old playerAPI
 		if(this.state.playerAPI) {
@@ -174,35 +199,11 @@ class FlexPlayer extends React.Component {
 		);
 	}
 
-	checkFocus(f, args) {
-		const inputs = document.getElementsByTagName('input');
-		for(const i of inputs) {
-			if(i == document.activeElement) {
-				return true;
-			}
-		}
-	    if(f) {
-	        f.call(this, args);
-	    }
-	}
-
-	//called by the playerAPI (this component is an observer of that. I know it's ugly, will make it pretty later)
-	//TODO is this still necessary?
-	update() {
-		const activeSegment = this.state.playerAPI.getActiveSegment();
-		this.setState({
-			segmentStart : activeSegment.start,
-			segmentEnd : activeSegment.end
-		})
-	}
-
-	/*************************************** Player event callbacks ***************************************/
-
-	playProgress(data) {
+	playProgress(event) {
 		if(this.state.playerAPI) {
 			this.state.playerAPI.getPosition(this.onGetPosition.bind(this));
 			if(this.props.onPlayProgress) {
-				this.props.onPlayProgress(data);
+				this.props.onPlayProgress(event);
 			}
 		}
 	}
@@ -573,7 +574,6 @@ class FlexPlayer extends React.Component {
 	}
 
 	playTrack(index) {
-		console.debug('Now playing a new media object: ' + index)
 		this.setState(
 			{
 				currentMediaObject : this.state.playList[index],
@@ -711,7 +711,6 @@ class FlexPlayer extends React.Component {
 				} else {
 					player = (
 						<HTML5VideoPlayer
-						//key={'video_player__' + this.state.currentMediaObject.assetId}
 						mediaObject={this.state.currentMediaObject}
 						useCredentials={this.props.useCredentials}
 						eventCallbacks={playerEventCallbacks}
@@ -720,7 +719,6 @@ class FlexPlayer extends React.Component {
 				}
 			} else if(this.state.currentMediaObject.mimeType.indexOf('audio') != -1) {
 				player = (<HTML5AudioPlayer
-					key={'audio_player__' + this.state.currentMediaObject.assetId}
 					mediaObject={this.state.currentMediaObject}
 					useCredentials={this.props.useCredentials}
 					eventCallbacks={playerEventCallbacks}

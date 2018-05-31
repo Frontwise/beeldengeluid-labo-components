@@ -57,7 +57,7 @@ class HTML5AudioPlayer extends React.Component {
 		//then seek to the starting point
 		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
 		if(start > 0) {
-			this.state.playerAPI.currentTime = start / 1000;
+			this.state.playerAPI.seek(start / 1000);
 		}
 
 		//notify the owner
@@ -72,7 +72,7 @@ class HTML5AudioPlayer extends React.Component {
 				className={IDUtil.cssClassName('html5-audio-player')}
 				id={'audio_player__' + this.props.mediaObject.assetId}
 				controls controlsList="nodownload" crossOrigin={
-					this.props.useCredentials ? "use-credentials" : "anonymous"
+					this.props.useCredentials ? "use-credentials" : null
 				}>
 				<source src={this.props.mediaObject.url}></source>
 			</audio>
