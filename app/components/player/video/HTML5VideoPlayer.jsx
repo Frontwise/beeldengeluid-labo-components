@@ -18,7 +18,7 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	componentDidMount() {
-		const vid = document.getElementById('video_player__' + this.props.mediaObject.id);
+		const vid = document.getElementById('video-player');
 		if(this.props.eventCallbacks) {
 			vid.onprogress = this.props.eventCallbacks.loadProgress.bind(this);
 			vid.ontimeupdate = this.props.eventCallbacks.playProgress.bind(this);
@@ -32,29 +32,50 @@ class HTML5VideoPlayer extends React.Component {
 		vid.setAttribute("controlsList","nodownload");
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			return false
+		}
+		return true
+	}
+
+	componentDidUpdate() {
+		this.state.playerAPI.load()
+	}
+
 	onReady(playerAPI) {
 		if(this.state.playerAPI == null) {
-			this.setState({playerAPI : playerAPI}, function() {
-				if(this.props.onPlayerReady) {
-					this.props.onPlayerReady(new HTML5VideoPlayerAPI(this.state.playerAPI));
+			this.setState(
+				{playerAPI : playerAPI},
+				() => {
+					this.onSourceLoaded();
 				}
-				const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
-				if(start > 0) {
-					this.state.playerAPI.currentTime = start / 1000;
-				}
-			}.bind(this));
+			);
 		} else {
-			console.debug('There is something wrong, onReady is being triggered too often');
+			this.onSourceLoaded();
+		}
+	}
+
+	onSourceLoaded() {
+		//then seek to the starting point
+		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
+		if(start > 0) {
+			this.state.playerAPI.seek(start / 1000);
+		}
+
+		//notify the owner
+		if(this.props.onPlayerReady) {
+			this.props.onPlayerReady(new HTML5VideoPlayerAPI(this.state.playerAPI));
 		}
 	}
 
 	render() {
 		return (
 			<video
+				id="video-player"
 				className={IDUtil.cssClassName('html5-video-player')}
-				id={'video_player__' + this.props.mediaObject.id}
 				controls controlsList="nodownload" crossOrigin={
-					this.props.useCredentials ? "use-credentials" : "anonymous"
+					this.props.useCredentials ? "use-credentials" : null
 				}>
 				<source src={this.props.mediaObject.url}></source>
 				Your browser does not support the video tag

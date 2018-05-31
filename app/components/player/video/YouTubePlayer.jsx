@@ -31,6 +31,17 @@ class YouTubePlayer extends React.Component {
 		}
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			return false
+		}
+		return true
+	}
+
+	componentDidUpdate() {
+		console.debug('make sure the new media object ' + this.props.mediaObject.assetId + ' is loaded')
+	}
+
 	componentWillUnmount() {
 		if(this.state.player) {
 			this.state.player.destroy();

@@ -10,6 +10,7 @@ const AnnotationUtil = {
 
 	//extracts all contained targets/resources into a list for the bookmark-centric view
 	//TODO add the parentAnnotationId, so the UI knows how to do CRUD
+	//TODO get the client ID + user ID!!
 	generateBookmarkCentricList(annotations, callback) {
 		let resourceList = [];
 		annotations.forEach((na, index) => {
@@ -147,12 +148,14 @@ const AnnotationUtil = {
 		//now loop through the clustered (by collectionId) resourceIdLists and call the document API
 		const accumulatedData = {}
 		Object.keys(resourceIds).forEach((key) => {
+			console.debug('KEY: ' + key)
 			DocumentAPI.getItemDetailsMultiple(
 				key, //collectionId
 				resourceIds[key], //all resourceIds for this collection
 				(collectionId, idList, resourceData) => {
 					//reconsile and callback the "client"
-					const configClass = CollectionUtil.getCollectionClass(undefined,undefined,collectionId, true);
+					//TODO get the client ID + user ID!!
+					const configClass = CollectionUtil.getCollectionClass(null, null, collectionId, true);
 					const collectionConfig = new configClass(collectionId);
 					const mappedResourceData = resourceData  && !resourceData.error ? resourceData.map((doc) => {
 						return doc.found ? collectionConfig.getItemDetailData(doc) : null;
