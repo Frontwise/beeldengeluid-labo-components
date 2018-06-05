@@ -162,8 +162,8 @@ class ProjectTable extends React.PureComponent {
                 k = k.toLowerCase();
                 result = result.filter(
                     project =>
-                    project.name.toLowerCase().includes(k) ||
-                    project.description.toLowerCase().includes(k)
+                    (project.name && project.name.toLowerCase().includes(k)) ||
+                    (project.description && project.description.toLowerCase().includes(k))
                 );
             });
         }

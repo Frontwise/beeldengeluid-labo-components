@@ -183,7 +183,7 @@ SortTable.propTypes = {
 };
 
 SortTable.defaultProps = {
-    perPage: 20,
+    perPage: 10,
     currentPage: 0,
     defaultSort: { field: null, order: 'asc' },
 };
