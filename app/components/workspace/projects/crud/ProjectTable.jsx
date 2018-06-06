@@ -24,7 +24,7 @@ class ProjectTable extends React.PureComponent {
             { field: 'name', content: 'Name', sortable: true },
             {
                 field: 'bookmarks',
-                content: <i className="bookmark-icon" />,
+                content: <i className="bookmark-icon" title="Number of bookmarks"/>,
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
