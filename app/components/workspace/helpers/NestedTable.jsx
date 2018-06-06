@@ -1,12 +1,12 @@
-import ProjectAPI from '../../../../api/ProjectAPI';
+import ProjectAPI from '../../../api/ProjectAPI';
 
-import AnnotationUtil from '../../../../util/AnnotationUtil';
-import ComponentUtil from '../../../../util/ComponentUtil';
-import IDUtil from '../../../../util/IDUtil';
+import AnnotationUtil from '../../../util/AnnotationUtil';
+import ComponentUtil from '../../../util/ComponentUtil';
+import IDUtil from '../../../util/IDUtil';
 
-import AnnotationStore from '../../../../flux/AnnotationStore';
+import AnnotationStore from '../../../flux/AnnotationStore';
 
-import ItemDetailsRecipe from '../../../../ItemDetailsRecipe';
+import ItemDetailsRecipe from '../../../ItemDetailsRecipe';
 
 import PropTypes from 'prop-types';
 
@@ -34,7 +34,7 @@ class NestedTable extends React.PureComponent {
 
 
     componentDidMount() {
-        // instead of breaking out of the container, change the background color to a white and gray region
+        // instead of breaking out of the container, change the background color to a white and grey region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
     }
 

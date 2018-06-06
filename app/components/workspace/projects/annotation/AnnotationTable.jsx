@@ -14,7 +14,7 @@ import { exportDataAsJSON } from '../../helpers/Export';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
-import NestedTable from './NestedTable';
+import NestedTable from '../../helpers/NestedTable';
 import AnnotationRow from './AnnotationRow';
 import classNames from 'classnames';
 
@@ -164,7 +164,7 @@ class AnnotationTable extends React.PureComponent {
                         options: createAnnotationClassificationOptionList(items, 'groups'),
                     }
                 break;
-                case 'code':
+                case 'classification':
                     return {
                         title:'☆ Code',
                         key: 'bookmarkClassification',

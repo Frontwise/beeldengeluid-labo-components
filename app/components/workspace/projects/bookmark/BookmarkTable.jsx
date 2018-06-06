@@ -15,7 +15,7 @@ import { createAnnotationOptionList, createOptionList, createClassificationOptio
 import ResourceViewerModal from '../../ResourceViewerModal';
 
 import BookmarkRow from './BookmarkRow';
-import NestedTable from './NestedTable';
+import NestedTable from '../../helpers/NestedTable';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 

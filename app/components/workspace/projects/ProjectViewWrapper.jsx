@@ -125,7 +125,13 @@ class ProjectViewWrapper extends React.PureComponent {
                                     '/workspace/projects/' +
                                     encodeURIComponent(project.id) +
                                     '/bookmarks'}>
-                                    Bookmarks & Annotations<span className="count">{this.state.bookmarkCount} / {this.state.annotationCount}</span>
+                                    Bookmarks<span className="count">{this.state.bookmarkCount}</span>
+                                </NavLink>                                
+                                <NavLink activeClassName="active" to={
+                                    '/workspace/projects/' +
+                                    encodeURIComponent(project.id) +
+                                    '/annotations'}>
+                                    Annotations<span className="count">{this.state.annotationCount}</span>
                                 </NavLink>
                                 <NavLink activeClassName="active" to={
                                     '/workspace/projects/' +
