@@ -330,10 +330,21 @@ class ProjectTable extends React.PureComponent {
 
 
         {
+            props: { className: 'actions' },
             content: project.canOpen(currentUserId) ? (
-                <Link to={'/workspace/projects/' + project.id} className="btn">
-                    Open
-                </Link>
+                <div>
+                    <Link to={'/workspace/projects/' + project.id} className="btn">
+                        Open
+                    </Link>
+
+                    <div className="row-menu">
+                        <span>⋮</span>
+                        <ul>
+                            <li onClick={this.deleteProject.bind(this, project)}>Delete</li>
+                            <li onClick={exportDataAsJSON.bind(this, project)}>Export</li>
+                        </ul>
+                    </div>
+                </div>
             ) : ('')
         }];
     }
