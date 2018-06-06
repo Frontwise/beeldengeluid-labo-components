@@ -7,6 +7,11 @@
   }
 
   table{
+    .description{
+      max-width: 270px;
+      white-space: normal;
+    }
+
     .bookmark-icon{
       background-image: $iconBookmarkWhiteUrl;
       background-repeat: no-repeat;

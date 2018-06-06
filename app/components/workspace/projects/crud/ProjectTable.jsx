@@ -22,6 +22,7 @@ class ProjectTable extends React.PureComponent {
 
         this.head = [
             { field: 'name', content: 'Name', sortable: true },
+            { field: 'description', content: 'Description', sortable: true },
             {
                 field: 'bookmarks',
                 content: <i className="bookmark-icon" title="Number of bookmarks"/>,
@@ -30,8 +31,6 @@ class ProjectTable extends React.PureComponent {
             { field: 'owner', content: 'Owner', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
-            { field: '', content: '', sortable: false },
-            { field: '', content: '', sortable: false },
             { field: '', content: '', sortable: false }
         ];
 
@@ -256,13 +255,16 @@ class ProjectTable extends React.PureComponent {
     }
 
     sortProjects(projects, sort) {
+        const getLowerSafe = (s)=>(s ? s.toLowerCase() : '');
+
         const sorted = projects;
         switch (sort.field) {
-            case 'name': sorted.sort((a, b) => a.name > b.name); break;
-            case 'bookmarks': sorted.sort((a, b) => this.getBookmarkCount(a.id) > this.getBookmarkCount(b.id)); break;
-            case 'owner': sorted.sort((a, b) => a.owner.name > b.owner.name); break;
-            case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)); break;
-            case 'created': sorted.sort((a, b) => a.created > b.created); break;
+            case 'name': sorted.sort((a, b) => getLowerSafe(a.name) > getLowerSafe(b.name) ? 1 : -1); break;
+            case 'description': sorted.sort((a, b) => getLowerSafe(a.description) > getLowerSafe(b.description) ? -1 : 1); break;
+            case 'bookmarks': sorted.sort((a, b) => this.getBookmarkCount(b.id) - this.getBookmarkCount(a.id)); break;
+            case 'owner': sorted.sort((a, b) => getLowerSafe(a.owner.name) > getLowerSafe(b.owner.name)  ? 1 : -1); break;
+            case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)  ? 1 : -1); break;
+            case 'created': sorted.sort((a, b) => a.created > b.created  ? 1 : -1) ; break;
             default: return sorted;
         }
         return sort.order === 'desc' ? sorted.reverse() : sorted;
@@ -275,6 +277,11 @@ class ProjectTable extends React.PureComponent {
         return '...';
     }
 
+    trunc(s, n){
+        console.log(s ? s.length : '');
+        return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
+    }
+
     //Transforms a project to a row needed for the sort table
     //don't like this is passed as a function to the sort table... but let's see first
     getProjectRow(project) {
@@ -284,6 +291,10 @@ class ProjectTable extends React.PureComponent {
         {
             props: { className: 'primary' },
             content: (<Link to={'/workspace/projects/' + project.id}>{project.name}</Link>)
+        },
+        {
+            props: { className: 'description' },
+            content: (<p>{this.trunc(project.description, 140)}</p>)
         },
         {
             props: { className: 'number' },
@@ -310,20 +321,20 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'smaller' },
             content: project.created.substring(0, 10)
         },
-        {
-        content: project.canDelete(currentUserId) ? (
-            <a className="btn blank warning" onClick={this.deleteProject.bind(this, project)}>
-                Delete
-            </a>
-            ) : ('')
-        },
-        {
-        content: project.canExport(currentUserId) ? (
-            <a className="btn blank" onClick={exportDataAsJSON.bind(this, project)}>
-                Export
-            </a>
-            ) : ('')
-        },
+        // {
+        // content: project.canDelete(currentUserId) ? (
+        //     <a className="btn blank warning" onClick={this.deleteProject.bind(this, project)}>
+        //         Delete
+        //     </a>
+        //     ) : ('')
+        // },
+        // {
+        // content: project.canExport(currentUserId) ? (
+        //     <a className="btn blank" onClick={exportDataAsJSON.bind(this, project)}>
+        //         Export
+        //     </a>
+        //     ) : ('')
+        // },
         {
         content: project.canOpen(currentUserId) ? (
             <Link to={'/workspace/projects/' + project.id} className="btn">
