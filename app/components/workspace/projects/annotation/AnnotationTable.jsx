@@ -160,6 +160,7 @@ class AnnotationTable extends React.PureComponent {
                     
                     return {
                         title:'☆ Group',
+                        titleAttr: 'Bookmark group',
                         key: 'bookmarkGroup',
                         type: 'select',                         
                         options: createAnnotationClassificationOptionList(items, 'groups'),
@@ -168,6 +169,7 @@ class AnnotationTable extends React.PureComponent {
                 case 'classification':
                     return {
                         title:'☆ Code',
+                        titleAttr: 'Bookmark code',
                         key: 'bookmarkClassification',
                         type: 'select',
                         options: createAnnotationClassificationOptionList(items, 'classifications'),

@@ -120,7 +120,7 @@ class NestedTable extends React.PureComponent {
                 break;
                 case 'select':
                     return (<span key={index}>
-                        <label className="type-label">{filter.title}</label>
+                        <label className="type-label" title={filter.titleAttr ? filter.titleAttr : null}>{filter.title}</label>
 
                         <select
                             disabled={filter.options.length == 0}

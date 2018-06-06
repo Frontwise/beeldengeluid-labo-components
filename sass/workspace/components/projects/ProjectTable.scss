@@ -40,50 +40,6 @@
         padding-left: 15px;
         padding-right: 35px;
       }
-
-      .row-menu{
-        float:right;
-        display: inline-block;
-        width: 25px;
-        height: 35px;
-        cursor: pointer;
-        text-align: center;
-        cursor: pointer;
-        span{
-          line-height: 35px;
-          font-size: 1.1em;          
-          font-weight: bold;
-        }
-
-        ul{
-          display: none;
-          margin-left: -40px;
-          position: absolute;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-          li{
-            cursor: pointer;
-            background-color: #fff;
-            padding: 10px 15px;
-            border-bottom: 1px solid #aaa;
-
-            &:hover{
-              background-color: $clPrimary;
-              color: white;
-            }
-
-            &::last-child{
-              border-bottom: 0;
-            }
-          }
-        }
-
-        &:hover{
-          ul{
-            display: block;
-          }
-        }
-      }  
     }
-    
   }
 }

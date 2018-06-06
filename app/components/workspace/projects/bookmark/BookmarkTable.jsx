@@ -57,6 +57,7 @@ class BookmarkTable extends React.PureComponent {
         // bind functions (TODO get rid of these, unnecessary and confusing)
         this.viewBookmark = this.viewBookmark.bind(this);
         this.deleteBookmarks = this.deleteBookmarks.bind(this);
+        this.deleteBookmark = this.deleteBookmark.bind(this);
 
         this.filterBookmarks = this.filterBookmarks.bind(this);
         this.sortBookmarks = this.sortBookmarks.bind(this);
@@ -130,16 +131,17 @@ class BookmarkTable extends React.PureComponent {
             
             // type filter        
             {
-                title:'Media',
+                title:'Media type',
                 key: 'mediaType',
                 type: 'select',
                 options: createSimpleArrayOptionList(items, (i)=>(i.object.mediaTypes) )
             },
             // group filter        
             {
-                title:'Group',
+                title:'☆ Group',
                 key: 'group',
                 type: 'select',
+                titleAttr: 'Bookmark group',
                 options: createClassificationOptionList(items,'groups')
             },
             // annotations filter        
@@ -148,8 +150,8 @@ class BookmarkTable extends React.PureComponent {
                 key: 'annotations',
                 type: 'select',
                 options: [
-                    {value:'yes',name:'Yes'},
-                    {value:'no',name:'No'},
+                    {value:'yes',name:'With annotations'},
+                    {value:'no',name:'Without annotations'},
                     {value:'',name:'-----------', disabled: true}
                 ].concat(createAnnotationOptionList(items)),
             },
@@ -306,6 +308,10 @@ class BookmarkTable extends React.PureComponent {
         exportDataAsJSON(data);
     }
 
+    deleteBookmark(bookmark){
+        this.deleteBookmarks([bookmark.id]);
+    }
+
     makeActiveProject() {
         ComponentUtil.storeJSONInLocalStorage('activeProject', this.props.project);
     }
@@ -424,7 +430,8 @@ class BookmarkTable extends React.PureComponent {
                         <BookmarkRow
                             key={bookmark.resourceId}
                             bookmark={bookmark}
-                            onDelete={this.deleteBookmarks}
+                            onDelete={this.deleteBookmark}
+                            onExport={exportDataAsJSON}
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(bookmark.resourceId)}
                             onSelect={this.selectItem}

@@ -124,7 +124,6 @@ class BookmarkRow extends React.PureComponent {
                             checked={this.props.selected}
                             onChange={this.onSelectChange.bind(this)}
                             title={'Select this bookmark with id:\n' + bookmark.id}/>
-                        <div className="delete" onClick={this.onDelete} title="Delete bookmark" />
                     </div>
 
                     <div className="image" onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
@@ -149,7 +148,6 @@ class BookmarkRow extends React.PureComponent {
                         <li>
                             <h4 className="label">Groups</h4>
                             <p className="groups">
-                            {/*<span>Haarlem</span><span>Watersnood</span><span>Dummy</span>*/}
                                 {bookmark.groups ? 
                                 bookmark.groups.map((g)=>(<span>{g.label}</span>))
                                 : null}
@@ -162,6 +160,14 @@ class BookmarkRow extends React.PureComponent {
                             View
                         </div>
 
+                        <div className="row-menu">
+                            <span>⋮</span>
+                            <ul>
+                                <li onClick={this.props.onDelete.bind(this, bookmark)}>Delete</li>
+                                <li onClick={this.props.onExport.bind(this, bookmark)}>Export</li>
+                            </ul>
+                        </div>
+
                         <div title="Annotations" className={classNames('sublevel-button', {
                                 active: this.props.showsub,
                                 zero: !hasAnnotations
@@ -169,6 +175,7 @@ class BookmarkRow extends React.PureComponent {
                             <span className="icon annotation"/>
                             <span className="count">{annotations.length}</span>
                         </div>
+
                     </div>
                 </div>
                 {foldableBlock}
