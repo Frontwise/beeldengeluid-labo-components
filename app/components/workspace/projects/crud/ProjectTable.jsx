@@ -29,9 +29,9 @@ class ProjectTable extends React.PureComponent {
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
+            { field: 'isPrivate', content: 'Private', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
-            { field: 'collaborators', content: 'Collaborators', sortable: true },
             { field: '', content: '', sortable: false }
         ];
 
@@ -267,7 +267,7 @@ class ProjectTable extends React.PureComponent {
             case 'owner': sorted.sort((a, b) => getLowerSafe(a.owner.name) > getLowerSafe(b.owner.name)  ? 1 : -1); break;
             case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)  ? 1 : -1); break;
             case 'created': sorted.sort((a, b) => a.created > b.created  ? 1 : -1) ; break;
-            case 'collaborators': sorted.sort((a, b) => getFirst(a.collaborators) > getFirst(b.collaborators) ? 1 : -1) ; break;
+            // case 'collaborators': sorted.sort((a, b) => getFirst(a.collaborators) > getFirst(b.collaborators) ? 1 : -1) ; break;
             default: return sorted;
         }
         return sort.order === 'desc' ? sorted.reverse() : sorted;
@@ -292,7 +292,8 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}</Link>)
+            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}
+                      </Link>)
         },
         {
             props: { className: 'description' },
@@ -315,8 +316,11 @@ class ProjectTable extends React.PureComponent {
                 </span>
             )
         },
+        {            
+            content: (project.isPrivate ? "✔" : null)
+        },
         {
-            props: { className: 'access' },
+            props: { className: 'access smaller' },
             content: project.getAccess(currentUserId)
         },
         {
@@ -324,12 +328,6 @@ class ProjectTable extends React.PureComponent {
             content: project.created.substring(0, 10)
         },
 
-        // collaborators is just a place holder for now
-        {            
-            content: <ul className="collaborators">
-                        {project.collaborators.map((c, index)=>(<li key={index}>{c}</li>))}
-                    </ul>
-        },
 
         {
             content: project.canOpen(currentUserId) ? (
