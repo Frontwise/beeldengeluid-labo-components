@@ -31,6 +31,7 @@ class ProjectTable extends React.PureComponent {
             { field: 'owner', content: 'Owner', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
+            { field: 'collaborators', content: 'Collaborators', sortable: true },
             { field: '', content: '', sortable: false }
         ];
 
@@ -256,6 +257,7 @@ class ProjectTable extends React.PureComponent {
 
     sortProjects(projects, sort) {
         const getLowerSafe = (s)=>(s ? s.toLowerCase() : '');
+        const getFirst = (l)=>(Array.isArray(l) && l[0] ? l[0].toLowerCase() : '');
 
         const sorted = projects;
         switch (sort.field) {
@@ -265,6 +267,7 @@ class ProjectTable extends React.PureComponent {
             case 'owner': sorted.sort((a, b) => getLowerSafe(a.owner.name) > getLowerSafe(b.owner.name)  ? 1 : -1); break;
             case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)  ? 1 : -1); break;
             case 'created': sorted.sort((a, b) => a.created > b.created  ? 1 : -1) ; break;
+            case 'collaborators': sorted.sort((a, b) => getFirst(a.collaborators) > getFirst(b.collaborators) ? 1 : -1) ; break;
             default: return sorted;
         }
         return sort.order === 'desc' ? sorted.reverse() : sorted;
@@ -278,7 +281,6 @@ class ProjectTable extends React.PureComponent {
     }
 
     trunc(s, n){
-        console.log(s ? s.length : '');
         return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
@@ -321,25 +323,19 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'smaller' },
             content: project.created.substring(0, 10)
         },
-        // {
-        // content: project.canDelete(currentUserId) ? (
-        //     <a className="btn blank warning" onClick={this.deleteProject.bind(this, project)}>
-        //         Delete
-        //     </a>
-        //     ) : ('')
-        // },
-        // {
-        // content: project.canExport(currentUserId) ? (
-        //     <a className="btn blank" onClick={exportDataAsJSON.bind(this, project)}>
-        //         Export
-        //     </a>
-        //     ) : ('')
-        // },
+
+        // collaborators is just a place holder for now
+        {            
+            content: <ul className="collaborators">
+                        {project.collaborators.map((c, index)=>(<li key={index}>{c}</li>))}
+                    </ul>
+        },
+
         {
-        content: project.canOpen(currentUserId) ? (
-            <Link to={'/workspace/projects/' + project.id} className="btn">
-                Open
-            </Link>
+            content: project.canOpen(currentUserId) ? (
+                <Link to={'/workspace/projects/' + project.id} className="btn">
+                    Open
+                </Link>
             ) : ('')
         }];
     }
