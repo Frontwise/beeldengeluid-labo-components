@@ -342,7 +342,7 @@ class ProjectTable extends React.PureComponent {
                         <input
                             className="search"
                             type="text"
-                            placeholder="Search"
+                            placeholder="Search User Projects"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
                         <input
