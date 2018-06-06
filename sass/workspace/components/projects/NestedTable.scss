@@ -116,6 +116,7 @@
 
       .actions{
         min-width:100px;
+        min-height: 65px;
         flex-shrink: 0;
 
         .btn.primary{
@@ -146,20 +147,20 @@
           &:hover, &.active{
             background-color: darken($clGreyTint, 3);
             &:before{
-              border-right: 20px solid darken($clGreyTint, 3);
-              border-bottom: 20px solid darken($clGreyTint, 3);
+              border-right: 15px solid darken($clGreyTint, 3);
+              border-bottom: 15px solid darken($clGreyTint, 3);
             }
           }
           
           &:before{
             content: " ";
             position:absolute;
-            left: -40px;
+            left: -30px;
             top: 0px;
-            border-top: 20px solid transparent;
-            border-left: 20px solid transparent;
-            border-right: 20px solid $clGreyTint;
-            border-bottom: 20px solid $clGreyTint;
+            border-top: 15px solid transparent;
+            border-left: 15px solid transparent;
+            border-right: 15px solid $clGreyTint;
+            border-bottom: 15px solid $clGreyTint;
           }
 
           &.active{
@@ -167,8 +168,8 @@
             &:hover{
               background-color: darken($clGreyTint, 6);
               &:before{
-                border-right: 20px solid darken($clGreyTint, 6);
-                border-bottom: 20px solid darken($clGreyTint, 6);
+                border-right: 15px solid darken($clGreyTint, 6);
+                border-bottom: 15px solid darken($clGreyTint, 6);
               }
             }
           }
@@ -178,17 +179,17 @@
             background-repeat: no-repeat;
             background-position: center center;          
             
-            height: 40px;
+            height: 30px;
 
             &.annotation{
-              width: 31px;
-              background-size: 31px;          
+              width: 28px;
+              background-size: 28px;          
               background-image: $iconAnnotationUrl;
             }
 
             &.bookmark{
-              width: 21px;
-              background-size: 21px;          
+              width: 20px;
+              background-size: 20px;          
               background-image: $iconBookmarkUrl;
             }
           }
@@ -196,7 +197,7 @@
 
           .count{
             margin-left: 8px;
-            margin-top: 11px;
+            margin-top: 6px;
           }
           
           &.zero {

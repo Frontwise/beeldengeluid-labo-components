@@ -53,6 +53,7 @@ class AnnotationTable extends React.PureComponent {
         this.closeItemDetails = this.closeItemDetails.bind(this);
         this.deleteAnnotations = this.deleteAnnotations.bind(this);
         this.exportAnnotations = this.exportAnnotations.bind(this);
+        this.exportAnnotation = this.exportAnnotation.bind(this);
         this.filterAnnotations = this.filterAnnotations.bind(this);
         this.renderResults = this.renderResults.bind(this);
         this.selectAllChange = this.selectAllChange.bind(this);
@@ -289,6 +290,10 @@ class AnnotationTable extends React.PureComponent {
         }
     }
 
+    deleteAnnotation(annotation){
+        this.deleteAnnotations([annotation.annotationId]);
+    }
+
     exportAnnotationsByIds(annotationIds) {
         const data = this.state.annotations.filter(item =>
             annotationIds.includes(item.annotationId)
@@ -303,12 +308,18 @@ class AnnotationTable extends React.PureComponent {
 
         // remove cyclic structures
         data = data.map(d => {
-            delete d.bookmarkAnnotation;
-            delete d.bookmarks;
+            d.bookmarks.forEach((b)=>{
+                delete b.groups;
+                delete b.classifications;
+            });
             return d;
         });
 
         exportDataAsJSON(data);
+    }
+
+    exportAnnotation(annotation){
+        this.exportAnnotations([annotation]);
     }
 
     viewBookmark(bookmark) {
@@ -316,7 +327,6 @@ class AnnotationTable extends React.PureComponent {
             detailBookmark: bookmark
         });
     }
-
 
     //Close itemDetails view, and refresh the data (assuming changes have been made)
     closeItemDetails() {
@@ -426,7 +436,8 @@ class AnnotationTable extends React.PureComponent {
                         <AnnotationRow
                             key={annotation.annotationId}
                             annotation={annotation}
-                            onDelete={this.deleteAnnotations}
+                            onDelete={this.deleteAnnotation}
+                            onExport={this.exportAnnotation}
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(annotation.annotationId)}
                             onSelect={this.selectItem}

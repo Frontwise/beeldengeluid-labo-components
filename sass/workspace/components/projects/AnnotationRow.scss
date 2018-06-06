@@ -1,4 +1,4 @@
-.bg__annotation-row{
+.bg__annotation-row.item-row{
   .item{
     .classification{
       .vocabulary{
@@ -16,9 +16,12 @@
       width: 100px;
     }  
 
+    .actions{
+      .row-menu{
+        margin-top: 0px;          
+      }
+    }
   }
-
-  
 
   .sublevel{
     td.actions{
