@@ -32,17 +32,6 @@ class NestedTable extends React.PureComponent {
         };
     }
 
-
-    componentDidMount() {
-        // instead of breaking out of the container, change the background color to a white and grey region
-        document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
-    }
-
-    componentWillUnmount() {
-        //reset background color of body
-        document.body.style.background = 'white';
-    }
-
     //load and filter data
     reloadData() {
         // filter

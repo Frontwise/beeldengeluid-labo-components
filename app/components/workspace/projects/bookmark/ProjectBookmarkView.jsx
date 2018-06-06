@@ -36,6 +36,16 @@ class ProjectBookmarkView extends React.PureComponent {
         this.setView = this.setView.bind(this);
     }
 
+    componentDidMount() {
+        // instead of breaking out of the container, change the background color to a white and grey region
+        document.body.style.background = 'linear-gradient(180deg, white, white 333px, #faf6f6 333px, #faf6f6)';
+    }
+
+    componentWillUnmount() {
+        //reset background color of body
+        document.body.style.background = 'white';
+    }
+
     viewChange(e) {
         this.setView(e.target.value);
     }
