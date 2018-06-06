@@ -124,7 +124,8 @@ class BookmarkTable extends React.PureComponent {
             {
                 title:'',
                 key: 'keywords',
-                type: 'search'
+                type: 'search',
+                placeholder: 'Search Bookmarks'
             },
             
             // type filter        

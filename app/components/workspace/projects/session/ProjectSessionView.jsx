@@ -191,7 +191,7 @@ class ProjectSessionView extends React.PureComponent {
                         <input
                             className="search"
                             type="text"
-                            placeholder="Search"
+                            placeholder="Search Tool sessions"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
                     </div>

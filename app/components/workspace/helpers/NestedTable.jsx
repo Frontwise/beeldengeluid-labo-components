@@ -112,7 +112,7 @@ class NestedTable extends React.PureComponent {
                         key={index}
                         className="search"
                         type="text"
-                        placeholder="Search"
+                        placeholder={filter.placeholder || "Search"}
                         value={this.state.filter[filter.key]}
                         onChange={this.filterChange.bind(this, filter.key)}
                         />)

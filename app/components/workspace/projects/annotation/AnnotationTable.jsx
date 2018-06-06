@@ -144,7 +144,8 @@ class AnnotationTable extends React.PureComponent {
                     return {
                         title:'',
                         key: 'keywords',
-                        type: 'search'
+                        type: 'search',
+                        placeholder: 'Search Annotations'
                     }                    
                 break;
                 case 'vocabulary':
