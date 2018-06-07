@@ -21,6 +21,12 @@
         margin-top: 0px;          
       }
     }
+    
+    .icon.bookmark{
+      width: 20px;
+      background-size: 20px;          
+      background-image: $iconBookmarkUrl;
+    }
   }
 
   .sublevel{

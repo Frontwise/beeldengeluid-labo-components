@@ -48,7 +48,8 @@ class BookmarkTable extends React.PureComponent {
             annotations: [],
             bookmarks: [],
             selection: [],
-            showSub: {},
+            subMediaObject: {},
+            subSegment: {},
             loading: true,
             detailBookmark: null,
             filters: []
@@ -66,7 +67,8 @@ class BookmarkTable extends React.PureComponent {
         this.selectAllChange = this.selectAllChange.bind(this);
         this.selectItem = this.selectItem.bind(this);
         this.closeItemDetails = this.closeItemDetails.bind(this);
-        this.toggleSub = this.toggleSub.bind(this);
+        this.toggleSubMediaObject = this.toggleSubMediaObject.bind(this);
+        this.toggleSubSegment = this.toggleSubSegment.bind(this);
         this.unFoldAll = this.unFoldAll.bind(this);
         this.foldAll = this.foldAll.bind(this);
     }
@@ -131,7 +133,7 @@ class BookmarkTable extends React.PureComponent {
             
             // type filter        
             {
-                title:'Media type',
+                title:'Media',
                 key: 'mediaType',
                 type: 'select',
                 options: createSimpleArrayOptionList(items, (i)=>(i.object.mediaTypes) )
@@ -149,11 +151,22 @@ class BookmarkTable extends React.PureComponent {
                 title:'Annotations',
                 key: 'annotations',
                 type: 'select',
+                titleAttr: 'MediaObject level annotations',
                 options: [
                     {value:'yes',name:'With annotations'},
                     {value:'no',name:'Without annotations'},
                     {value:'',name:'-----------', disabled: true}
                 ].concat(createAnnotationOptionList(items)),
+            },
+            // segment filter        
+            {
+                title:'Segments',
+                key: 'segments',
+                type: 'select',
+                options: [
+                    {value:'yes',name:'With segments'},
+                    {value:'no',name:'Without segments'},
+                ],
             },
 
         ];      
@@ -202,6 +215,22 @@ class BookmarkTable extends React.PureComponent {
                     bookmarks = bookmarks.filter(bookmark => 
                         bookmark.annotations.some((a) => (a.annotationType === filter.annotations))
                     );
+            }
+        }
+
+        // filter on segments
+        if (filter.segments) {
+            switch(filter.segments){
+                case 'yes':
+                    bookmarks = bookmarks.filter(bookmark =>
+                        bookmark.segments.length > 0
+                    );
+                break;
+                case 'no':            
+                    bookmarks = bookmarks.filter(bookmark =>
+                        bookmark.segments.length === 0
+                    );
+                break;                
             }
         }
 
@@ -309,7 +338,7 @@ class BookmarkTable extends React.PureComponent {
     }
 
     deleteBookmark(bookmark){
-        this.deleteBookmarks([bookmark.id]);
+        this.deleteBookmarks([bookmark.resourceId]);
     }
 
     makeActiveProject() {
@@ -378,29 +407,67 @@ class BookmarkTable extends React.PureComponent {
         this.loadBookmarks();
     }
 
-    // Toggle sublevel visibility
-    toggleSub(id){
-        const showSub = Object.assign({}, this.state.showSub);
-        if (id in showSub){
-            delete showSub[id];
+    // Toggle sublevel mediaobject visibility
+    toggleSubMediaObject(id){
+        const subMediaObject = Object.assign({}, this.state.subMediaObject);
+        if (id in subMediaObject){
+            delete subMediaObject[id];
         } else{
-            showSub[id] = true;
+            subMediaObject[id] = true;
         }
-        this.setState({showSub});
+        // remove from subSegments
+        const subSegment = Object.assign({},this.state.subSegment);
+        delete subSegment[id];
+
+        this.setState({subMediaObject, subSegment});
+    }
+
+    // Toggle sublevel segment visibility
+    toggleSubSegment(id){
+        const subSegment = Object.assign({}, this.state.subSegment);
+        if (id in subSegment){
+            delete subSegment[id];
+        } else{
+            subSegment[id] = true;
+        }
+        // remove from subMediaObject
+        const subMediaObject = Object.assign({},this.state.subMediaObject);
+        delete subMediaObject[id];
+
+        this.setState({subMediaObject, subSegment});
     }
 
     unFoldAll(){
-        const showSub = {};
-        this.state.bookmarks.forEach((b)=>{
-            if (b.annotations && b.annotations.length > 0){
-                showSub[b.resourceId] = true;        
-            }            
-        });
-        this.setState({showSub});
+        const showSub = {}; 
+        switch(this.foldTarget.value){
+            case 'mediaobject':
+                this.state.bookmarks.forEach((b)=>{
+                    if (b.annotations && b.annotations.length > 0){
+                        showSub[b.resourceId] = true;        
+                    }            
+                });
+                this.setState({subSegment:{}, subMediaObject: showSub});            
+            break;
+            case 'segments':
+                this.state.bookmarks.forEach((b)=>{
+                    if (b.segments && b.segments.length > 0){
+                        showSub[b.resourceId] = true;        
+                    }            
+                });
+                this.setState({subMediaObject:{}, subSegment: showSub});            
+            break;
+        }
     }
 
     foldAll(){
-        this.setState({showSub:{}});
+        switch(this.foldTarget.value){
+            case 'mediaobject':
+                    this.setState({subMediaObject:{}});
+            break;
+            case 'segments':
+                    this.setState({subSegment:{}});
+            break;
+        }
     }
 
     renderResults(renderState) {
@@ -420,8 +487,16 @@ class BookmarkTable extends React.PureComponent {
 
                     Bookmarks:{' '}
                     <span className="count">{renderState.visibleItems.length || 0}</span>
-                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
-                    <div className="fold" onClick={this.foldAll}>Fold all</div>
+
+                    <div className="fold">
+                        <select ref={elem => (this.foldTarget = elem)}>
+                            <option value="mediaobject">MediaObject annotations</option>
+                            <option value="segments">Segments</option>
+                        </select>
+                        <div className="filter">
+                            <span onClick={this.unFoldAll}>Show all</span>&nbsp;/&nbsp;<span onClick={this.foldAll}>Hide all</span>
+                        </div>
+                    </div>
                 </h2>
 
                 <div className="bookmark-table">
@@ -435,8 +510,10 @@ class BookmarkTable extends React.PureComponent {
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(bookmark.resourceId)}
                             onSelect={this.selectItem}
-                            showSub={bookmark.resourceId in this.state.showSub}
-                            toggleSub={this.toggleSub}
+                            showSubMediaObject={bookmark.resourceId in this.state.subMediaObject}
+                            showSubSegment={bookmark.resourceId in this.state.subSegment}
+                            toggleSubMediaObject={this.toggleSubMediaObject}
+                            toggleSubSegment={this.toggleSubSegment}
                             annotationTypeFilter={annotationTypeFilter}
                             />
                     ))
@@ -459,16 +536,20 @@ class BookmarkTable extends React.PureComponent {
         return (
             <div className={classNames(IDUtil.cssClassName('bookmark-table'),{loading:this.state.loading})}>
                 <NestedTable
-                    items={this.state.bookmarks}
-                    selection={this.state.selection}
-                    sortItems={this.sortBookmarks}
-                    orders={this.orders}
+                    uid={this.props.project.id + "-bookmarks"}
+
                     filterItems={this.filterBookmarks}
-                    filters={this.state.filters}
                     renderResults={this.renderResults}
                     onExport={exportDataAsJSON}
-                    showSub={this.state.showSub}
-                    uid={this.props.project.id + "-bookmarks"}
+                    
+                    items={this.state.bookmarks}
+                    sortItems={this.sortBookmarks}
+                    selection={this.state.selection}
+                    orders={this.orders}
+                    filters={this.state.filters}
+
+                    toggleSubMediaObject={this.state.subMediaObject}
+                    toggleSubSegment={this.state.subSegment}
                     />
 
                 <BulkActions

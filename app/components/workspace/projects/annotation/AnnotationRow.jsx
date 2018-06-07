@@ -201,16 +201,17 @@ class AnnotationRow extends React.PureComponent {
                                 <li onClick={this.props.onExport.bind(this, annotation)}>Export</li>
                             </ul>
                         </div>
+                        <div className="sublevel-button-container">
+                            <div
+                                title="Bookmarks"
+                                className={
+                                    classNames('sublevel-button facet', {active: this.props.showSub, zero: !hasBookmarks})
+                                }
+                                onClick={this.toggleSub}>
 
-                        <div
-                        title="Bookmarks"
-                        className={
-                            classNames('sublevel-button', {active: this.props.showSub, zero: !hasBookmarks})
-                        }
-                        onClick={this.toggleSub}>
-
-                        <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
-                    </div>
+                                <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
+                            </div>
+                            </div>
                     </div>
 
                     

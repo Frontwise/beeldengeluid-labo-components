@@ -108,33 +108,37 @@ class NestedTable extends React.PureComponent {
         return filters.map((filter, index)=>{
             switch(filter.type){
                 case 'search':
-                    return(<input
-                        key={index}
-                        className="search"
-                        type="text"
-                        placeholder={filter.placeholder || "Search"}
-                        value={this.state.filter[filter.key]}
-                        onChange={this.filterChange.bind(this, filter.key)}
-                        />)
+                    return(<div className="filter-container">
+                            <input
+                                key={index}
+                                className="search"
+                                type="text"
+                                placeholder={filter.placeholder || "Search"}
+                                value={this.state.filter[filter.key]}
+                                onChange={this.filterChange.bind(this, filter.key)}
+                                />
+                            </div>)
 
                 break;
                 case 'select':
-                    return (<span key={index}>
-                        <label className="type-label" title={filter.titleAttr ? filter.titleAttr : null}>{filter.title}</label>
+                    return (<div className="filter-container">
+                            <span key={index}>
+                            <label className="type-label" title={filter.titleAttr ? filter.titleAttr : null}>{filter.title}</label>
 
-                        <select
-                            disabled={filter.options.length == 0}
-                            className="type-select"
-                            value={this.state.filter[filter.key]}
-                            onChange={this.filterChange.bind(this, filter.key)}>
-                                <option />
-                                {filter.options.map((option, index) => (
-                                    <option key={index} value={option.value} disabled={option.disabled}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                        </select>
-                    </span>)
+                            <select
+                                disabled={filter.options.length == 0}
+                                className="type-select"
+                                value={this.state.filter[filter.key]}
+                                onChange={this.filterChange.bind(this, filter.key)}>
+                                    <option />
+                                    {filter.options.map((option, index) => (
+                                        <option key={index} value={option.value} disabled={option.disabled}>
+                                            {option.name}
+                                        </option>
+                                    ))}
+                            </select>
+                        </span>
+                    </div>)
                 break;
                 default: 
                     console.error("Unknown filter type", filter);
@@ -148,34 +152,32 @@ class NestedTable extends React.PureComponent {
         return (
             <div className={IDUtil.cssClassName('nested-table')}>
                 <div className="tools">
-                    <div className="export-button btn primary"
+                    {/*<div className="export-button btn primary"
                         onClick={this.props.onExport.bind(this, this.state.visibleItems)}>
                         Export all
-                    </div>
-
-                    <div className="filters">
-                        <div className="left">
-                            <h3>Filters</h3>
-                            {this.renderFilters(this.props.filters)}
-                        </div>
-
-                        <div className="right">
-                            <h3>Order</h3>
-
-                            <select
-                            value={this.state.order}
-                            onChange={this.sortChange.bind(this)}>
-                                {this.props.orders.map((type, index) => (
-                                    <option key={index} value={type.value}>
-                                        {type.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                    </div>*/}
+                    <div className="left">
+                        <h3>Filters</h3>
+                        {this.renderFilters(this.props.filters)}
                     </div>
                 </div>
 
-                <div className="results">{this.props.renderResults(this.state)}</div>
+                <div className="results">
+                    <div className="sort">
+                        <h3>Order</h3>
+
+                        <select
+                        value={this.state.order}
+                        onChange={this.sortChange.bind(this)}>
+                            {this.props.orders.map((type, index) => (
+                                <option key={index} value={type.value}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    {this.props.renderResults(this.state)}
+                </div>
             </div>
         )
     }

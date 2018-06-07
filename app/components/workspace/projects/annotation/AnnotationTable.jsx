@@ -426,9 +426,11 @@ class AnnotationTable extends React.PureComponent {
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
 
                     {this.title} {this.state.renders} :{' '}<span className="count">{renderState.visibleItems.length || 0}</span>
-
-                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
-                    <div className="fold" onClick={this.foldAll}>Fold all</div>
+                    <div className="fold">
+                        <div className="filter">
+                            <span onClick={this.unFoldAll}>Show all bookmarks</span> / <span onClick={this.foldAll}>Hide all bookmarks</span>
+                        </div>
+                    </div>
                 </h2>
                 <div className="bookmark-table">
                     {renderState.visibleItems.length ? 

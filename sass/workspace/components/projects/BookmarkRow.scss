@@ -9,14 +9,79 @@
       flex-shrink: 0;
       cursor: pointer;
     }
-    .info li{         
+
+    .info li{
       &.primary p{
         cursor: pointer;
         &:hover{
           text-decoration: underline;
         }
       }
+
+      &.content-date{
+        min-width: 100px;
+        max-width: 100px;
+      }
+
+      &.content-media{
+        min-width: 100px;
+        max-width: 100px;
+      }
+    }
+
+    .actions .sublevel-button-container .sublevel-button{
+      padding-left: 15px;
+      border-left: 1px solid rgba(0,0,0,0.3);
+      &.facet{
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .icon.annotation{
+        width: 28px;
+        background-size: 28px;
+        background-image: $iconAnnotationUrl;
+      }
+
+      .icon.segment{
+        margin-right: 3px;
+        width: 20px;
+        background-size: 20px;
+        background-image: $iconSegmentUrl;
+      }
     }
   }
 
+  .sublevel{
+    table{
+      width: 100%;
+      tr{
+          .time{
+            width: 20%;
+          }
+          .type{
+            width: 20%;       
+          }
+          .details{
+            width: 30%;
+          }
+
+          td{
+            vertical-align: top;
+            &.time{
+              font-weight: bold;
+            } 
+            table{
+              tr{
+                &:first-child{
+                  td{
+                  border: 0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

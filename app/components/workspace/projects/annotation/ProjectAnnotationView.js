@@ -124,7 +124,7 @@ class ProjectAnnotationView extends React.PureComponent {
         <div className={IDUtil.cssClassName('project-data-view')}>
             <div className="tools">
                 <div className="view">
-                    <h3>View</h3>
+                    <h3>Type</h3>
                     <div className="radiogroup">
 
                         <input
