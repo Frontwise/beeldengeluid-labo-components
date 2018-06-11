@@ -112,7 +112,7 @@ class ProjectAnnotationView extends React.PureComponent {
                     <AnnotationTable {...defaultOptions}
                         key="metadata" 
                         type="metadata" 
-                        title="Metadata" 
+                        title="Metadata cards" 
                         filters={["search","classification","bookmarkGroup"]}
                         sort={["created","template"]}
                     />
@@ -165,7 +165,7 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'metadata-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-metadata">Metadata</label>
+                        <label htmlFor="view-metadata">Metadata cards</label>
                     </div>
                 </div>
             </div>
