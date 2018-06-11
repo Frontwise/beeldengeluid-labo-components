@@ -47,6 +47,8 @@ const AnnotationUtil = {
 
 						// (Creation) date of the object (nice to have)
 						date: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+						dateField: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+
 
 						// dataset the object originates from
 						dataset: collectionInfo ? collectionInfo.id : null,
@@ -219,6 +221,7 @@ const AnnotationUtil = {
 			if(temp.length == 1) {
 				x.object.title = temp[0].title;
 				x.object.date = temp[0].date;
+				x.object.dateField = temp[0].dateField;
 				x.object.description = temp[0].description;
 				x.object.mediaTypes=temp[0].mediaTypes || [];
 				

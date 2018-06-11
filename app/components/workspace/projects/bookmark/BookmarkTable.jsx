@@ -160,12 +160,12 @@ class BookmarkTable extends React.PureComponent {
             },
             // segment filter        
             {
-                title:'Segments',
+                title:'Fragments',
                 key: 'segments',
                 type: 'select',
                 options: [
-                    {value:'yes',name:'With segments'},
-                    {value:'no',name:'Without segments'},
+                    {value:'yes',name:'With fragments'},
+                    {value:'no',name:'Without fragments'},
                 ],
             },
 
