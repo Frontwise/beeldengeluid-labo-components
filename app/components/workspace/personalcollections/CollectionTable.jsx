@@ -269,18 +269,22 @@ class CollectionTable extends React.PureComponent {
                 <div className="tools">
                     <div className="left">
                         <h3>Filters</h3>
-                        <input
-                            className="search"
-                            type="text"
-                            placeholder="Search"
-                            value={this.state.filter.keywords}
-                            onChange={this.keywordsChange.bind(this)}/>
-                        <input
-                            type="checkbox"
-                            id="current-user"
-                            checked={this.state.filter.currentUser}
-                            onChange={this.currentUserChange.bind(this)}/>
-                        <label htmlFor="current-user">Show only my collections</label>
+                        <div className="filter-container">
+                            <input
+                                className="search"
+                                type="text"
+                                placeholder="Search"
+                                value={this.state.filter.keywords}
+                                onChange={this.keywordsChange.bind(this)}/>
+                        </div>
+                        <div className="filter-container">
+                            <input
+                                type="checkbox"
+                                id="current-user"
+                                checked={this.state.filter.currentUser}
+                                onChange={this.currentUserChange.bind(this)}/>
+                            <label htmlFor="current-user">Show only my collections</label>
+                        </div>
                     </div>
                 </div>
 
