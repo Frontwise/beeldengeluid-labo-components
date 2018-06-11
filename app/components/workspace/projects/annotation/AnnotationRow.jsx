@@ -16,13 +16,8 @@ class AnnotationRow extends React.PureComponent {
         super(props);
 
         // bind functions
-        this.onDelete = this.onDelete.bind(this);
-        this.onView = this.onView.bind(this);
         this.toggleSub = this.toggleSub.bind(this);
-    }
-
-    onDelete() {
-        this.props.onDelete([this.props.annotation.annotationId]);
+        this.onView = this.onView.bind(this);
     }
 
     onView(bookmark) {
@@ -194,22 +189,29 @@ class AnnotationRow extends React.PureComponent {
                             title={
                                 'Select this annotation with id:\n' + annotation.annotationId
                             }/>
-                        <div className="delete" onClick={this.onDelete} title="Delete annotation" />
                     </div>
 
                     {this.getInfoRow(annotation)}
                     
                     <div className="actions">
-                        
-                        <div
-                        title="Bookmarks"
-                        className={
-                            classNames('sublevel-button', {active: this.props.showSub, zero: !hasBookmarks})
-                        }
-                        onClick={this.toggleSub}>
+                        <div className="row-menu">
+                            <span>⋮</span>
+                            <ul>
+                                <li onClick={this.props.onDelete.bind(this, annotation)}>Delete</li>
+                                <li onClick={this.props.onExport.bind(this, annotation)}>Export</li>
+                            </ul>
+                        </div>
+                        <div className="sublevel-button-container">
+                            <div
+                                title="Bookmarks"
+                                className={
+                                    classNames('sublevel-button facet', {active: this.props.showSub, zero: !hasBookmarks})
+                                }
+                                onClick={this.toggleSub}>
 
-                        <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
-                    </div>
+                                <span className="icon bookmark" /> <span className="count">{bookmarks.length}</span>
+                            </div>
+                            </div>
                     </div>
 
                     

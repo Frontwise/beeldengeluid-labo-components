@@ -23,13 +23,14 @@
 @import './components/projects/ProjectQueriesView.scss';
 @import './components/projects/ProjectQueriesTable.scss';
 
-@import './components/projects/ProjectAnnotationView.scss';
+@import './components/projects/ProjectDataView.scss';
 @import './components/projects/NestedTable.scss';
 @import './components/projects/BookmarkTable.scss';
 @import './components/projects/BookmarkRow.scss';
 @import './components/projects/AnnotationTable.scss';
 @import './components/projects/AnnotationRow.scss';
 
+@import './components/_rowMenu.scss';
 
 // Workspace -- Personal collections
 @import './components/personalcollections/CollectionListView.scss';

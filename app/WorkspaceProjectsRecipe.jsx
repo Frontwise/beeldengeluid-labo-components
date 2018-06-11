@@ -2,7 +2,8 @@ import ProjectAPI from './api/ProjectAPI';
 
 import IDUtil from './util/IDUtil';
 
-//bookmark related view
+//bookmark and annotation view
+import ProjectBookmarkView from './components/workspace/projects/bookmark/ProjectBookmarkView';
 import ProjectAnnotationView from './components/workspace/projects/annotation/ProjectAnnotationView';
 
 //basic crud views
@@ -59,7 +60,9 @@ class WorkspaceProjects extends Component {
                     )} />
 
                     <Route path="/workspace/projects/:id/bookmarks"
-                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />                    
+                        render={this.getPropsRenderer(ProjectBookmarkView, this.props, {api: ProjectAPI})} />                    
+                    <Route path="/workspace/projects/:id/annotations"
+                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />    
                     <Route path="/workspace/projects/:id/sessions"
                         render={this.getPropsRenderer(ProjectSessionView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/queries"

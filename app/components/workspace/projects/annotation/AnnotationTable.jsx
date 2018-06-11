@@ -14,7 +14,7 @@ import { exportDataAsJSON } from '../../helpers/Export';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
 
-import NestedTable from './NestedTable';
+import NestedTable from '../../helpers/NestedTable';
 import AnnotationRow from './AnnotationRow';
 import classNames from 'classnames';
 
@@ -53,6 +53,7 @@ class AnnotationTable extends React.PureComponent {
         this.closeItemDetails = this.closeItemDetails.bind(this);
         this.deleteAnnotations = this.deleteAnnotations.bind(this);
         this.exportAnnotations = this.exportAnnotations.bind(this);
+        this.exportAnnotation = this.exportAnnotation.bind(this);
         this.filterAnnotations = this.filterAnnotations.bind(this);
         this.renderResults = this.renderResults.bind(this);
         this.selectAllChange = this.selectAllChange.bind(this);
@@ -144,7 +145,8 @@ class AnnotationTable extends React.PureComponent {
                     return {
                         title:'',
                         key: 'keywords',
-                        type: 'search'
+                        type: 'search',
+                        placeholder: 'Search Annotations'
                     }                    
                 break;
                 case 'vocabulary':
@@ -159,14 +161,16 @@ class AnnotationTable extends React.PureComponent {
                     
                     return {
                         title:'☆ Group',
+                        titleAttr: 'Bookmark group',
                         key: 'bookmarkGroup',
                         type: 'select',                         
                         options: createAnnotationClassificationOptionList(items, 'groups'),
                     }
                 break;
-                case 'code':
+                case 'classification':
                     return {
                         title:'☆ Code',
+                        titleAttr: 'Bookmark code',
                         key: 'bookmarkClassification',
                         type: 'select',
                         options: createAnnotationClassificationOptionList(items, 'classifications'),
@@ -286,6 +290,10 @@ class AnnotationTable extends React.PureComponent {
         }
     }
 
+    deleteAnnotation(annotation){
+        this.deleteAnnotations([annotation.annotationId]);
+    }
+
     exportAnnotationsByIds(annotationIds) {
         const data = this.state.annotations.filter(item =>
             annotationIds.includes(item.annotationId)
@@ -300,12 +308,18 @@ class AnnotationTable extends React.PureComponent {
 
         // remove cyclic structures
         data = data.map(d => {
-            delete d.bookmarkAnnotation;
-            delete d.bookmarks;
+            d.bookmarks.forEach((b)=>{
+                delete b.groups;
+                delete b.classifications;
+            });
             return d;
         });
 
         exportDataAsJSON(data);
+    }
+
+    exportAnnotation(annotation){
+        this.exportAnnotations([annotation]);
     }
 
     viewBookmark(bookmark) {
@@ -313,7 +327,6 @@ class AnnotationTable extends React.PureComponent {
             detailBookmark: bookmark
         });
     }
-
 
     //Close itemDetails view, and refresh the data (assuming changes have been made)
     closeItemDetails() {
@@ -413,9 +426,11 @@ class AnnotationTable extends React.PureComponent {
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
 
                     {this.title} {this.state.renders} :{' '}<span className="count">{renderState.visibleItems.length || 0}</span>
-
-                    <div className="fold" onClick={this.unFoldAll}>Unfold all</div>
-                    <div className="fold" onClick={this.foldAll}>Fold all</div>
+                    <div className="fold">
+                        <div className="filter">
+                            <span onClick={this.unFoldAll}>Show all bookmarks</span> / <span onClick={this.foldAll}>Hide all bookmarks</span>
+                        </div>
+                    </div>
                 </h2>
                 <div className="bookmark-table">
                     {renderState.visibleItems.length ? 
@@ -423,7 +438,8 @@ class AnnotationTable extends React.PureComponent {
                         <AnnotationRow
                             key={annotation.annotationId}
                             annotation={annotation}
-                            onDelete={this.deleteAnnotations}
+                            onDelete={this.deleteAnnotation}
+                            onExport={this.exportAnnotation}
                             onView={this.viewBookmark}
                             selected={this.state.selection.includes(annotation.annotationId)}
                             onSelect={this.selectItem}
