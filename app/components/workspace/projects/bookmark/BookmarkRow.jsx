@@ -7,6 +7,7 @@ import {secToTime} from '../../helpers/time';
 import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 /**
 * A row with bookmark information, and actions, and sub level annotations
@@ -74,7 +75,9 @@ class BookmarkRow extends React.PureComponent {
                 <tbody>
                     {annotations.map(annotation => (
                         <tr>
-                            <td className="type bold">{AnnotationTranslator(annotation.annotationType)}</td>
+                            <td className="type bold">
+                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType}>{AnnotationTranslator(annotation.annotationType)}</Link>
+                            </td>
                             <td className="content">
                                 {annotation.text ? annotation.text.substring(0, 200) : null}
                                 {annotation.label ? annotation.label : null}
