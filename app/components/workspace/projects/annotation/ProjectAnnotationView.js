@@ -38,6 +38,9 @@ class ProjectAnnotationView extends React.PureComponent {
     componentDidMount() {
         // instead of breaking out of the container, change the background color to a white and grey region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
+
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "annotations");
     }
 
     componentWillUnmount() {

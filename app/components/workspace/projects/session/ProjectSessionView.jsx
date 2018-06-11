@@ -51,6 +51,9 @@ class ProjectSessionView extends React.PureComponent {
 
     componentDidMount() {
         this.loadData();
+
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "sessions");
     }
 
     componentDidUpdate() {
