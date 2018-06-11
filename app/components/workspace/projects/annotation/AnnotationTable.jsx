@@ -52,6 +52,7 @@ class AnnotationTable extends React.PureComponent {
         // bind functions (TODO get rid of these, they are unnecessary and confusing)
         this.closeItemDetails = this.closeItemDetails.bind(this);
         this.deleteAnnotations = this.deleteAnnotations.bind(this);
+        this.deleteAnnotation = this.deleteAnnotation.bind(this);
         this.exportAnnotations = this.exportAnnotations.bind(this);
         this.exportAnnotation = this.exportAnnotation.bind(this);
         this.filterAnnotations = this.filterAnnotations.bind(this);
