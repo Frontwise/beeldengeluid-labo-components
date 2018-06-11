@@ -151,7 +151,7 @@ class BookmarkTable extends React.PureComponent {
                 title:'Annotations',
                 key: 'annotations',
                 type: 'select',
-                titleAttr: 'MediaObject level annotations',
+                titleAttr: 'MediaObject annotations',
                 options: [
                     {value:'yes',name:'With annotations'},
                     {value:'no',name:'Without annotations'},
@@ -489,13 +489,14 @@ class BookmarkTable extends React.PureComponent {
                     <span className="count">{renderState.visibleItems.length || 0}</span>
 
                     <div className="fold">
+                        <div className="filter">
+                            <span onClick={this.unFoldAll}>Show all</span>&nbsp;/&nbsp;<span onClick={this.foldAll}>Hide all</span>
+                        </div>
                         <select ref={elem => (this.foldTarget = elem)}>
                             <option value="mediaobject">MediaObject annotations</option>
                             <option value="segments">Segments</option>
                         </select>
-                        <div className="filter">
-                            <span onClick={this.unFoldAll}>Show all</span>&nbsp;/&nbsp;<span onClick={this.foldAll}>Hide all</span>
-                        </div>
+                        
                     </div>
                 </h2>
 

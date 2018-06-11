@@ -4,6 +4,7 @@ import IDUtil from '../../../../util/IDUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 import {secToTime} from '../../helpers/time';
+import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -52,7 +53,7 @@ class BookmarkRow extends React.PureComponent {
 
     renderSubMediaObject(bookmark, annotations, showHeader){
         // sort annotations by type
-        annotations.sort((a,b)=>(a.type > b.type ? 1 : -1));
+        annotations.sort((a,b)=>(a.annotationType > b.annotationType ? 1 : -1));
 
         return !annotations || annotations.length === 0 ? 
             (<p>
@@ -73,7 +74,7 @@ class BookmarkRow extends React.PureComponent {
                 <tbody>
                     {annotations.map(annotation => (
                         <tr>
-                            <td className="type bold">{annotation.annotationType}</td>
+                            <td className="type bold">{AnnotationTranslator(annotation.annotationType)}</td>
                             <td className="content">
                                 {annotation.text ? annotation.text.substring(0, 200) : null}
                                 {annotation.label ? annotation.label : null}
