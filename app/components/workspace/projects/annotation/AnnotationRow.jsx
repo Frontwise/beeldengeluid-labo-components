@@ -150,7 +150,7 @@ class AnnotationRow extends React.PureComponent {
                         <tbody>
                             {bookmarks.map(bookmark => (
                                 <tr>
-                                    <td>{bookmark.type}</td>
+                                    <td className="type">{bookmark.type}</td>
                                     <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
                                     <td className="groups">
