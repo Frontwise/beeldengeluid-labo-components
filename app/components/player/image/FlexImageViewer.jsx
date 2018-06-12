@@ -88,8 +88,7 @@ class FlexImageViewer extends React.Component {
 			sequenceMode : true,
 			preserveViewport: true,
 			height: '100px',
-
-			//in case of a simple image
+			ajaxWithCredentials : this.props.useCredentials,
 			tileSources: sources.map(s => s.infoUrl),
 			initialPage : this.state.currentPage
 		});
@@ -246,7 +245,7 @@ class FlexImageViewer extends React.Component {
 	}
 
 	toOSDUrl(mediaObject) {
-		const index = mediaObject.url.indexOf('.tif');
+		const index = mediaObject.url.indexOf('.tif'); //FIXME very weak way to check if it's IIIF!
 		let moClone = JSON.parse(JSON.stringify(mediaObject));
 		if(index == -1) {
 			moClone.infoUrl = mediaObject.url;
