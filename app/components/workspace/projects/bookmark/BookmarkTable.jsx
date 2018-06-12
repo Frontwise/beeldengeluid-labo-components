@@ -267,33 +267,33 @@ class BookmarkTable extends React.PureComponent {
         const sorted = bookmarks;
         switch (field) {
             case 'created':
-                sorted.sort((a, b) => a.created > b.created);
+                sorted.sort((a, b) => a.created > b.created ? 1 : -1);
                 break;
             case 'newest':
-                sorted.sort((a, b) => a.object.date < b.object.date);
+                sorted.sort((a, b) => a.object.date < b.object.date ? 1 : -1);
                 break;
             case 'oldest':
-                sorted.sort((a, b) => a.object.date > b.object.date);
+                sorted.sort((a, b) => a.object.date > b.object.date ? 1 : -1);
                 break;
             case 'name-az':
-                sorted.sort((a, b) => a.object.title > b.object.title);
+                sorted.sort((a, b) => a.object.title > b.object.title ? 1 : -1);
                 break;
             case 'name-za':
-                sorted.sort((a, b) => a.object.title < b.object.title);
+                sorted.sort((a, b) => a.object.title < b.object.title ? 1 : -1);
                 break;
             case 'mediatype':{
                     // '~' > move empty to bottom
                     const e = '~';
-                    sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e));
+                    sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e) ? 1 : -1);
                     break;
                 }
             case 'dataset':
-                sorted.sort((a, b) => a.object.dataset > b.object.dataset);
+                sorted.sort((a, b) => a.object.dataset > b.object.dataset ? 1 : -1);
                 break;
             case 'group':{
                     // '~' > move empty to bottom
                     const e = {label:'~'};
-                    sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label);
+                    sorted.sort((a, b) => getFirst(a.groups, e).label > getFirst(b.groups, e).label  ? 1 : -1);
                     break;
                 }
             default: return sorted;
