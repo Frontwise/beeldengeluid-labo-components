@@ -23,16 +23,27 @@ class ProjectAnnotationView extends React.PureComponent {
             view: 'bg__project-annotation-view'
         };
 
-        // get view from session storage (bookmark-centric OR annotation-centric)
-        const view = window.sessionStorage.getItem(this.keys.view) || 'classification-centric';
         this.state = {
             annotations: [],
             loading: true,
-            view: view
+            view: this.getCurrentView()
         };
 
         this.viewChange = this.viewChange.bind(this);
         this.setView = this.setView.bind(this);
+    }
+
+    getCurrentView(){
+        // get current view from window location hash, or sessionStorage, or fallback to classification-centric
+        switch(window.location.hash){
+            case '#classification-centric': return 'classification-centric';
+            case '#comment-centric': return 'comment-centric';
+            case '#link-centric': return 'link-centric';
+            case '#metadata-centric': return 'metadata-centric';
+            default:
+                // get view from session storage (bookmark-centric OR annotation-centric)
+                return window.sessionStorage.getItem(this.keys.view) || 'classification-centric';            
+        }
     }
 
     componentDidMount() {
@@ -48,15 +59,16 @@ class ProjectAnnotationView extends React.PureComponent {
         document.body.style.background = 'white';
     }
 
-
-
     viewChange(e) {
         this.setView(e.target.value);
     }
 
     setView(view){
-          // store view to session storage
+        // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
+
+        // update location hash
+        window.location.hash = '#' + view;
 
         this.setState({
             view

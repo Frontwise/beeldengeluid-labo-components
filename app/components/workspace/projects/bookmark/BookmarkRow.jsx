@@ -76,7 +76,7 @@ class BookmarkRow extends React.PureComponent {
                     {annotations.map(annotation => (
                         <tr>
                             <td className="type bold">
-                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType}>{AnnotationTranslator(annotation.annotationType)}</Link>
+                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>{AnnotationTranslator(annotation.annotationType)}</Link>
                             </td>
                             <td className="content">
                                 {annotation.text ? annotation.text.substring(0, 200) : null}
@@ -204,8 +204,8 @@ class BookmarkRow extends React.PureComponent {
                             <p onClick={this.onView}>{bookmark.object.title}</p>
                         </li>
                         <li className="content-date">
-                            <h4 className="label" title={bookmark.object.dateField}>Date</h4>
-                            <p>{resourceDate}</p>                            
+                            <h4 className="label">Date</h4>
+                            <p title={bookmark.object.dateField}>{resourceDate}</p>                            
                         </li>
                         <li className="content-media">
                             <h4 className="label">Media</h4>
