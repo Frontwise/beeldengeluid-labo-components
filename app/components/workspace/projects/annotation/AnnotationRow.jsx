@@ -3,6 +3,7 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 import IDUtil from '../../../../util/IDUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
+import {BookmarkTranslator} from '../../helpers/BookmarkTranslator';
 
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
@@ -150,7 +151,7 @@ class AnnotationRow extends React.PureComponent {
                         <tbody>
                             {bookmarks.map(bookmark => (
                                 <tr>
-                                    <td className="type">{bookmark.type}</td>
+                                    <td className="type">{BookmarkTranslator(bookmark.type)}</td>
                                     <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
                                     <td className="groups">
