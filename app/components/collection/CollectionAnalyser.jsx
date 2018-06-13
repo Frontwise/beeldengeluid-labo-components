@@ -11,14 +11,64 @@ class CollectionAnalyser extends React.Component {
 		this.state = {
             value : '', //the label of the selected classification (autocomplete)
             suggestions : [], //current list of suggestions shown
+            completeness: {}, //store completeness of the fields
 		}
 	}
 
     componentDidMount(){
+        console.log(this.props.collectionConfig);
         // auto load the analyse if there is a preferred DateField
         if (this.props.collectionConfig.getPreferredDateField()){
           this.analyseField(this.props.collectionConfig.getPreferredDateField());
         }
+
+        this.previewCompleteness();
+    }
+
+    previewCompleteness(){
+        let fieldNames = [];
+
+        // Collect all field names
+        Object.keys(this.props.collectionConfig).forEach((key)=>{
+            if (key.endsWith('Fields')){
+                fieldNames = fieldNames.concat(this.props.collectionConfig[key]);                
+            }
+        });
+        
+        // For each fieldname request the completeness and store it to the state
+        fieldNames.forEach((field)=>{
+                this.previewAnalysis(field, (data)=>{
+                    // analysis_field
+                
+                    // data.
+                    // data.doc_stats.
+                        // no_analysis_field
+                        // no_date_field
+                        // total
+                    this.setState((state, props)=>{
+                        const fieldData = {};
+                        fieldData[data.analysis_field] = data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0;
+
+                        return {
+                            completeness: Object.assign({},state.completeness,fieldData)
+                        }
+                    });
+            });
+        });
+    }
+
+    previewAnalysis(analysisField, callback){
+        CollectionAPI.analyseField(
+            this.props.collectionConfig.collectionId,
+            this.props.collectionConfig.getDocumentType(),
+            'null__option',
+            analysisField ? analysisField : 'null__option',
+            [], //facets are not yet supported
+            this.props.collectionConfig.getMinimunYear(),
+            (data) => {
+                callback(data);
+            }
+        );
     }
 
 
@@ -194,7 +244,10 @@ class CollectionAnalyser extends React.Component {
 				const sortedDateFields = this.sortAndBeautifyArray(dateFields);
 				let dateFieldOptions = sortedDateFields.map((dateField) => {
 					return (
-						<option key={dateField.value} value={dateField.value}>{dateField.beautifiedValue}</option>
+						<option key={dateField.value} value={dateField.value}>
+                            {dateField.beautifiedValue}
+                            {dateField.value in this.state.completeness ? '[' + this.state.completeness[dateField.value] + '%]' : null}
+                        </option>
 					)
 				});
 
@@ -215,12 +268,19 @@ class CollectionAnalyser extends React.Component {
 				);
 			}
 
-			analysisFieldSelect = (
+
+
+            analysisFieldSelect = (
 				<div className="form-group">
 					<label htmlFor="analysisfield_select">Metadata field to inspect (Y-axis)</label>
                     <Autosuggest
                         ref="classifications"
-                        suggestions={this.state.suggestions}
+                        suggestions={this.state.suggestions.map((suggestion)=>(
+                            // add completeness                            
+                            Object.assign({},suggestion,{
+                                beautifiedValue: suggestion.beautifiedValue + (suggestion.value in this.state.completeness ? '[' + this.state.completeness[suggestion.value] + '%]' : '')
+                            })
+                        ))}
                         onSuggestionsFetchRequested={this.onSuggestionsFetchRequested.bind(this)}
                         onSuggestionsClearRequested={this.onSuggestionsClearRequested.bind(this)}
                         onSuggestionSelected={this.onSuggestionSelected.bind(this)}
