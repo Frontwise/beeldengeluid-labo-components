@@ -14,6 +14,14 @@ class CollectionAnalyser extends React.Component {
 		}
 	}
 
+  componentDidMount(){
+    // auto load the analyse if there is a preferred DateField
+    if (this.props.collectionConfig.getPreferredDateField()){
+      this.analyseField(this.props.collectionConfig.getPreferredDateField());
+    }
+  }
+
+
 	analyseField(analysisField) {
 		this.loadAnalysis(analysisField, (data, timelineData) => {
 			this.onOutput({
@@ -23,7 +31,7 @@ class CollectionAnalyser extends React.Component {
 		});
 	}
 
-    loadAnalysis(analysisField, callback) {
+    loadAnalysis(analysisField, callback) {      
     	const dateSelect = document.getElementById("datefield_select");
     	if(dateSelect) {
 	        CollectionAPI.analyseField(
@@ -34,6 +42,7 @@ class CollectionAnalyser extends React.Component {
 	            [], //facets are not yet supported
 	            this.props.collectionConfig.getMinimunYear(),
 	            (data) => {
+                  console.log(data);
 	                const timelineData = this.toTimelineData(data);
 	                callback(data, timelineData);
 	            }
@@ -195,9 +204,12 @@ class CollectionAnalyser extends React.Component {
 				dateFieldSelect = (
 					<div className="form-group">
 						<label htmlFor="datefield_select">Metadata field for date (X-axis)</label>
-						<select className="form-control" id="datefield_select" onChange={
-							this.analyseField.bind(this, this.state.value)
-						}>
+						<select className="form-control" 
+                    id="datefield_select" 
+                    defaultValue={this.props.collectionConfig.getPreferredDateField()} 
+                    onChange={
+        							this.analyseField.bind(this, this.state.value)
+        						}>
 							{dateFieldOptions}
 						</select>
 					</div>
