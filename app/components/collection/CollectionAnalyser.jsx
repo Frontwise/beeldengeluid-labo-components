@@ -14,12 +14,12 @@ class CollectionAnalyser extends React.Component {
 		}
 	}
 
-  componentDidMount(){
-    // auto load the analyse if there is a preferred DateField
-    if (this.props.collectionConfig.getPreferredDateField()){
-      this.analyseField(this.props.collectionConfig.getPreferredDateField());
+    componentDidMount(){
+        // auto load the analyse if there is a preferred DateField
+        if (this.props.collectionConfig.getPreferredDateField()){
+          this.analyseField(this.props.collectionConfig.getPreferredDateField());
+        }
     }
-  }
 
 
 	analyseField(analysisField) {
@@ -34,20 +34,19 @@ class CollectionAnalyser extends React.Component {
     loadAnalysis(analysisField, callback) {      
     	const dateSelect = document.getElementById("datefield_select");
     	if(dateSelect) {
-	        CollectionAPI.analyseField(
-	            this.props.collectionConfig.collectionId,
-	            this.props.collectionConfig.getDocumentType(),
-	            dateSelect.options[dateSelect.selectedIndex].value,
-	            analysisField ? analysisField : 'null__option',
-	            [], //facets are not yet supported
-	            this.props.collectionConfig.getMinimunYear(),
-	            (data) => {
-                  console.log(data);
-	                const timelineData = this.toTimelineData(data);
-	                callback(data, timelineData);
-	            }
-	        );
-	    }
+            CollectionAPI.analyseField(
+                this.props.collectionConfig.collectionId,
+                this.props.collectionConfig.getDocumentType(),
+                dateSelect.options[dateSelect.selectedIndex].value,
+                analysisField ? analysisField : 'null__option',
+                [], //facets are not yet supported
+                this.props.collectionConfig.getMinimunYear(),
+                (data) => {
+                    const timelineData = this.toTimelineData(data);
+                    callback(data, timelineData);
+                }
+            );
+        }
     }
 
     //TODO optimize this.
