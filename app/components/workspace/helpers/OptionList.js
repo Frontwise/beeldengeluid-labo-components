@@ -1,3 +1,4 @@
+import { AnnotationTranslator } from './AnnotationTranslator';
 
 // Create a {value/name} list based on given items and key
 export const createOptionList = (items, getValue) =>{
@@ -73,7 +74,7 @@ export const createAnnotationOptionList = (items) =>{
         i.annotations.forEach((a)=>{
             if (!(a.annotationType in hits)){
                 hits[a.annotationType] = true;
-                list.push({value:a.annotationType, name: "⊆ " + a.annotationType});
+                list.push({value:a.annotationType, name: "⊆ " + AnnotationTranslator(a.annotationType)});
             }
         });
     });

@@ -1,18 +1,48 @@
 .bg__nested-table{
   
   h2{
-    padding-bottom: 10px;
+    padding-bottom: 30px;
+    padding-top: 15px;
 
-    .fold{
-      float:right;
+    .fold{      
+      margin-left: 20px;
+      margin-top: -2px;
       display: inline-block;
-      padding: 10px;
       font-size: 13px;
-      text-decoration: underline;
-      cursor: pointer;
-      &:hover{
-        opacity: 0.8;
+      
+      .filter{
+        float: right;
+        padding: 10px;      
+
+        span{
+          text-decoration: underline;
+          &:hover{
+            cursor: pointer;
+            opacity: 0.8;
+          }
+        }
       }
+
+      select{
+        font-family: $fontBody;
+        float:right;
+        margin-top: 5px;
+        font-weight: normal;
+        font-size: 14px;
+        padding: 6px 10px;
+
+        // webkit only
+        @media screen and (-webkit-min-device-pixel-ratio:0) {  
+          border-color: $clGreyTint;
+          box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+          border-radius: 2px;
+          background-color: #fff;  
+          &:disabled{
+            background-color: $clGrey;
+          }
+        }
+      }
+      
     }
   }
 
@@ -116,91 +146,113 @@
 
       .actions{
         min-width:100px;
+        min-height: 65px;
         flex-shrink: 0;
 
         .btn.primary{
           margin: 7px;
           padding-left: 17px;
           padding-right: 30px;
-          margin-right: 6px;
-          float: right;
+          margin-right: 0px;
         }
 
-        .sublevel-button{
+        .row-menu{
+          margin-top: 7px;          
+        }
+        .sublevel-button-container{
           position: absolute;
           right: 0;
           bottom: 0;
-          background-color: $clGreyTint;
-          color: $clDark;
-          text-transform: uppercase;
-          font-family: $fontHeading;
-          padding: 0px 30px 0px 0px;
-          background-position: center right 10px;
-          background-repeat: no-repeat;
-          background-image: $arrowDownDarkUrl;
-          cursor: pointer;
 
-          &:hover, &.active{
-            background-color: darken($clGreyTint, 3);
-            &:before{
-              border-right: 20px solid darken($clGreyTint, 3);
-              border-bottom: 20px solid darken($clGreyTint, 3);
-            }
-          }
-          
-          &:before{
-            content: " ";
-            position:absolute;
-            left: -40px;
-            top: 0px;
-            border-top: 20px solid transparent;
-            border-left: 20px solid transparent;
-            border-right: 20px solid $clGreyTint;
-            border-bottom: 20px solid $clGreyTint;
-          }
+          .sublevel-button{
+            display: inline-block;
+            float:right;  
+            background-color: $clGreyTint;
+            color: $clDark;
+            text-transform: uppercase;
+            font-family: $fontHeading;
+            padding: 0px 30px 0px 0px;
+            background-position: center right 10px;
+            background-repeat: no-repeat;
+            background-image: $arrowDownDarkUrl;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease-out;
 
-          &.active{
-            background-image: $arrowUpDarkUrl;
-            &:hover{
-              background-color: darken($clGreyTint, 6);
-              &:before{
-                border-right: 20px solid darken($clGreyTint, 6);
-                border-bottom: 20px solid darken($clGreyTint, 6);
+            &.lowered{
+              background-color: darken($clGreyTint, 10);
+              &.facet:before{
+                border-right: 15px solid darken($clGreyTint, 10);
+                border-bottom: 15px solid darken($clGreyTint, 10);
               }
             }
-          }
 
-          .icon{
-            display: inline-block;
-            background-repeat: no-repeat;
-            background-position: center center;          
-            
-            height: 40px;
-
-            &.annotation{
-              width: 31px;
-              background-size: 31px;          
-              background-image: $iconAnnotationUrl;
+            &:hover{
+              background-color: darken($clGreyTint, 5);
+              &.facet:before{
+                border-right: 15px solid darken($clGreyTint, 5);
+                border-bottom: 15px solid darken($clGreyTint, 5);
+              }
             }
 
-            &.bookmark{
-              width: 21px;
-              background-size: 21px;          
-              background-image: $iconBookmarkUrl;
+             &.active{
+              background-color: $clGreyTint;
+              &.facet:before{
+                border-right: 15px solid $clGreyTint;
+                border-bottom: 15px solid $clGreyTint;
+              }
             }
-          }
-          @import '../_count.scss';
-
-          .count{
-            margin-left: 8px;
-            margin-top: 11px;
-          }
-          
-          &.zero {
-            opacity: 0.5;
             
+            &.facet:before{
+              content: " ";
+              position:absolute;
+              left: -30px;
+              top: 0px;
+              border-top: 15px solid transparent;
+              border-left: 15px solid transparent;
+              border-right: 15px solid $clGreyTint;
+              border-bottom: 15px solid $clGreyTint;
+              transition: border-color 0.2s ease-out;
+            }
+
+            &.active{
+              background-image: $arrowUpDarkUrl;
+              &:hover{
+                background-color: darken($clGreyTint, 3);
+                &.facet:before{
+                  border-right: 15px solid darken($clGreyTint, 3);
+                  border-bottom: 15px solid darken($clGreyTint, 3);
+                }
+              }
+            }
+
+            .icon{
+              display: inline-block;
+              background-repeat: no-repeat;
+              background-position: center center;          
+              
+              height: 30px;
+            }
+            @import '../_count.scss';
+
             .count{
-              background-color: $clDarkGrey;        
+              margin-left: 8px;
+              margin-top: 6px;
+            }
+            
+            &.zero {
+              &.lowered{
+                background-color: $clGreyTint;
+              }
+              opacity:0.3;
+
+              &.active{
+                opacity: 1;
+              }
+
+              .count{
+                background-color: $clDarkGrey;        
+              }
             }
           }
         }
@@ -226,6 +278,9 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          &.bold{
+            font-weight: bold;
+          }
         }
 
       }

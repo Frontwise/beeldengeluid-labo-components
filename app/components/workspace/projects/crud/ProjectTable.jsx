@@ -19,19 +19,19 @@ class ProjectTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
-
+        
         this.head = [
             { field: 'name', content: 'Name', sortable: true },
+            { field: 'description', content: 'Description', sortable: true },
             {
                 field: 'bookmarks',
-                content: <i className="bookmark-icon" />,
+                content: <i className="bookmark-icon" title="Number of bookmarks"/>,
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
+            { field: 'isPrivate', content: 'Private', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
-            { field: '', content: '', sortable: false },
-            { field: '', content: '', sortable: false },
             { field: '', content: '', sortable: false }
         ];
 
@@ -256,13 +256,18 @@ class ProjectTable extends React.PureComponent {
     }
 
     sortProjects(projects, sort) {
+        const getLowerSafe = (s)=>(s ? s.toLowerCase() : '');
+        const getFirst = (l)=>(Array.isArray(l) && l[0] ? l[0].toLowerCase() : '');
+
         const sorted = projects;
         switch (sort.field) {
-            case 'name': sorted.sort((a, b) => a.name > b.name); break;
-            case 'bookmarks': sorted.sort((a, b) => this.getBookmarkCount(a.id) > this.getBookmarkCount(b.id)); break;
-            case 'owner': sorted.sort((a, b) => a.owner.name > b.owner.name); break;
-            case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)); break;
-            case 'created': sorted.sort((a, b) => a.created > b.created); break;
+            case 'name': sorted.sort((a, b) => getLowerSafe(a.name) > getLowerSafe(b.name) ? 1 : -1); break;
+            case 'description': sorted.sort((a, b) => getLowerSafe(a.description) > getLowerSafe(b.description) ? -1 : 1); break;
+            case 'bookmarks': sorted.sort((a, b) => this.getBookmarkCount(b.id) - this.getBookmarkCount(a.id)); break;
+            case 'owner': sorted.sort((a, b) => getLowerSafe(a.owner.name) > getLowerSafe(b.owner.name)  ? 1 : -1); break;
+            case 'access': sorted.sort((a, b) => a.getAccess(this.props.user.id) > b.getAccess(this.props.user.id)  ? 1 : -1); break;
+            case 'created': sorted.sort((a, b) => a.created > b.created  ? 1 : -1) ; break;
+            // case 'collaborators': sorted.sort((a, b) => getFirst(a.collaborators) > getFirst(b.collaborators) ? 1 : -1) ; break;
             default: return sorted;
         }
         return sort.order === 'desc' ? sorted.reverse() : sorted;
@@ -275,6 +280,10 @@ class ProjectTable extends React.PureComponent {
         return '...';
     }
 
+    trunc(s, n){
+        return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
+    }
+
     //Transforms a project to a row needed for the sort table
     //don't like this is passed as a function to the sort table... but let's see first
     getProjectRow(project) {
@@ -283,7 +292,12 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}</Link>)
+            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}
+                      </Link>)
+        },
+        {
+            props: { className: 'description' },
+            content: (<p><Link to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
         },
         {
             props: { className: 'number' },
@@ -302,33 +316,35 @@ class ProjectTable extends React.PureComponent {
                 </span>
             )
         },
+        {            
+            content: (project.isPrivate ? "✔" : null)
+        },
         {
-            props: { className: 'access' },
+            props: { className: 'access smaller' },
             content: project.getAccess(currentUserId)
         },
         {
             props: { className: 'smaller' },
             content: project.created.substring(0, 10)
         },
+
+
         {
-        content: project.canDelete(currentUserId) ? (
-            <a className="btn blank warning" onClick={this.deleteProject.bind(this, project)}>
-                Delete
-            </a>
-            ) : ('')
-        },
-        {
-        content: project.canExport(currentUserId) ? (
-            <a className="btn blank" onClick={exportDataAsJSON.bind(this, project)}>
-                Export
-            </a>
-            ) : ('')
-        },
-        {
-        content: project.canOpen(currentUserId) ? (
-            <Link to={'/workspace/projects/' + project.id} className="btn">
-                Open
-            </Link>
+            props: { className: 'actions' },
+            content: project.canOpen(currentUserId) ? (
+                <div>
+                    <Link to={'/workspace/projects/' + project.id} className="btn">
+                        Open
+                    </Link>
+
+                    <div className="row-menu">
+                        <span>⋮</span>
+                        <ul>
+                            <li onClick={this.deleteProject.bind(this, project)}>Delete</li>
+                            <li onClick={exportDataAsJSON.bind(this, project)}>Export</li>
+                        </ul>
+                    </div>
+                </div>
             ) : ('')
         }];
     }
@@ -339,18 +355,22 @@ class ProjectTable extends React.PureComponent {
                 <div className="tools">
                     <div className="left">
                         <h3>Filters</h3>
-                        <input
-                            className="search"
-                            type="text"
-                            placeholder="Search"
-                            value={this.state.filter.keywords}
-                            onChange={this.keywordsChange.bind(this)}/>
-                        <input
-                            type="checkbox"
-                            id="current-user"
-                            checked={this.state.filter.currentUser}
-                            onChange={this.currentUserChange.bind(this)}/>
-                        <label htmlFor="current-user">Show only my projects</label>
+                        <div className="filter-container">
+                            <input
+                                className="search"
+                                type="text"
+                                placeholder="Search User Projects"
+                                value={this.state.filter.keywords}
+                                onChange={this.keywordsChange.bind(this)}/>
+                        </div>
+                        <div className="filter-container">
+                            <input
+                                type="checkbox"
+                                id="current-user"
+                                checked={this.state.filter.currentUser}
+                                onChange={this.currentUserChange.bind(this)}/>
+                            <label htmlFor="current-user">Show only my projects</label>
+                        </div>
                     </div>
                 </div>
 

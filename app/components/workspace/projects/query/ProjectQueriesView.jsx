@@ -12,6 +12,11 @@ class ProjectQueriesView extends React.PureComponent {
         super(props);
     }
 
+    componentDidMount(){
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "queries");
+    }
+
     render() {
 
         return (

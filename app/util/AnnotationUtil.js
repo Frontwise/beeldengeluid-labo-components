@@ -18,9 +18,11 @@ const AnnotationUtil = {
 			if(na.target.selector) {
 				targets = [na.target]; //there is only a single target
 			}
+
 			resourceList = resourceList.concat(targets.map((t) => {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
+				
 				return {
 					id : IDUtil.guid(), // unique bookmark id
 
@@ -34,14 +36,19 @@ const AnnotationUtil = {
 						// unique object id
 						id: resourceInfo ? resourceInfo.id : null,
 
-						// object type: "Video", Video-Fragment", "Image", "Audio", "Entity", ...
+						// object type: "Resource","MediaObject","Segment"
 						type: t.type,
 
 						// short object title
 						title: na.id,
 
+						// description, need to fetch
+						description: '',
+
 						// (Creation) date of the object (nice to have)
 						date: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+						dateField: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+
 
 						// dataset the object originates from
 						dataset: collectionInfo ? collectionInfo.id : null,
@@ -59,15 +66,18 @@ const AnnotationUtil = {
 					// sort position
 					sort: index,
 
-					// optional list of annotations here (leaves out bookmarks)
+					// list of annotations
 					annotations: na.body ? na.body.filter(a => {
 						return a.vocabulary != 'clariahwp5-bookmark-group'
-					}) : null,
+					}) : [],
 
 					// bookmark groups
 					groups: na.body ? na.body.filter(a => {
 						return a.vocabulary == 'clariahwp5-bookmark-group'
 					}) : [],
+
+					// Selector details: required for segment information
+					selector: na.target.selector
 				}
 			}))
 		});
@@ -75,7 +85,7 @@ const AnnotationUtil = {
 
 		// Merge bookmarks and annotations for same resources
 		// If only an annotation is available without the resource being bookmarked,
-		// offer a fallback, and create this bookmark
+		// offer a fallback, and create this bookmarked resource
 		const uniqueList={};
 
 		// move resources to top
@@ -87,36 +97,66 @@ const AnnotationUtil = {
 			b.annotations = b.annotations ? 
 				// augment annotations
 				b.annotations.map((a)=>(Object.assign({},a,{
-					origin: b.object.type,
 					parentAnnotationId: b.annotationId
 				}))) : 
 				// empty annotation, required for deleting
 				[{
-					origin: 'Empty',
 					parentAnnotationId: b.annotationId
 				}];
 
-			if (b.resourceId in uniqueList){				
-				uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
-				uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
-				uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
-			} else{
-				// always make the main bookmark a resource
-				b.object.type = "Resource";
-				uniqueList[b.resourceId] = b;
-			}
-		});
-		resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
 
-		if(callback){
-			if (resourceList.length > 0) {
-				return AnnotationUtil.reconsileResourceList(resourceList, callback)
-			} else{
-				callback([]);
+		// prepare the bookmark object and add it to the uniquelist
+		if (b.resourceId in uniqueList){				
+			// existing
+			
+			// Add to unique list, based on type
+			switch(b.object.type){
+				case 'Segment':
+					// add to the segment list
+					uniqueList[b.resourceId].segments = uniqueList[b.resourceId].segments.concat(b);
+				break;
+				default:
+					// just combine the bookmarks
+					uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
+					uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);				
+					uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
 			}
- 		}
-		return resourceList;
-	},
+		} else{
+			// new
+
+			if (b.object.type === 'Segment'){
+
+					// Create a new resourceobject for the segment
+					const segment = Object.assign({},b,{
+						object: Object.assign({},b.object),
+						annotations: b.annotations.slice(),
+					})
+					// add the the segment to the resource
+					b.segments = [segment];						
+
+					// clear the annotations
+					b.annotations = [];
+			} else{
+				// create the segments placeholder
+				b.segments = [];
+			}
+
+			// always make the main bookmark a resource
+			b.object.type = "Resource";
+			uniqueList[b.resourceId] = b;
+		}
+	});
+	resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
+
+	if(callback){
+		if (resourceList.length > 0) {
+			return AnnotationUtil.reconsileResourceList(resourceList, callback)
+		} else{
+			callback([]);
+		}
+		}
+	return resourceList;
+},
 
 	//TODO do a mget to fetch all the resource data from the search API.
 	reconsileResourceList(resourceList, callback) {
@@ -181,7 +221,8 @@ const AnnotationUtil = {
 			if(temp.length == 1) {
 				x.object.title = temp[0].title;
 				x.object.date = temp[0].date;
-
+				x.object.dateField = temp[0].dateField;
+				x.object.description = temp[0].description;
 				x.object.mediaTypes=temp[0].mediaTypes || [];
 				
 				if (temp[0].placeholderImage){

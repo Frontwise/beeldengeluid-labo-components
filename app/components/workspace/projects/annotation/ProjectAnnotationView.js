@@ -5,7 +5,6 @@ import IDUtil from '../../../../util/IDUtil';
 import ProjectViewWrapper from '../ProjectViewWrapper';
 
 import AnnotationTable from './AnnotationTable';
-import BookmarkTable from './BookmarkTable';
 
 
 import PropTypes from 'prop-types';
@@ -21,19 +20,43 @@ class ProjectAnnotationView extends React.PureComponent {
 
         // unique keys used for storage
         this.keys = {
-            view: 'bg__project-bookmarks-view'
+            view: 'bg__project-annotation-view'
         };
 
-        // get view from session storage (bookmark-centric OR annotation-centric)
-        const view = window.sessionStorage.getItem(this.keys.view) || 'bookmark-centric';
         this.state = {
             annotations: [],
             loading: true,
-            view: view
+            view: this.getCurrentView()
         };
 
         this.viewChange = this.viewChange.bind(this);
         this.setView = this.setView.bind(this);
+    }
+
+    getCurrentView(){
+        // get current view from window location hash, or sessionStorage, or fallback to classification-centric
+        switch(window.location.hash){
+            case '#classification-centric': return 'classification-centric';
+            case '#comment-centric': return 'comment-centric';
+            case '#link-centric': return 'link-centric';
+            case '#metadata-centric': return 'metadata-centric';
+            default:
+                // get view from session storage (bookmark-centric OR annotation-centric)
+                return window.sessionStorage.getItem(this.keys.view) || 'classification-centric';            
+        }
+    }
+
+    componentDidMount() {
+        // instead of breaking out of the container, change the background color to a white and grey region
+        document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
+
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "annotations");
+    }
+
+    componentWillUnmount() {
+        //reset background color of body
+        document.body.style.background = 'white';
     }
 
     viewChange(e) {
@@ -41,8 +64,11 @@ class ProjectAnnotationView extends React.PureComponent {
     }
 
     setView(view){
-          // store view to session storage
+        // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
+
+        // update location hash
+        window.location.hash = '#' + view;
 
         this.setState({
             view
@@ -60,18 +86,10 @@ class ProjectAnnotationView extends React.PureComponent {
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
         switch (this.state.view) {
-            case 'bookmark-centric': 
-                viewComponent = (
-                    <BookmarkTable 
-                       {...defaultOptions}
-                    />
-                );
-                break;
-
-            case 'code-centric': 
+            case 'classification-centric': 
                 viewComponent = (
                     <AnnotationTable {...defaultOptions}
-                        key="code" 
+                        key="classification" 
                         type="classification" 
                         title="Codes" 
                         filters={["search","vocabulary","bookmarkGroup"]}
@@ -86,7 +104,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         key="comments" 
                         type="comment" 
                         title="Comments" 
-                        filters={["search","code","bookmarkGroup"]}
+                        filters={["search","classification","bookmarkGroup"]}
                         sort={["created","a-z-text","z-a-text"]}
                     />
                 );
@@ -98,7 +116,7 @@ class ProjectAnnotationView extends React.PureComponent {
                         key="links" 
                         type="link" 
                         title="Links"  
-                        filters={["search","code","bookmarkGroup"]}
+                        filters={["search","classification","bookmarkGroup"]}
                         sort={["created","a-z-label","z-a-label"]}
                     />
                 );
@@ -109,8 +127,8 @@ class ProjectAnnotationView extends React.PureComponent {
                     <AnnotationTable {...defaultOptions}
                         key="metadata" 
                         type="metadata" 
-                        title="Metadata" 
-                        filters={["search","code","bookmarkGroup"]}
+                        title="Metadata cards" 
+                        filters={["search","classification","bookmarkGroup"]}
                         sort={["created","template"]}
                     />
                 );
@@ -118,30 +136,21 @@ class ProjectAnnotationView extends React.PureComponent {
         }
         
     return (
-        <div className={IDUtil.cssClassName('project-annotation-view')}>
+        <div className={IDUtil.cssClassName('project-data-view')}>
             <div className="tools">
                 <div className="view">
-                    <h3>View</h3>
+                    <h3>Type</h3>
                     <div className="radiogroup">
-                        <input
-                            type="radio"
-                            name="view"
-                            value="bookmark-centric"
-                            id="view-bookmark"
-                            checked={this.state.view === 'bookmark-centric'}
-                            onChange={this.viewChange}/>
-
-                        <label htmlFor="view-bookmark">Bookmarks</label>
 
                         <input
                             type="radio"
                             name="view"
-                            value="code-centric"
-                            id="view-code"
-                            checked={this.state.view === 'code-centric'}
+                            value="classification-centric"
+                            id="view-classification"
+                            checked={this.state.view === 'classification-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-code">Codes</label>
+                        <label htmlFor="view-classification">Codes</label>
 
                          <input
                             type="radio"
@@ -171,7 +180,7 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'metadata-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-metadata">Metadata</label>
+                        <label htmlFor="view-metadata">Metadata cards</label>
                     </div>
                 </div>
             </div>
@@ -191,7 +200,7 @@ class WrappedProjectAnnotationView extends React.PureComponent {
     render() {
         return (
             <ProjectViewWrapper renderComponent={ProjectAnnotationView} {...this.props} />
-            );
+        );
     }
 }
 
