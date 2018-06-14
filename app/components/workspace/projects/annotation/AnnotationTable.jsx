@@ -52,6 +52,7 @@ class AnnotationTable extends React.PureComponent {
         // bind functions (TODO get rid of these, they are unnecessary and confusing)
         this.closeItemDetails = this.closeItemDetails.bind(this);
         this.deleteAnnotations = this.deleteAnnotations.bind(this);
+        this.deleteAnnotation = this.deleteAnnotation.bind(this);
         this.exportAnnotations = this.exportAnnotations.bind(this);
         this.exportAnnotation = this.exportAnnotation.bind(this);
         this.filterAnnotations = this.filterAnnotations.bind(this);
@@ -124,13 +125,13 @@ class AnnotationTable extends React.PureComponent {
             s && typeof s === 'string' ? s.toLowerCase() : ''
         )
         switch (field) {
-            case 'created': return annotations.sort((a, b) => a.created > b.created); 
-            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label)); 
-            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label)); 
-            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text)); 
-            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text)); 
-            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary)); 
-            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template)); 
+            case 'created': return annotations.sort((a, b) => a.created < b.created ? 1 : -1); 
+            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label) ? 1 : -1); 
+            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label) ? 1 : -1); 
+            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text) ? 1 : -1); 
+            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text) ? 1 : -1); 
+            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary) ? 1 : -1); 
+            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template) ? 1 : -1); 
             default: return annotations;
         }
     }

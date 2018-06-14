@@ -1,12 +1,12 @@
 const PlayoutAPI = {
 
-	requestAccess : function(collectionId, videoId, desiredState, callback) {
+	requestAccess : function(collectionId, contentId, desiredState, callback) {
 		var data = {
-			videoId: videoId,
+			contentId: contentId,
 			clientId: _clientId,
 			at: _chickenStock
 		}
-		var url = _play + '/api/play/' + collectionId + '/' + videoId;
+		var url = _play + '/api/play/' + collectionId + '/' + contentId;
 		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {

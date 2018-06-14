@@ -8,6 +8,10 @@
 
   table{
     .description{
+      a{
+        text-decoration: none;
+        color: black;
+      }
       max-width: 270px;
       white-space: normal;
     }
@@ -23,7 +27,7 @@
     }
 
     .collaborators{
-      display: inline-block;
+      display: block;
       color: $clPrimaryAlt;
       text-transform: uppercase;
       font-size: 12px;

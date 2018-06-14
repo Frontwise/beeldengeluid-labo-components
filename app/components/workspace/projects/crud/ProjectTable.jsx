@@ -19,7 +19,7 @@ class ProjectTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
-
+        
         this.head = [
             { field: 'name', content: 'Name', sortable: true },
             { field: 'description', content: 'Description', sortable: true },
@@ -297,7 +297,7 @@ class ProjectTable extends React.PureComponent {
         },
         {
             props: { className: 'description' },
-            content: (<p>{this.trunc(project.description, 140)}</p>)
+            content: (<p><Link to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
         },
         {
             props: { className: 'number' },
@@ -355,18 +355,22 @@ class ProjectTable extends React.PureComponent {
                 <div className="tools">
                     <div className="left">
                         <h3>Filters</h3>
-                        <input
-                            className="search"
-                            type="text"
-                            placeholder="Search User Projects"
-                            value={this.state.filter.keywords}
-                            onChange={this.keywordsChange.bind(this)}/>
-                        <input
-                            type="checkbox"
-                            id="current-user"
-                            checked={this.state.filter.currentUser}
-                            onChange={this.currentUserChange.bind(this)}/>
-                        <label htmlFor="current-user">Show only my projects</label>
+                        <div className="filter-container">
+                            <input
+                                className="search"
+                                type="text"
+                                placeholder="Search User Projects"
+                                value={this.state.filter.keywords}
+                                onChange={this.keywordsChange.bind(this)}/>
+                        </div>
+                        <div className="filter-container">
+                            <input
+                                type="checkbox"
+                                id="current-user"
+                                checked={this.state.filter.currentUser}
+                                onChange={this.currentUserChange.bind(this)}/>
+                            <label htmlFor="current-user">Show only my projects</label>
+                        </div>
                     </div>
                 </div>
 

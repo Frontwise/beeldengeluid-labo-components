@@ -124,6 +124,12 @@ class ProjectViewWrapper extends React.PureComponent {
                                 <NavLink activeClassName="active" to={
                                     '/workspace/projects/' +
                                     encodeURIComponent(project.id) +
+                                    '/details'}>
+                                    Details
+                                </NavLink>
+                                <NavLink activeClassName="active" to={
+                                    '/workspace/projects/' +
+                                    encodeURIComponent(project.id) +
                                     '/bookmarks'}>
                                     Bookmarks<span className="count">{this.state.bookmarkCount}</span>
                                 </NavLink>                                
@@ -145,12 +151,7 @@ class ProjectViewWrapper extends React.PureComponent {
                                     '/queries'}>
                                     Queries<span className="count">{project.queries ? project.queries.length : 0}</span>
                                 </NavLink>
-                                <NavLink activeClassName="active" to={
-                                    '/workspace/projects/' +
-                                    encodeURIComponent(project.id) +
-                                    '/details'}>
-                                    Details
-                                </NavLink>
+                                
                             </div>
                         </div>
 

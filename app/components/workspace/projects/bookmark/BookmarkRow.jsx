@@ -4,8 +4,10 @@ import IDUtil from '../../../../util/IDUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 import {secToTime} from '../../helpers/time';
+import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 /**
 * A row with bookmark information, and actions, and sub level annotations
@@ -51,6 +53,9 @@ class BookmarkRow extends React.PureComponent {
 
 
     renderSubMediaObject(bookmark, annotations, showHeader){
+        // sort annotations by type
+        annotations.sort((a,b)=>(a.annotationType > b.annotationType ? 1 : -1));
+
         return !annotations || annotations.length === 0 ? 
             (<p>
                 This {bookmark.object.type.toLowerCase() || 'object'} has no annotations yet
@@ -62,25 +67,27 @@ class BookmarkRow extends React.PureComponent {
                 <thead>
                     <tr>
                         <th>Type</th>
-                        <th>Details</th>
                         <th>Content</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 : null}
                 <tbody>
                     {annotations.map(annotation => (
                         <tr>
-                            <td className="type bold">{annotation.annotationType}</td>
+                            <td className="type bold">
+                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>{AnnotationTranslator(annotation.annotationType)}</Link>
+                            </td>
+                            <td className="content">
+                                {annotation.text ? annotation.text.substring(0, 200) : null}
+                                {annotation.label ? annotation.label : null}
+                            </td>                            
                             <td className="details">
                                 {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
                                 {annotation.annotationType === 'comment' ? annotation.created : null}
                                 {annotation.url ? <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a> : null}
                                 {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
                             </td>
-                            <td className="content">
-                                {annotation.text ? annotation.text.substring(0, 200) : null}
-                                {annotation.label ? annotation.label : null}
-                            </td>                            
                         </tr>
                     ))}
                 </tbody>
@@ -91,7 +98,7 @@ class BookmarkRow extends React.PureComponent {
     renderSubSegment(bookmark, segments){
         return !segments || segments.length === 0 ? 
             (<p>
-                This {bookmark.object.type.toLowerCase() || 'object'} has no segments yet
+                This {bookmark.object.type.toLowerCase() || 'object'} has no fragments yet
             </p>)
             :
         
@@ -103,8 +110,8 @@ class BookmarkRow extends React.PureComponent {
                             <table>
                                 <thead>
                                     <th className="type">Type</th>
-                                    <th className="details">Details</th>
                                     <th className="content">Content</th>
+                                    <th className="details">Details</th>
                                 </thead>
                             </table>
                         </th>                       
@@ -197,8 +204,8 @@ class BookmarkRow extends React.PureComponent {
                             <p onClick={this.onView}>{bookmark.object.title}</p>
                         </li>
                         <li className="content-date">
-                            <h4 className="label" title="Resource date">Date</h4>
-                            <p>{resourceDate}</p>                            
+                            <h4 className="label">Date</h4>
+                            <p title={bookmark.object.dateField}>{resourceDate}</p>                            
                         </li>
                         <li className="content-media">
                             <h4 className="label">Media</h4>
@@ -232,7 +239,7 @@ class BookmarkRow extends React.PureComponent {
                         </div>
 
                         <div className="sublevel-button-container">
-                            <div title="Segments" className={classNames('sublevel-button', {
+                            <div title="Fragments" className={classNames('sublevel-button', {
                                     active: this.props.showSubSegment,
                                     zero: !hasSegments,
                                     lowered: this.props.showSubMediaObject

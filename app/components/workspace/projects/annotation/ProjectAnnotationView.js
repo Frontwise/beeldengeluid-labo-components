@@ -23,21 +23,35 @@ class ProjectAnnotationView extends React.PureComponent {
             view: 'bg__project-annotation-view'
         };
 
-        // get view from session storage (bookmark-centric OR annotation-centric)
-        const view = window.sessionStorage.getItem(this.keys.view) || 'classification-centric';
         this.state = {
             annotations: [],
             loading: true,
-            view: view
+            view: this.getCurrentView()
         };
 
         this.viewChange = this.viewChange.bind(this);
         this.setView = this.setView.bind(this);
     }
 
+    getCurrentView(){
+        // get current view from window location hash, or sessionStorage, or fallback to classification-centric
+        switch(window.location.hash){
+            case '#classification-centric': return 'classification-centric';
+            case '#comment-centric': return 'comment-centric';
+            case '#link-centric': return 'link-centric';
+            case '#metadata-centric': return 'metadata-centric';
+            default:
+                // get view from session storage (bookmark-centric OR annotation-centric)
+                return window.sessionStorage.getItem(this.keys.view) || 'classification-centric';            
+        }
+    }
+
     componentDidMount() {
         // instead of breaking out of the container, change the background color to a white and grey region
         document.body.style.background = 'linear-gradient(180deg, white, white 393px, #faf6f6 393px, #faf6f6)';
+
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "annotations");
     }
 
     componentWillUnmount() {
@@ -45,15 +59,16 @@ class ProjectAnnotationView extends React.PureComponent {
         document.body.style.background = 'white';
     }
 
-
-
     viewChange(e) {
         this.setView(e.target.value);
     }
 
     setView(view){
-          // store view to session storage
+        // store view to session storage
         window.sessionStorage.setItem(this.keys.view, view);
+
+        // update location hash
+        window.location.hash = '#' + view;
 
         this.setState({
             view
@@ -112,7 +127,7 @@ class ProjectAnnotationView extends React.PureComponent {
                     <AnnotationTable {...defaultOptions}
                         key="metadata" 
                         type="metadata" 
-                        title="Metadata" 
+                        title="Metadata cards" 
                         filters={["search","classification","bookmarkGroup"]}
                         sort={["created","template"]}
                     />
@@ -165,7 +180,7 @@ class ProjectAnnotationView extends React.PureComponent {
                             checked={this.state.view === 'metadata-centric'}
                             onChange={this.viewChange}/>
 
-                        <label htmlFor="view-metadata">Metadata</label>
+                        <label htmlFor="view-metadata">Metadata cards</label>
                     </div>
                 </div>
             </div>

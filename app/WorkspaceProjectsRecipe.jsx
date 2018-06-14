@@ -56,7 +56,7 @@ class WorkspaceProjects extends Component {
                         render={this.getPropsRenderer(ProjectCreateView, this.props, {api: ProjectAPI} )} />
 
                     <Route exact path="/workspace/projects/:id" render={({ match }) => (
-                        <Redirect to={`/workspace/projects/${match.params.id}/bookmarks`} />
+                        <Redirect to={`/workspace/projects/${match.params.id}/${window.sessionStorage.getItem("bg__project-tab") || "details"}`} />
                     )} />
 
                     <Route path="/workspace/projects/:id/bookmarks"

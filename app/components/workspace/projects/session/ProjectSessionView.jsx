@@ -51,6 +51,9 @@ class ProjectSessionView extends React.PureComponent {
 
     componentDidMount() {
         this.loadData();
+
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "sessions");
     }
 
     componentDidUpdate() {
@@ -188,12 +191,14 @@ class ProjectSessionView extends React.PureComponent {
                 <div className="tools">
                     <div className="left">
                         <h3>Filters</h3>
-                        <input
-                            className="search"
-                            type="text"
-                            placeholder="Search Tool sessions"
-                            value={this.state.filter.keywords}
-                            onChange={this.keywordsChange.bind(this)}/>
+                        <div className="filter-container">
+                            <input
+                                className="search"
+                                type="text"
+                                placeholder="Search Tool sessions"
+                                value={this.state.filter.keywords}
+                                onChange={this.keywordsChange.bind(this)}/>
+                        </div>
                     </div>
                 </div>
 
