@@ -226,6 +226,9 @@ class BookmarkRow extends React.PureComponent {
                     </ul>
 
                     <div className="actions">
+                        <span className="id-field">
+                            <span className="icon" title={bookmark.id}>ID</span>
+                        </span>
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
@@ -239,6 +242,7 @@ class BookmarkRow extends React.PureComponent {
                         </div>
 
                         <div className="sublevel-button-container">
+
                             <div title="Fragments" className={classNames('sublevel-button', {
                                     active: this.props.showSubSegment,
                                     zero: !hasSegments,
@@ -256,6 +260,7 @@ class BookmarkRow extends React.PureComponent {
                                 <span className="icon annotation"/>
                                 <span className="count">{annotations.length}</span>
                             </div>
+                          
                         </div>
                     </div>
                 </div>
