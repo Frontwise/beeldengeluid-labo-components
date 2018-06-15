@@ -193,15 +193,15 @@ class BookmarkRow extends React.PureComponent {
                             type="checkbox"
                             checked={this.props.selected}
                             onChange={this.onSelectChange.bind(this)}
-                            title={'Select this bookmark with id:\n' + bookmark.id}/>
+                            title={'Select this bookmark with resource ID:\n' + bookmark.resourceId}/>
                     </div>
 
-                    <div className="image" onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
+                    <div className="image" title={"Resource ID: " + bookmark.resourceId} onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
 
                     <ul className="info">
                         <li className="primary content-title">
                             <h4 className="label">Title</h4>
-                            <p onClick={this.onView}>{bookmark.object.title}</p>
+                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>{bookmark.object.title}</p>
                         </li>
                         <li className="content-date">
                             <h4 className="label">Date</h4>
@@ -225,10 +225,7 @@ class BookmarkRow extends React.PureComponent {
                         </li>
                     </ul>
 
-                    <div className="actions">
-                        <span className="id-field">
-                            <span className="icon" title={bookmark.id}>ID</span>
-                        </span>
+                    <div className="actions">                       
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
