@@ -246,7 +246,7 @@ class CollectionAnalyser extends React.Component {
 					return (
 						<option key={dateField.value} value={dateField.value}>
                             {dateField.beautifiedValue}
-                            {dateField.value in this.state.completeness ? '[' + this.state.completeness[dateField.value] + '%]' : null}
+                            {dateField.value in this.state.completeness ? ' [' + this.state.completeness[dateField.value] + '%]' : null}
                         </option>
 					)
 				});
@@ -278,7 +278,7 @@ class CollectionAnalyser extends React.Component {
                         suggestions={this.state.suggestions.map((suggestion)=>(
                             // add completeness                            
                             Object.assign({},suggestion,{
-                                beautifiedValue: suggestion.beautifiedValue + (suggestion.value in this.state.completeness ? '[' + this.state.completeness[suggestion.value] + '%]' : '')
+                                beautifiedValue: suggestion.beautifiedValue + (suggestion.value in this.state.completeness ? ' [' + this.state.completeness[suggestion.value] + '%]' : '')
                             })
                         ))}
                         onSuggestionsFetchRequested={this.onSuggestionsFetchRequested.bind(this)}
