@@ -83,7 +83,6 @@ class CollectionSelector extends React.Component {
 		);
 		if(this.props.onOutput) {
 			if(collectionId) {
-				console.debug('dit is het hoor', collectionConfig);
 				this.props.onOutput(this.constructor.name, collectionConfig);
 			} else {
 				console.debug('No collection selected...');
