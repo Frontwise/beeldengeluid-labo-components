@@ -350,13 +350,17 @@ class CollectionRecipe extends React.Component {
 						{analysisBlock}
 					</div>
 				</div>
-				<div className="row">
-					<div className="col-md-9">
-						{fieldAnalysisTimeline}
-					</div>
+
+                <div className="row">                
                     <div className="col-md-3">
-                        {piecharts}
+                       {piecharts}
                     </div>
+                </div>
+
+				<div className="row">
+					<div className="col-md-12">
+						{fieldAnalysisTimeline}
+					</div>                    
 				</div>
 				<div className="row">
 					<div className="col-md-12">
