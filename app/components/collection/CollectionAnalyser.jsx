@@ -8,8 +8,16 @@ class CollectionAnalyser extends React.Component {
 
 	constructor(props) {
 		super(props);
+
+        this.prefix = 'ms_ca_';
+
+        // default values
+        const defaultValue = window.sessionStorage.getItem(this.prefix + 'defaultValue' + this.props.collectionConfig.collectionId) || '';
+        const defaultDateField = window.sessionStorage.getItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId) || this.props.collectionConfig.getPreferredDateField();
+        console.log(defaultDateField, defaultValue);
 		this.state = {
-            value : '', //the label of the selected classification (autocomplete)
+            value : defaultValue,
+            dateField: defaultDateField,
             suggestions : [], //current list of suggestions shown
             completeness: {}, //store completeness of the fields
 		}
@@ -17,43 +25,65 @@ class CollectionAnalyser extends React.Component {
 
     componentDidMount(){
         console.log(this.props.collectionConfig);
-        // auto load the analyse if there is a preferred DateField
-        if (this.props.collectionConfig.getPreferredDateField()){
-          this.analyseField(this.props.collectionConfig.getPreferredDateField());
+
+        // auto load the analyse if there are default values
+        if (this.state.value){
+          this.analyseField(this.state.value);
+        }
+
+        if (this.state.dateField){
+          this.analyseField(this.state.dateField);
         }
 
         this.previewCompleteness();
+    }
+
+
+    onDateFieldChange(e){        
+        window.sessionStorage.setItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId, e.target.value);
+        this.analyseField(this.state.value);
     }
 
     previewCompleteness(){
         let fieldNames = [];
 
         // Collect all field names
-        Object.keys(this.props.collectionConfig).forEach((key)=>{
+        // Sort to get the DateFields on top
+        Object.keys(this.props.collectionConfig).sort().forEach((key)=>{
             if (key.endsWith('Fields')){
                 fieldNames = fieldNames.concat(this.props.collectionConfig[key]);                
             }
         });
-        
-        // For each fieldname request the completeness and store it to the state
-        fieldNames.forEach((field)=>{
-                this.previewAnalysis(field, (data)=>{
-                    // analysis_field
-                
-                    // data.
-                    // data.doc_stats.
-                        // no_analysis_field
-                        // no_date_field
-                        // total
-                    this.setState((state, props)=>{
-                        const fieldData = {};
-                        fieldData[data.analysis_field] = data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0;
 
-                        return {
-                            completeness: Object.assign({},state.completeness,fieldData)
-                        }
-                    });
-            });
+        // For each fieldname request the completeness and store it to the state and sessionstorage
+        fieldNames.forEach((field)=>{
+                // retrieve from local storage
+                const completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
+                if (completeness !== null){
+                    this.setState((state, props)=>{
+                            const fieldData = {};
+                            fieldData[field] = completeness;
+                            return {
+                                completeness: Object.assign({},state.completeness,fieldData),                                
+                            }
+                        });
+                } else{ 
+                    this.previewAnalysis(field, (data)=>{
+                        const completeness = data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0;
+                        
+                        // store to sessionStorage
+                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, completeness);
+
+                        // update state
+                        this.setState((state, props)=>{
+                            const fieldData = {};
+                            fieldData[data.analysis_field] = completeness;
+                            return {
+                                completeness: Object.assign({},state.completeness,fieldData),                                
+                            }
+                        });
+                });
+            }
         });
     }
 
@@ -162,7 +192,8 @@ class CollectionAnalyser extends React.Component {
         let temp = arrayToSort.map(function(el) {
             return {
             	value: el,
-            	beautifiedValue: this.props.collectionConfig.toPrettyFieldName(el)
+            	beautifiedValue: this.props.collectionConfig.toPrettyFieldName(el),
+                completeness: this.state.completeness[el]
 			};
         }, this);
         // sorting the mapped array containing the reduced values
@@ -197,6 +228,13 @@ class CollectionAnalyser extends React.Component {
     }
 
     onSuggestionSelected(event, {suggestion, suggestionValue, suggestionIndex, sectionIndex}) {
+
+        // store value to session storage
+        window.sessionStorage.setItem(this.prefix + 'defaultValue' + this.props.collectionConfig.collectionId, suggestion.value);
+
+        this.setState({
+            value: suggestion.value
+        });
         this.analyseField(suggestion.value);
     }
 
@@ -206,9 +244,27 @@ class CollectionAnalyser extends React.Component {
 
     //TODO the rendering should be adapted for different vocabularies
     renderSuggestion(suggestion) {
+        const completeness = suggestion.completeness + '%';
         return (
-            <span key={suggestion.value} value={suggestion.value}>{suggestion.beautifiedValue}</span>
+            <div key={suggestion.value} value={suggestion.value}>
+                <span className="title">{suggestion.beautifiedValue}</span>
+                {
+                    suggestion.completeness !== undefined ?
+                    <span className="completeness" title={"Completeness: " + completeness}>{completeness}</span>
+                    : null
+                }
+            </div>
         );
+    }
+
+    renderInputComponent(inputProps){
+        const completeness = this.state.completeness[inputProps.value] + '%';
+        return(
+            <div>
+                <input  {...inputProps} />
+                {/*<span className="completeness" title={"Completeness: " + completeness}>{completeness}</span>*/}
+            </div>
+        )
     }
 
     onSuggestionsClearRequested() {
@@ -232,7 +288,6 @@ class CollectionAnalyser extends React.Component {
 
 	render() {
 		let analysisBlock = null;
-
 		//only draw the rest when a collection is selected (either using the selector or via the props)
 		if(this.props.collectionConfig) {
 			let dateFields = this.props.collectionConfig.getDateFields();
@@ -258,10 +313,8 @@ class CollectionAnalyser extends React.Component {
 						<label htmlFor="datefield_select">Metadata field for date (X-axis)</label>
 						<select className="form-control" 
                     id="datefield_select" 
-                    defaultValue={this.props.collectionConfig.getPreferredDateField()} 
-                    onChange={
-        							this.analyseField.bind(this, this.state.value)
-        						}>
+                    defaultValue={this.state.dateField} 
+                    onChange={this.onDateFieldChange.bind(this)}>
 							{dateFieldOptions}
 						</select>
 					</div>
@@ -269,24 +322,24 @@ class CollectionAnalyser extends React.Component {
 			}
 
 
-
             analysisFieldSelect = (
 				<div className="form-group">
 					<label htmlFor="analysisfield_select">Metadata field to inspect (Y-axis)</label>
                     <Autosuggest
                         ref="classifications"
-                        suggestions={this.state.suggestions.map((suggestion)=>(
-                            // add completeness                            
-                            Object.assign({},suggestion,{
-                                beautifiedValue: suggestion.beautifiedValue + (suggestion.value in this.state.completeness ? ' [' + this.state.completeness[suggestion.value] + '%]' : '')
-                            })
-                        ))}
+                        suggestions={this.state.suggestions.map((suggestion)=>(                            
+                                    // add completeness                            
+                                    Object.assign({},suggestion,{
+                                        completeness: this.state.completeness[suggestion.value] 
+                                    })
+                                ))}
                         onSuggestionsFetchRequested={this.onSuggestionsFetchRequested.bind(this)}
                         onSuggestionsClearRequested={this.onSuggestionsClearRequested.bind(this)}
                         onSuggestionSelected={this.onSuggestionSelected.bind(this)}
                         getSuggestionValue={this.getSuggestionValue.bind(this)}
                         renderSuggestion={this.renderSuggestion.bind(this)}
 						shouldRenderSuggestions={this.shouldRenderSuggestions.bind(this)}
+                        renderInputComponent={this.renderInputComponent.bind(this)}
                         inputProps={{
 				            placeholder: 'Search a field',
 				            value: this.state.value,
