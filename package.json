@@ -1,6 +1,6 @@
 {
   "name": "labo-components",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "B&G UI components",
   "main": "webpack.config.js",
   "scripts": {
