@@ -352,25 +352,30 @@ class CollectionConfig {
 	toPrettyFieldName(esFieldName) {
 		if(esFieldName) {
 			//first split the field based on a dot
-			const tmp = esFieldName.split('.');
+			let tmp = esFieldName.split('.');
+
+			// remove namespaces
+			tmp = tmp.map((field)=>(field.substring(field.indexOf(":") + 1)));
+
+			let isKeywordField = false;
 
 			//if the last field is called raw or keyword (ES reserved names), drop it
 			if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
+				isKeywordField = true;
 				tmp.pop();
 			}
-			//take the leaf field and make it the first in the pretty name
-			let fn = tmp[tmp.length-1];
 
-			//remove any prefix particle separated by ':'
-			if(fn.indexOf(':') != -1) {
-				fn = fn.substring(fn.indexOf(':') + 1);
-			}
+			let leaf = tmp.pop();
 
-			//add between brackets the parent of the leaf field
-			if(tmp.length > 1) {
-			 	fn += ' (in: ' + tmp[tmp.length-2] + ')';
+			// move @ to end of fieldname
+			if (leaf.substring(0,1) == '@'){
+				leaf = leaf.substring(1) + '@';
 			}
-			return fn
+			let origin = tmp.join(".");
+			if (origin){
+				origin = ' => ' + origin;
+			}
+			return leaf + origin + (isKeywordField ? ' *' : '');
 		}
 		return esFieldName;
 	}
