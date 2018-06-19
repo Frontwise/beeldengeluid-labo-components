@@ -24,6 +24,7 @@ import CollectionMapping from '../collection/mappings/CollectionMapping';
 const CollectionUtil = {
 
 	//returns the correct CollectionConfig instance based on the collectionId
+	// TODO: Please note: clientId / user are not used in the call.
 	getCollectionClass(clientId, user, collectionId, lookupMapping = true) {
 		let configClass = null;
 		if(lookupMapping) {
@@ -31,7 +32,7 @@ const CollectionUtil = {
 			if(configClass == null) { //go through the wildcard mappings
 				const temp = Object.keys(CollectionMapping).filter(k => {
 					if(k.indexOf('*') != -1) {
-						return collectionId.startsWith(k.substring(0, k.length -2))
+						return collectionId && collectionId.startsWith(k.substring(0, k.length -2))
 					}
 					return false;
 				})
@@ -145,8 +146,11 @@ const CollectionUtil = {
 	//for pruning long descriptions; makes sure to return the snippet that contains the search term
 	highlightSearchTermInDescription(text, searchTerm=null, maxWords=35) {
 		if(text) {
-			let regex = new RegExp(searchTerm.toLowerCase(), 'gi');
-			let index = text.toLowerCase().search(regex);
+			let index = 0;
+			if(searchTerm) {
+				const regex = new RegExp(searchTerm.toLowerCase(), 'gi');
+				index = text.toLowerCase().search(regex);
+			}
 			index = index > 50 ? index - 50 : 0;
 			text = text.substring(index);
 			let words = text.split(' ');

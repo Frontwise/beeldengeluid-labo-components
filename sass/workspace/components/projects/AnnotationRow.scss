@@ -1,4 +1,4 @@
-.bg__annotation-row{
+.bg__annotation-row.item-row{
   .item{
     .classification{
       .vocabulary{
@@ -16,16 +16,18 @@
       width: 100px;
     }  
 
-    .info{
-      table{
-        td{
-          padding-top: 5px;
-        }  
-      }      
+    .actions{
+      .row-menu{
+        margin-top: 0px;          
+      }
+    }
+    
+    .icon.bookmark{
+      width: 20px;
+      background-size: 20px;          
+      background-image: $iconBookmarkUrl;
     }
   }
-
-  
 
   .sublevel{
     td.actions{

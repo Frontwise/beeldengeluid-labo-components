@@ -3,4 +3,9 @@
 
   @import '../_modal.scss';
 
+  &.loading{
+    .bg__nested-table{
+      opacity: 0.5;
+    }
+  }
 }

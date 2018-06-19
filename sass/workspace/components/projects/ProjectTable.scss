@@ -7,6 +7,15 @@
   }
 
   table{
+    .description{
+      a{
+        text-decoration: none;
+        color: black;
+      }
+      max-width: 270px;
+      white-space: normal;
+    }
+
     .bookmark-icon{
       background-image: $iconBookmarkWhiteUrl;
       background-repeat: no-repeat;
@@ -18,15 +27,23 @@
     }
 
     .collaborators{
-      display: inline-block;
+      display: block;
       color: $clPrimaryAlt;
       text-transform: uppercase;
       font-size: 12px;
       font-family: $fontHeading;
     }
 
-    &.access{
-      text-transform: capitalize;
+    .access{
+      text-transform: uppercase;
+    }
+
+    .actions{
+      width: 130px;
+      .btn{
+        padding-left: 15px;
+        padding-right: 35px;
+      }
     }
   }
 }

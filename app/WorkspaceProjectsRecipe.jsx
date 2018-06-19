@@ -2,7 +2,8 @@ import ProjectAPI from './api/ProjectAPI';
 
 import IDUtil from './util/IDUtil';
 
-//bookmark related view
+//bookmark and annotation view
+import ProjectBookmarkView from './components/workspace/projects/bookmark/ProjectBookmarkView';
 import ProjectAnnotationView from './components/workspace/projects/annotation/ProjectAnnotationView';
 
 //basic crud views
@@ -13,6 +14,7 @@ import ProjectEditView from './components/workspace/projects/crud/ProjectEditVie
 
 //session view
 import ProjectSessionView from './components/workspace/projects/session/ProjectSessionView';
+import ProjectSessionCreateView from './components/workspace/projects/session/ProjectSessionCreateView';
 
 //queries view
 import ProjectQueriesView from './components/workspace/projects/query/ProjectQueriesView';
@@ -45,17 +47,22 @@ class WorkspaceProjects extends Component {
         return(
             <Router>
                 <Switch>
+                    <Route exact path="/workspace/projects/session/create/:tool"
+                        render={this.getPropsRenderer(ProjectSessionCreateView, this.props, {api: ProjectAPI})} />
+
                     <Route exact path="/workspace/projects"
                         render={this.getPropsRenderer(ProjectListView, this.props, {api: ProjectAPI} )} />
                     <Route exact path="/workspace/projects/create"
                         render={this.getPropsRenderer(ProjectCreateView, this.props, {api: ProjectAPI} )} />
 
                     <Route exact path="/workspace/projects/:id" render={({ match }) => (
-                        <Redirect to={`/workspace/projects/${match.params.id}/bookmarks`} />
+                        <Redirect to={`/workspace/projects/${match.params.id}/${window.sessionStorage.getItem("bg__project-tab") || "details"}`} />
                     )} />
 
                     <Route path="/workspace/projects/:id/bookmarks"
-                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />
+                        render={this.getPropsRenderer(ProjectBookmarkView, this.props, {api: ProjectAPI})} />                    
+                    <Route path="/workspace/projects/:id/annotations"
+                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />    
                     <Route path="/workspace/projects/:id/sessions"
                         render={this.getPropsRenderer(ProjectSessionView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/queries"

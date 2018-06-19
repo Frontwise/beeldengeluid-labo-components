@@ -10,24 +10,25 @@ const AnnotationUtil = {
 
 	//extracts all contained targets/resources into a list for the bookmark-centric view
 	//TODO add the parentAnnotationId, so the UI knows how to do CRUD
+	//TODO get the client ID + user ID!!
 	generateBookmarkCentricList(annotations, callback) {
 		let resourceList = [];
-
 		annotations.forEach((na, index) => {
 			let targets = na.target;
 			if(na.target.selector) {
 				targets = [na.target]; //there is only a single target
 			}
+
 			resourceList = resourceList.concat(targets.map((t) => {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
-				//console.debug(resourceInfo, collectionInfo)
+				
 				return {
-					id : IDUtil.guid(), // unique bookmark id, used for referencing
+					id : IDUtil.guid(), // unique bookmark id
 
-					annotationId: na.id, //needed for deleting
+					resourceId: resourceInfo ? resourceInfo.id : t.source, //needed for deleting, displaying, selecting, merging
 
-					targetId: t.source, //needed for deleting
+					annotationIds: [na.id], //needed for deleting
 
 					// general object (document,fragment,entity) data
 					object: {
@@ -35,21 +36,28 @@ const AnnotationUtil = {
 						// unique object id
 						id: resourceInfo ? resourceInfo.id : null,
 
-						// object type: "Video", Video-Fragment", "Image", "Audio", "Entity", ...
+						// object type: "Resource","MediaObject","Segment"
 						type: t.type,
 
 						// short object title
 						title: na.id,
 
+						// description, need to fetch
+						description: '',
+
 						// (Creation) date of the object (nice to have)
 						date: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+						dateField: "NEED TO FETCH (DEPENDS ON RESOURCE)",
+
 
 						// dataset the object originates from
 						dataset: collectionInfo ? collectionInfo.id : null,
 
-						// placeholder image if available
-						placeholderImage: "http://localhost:5304/static/images/placeholder.2b77091b.svg"
+						// placeholder image
+						placeholderImage: "/static/images/placeholder.2b77091b.svg",
 
+						// media types
+						mediaTypes: [],
 					},
 
 					// Bookmark created
@@ -58,18 +66,97 @@ const AnnotationUtil = {
 					// sort position
 					sort: index,
 
-					// optional list of annotations here (leaves out bookmarks)
+					// list of annotations
 					annotations: na.body ? na.body.filter(a => {
 						return a.vocabulary != 'clariahwp5-bookmark-group'
-					}) : null,
+					}) : [],
+
+					// bookmark groups
+					groups: na.body ? na.body.filter(a => {
+						return a.vocabulary == 'clariahwp5-bookmark-group'
+					}) : [],
+
+					// Selector details: required for segment information
+					selector: na.target.selector
 				}
 			}))
 		});
-		if(callback && resourceList.length > 0) {
-			return AnnotationUtil.reconsileResourceList(resourceList, callback)
+
+
+		// Merge bookmarks and annotations for same resources
+		// If only an annotation is available without the resource being bookmarked,
+		// offer a fallback, and create this bookmarked resource
+		const uniqueList={};
+
+		// move resources to top
+		resourceList.sort((a,b)=>(a.object.type == 'Resource' ? -1 : 1));
+
+		resourceList.forEach((b)=>{
+
+			// save information about the annotation origin			
+			b.annotations = b.annotations ? 
+				// augment annotations
+				b.annotations.map((a)=>(Object.assign({},a,{
+					parentAnnotationId: b.annotationId
+				}))) : 
+				// empty annotation, required for deleting
+				[{
+					parentAnnotationId: b.annotationId
+				}];
+
+
+		// prepare the bookmark object and add it to the uniquelist
+		if (b.resourceId in uniqueList){				
+			// existing
+			
+			// Add to unique list, based on type
+			switch(b.object.type){
+				case 'Segment':
+					// add to the segment list
+					uniqueList[b.resourceId].segments = uniqueList[b.resourceId].segments.concat(b);
+				break;
+				default:
+					// just combine the bookmarks
+					uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
+					uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);				
+					uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
+			}
+		} else{
+			// new
+
+			if (b.object.type === 'Segment'){
+
+					// Create a new resourceobject for the segment
+					const segment = Object.assign({},b,{
+						object: Object.assign({},b.object),
+						annotations: b.annotations.slice(),
+					})
+					// add the the segment to the resource
+					b.segments = [segment];						
+
+					// clear the annotations
+					b.annotations = [];
+			} else{
+				// create the segments placeholder
+				b.segments = [];
+			}
+
+			// always make the main bookmark a resource
+			b.object.type = "Resource";
+			uniqueList[b.resourceId] = b;
 		}
-		return resourceList;
-	},
+	});
+	resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
+
+	if(callback){
+		if (resourceList.length > 0) {
+			return AnnotationUtil.reconsileResourceList(resourceList, callback)
+		} else{
+			callback([]);
+		}
+		}
+	return resourceList;
+},
 
 	//TODO do a mget to fetch all the resource data from the search API.
 	reconsileResourceList(resourceList, callback) {
@@ -80,9 +167,9 @@ const AnnotationUtil = {
 			}
 		})
 		const resourceIds = temp.reduce((acc, cur) => {
-			//the first accumulator is the same as the current object...
+			//the first accumulator is the same as the current object...|
 			if(acc.resourceId) {
-				let temp = {}
+				const temp = {}
 				temp[acc.collectionId] = [acc.resourceId];
 				acc = temp;
 			} else {
@@ -101,16 +188,18 @@ const AnnotationUtil = {
 		//now loop through the clustered (by collectionId) resourceIdLists and call the document API
 		const accumulatedData = {}
 		Object.keys(resourceIds).forEach((key) => {
+			console.debug('KEY: ' + key)
 			DocumentAPI.getItemDetailsMultiple(
 				key, //collectionId
 				resourceIds[key], //all resourceIds for this collection
 				(collectionId, idList, resourceData) => {
 					//reconsile and callback the "client"
-					const configClass = CollectionUtil.getCollectionClass(collectionId, true);
+					//TODO get the client ID + user ID!!
+					const configClass = CollectionUtil.getCollectionClass(null, null, collectionId, true);
 					const collectionConfig = new configClass(collectionId);
-					const mappedResourceData = resourceData.map((doc) => {
+					const mappedResourceData = resourceData  && !resourceData.error ? resourceData.map((doc) => {
 						return doc.found ? collectionConfig.getItemDetailData(doc) : null;
-					})
+					}) : [];
 
 					accumulatedData[collectionId] = mappedResourceData;
 					if(Object.keys(resourceIds).length == Object.keys(accumulatedData).length) {
@@ -119,20 +208,27 @@ const AnnotationUtil = {
 				}
 			)
 		});
-		//TODO merge bookmarks that target the same resource!
+		
 	},
 
-	//TODO FINISH THIS AND WE'RE ALL DONE!
-	reconsileAll(resourceList, resourceData) {
+	reconsileAll(resourceList, resourceData) {		
 		resourceList.forEach((x) => {
-			let temp = resourceData[x.object.dataset].filter((doc) => {
+			const temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
-			});
+			});			
 			x.object.title = 'Resource not found';
 			x.object.date = 'N/A';
 			if(temp.length == 1) {
 				x.object.title = temp[0].title;
 				x.object.date = temp[0].date;
+				x.object.dateField = temp[0].dateField;
+				x.object.description = temp[0].description;
+				x.object.mediaTypes=temp[0].mediaTypes || [];
+				
+				if (temp[0].placeholderImage){
+					x.object.placeholderImage = temp[0].placeholderImage;
+				} 
+				
 				if(temp[0].posterURL) {
 					x.object.placeholderImage = temp[0].posterURL
 				}
@@ -143,14 +239,17 @@ const AnnotationUtil = {
 
 	//extracts all contained annotations into a list for the annotation-centric view
 	//TODO update this so each body is an item. Use parentAnnotationId to refer to the parent
-	generateAnnotationCentricList(annotations) {
+	generateAnnotationCentricList(annotations, type, callback) {
 		// check for empty: can't reduce an empty array
 		if (annotations.length === 0){
 			return [];
 		}
-
-		return annotations.filter(an => an.body).map((an) => {
-
+		
+		// -----------------------------------------------
+		// Create list of annotations with bookmarks
+		// -----------------------------------------------
+		annotations = annotations.filter(an => an.body).map((an) => {
+		
 			//create a list of bookmarks from the parent annotation's targets
 			let targets = an.target;
 			if(an.target.selector) {
@@ -160,23 +259,162 @@ const AnnotationUtil = {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
 				return {
-					resourceId : resourceInfo ? resourceInfo.id : null,
 					collectionId : collectionInfo ? collectionInfo.id : null,
 					type : t.type,
-					title : resourceInfo ? resourceInfo.id : null
+					title : resourceInfo ? resourceInfo.id : null,
+					resourceId : resourceInfo ? resourceInfo.id : null,
+					groups: [], // populated later, for filtering
+					classifications: [], // populated later, for filtering
+
+					// also build the document object, so it can be preview in the annotation list
+					// and be used for filtering
+					object:{
+						id: resourceInfo ? resourceInfo.id : null,
+						dataset : collectionInfo ? collectionInfo.id : null,						
+					},
+
 				}
 			})
-
+			
 			//assign the targets as a list of bookmarks to each body/annotation
 			an.body.forEach((b) => {
 				b.bookmarks = bookmarks;
 				b.parentAnnotationId = an.id;
 			});
+
 			//assign the parent annotation ID to this (sub)annotation
 			return an.body
 		}).reduce((acc, cur) => { //concat all annotation bodies into a single array
 			return acc.concat(cur);
+		},[]);
+
+		// -----------------------------------------------
+		// Store bookmark groups and classifications to the objects
+		// -----------------------------------------------
+		
+		const objectAnnotations = {};
+		
+		// Store classification and group data for each bookmark.
+		// After filtering and merging the annotations, the data will be merged
+		annotations.forEach((a)=>{
+			if (a.annotationType === 'classification'){
+
+					a.bookmarks.forEach((b)=>{
+						const id = b.collectionId + b.resourceId;						
+						if (!(id in objectAnnotations)){
+							objectAnnotations[id] = {
+								groups: [],
+								classifications: [],
+							}
+						} 
+						switch(a.vocabulary){
+						case 'clariahwp5-bookmark-group':
+							objectAnnotations[id].groups.push(a);
+						break;
+						default:
+							objectAnnotations[id].classifications.push(a);
+						}
+			});
+			}
 		});
+
+		// -----------------------------------------------
+		// Filter annotations on selected type
+		// -----------------------------------------------
+		
+		annotations = annotations.filter((a)=>( 
+				a.annotationType === type
+				// and exclude bookmark groups
+				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
+		));
+
+			
+		const uniqAnnotations = {};
+		const newAnnotations = [];
+		let id;
+
+		// -----------------------------------------------
+		// Merge equal annotations (classifications, links)
+		// -----------------------------------------------
+		switch (type){
+			case 'classification':{
+					// merge classifications with same id
+					annotations.forEach((a)=>{
+						if (a.id in uniqAnnotations){
+							uniqAnnotations[a.id].bookmarks = uniqAnnotations[a.id].bookmarks.concat(a.bookmarks);
+						} else{
+							uniqAnnotations[a.id] = a;
+							newAnnotations.push(a);
+						}
+					});
+					annotations = newAnnotations;
+				}
+			break;
+			case 'link':{
+					// merge links with same url				
+					annotations.forEach((a)=>{
+						if (a.url in uniqAnnotations){
+							uniqAnnotations[a.url].bookmarks = uniqAnnotations[a.url].bookmarks.concat(a.bookmarks);
+						} else{
+							uniqAnnotations[a.url] = a;
+							newAnnotations.push(a);
+						}
+					});
+					annotations = newAnnotations;
+				}
+			break;				
+		}
+
+
+		// -----------------------------------------------
+		// Apply the groups/classifications data to the bookmarks in the annotations list
+		// -----------------------------------------------
+		annotations.forEach((a)=>{
+			a.bookmarks.forEach((b)=>{
+				const id = b.collectionId + b.resourceId;	
+				if (id in objectAnnotations){
+					b.groups = objectAnnotations[id].groups;
+					b.classifications = objectAnnotations[id].classifications;
+				}
+			});
+		});
+
+		const count = 0;
+		const bookmarkCount = 0;
+
+		
+		// -----------------------------------------------
+		// Handle empty results
+		// -----------------------------------------------
+				// if no results are available, call the callback function
+		if (annotations.length === 0){
+			callback(annotations);
+			return;
+		}
+
+		// -----------------------------------------------
+		// Add object data to annotation bookmarks
+		// -----------------------------------------------
+		const bookmarks = [];
+		const hits = {};
+		
+		annotations.forEach((a)=>{
+			a.bookmarks.forEach((b)=>{
+				const id = b.collectionId + b.resourceId;	
+				if (!(id in hits)){
+					hits[id] = true;
+					bookmarks.push(b);
+				}
+			})
+		});
+
+		// retrieve bookmark data			
+		// The objects in the annotations array are the same objects that have been enriched with the document data; 
+		// we don't have to store/merge any data; just run reconsileResourcelist callback
+		AnnotationUtil.reconsileResourceList(bookmarks, ()=>{
+			callback(annotations);
+		});
+
 	},
 
 	//the Collection & Resource should always be part of the annotation target
@@ -217,7 +455,6 @@ const AnnotationUtil = {
 					}
 					i++;
 				}
-
 			}
 		}
 		return null;
@@ -255,7 +492,7 @@ const AnnotationUtil = {
 
 	//currently only used for bookmarking lots of resources
 	generateEmptyW3CMultiTargetAnnotation : function(user, project, collectionId, resourceIds, motivation='bookmarking') {
-		let annotation = {
+		const annotation = {
 			id : null,
 			user : user.id,
 			project : project ? project.id : null, //no suitable field found in W3C so far
@@ -332,7 +569,7 @@ const AnnotationUtil = {
 			}
 
 			//this is basically the OLD target. It will be transformed using generateTarget
-			let target = {
+			const target = {
 				//FIXME the source params can be important for resolving the URL! In some cases however not.
 				//Think of something to tackle this!
 				source: AnnotationUtil.removeSourceUrlParams(mediaObject.url), //TODO It should be a PID!
@@ -381,7 +618,7 @@ const AnnotationUtil = {
 	//TODO make this suitable for resource annotations too (now it's currently only for mediaobject annotations)
 	generateTarget : function(collectionId, resourceId, target) {
 		let targetType = 'MediaObject';
-		let selector = {
+		const selector = {
 			type: 'NestedPIDSelector',
 			value: [
 				{

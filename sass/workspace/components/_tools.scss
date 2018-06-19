@@ -1,19 +1,28 @@
  .tools{
     background-color: $clGrey;
     padding: 0px 10px;
+    display: flex;
 
     &:after{
       clear:both;
       content: "";
       display: table;
     }
-
+    
     .left{
+      display: flex;
+      align-content: flex-start;
+      justify-content: flex-start;
+      flex-wrap: wrap;
       float:left;
-    }
+      flex: 1 1 0;
+    }    
 
-    .right{
-      float:right;
+    .filter-container{
+      display: flex;
+      align-content: flex-start;
+      justify-content: flex-start;
+      align-items: center;      
     }
 
     h3{
@@ -39,8 +48,9 @@
 
     label{
       vertical-align: middle;
-      margin-left: 5px;
+      padding: 10px 10px 10px 5px;
     }
+
     input, input[type=checkbox], select{
       vertical-align: middle;
       margin-left: 20px;
@@ -57,18 +67,22 @@
       background-image: $iconSearchUrl;
       background-position: center right 10px;
       background-repeat: no-repeat;
+      padding-right: 30px;
     }
 
-    select{
-      @media screen and (-webkit-min-device-pixel-ratio:0) {  
-        border-color: $clGreyTint;
-        box-shadow: 0 2px 2px rgba(0,0,0,0.1);
-        border-radius: 2px;
-        background-color: #fff;  
+   select{
+    // webkit only
+    @media screen and (-webkit-min-device-pixel-ratio:0) {  
+      border-color: $clGreyTint;
+      box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+      border-radius: 2px;
+      background-color: #fff;  
+      &:disabled{
+        background-color: $clGrey;
       }
-      
-      padding: 5px;
-        
-      
     }
+    max-width: 160px;
+    
+    padding: 5px;
   }
+}

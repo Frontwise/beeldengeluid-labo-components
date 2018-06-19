@@ -46,10 +46,10 @@ const QueryModel = {
 
 			//(fragment search only) decide whether to return sub fragments as well
 			//(e.g. when retrieving a paragraph it's possible to exclude the list of sentences)
-			includeFragmentChildren: obj.includeFragmentChildren === true || false,
+			includeFragmentChildren: obj.includeFragmentChildren === true ? true : collectionConfig.includeFragmentChildren(),
 
 			//(fragment search only) decide whether to search/retrieve the document level as well
-			includeMediaObjects: obj.includeMediaObjects === false || true,
+			includeMediaObjects: obj.includeMediaObjects === false ? false : collectionConfig.includeMediaObjects(),
 
 			//paging within inner hits is not really supported/reflected by the UI (yet)
 			innerHitsOffset: obj.innerHitsOffset || 0,
@@ -107,7 +107,6 @@ const QueryModel = {
 
 	//TODO add support for missing params such as: desiredFacets
 	toUrlParams(query) {
-		console.debug(query)
 		const params = {
 			fr : query.offset,
 			sz : query.size,
@@ -162,7 +161,6 @@ const QueryModel = {
 
 	//TODO probably better to return a default query instead of null whenever the urlParams are null
 	urlParamsToQuery : function(urlParams, collectionConfig) {
-		console.debug('THE URL PARAMS', urlParams)
 		if(urlParams) {
 			const numParams = Object.keys(urlParams).length;
 			if(numParams == 0) {

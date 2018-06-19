@@ -71,7 +71,7 @@ const FlexRouter = {
 	//TODO extend this function so it is optional to put the params in the URL
 	setBrowserHistory : function(params, stateTitle) {
 		let url = document.location.pathname;
-		let paramList = FlexRouter.__toUrlParamList(params);
+		const paramList = FlexRouter.__toUrlParamList(params);
 		if(paramList) {
 			url += '?' + paramList.join('&');
 		}

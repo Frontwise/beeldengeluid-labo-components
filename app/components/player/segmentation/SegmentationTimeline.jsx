@@ -13,7 +13,6 @@ class SegmentationTimeline extends React.Component {
 	}
 
 	componentWillUnmount() {
-		console.debug('removing this event listener');
 		window.removeEventListener('resize', this.updateCanvasDimensions.bind(this));
 	}
 

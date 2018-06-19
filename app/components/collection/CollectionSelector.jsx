@@ -71,9 +71,9 @@ class CollectionSelector extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	onOutput(collectionId, collectionStats, collectionInfo) {
-		console.debug(collectionId)
-		console.debug(collectionStats)
-		console.debug(collectionInfo)
+		// console.debug(collectionId)
+		// console.debug(collectionStats)
+		// console.debug(collectionInfo)
 		const collectionConfig = CollectionUtil.createCollectionConfig(
 			this.props.clientId,
 			this.props.user,
@@ -83,7 +83,6 @@ class CollectionSelector extends React.Component {
 		);
 		if(this.props.onOutput) {
 			if(collectionId) {
-				console.debug('dit is het hoor', collectionConfig);
 				this.props.onOutput(this.constructor.name, collectionConfig);
 			} else {
 				console.debug('No collection selected...');
@@ -127,12 +126,17 @@ class CollectionSelector extends React.Component {
 
 				//the collections visualized as blocks
 				const collectionBlocks = this.state.collectionList.map((collection) => {
+					let organisationImage = null;
+					if(collection.organization.image_url) {
+						organisationImage = (<img src={collection.organization.image_url}/>)
+					}
 					return (
 						<div className={IDUtil.cssClassName('collection', this.CLASS_PREFIX)}
 							onClick={this.selectCollection.bind(this, collection.index)}>
 							<div className={IDUtil.cssClassName('caption', this.CLASS_PREFIX)}>
 								<h4>{collection.title}</h4>
 								<p>{collection.organization.title}</p>
+								{organisationImage}
 							</div>
 						</div>
 					)
