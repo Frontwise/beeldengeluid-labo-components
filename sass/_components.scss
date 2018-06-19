@@ -1,3 +1,13 @@
+.bg__comparative-search-recipe {
+	.bg__project-queries-view {
+		@import './workspace/index';
+	}
+	.combineSavedQueries {
+		position: absolute;
+		right: 0
+	}
+}
+
 .tooltip-info {
 	cursor:help;
 	text-decoration:underline;
@@ -780,6 +790,9 @@
 		margin: 3rem 0;
 		padding: 4rem;
 	}
+	.ms_toggle_btn {
+		display: none;
+	}
 }
 
 .bg__item-details-recipe { /* ItemDetailsRecipe.jsx */
@@ -868,7 +881,9 @@
 }
 
 /* ==================== stylings for switch btn (move to a separated file) ============================================ */
-$transition-time : .8s;
+$transition-time : 1s;
+$backColorBtnActive : #468dcb;
+$backColorBtnInactive :#7aabd6;
 .ms_toggle_btn{
 	input.checkbox-toggle {
 		position: absolute;
@@ -935,7 +950,7 @@ $transition-time : .8s;
 	}
 
 	input.checkbox-toggle-round:checked + label:before {
-		background-color: #4DB346;
+		background-color: #7aabd6;
 		color: white;
 	}
 
@@ -981,26 +996,53 @@ $transition-time : .8s;
 	}
 
 	input.checkbox-toggle-round-flat:checked + label {
-		background-color: #8ce196;
+		background-color: #7aabd6;
 	}
 
 	input.checkbox-toggle-round-flat:checked + label:after {
 		margin-left: 42px;
-		background-color: #8ce196;
+		background-color: #7aabd6;
 	}
 }
 
 /* ==================== Custom tooltip stylings for line charts ============================================ */
-.ms__custom-tooltip {
+.recharts-tooltip-wrapper {
 	background-color: rgba(0, 0, 0, 0.6);
 	border-radius: 8px;
-	box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
+	box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .8);
+	.ms__custom-tooltip {
+		color: #f3f3f3;
+		padding: 1rem 3rem;
+		text-transform: capitalize;
+		.rightAlign {
+			float: right;
+			margin-left: 10px;
+			right: 0;
+		}
+	}
+}
+.ms__custom-legend {
 	color: #f3f3f3;
-	padding: 1rem 3rem;
+	margin-top: 4rem;
+	padding: 1rem 0;
 	text-transform: capitalize;
 	.rightAlign {
 		float: right;
 		margin-left: 10px;
 		right: 0;
+	}
+	.bg__comparative_queryLine {
+		background-color: #fefefe;
+		border: 1px solid #DEDEDA;
+		border-radius: 8px;
+		box-shadow: 1px 1px 9px 0 rgba(0,0,0,.8);
+		display: inline-block;
+		margin: 1rem 10px 1rem 0;
+		max-width: 33%;
+		vertical-align: top;
+		p{
+			color: #2D343A;
+			padding: 0 20px;
+		}
 	}
 }

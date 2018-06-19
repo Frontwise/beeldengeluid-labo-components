@@ -5,6 +5,7 @@ import {render} from 'react-dom';
 import CollectionRecipe from './CollectionRecipe';
 import SingleSearchRecipe from './SingleSearchRecipe';
 import ComparativeSearchRecipe from './ComparativeSearchRecipe';
+import QueryComparisonRecipe from './QueryComparisonRecipe';
 import ItemDetailsRecipe from './ItemDetailsRecipe';
 
 // workspace
@@ -53,6 +54,15 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
+        case 'query-comparison':
+            component = <QueryComparisonRecipe
+                recipe={recipe}
+                params={params}
+                user={user}
+                clientId={clientId}
+                collectionMapping={collectionMapping} //TODO move the collection mapping externally
+            />;
+            break;
 	 	case 'collection-analysis':
 			component = <CollectionRecipe
 				recipe={recipe}

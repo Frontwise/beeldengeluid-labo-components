@@ -78,7 +78,11 @@ class ComparativeSearchRecipe extends React.Component {
 					 	dateField : data.dateRange ? data.dateRange.field : null,
 					 	prettyQuery : QueryModel.toHumanReadableString(data.query),
 					 	data : newData,
-					 	queryId : data.query.id
+					 	queryId : data.query.id,
+						query : this.state.combinedSearchResults[data.query.id]
+                            ? this.state.combinedSearchResults[data.query.id].query
+                            : null,
+						collectionConfig: this.state.combinedSearchResults[data.query.id] ? this.state.combinedSearchResults[data.query.id].collectionConfig : null
 					}
 				}
 				csr[data.query.id] = data;

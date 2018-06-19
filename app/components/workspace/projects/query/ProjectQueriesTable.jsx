@@ -20,6 +20,7 @@ class ProjectQueriesTable extends React.PureComponent {
 
         this.state = {
             queries: [],
+            selectedQueries: [],
             filter: {
                 keywords: '',
                 currentUser: false
@@ -112,6 +113,15 @@ class ProjectQueriesTable extends React.PureComponent {
         }
     }
 
+    compareQueries(queries) {
+        const project = this.props.project;
+        project.queries = project.queries.filter(q => queries.includes(q));
+        console.log(project.queries);
+        // update state
+        this.setState({
+            selectedQueries: project.queries
+        }, console.log(this.state));
+    }
     //deletes multiple queries
     deleteQueries(queries) {
         if (window.confirm('Are you sure you want to delete ' + queries.length + ' queries?')) {
@@ -142,7 +152,14 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     render() {
-
+        let combineQueriesLink = null;
+        if(this.props.compareQueryLink) {
+            combineQueriesLink = (
+                <button className="btn btn-primary combineSavedQueries" onClick={this.props.handleCompareLink.bind(this)}>
+                    {this.props.compareQueryLink.label}
+                </button>
+            )
+        }
         return (
             <div className={IDUtil.cssClassName('project-queries-table')}>
                 <div className="tools">
@@ -154,6 +171,7 @@ class ProjectQueriesTable extends React.PureComponent {
                             placeholder="Search"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
+                        {combineQueriesLink}
                     </div>
                 </div>
 

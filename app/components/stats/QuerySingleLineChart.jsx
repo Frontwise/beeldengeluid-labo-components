@@ -67,7 +67,14 @@ class QuerySingleLineChart extends React.Component {
                     viewMode: 'relative',
                     query: {
                         ...this.state.query,
-                        term: ''
+                        term: '',
+                        selectedFacets: {},
+                        fieldCategory: [],
+                        dateRange: {
+                            ...this.state.query.dateRange,
+                            end:null,
+                            start:null
+                        }
                     }
                 }, () => {
                     this.doSearch(this.state.query, false)
