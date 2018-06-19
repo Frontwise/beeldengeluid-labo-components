@@ -14,7 +14,7 @@ const ElasticsearchDataUtil = {
 				aggregations[query.dateRange.field].forEach((a) => {
 					const y = new Date(a.date_millis).getFullYear();
 					if (!(isNaN(y))) {
-						let td = {
+						const td = {
 							year: y
 						}
 						td[query.id] = a.doc_count

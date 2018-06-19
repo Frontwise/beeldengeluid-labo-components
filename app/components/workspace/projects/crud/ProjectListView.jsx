@@ -30,7 +30,7 @@ class ProjectListView extends React.PureComponent {
                         Create User Project
                     </Link>
                     <h2>User Projects</h2>
-                    <p>Store and share Bookmarks & Annotations and Tool Sessions</p>
+                    <p>Store and share Bookmarks, Annotations, Tool sessions and Queries</p>
                 </div>
 
                 <ProjectTable api={this.props.api} user={this.props.user} />

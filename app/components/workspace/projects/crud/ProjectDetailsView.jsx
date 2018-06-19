@@ -12,6 +12,11 @@ import { Link } from 'react-router-dom';
 */
 class ProjectDetailsView extends React.PureComponent {
 
+    componentDidMount(){
+        // store tab to sessionStorage
+        window.sessionStorage.setItem("bg__project-tab", "details");
+    }
+
     render() {
         const project = this.props.project;
         return (
@@ -30,8 +35,8 @@ class ProjectDetailsView extends React.PureComponent {
                         <p>{project.description}</p>
                     </li>
                     <li>
-                        <h5 className="label">Visibility</h5>
-                        <p>{project.isPrivate ? 'Private' : 'Public'}</p>
+                        <h5 className="label">Private</h5>
+                        <p>{project.isPrivate ? "✔" : null}</p>
                     </li>
                     <li>
                         <h5 className="label">Created</h5>

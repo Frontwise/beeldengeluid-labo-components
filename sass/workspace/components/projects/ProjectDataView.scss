@@ -1,4 +1,4 @@
-.bg__project-annotation-view{
+.bg__project-data-view{
   @import '../_tools.scss';
 
   .tools{
@@ -23,11 +23,11 @@
     }
 
     .type-label{
-      margin-left: 10px;
+      padding-left: 10px;
     }
 
     .type-select{
-      margin-left: 10px;
+      margin-left: 0px;
     }
   }
 }

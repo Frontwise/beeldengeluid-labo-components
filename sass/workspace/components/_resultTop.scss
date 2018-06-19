@@ -1,4 +1,28 @@
 .results{
+  .sort{
+    margin-top: 10px;
+    float:right;
+    display: flex;
+    align-items: center;
+    h3{
+      margin-right: 10px;
+    }
+    select{
+      padding: 6px 10px;
+      // webkit only
+      @media screen and (-webkit-min-device-pixel-ratio:0) {  
+        border-color: $clGreyTint;
+        box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+        border-radius: 2px;
+        background-color: #fff;  
+        &:disabled{
+          background-color: $clGrey;
+        }
+      }
+    }
+  }
+
+
   h2,h3{
     text-transform: capitalize;
     margin: 20px 0;    

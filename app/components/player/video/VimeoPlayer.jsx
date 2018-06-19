@@ -26,6 +26,13 @@ class VimeoPlayer extends React.Component {
 		}
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			return false
+		}
+		return true
+	}
+
 	componentWillUnmount() {
 		if(this.state.player) {
 			this.state.player.api('unload');
