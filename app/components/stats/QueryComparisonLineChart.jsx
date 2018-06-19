@@ -239,7 +239,8 @@ class QueryComparisonLineChart extends React.Component {
                         <Tooltip content={<CustomTooltip  viewMode={this.state.viewMode}/>}/>
                         <Legend
                             verticalAlign="bottom"
-                            height={36}
+                            wrapperStyle={{ position: null }}
+                            height={39}
                         content={<CustomLegend selectedQueries={this.props.selectedQueries} lineColour={this.COLORS} labelData={this.state.collectionList} external={external}/>}
                         />
                     </LineChart>

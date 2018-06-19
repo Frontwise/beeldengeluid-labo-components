@@ -6,6 +6,10 @@
 		position: absolute;
 		right: 0
 	}
+	
+	.recharts-legend-wrapper {
+		position: relative;
+	}
 }
 
 .tooltip-info {
@@ -557,6 +561,7 @@
 	box-shadow: 1px 1px 0px 1px #999;
 
 	padding: 10px;
+	margin-top: 3rem;
 	.axis path,	.axis line { /* overridden d3 class */
 		fill: none;
 		stroke: #e3e3e3;
@@ -1046,7 +1051,7 @@ $backColorBtnInactive :#7aabd6;
 }
 .ms__custom-legend {
 	color: #f3f3f3;
-	margin-top: 4rem;
+	margin: 4rem 0;
 	padding: 1rem 0;
 	text-transform: capitalize;
 	display: flex;
