@@ -314,10 +314,11 @@ const CustomLegend = React.createClass({
 
                     })
                 }
-                // console.log(queryDetails)
                 if(queryDetails.length > 0) {
                     let fieldCategoryList = null,
-                        fieldClusterHeader = null;
+                        fieldClusterHeader = null,
+                        dateRangeHeader = null,
+                        dateRangeFields = null;
                     queryInfoBlocks = queryDetails.map(
                         item =>{
                             if(item.fieldCategory.length > 0) {
@@ -325,16 +326,27 @@ const CustomLegend = React.createClass({
                                    return (<li>{field.label} </li>);
                                 })
                             }
+                            if(item.dateRange) {
+                                dateRangeFields = Object.keys(item.dateRange).map(dateObj => {
+                                    if(dateObj === 'field') {
+                                        return (<li>{item.dateRange[dateObj]} </li>);
+                                    }
+                                })
+                            }
+                            if(dateRangeFields) {
+                                dateRangeHeader = <p><b>Date Range:</b></p>
+                            }
                             if(fieldCategoryList) {
                                 fieldClusterHeader = <p><b>Field cluster:</b></p>
                             }
-                            console.log(fieldClusterHeader)
                             return (<div className="bg__comparative_queryLine" onClick={this.toggleLine}>
                                 <h4 style={this.stylings(item.lineColour)}>Query title: {item.savedQueryName}</h4>
                                 <p><b>Collection name:</b> {item.collectionTitle}</p>
                                 <p><b>Query term (Search term):</b> {item.queryTerm}</p>
                                 {fieldClusterHeader}
                                 <ul>{fieldCategoryList}</ul>
+                                {dateRangeHeader}
+                                <ul>{dateRangeFields}</ul>
 
                             </div>)
                         }
