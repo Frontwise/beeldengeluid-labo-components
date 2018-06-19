@@ -104,9 +104,9 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 
 		//reset certain query properties
-		q.fieldCategory = null;
+		//q.fieldCategory = null;
 		q.selectedFacets = {};
-		q.dateRange = null;
+		//q.dateRange = null;
 		q.offset = 0;
 		q.term = this.refs.searchTerm.value;
 
@@ -259,9 +259,9 @@ class QueryBuilder extends React.Component {
         } else {
         	//Note: searchLayers & desiredFacets & selectedSortParams stay the same
         	let q = this.state.query;
-        	q.dateRange = null;
+        	//q.dateRange = null;
         	q.selectedFacets = {};
-        	q.fieldCategory = null;
+        	//q.fieldCategory = null;
 
             this.setState({
             	searchId: null,
