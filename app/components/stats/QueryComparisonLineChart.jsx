@@ -325,7 +325,7 @@ const CustomLegend = React.createClass({
 
                     queryInfoBlocks = queryDetails.map(
                         item =>{
-                            if(item.fieldCategory.length > 0) {
+                            if(item.fieldCategory && item.fieldCategory.length > 0) {
                                 fieldCategoryList = item.fieldCategory.map(field => {
                                    return (<li>{field.label} </li>);
                                 })
@@ -408,51 +408,53 @@ const CustomTooltip = React.createClass({
             const {payload, label} = this.props,
                 dataType = this.props.viewMode;
 
-            if (dataType === 'relative') {
-                const labelPercentage = payload.length > 1 ? 'Porcentages' : 'Porcentage',
-                    valueLabel = payload.length > 1 ? 'Values' : 'Value',
-                    point = payload.map(p => {
-                        return (
-                            <p style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</p>
-                        )
-                    });
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>{this.props.viewMode} {valueLabel}</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
-                    </div>
-                );
-            } else if (dataType === 'inspector') {
-                const point = payload.map((p, i) => {
-                        return (
-                            <p>
-                                {this.props.payload[i].name}: <span className="rightAlign"><p style={this.stylings(p)}>{p.value ? p.value : 0}</p></span>
-                            </p>
-                        )
-                    });
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>Values for year: {`${label}`}</h4>
-                        {point}
-                    </div>
-                );
-            } else {
-                const point = payload.map(p => {
-                        return (
-                            <p style={this.stylings(p)}>{p.value ? p.value : 0}</p>
-                        )
-                    }),
-                    labelTotals = payload.length > 1 ? 'Totals' : 'Total',
-                    valueLabel = payload.length > 1 ? 'Values' : 'Value';
+            if(payload && label) {
+                if (dataType === 'relative') {
+                    const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage',
+                        valueLabel = payload.length > 1 ? 'Values' : 'Value',
+                        point = payload.map(p => {
+                            return (
+                                <p style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</p>
+                            )
+                        });
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>{this.props.viewMode} {valueLabel}</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
+                        </div>
+                    );
+                } else if (dataType === 'inspector') {
+                    const point = payload.map((p, i) => {
+                            return (
+                                <p>
+                                    {this.props.payload[i].name}: <span className="rightAlign"><p style={this.stylings(p)}>{p.value ? p.value : 0}</p></span>
+                                </p>
+                            )
+                        });
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>Values for year: {`${label}`}</h4>
+                            {point}
+                        </div>
+                    );
+                } else {
+                    const point = payload.map(p => {
+                            return (
+                                <p style={this.stylings(p)}>{p.value ? p.value : 0}</p>
+                            )
+                        }),
+                        labelTotals = payload.length > 1 ? 'Totals' : 'Total',
+                        valueLabel = payload.length > 1 ? 'Values' : 'Value';
 
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>{this.props.viewMode} {valueLabel}</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
-                    </div>
-                );
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>{this.props.viewMode} {valueLabel}</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                            <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
+                        </div>
+                    );
+                }
             }
         }
         return null;
