@@ -314,15 +314,30 @@ const CustomLegend = React.createClass({
 
                     })
                 }
+                // console.log(queryDetails)
                 if(queryDetails.length > 0) {
+                    let fieldCategoryList = null,
+                        fieldClusterHeader = null;
                     queryInfoBlocks = queryDetails.map(
-                        item =>
-                            <div className="bg__comparative_queryLine" onClick={this.toggleLine}>
+                        item =>{
+                            if(item.fieldCategory.length > 0) {
+                                fieldCategoryList = item.fieldCategory.map(field => {
+                                   return (<li>{field.label} </li>);
+                                })
+                            }
+                            if(fieldCategoryList) {
+                                fieldClusterHeader = <p><b>Field cluster:</b></p>
+                            }
+                            console.log(fieldClusterHeader)
+                            return (<div className="bg__comparative_queryLine" onClick={this.toggleLine}>
                                 <h4 style={this.stylings(item.lineColour)}>Query title: {item.savedQueryName}</h4>
                                 <p><b>Collection name:</b> {item.collectionTitle}</p>
                                 <p><b>Query term (Search term):</b> {item.queryTerm}</p>
+                                {fieldClusterHeader}
+                                <ul>{fieldCategoryList}</ul>
 
-                            </div>
+                            </div>)
+                        }
                     )
                 }
             }
