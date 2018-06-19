@@ -4,6 +4,7 @@ import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
 import PropTypes from 'prop-types';
 import CKANAPI from "../../api/CKANAPI";
+import TimeUtil from '../../util/TimeUtil';
 /*
 See:
 	- http://rawgraphs.io/
@@ -291,7 +292,7 @@ const CustomLegend = React.createClass({
         });
 
         let queryInfo = selectedQueries.map(
-            d => {
+            () => {
                 const collectionInfo = that.props.labelData || null,
                     selectedQueries = that.props.selectedQueries;
                 let queryDetails = [];
@@ -311,14 +312,17 @@ const CustomLegend = React.createClass({
                                 })
                             }
                         })
-
                     })
                 }
                 if(queryDetails.length > 0) {
                     let fieldCategoryList = null,
                         fieldClusterHeader = null,
                         dateRangeHeader = null,
-                        dateRangeFields = null;
+                        dateRangeFields = null,
+                        dateField = null,
+                        dateStart = null,
+                        dateEnd = null;
+
                     queryInfoBlocks = queryDetails.map(
                         item =>{
                             if(item.fieldCategory.length > 0) {
@@ -326,12 +330,32 @@ const CustomLegend = React.createClass({
                                    return (<li>{field.label} </li>);
                                 })
                             }
+
                             if(item.dateRange) {
                                 dateRangeFields = Object.keys(item.dateRange).map(dateObj => {
-                                    if(dateObj === 'field') {
-                                        return (<li>{item.dateRange[dateObj]} </li>);
+                                    switch (dateObj) {
+                                        case 'field':
+                                            dateField = item.dateRange[dateObj];
+                                            break;
+                                        case 'start':
+                                            dateStart = TimeUtil.UNIXTimeToPrettyDate(item.dateRange[dateObj]);
+                                            break;
+                                        case 'end':
+                                            dateEnd = TimeUtil.UNIXTimeToPrettyDate(item.dateRange[dateObj]);
+                                            break;
                                     }
+                                    if(dateField && dateStart && dateEnd) {
+                                        return (
+                                            <ul>
+                                                <li>Selected date field: {dateField}</li>
+                                                <li>Initial date: {dateStart}</li>
+                                                <li>End date: {dateEnd}</li>
+                                            </ul>
+                                        )
+                                    }
+
                                 })
+
                             }
                             if(dateRangeFields) {
                                 dateRangeHeader = <p><b>Date Range:</b></p>
@@ -346,8 +370,7 @@ const CustomLegend = React.createClass({
                                 {fieldClusterHeader}
                                 <ul>{fieldCategoryList}</ul>
                                 {dateRangeHeader}
-                                <ul>{dateRangeFields}</ul>
-
+                                {dateRangeFields}
                             </div>)
                         }
                     )
