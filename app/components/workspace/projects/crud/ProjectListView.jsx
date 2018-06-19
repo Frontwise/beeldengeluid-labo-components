@@ -6,7 +6,7 @@ import ProjectTable from './ProjectTable';
 
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-
+import { initHelp } from '../../helpers/helpDoc';
 
 /**
  * Top level component/page for the projects overview.
@@ -20,6 +20,9 @@ class ProjectListView extends React.PureComponent {
 
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
+
+      initHelp("User Projects", "https://transfer.frontwise.com/beeldengeluid/mediasuite/examples/workspace/project-list.html");
+//      initHelp("Project List", "https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace.html");
     }
 
     render() {
