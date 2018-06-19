@@ -232,11 +232,7 @@ class QueryComparisonLineChart extends React.Component {
                 <ResponsiveContainer width="100%" height="50%">
                     <LineChart width={1200} height={200} data={timelineData}
                                margin={{top: 5, right: 20, bottom: 5, left: 0}}>
-                        {lines[0]}
-                        {lines[1]}
-                        {lines[2]}
-                        {lines[3]}
-                        {lines[4]}
+                        {lines}
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
                         <YAxis/>
@@ -325,7 +321,7 @@ const CustomLegend = React.createClass({
 
                     queryInfoBlocks = queryDetails.map(
                         item =>{
-                            if(item.fieldCategory.length > 0) {
+                            if(item.fieldCategory && item.fieldCategory.length > 0) {
                                 fieldCategoryList = item.fieldCategory.map(field => {
                                    return (<li>{field.label} </li>);
                                 })
