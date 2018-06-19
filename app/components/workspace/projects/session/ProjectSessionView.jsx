@@ -1,12 +1,10 @@
-import IDUtil from '../../../../util/IDUtil';
-
-import { exportDataAsJSON } from '../../helpers/Export';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
-import SortTable from '../../SortTable';
-
 import classNames from 'classnames';
+import IDUtil from '../../../../util/IDUtil';
+import ProjectViewWrapper from '../ProjectViewWrapper';
 import PropTypes from 'prop-types';
+import SortTable from '../../SortTable';
+import { exportDataAsJSON } from '../../helpers/Export';
+import { initHelp } from '../../helpers/helpDoc';
 import { Link } from 'react-router-dom';
 
 /**
@@ -54,6 +52,8 @@ class ProjectSessionView extends React.PureComponent {
 
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "sessions");
+
+        initHelp('Tool Sessions', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/tool-sessions.html');
     }
 
     componentDidUpdate() {

@@ -55,6 +55,9 @@ export const initHelp = (helpTitle, contentUrl) =>{
 const loadData = (contentUrl) => {
     content.innerHTML = "Loading...";
     fetch(contentUrl).then((response) => {
+        if (response.status !== 200){
+            return 'Could not load the help data. Please make sure it is available at: <a href="'+contentUrl+'">' + contentUrl + '</a>';
+        }
         return response.text();
     }).then((html)=>{
         content.innerHTML = html;
