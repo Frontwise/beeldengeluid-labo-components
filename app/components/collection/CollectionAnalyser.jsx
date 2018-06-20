@@ -158,14 +158,6 @@ class CollectionAnalyser extends React.Component {
     }
 	
 
-	/* --------------------------------- ON OUTPUT -------------------------------- */
-
-	onOutput(data) {
-		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, data);
-		}
-	}
-
     onShowFieldSelector(){
         this.setState({
             showFieldSelector: !this.state.showFieldSelector
