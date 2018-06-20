@@ -22,7 +22,7 @@ const AnnotationUtil = {
 			resourceList = resourceList.concat(targets.map((t) => {
 				const resourceInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Resource')
 				const collectionInfo = AnnotationUtil.getStructuralElementFromSelector(t.selector, 'Collection')
-				
+
 				return {
 					id : IDUtil.guid(), // unique bookmark id
 
@@ -93,12 +93,12 @@ const AnnotationUtil = {
 
 		resourceList.forEach((b)=>{
 
-			// save information about the annotation origin			
-			b.annotations = b.annotations ? 
+			// save information about the annotation origin
+			b.annotations = b.annotations ?
 				// augment annotations
 				b.annotations.map((a)=>(Object.assign({},a,{
 					parentAnnotationId: b.annotationId
-				}))) : 
+				}))) :
 				// empty annotation, required for deleting
 				[{
 					parentAnnotationId: b.annotationId
@@ -106,9 +106,9 @@ const AnnotationUtil = {
 
 
 		// prepare the bookmark object and add it to the uniquelist
-		if (b.resourceId in uniqueList){				
+		if (b.resourceId in uniqueList){
 			// existing
-			
+
 			// Add to unique list, based on type
 			switch(b.object.type){
 				case 'Segment':
@@ -118,7 +118,7 @@ const AnnotationUtil = {
 				default:
 					// just combine the bookmarks
 					uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
-					uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);				
+					uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
 					uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
 			}
 		} else{
@@ -132,7 +132,7 @@ const AnnotationUtil = {
 						annotations: b.annotations.slice(),
 					})
 					// add the the segment to the resource
-					b.segments = [segment];						
+					b.segments = [segment];
 
 					// clear the annotations
 					b.annotations = [];
@@ -188,7 +188,7 @@ const AnnotationUtil = {
 		//now loop through the clustered (by collectionId) resourceIdLists and call the document API
 		const accumulatedData = {}
 		Object.keys(resourceIds).forEach((key) => {
-			console.debug('KEY: ' + key)
+			//console.debug('KEY: ' + key)
 			DocumentAPI.getItemDetailsMultiple(
 				key, //collectionId
 				resourceIds[key], //all resourceIds for this collection
@@ -208,14 +208,14 @@ const AnnotationUtil = {
 				}
 			)
 		});
-		
+
 	},
 
-	reconsileAll(resourceList, resourceData) {		
+	reconsileAll(resourceList, resourceData) {
 		resourceList.forEach((x) => {
 			const temp = resourceData[x.object.dataset].filter((doc) => {
 				return doc && doc.resourceId == x.object.id
-			});			
+			});
 			x.object.title = 'Resource not found';
 			x.object.date = 'N/A';
 			if(temp.length == 1) {
@@ -224,11 +224,11 @@ const AnnotationUtil = {
 				x.object.dateField = temp[0].dateField;
 				x.object.description = temp[0].description;
 				x.object.mediaTypes=temp[0].mediaTypes || [];
-				
+
 				if (temp[0].placeholderImage){
 					x.object.placeholderImage = temp[0].placeholderImage;
-				} 
-				
+				}
+
 				if(temp[0].posterURL) {
 					x.object.placeholderImage = temp[0].posterURL
 				}
@@ -244,12 +244,12 @@ const AnnotationUtil = {
 		if (annotations.length === 0){
 			return [];
 		}
-		
+
 		// -----------------------------------------------
 		// Create list of annotations with bookmarks
 		// -----------------------------------------------
 		annotations = annotations.filter(an => an.body).map((an) => {
-		
+
 			//create a list of bookmarks from the parent annotation's targets
 			let targets = an.target;
 			if(an.target.selector) {
@@ -270,12 +270,12 @@ const AnnotationUtil = {
 					// and be used for filtering
 					object:{
 						id: resourceInfo ? resourceInfo.id : null,
-						dataset : collectionInfo ? collectionInfo.id : null,						
+						dataset : collectionInfo ? collectionInfo.id : null,
 					},
 
 				}
 			})
-			
+
 			//assign the targets as a list of bookmarks to each body/annotation
 			an.body.forEach((b) => {
 				b.bookmarks = bookmarks;
@@ -291,22 +291,22 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		// Store bookmark groups and classifications to the objects
 		// -----------------------------------------------
-		
+
 		const objectAnnotations = {};
-		
+
 		// Store classification and group data for each bookmark.
 		// After filtering and merging the annotations, the data will be merged
 		annotations.forEach((a)=>{
 			if (a.annotationType === 'classification'){
 
 					a.bookmarks.forEach((b)=>{
-						const id = b.collectionId + b.resourceId;						
+						const id = b.collectionId + b.resourceId;
 						if (!(id in objectAnnotations)){
 							objectAnnotations[id] = {
 								groups: [],
 								classifications: [],
 							}
-						} 
+						}
 						switch(a.vocabulary){
 						case 'clariahwp5-bookmark-group':
 							objectAnnotations[id].groups.push(a);
@@ -321,14 +321,14 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		// Filter annotations on selected type
 		// -----------------------------------------------
-		
-		annotations = annotations.filter((a)=>( 
+
+		annotations = annotations.filter((a)=>(
 				a.annotationType === type
 				// and exclude bookmark groups
 				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
 		));
 
-			
+
 		const uniqAnnotations = {};
 		const newAnnotations = [];
 		let id;
@@ -351,7 +351,7 @@ const AnnotationUtil = {
 				}
 			break;
 			case 'link':{
-					// merge links with same url				
+					// merge links with same url
 					annotations.forEach((a)=>{
 						if (a.url in uniqAnnotations){
 							uniqAnnotations[a.url].bookmarks = uniqAnnotations[a.url].bookmarks.concat(a.bookmarks);
@@ -362,7 +362,7 @@ const AnnotationUtil = {
 					});
 					annotations = newAnnotations;
 				}
-			break;				
+			break;
 		}
 
 
@@ -371,7 +371,7 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		annotations.forEach((a)=>{
 			a.bookmarks.forEach((b)=>{
-				const id = b.collectionId + b.resourceId;	
+				const id = b.collectionId + b.resourceId;
 				if (id in objectAnnotations){
 					b.groups = objectAnnotations[id].groups;
 					b.classifications = objectAnnotations[id].classifications;
@@ -382,7 +382,7 @@ const AnnotationUtil = {
 		const count = 0;
 		const bookmarkCount = 0;
 
-		
+
 		// -----------------------------------------------
 		// Handle empty results
 		// -----------------------------------------------
@@ -397,10 +397,10 @@ const AnnotationUtil = {
 		// -----------------------------------------------
 		const bookmarks = [];
 		const hits = {};
-		
+
 		annotations.forEach((a)=>{
 			a.bookmarks.forEach((b)=>{
-				const id = b.collectionId + b.resourceId;	
+				const id = b.collectionId + b.resourceId;
 				if (!(id in hits)){
 					hits[id] = true;
 					bookmarks.push(b);
@@ -408,8 +408,8 @@ const AnnotationUtil = {
 			})
 		});
 
-		// retrieve bookmark data			
-		// The objects in the annotations array are the same objects that have been enriched with the document data; 
+		// retrieve bookmark data
+		// The objects in the annotations array are the same objects that have been enriched with the document data;
 		// we don't have to store/merge any data; just run reconsileResourcelist callback
 		AnnotationUtil.reconsileResourceList(bookmarks, ()=>{
 			callback(annotations);
