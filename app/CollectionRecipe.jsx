@@ -150,20 +150,19 @@ class CollectionRecipe extends React.Component {
 
     loadAnalysis(analysisField, callback) {              
         const collectionConfig = this.getCollectionData(this.state.activeCollection);
-        if(this.state.dateField) {
-            CollectionAPI.analyseField(
-                collectionConfig.collectionId,
-                collectionConfig.getDocumentType(),
-                this.state.dateField,
-                analysisField ? analysisField : 'null__option',
-                [], //facets are not yet supported
-                collectionConfig.getMinimunYear(),
-                (data) => {
-                    const timelineData = this.toTimelineData(data);
-                    callback(data, timelineData);
-                }
-            );
-        }
+        
+        CollectionAPI.analyseField(
+            collectionConfig.collectionId,
+            collectionConfig.getDocumentType(),
+            this.state.dateField ? this.state.dateField : 'null__option',
+            analysisField ? analysisField : 'null__option',
+            [], //facets are not yet supported
+            collectionConfig.getMinimunYear(),
+            (data) => {
+                const timelineData = this.toTimelineData(data);
+                callback(data, timelineData);
+            }
+        );
     }
 
     //TODO optimize this.
@@ -326,7 +325,7 @@ class CollectionRecipe extends React.Component {
 				/>
 			);
 
-            // only show datefield selector when a field has been chose
+            // only show datefield selector when a field has been chosen
             if(this.state.field) {
                 dateFieldSelector = (  
                     <FlexBox title="Date Field selector">       
@@ -350,7 +349,7 @@ class CollectionRecipe extends React.Component {
 				);
 			}
 
-			if(this.state.fieldAnalysisTimeline) {
+			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
 				fieldAnalysisTimeline = (
 					<QueryComparisonLineChart
 						data={this.state.fieldAnalysisTimeline}

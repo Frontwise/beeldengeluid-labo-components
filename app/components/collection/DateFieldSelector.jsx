@@ -34,11 +34,15 @@ class DateFieldSelector extends React.Component {
         this.previewCompleteness();
     }
 
+    getDateFieldsFromConfig(){
+        return this.props.collectionConfig.getDateFields() || [];
+    }
+
     getFields() {
         let fields = [];
 
         // Collect all date field names        
-        fields = this.props.collectionConfig.getDateFields().map((field)=>(
+        fields = this.getDateFieldsFromConfig().map((field)=>(
             {
                 id: field, 
                 title: this.props.collectionConfig.toPrettyFieldName(field),
@@ -54,7 +58,7 @@ class DateFieldSelector extends React.Component {
     }
 
     previewCompleteness(){
-        let fieldNames = this.props.collectionConfig.getDateFields();
+        let fieldNames = this.getDateFieldsFromConfig();
 
         // For each fieldname request the completeness and store it to the state and sessionstorage
         fieldNames.forEach((field)=>{
@@ -109,11 +113,12 @@ class DateFieldSelector extends React.Component {
 
  
     render() {
-        let dateFieldSelect = null;
+        let dateFieldBlock = null;
 
         if(this.props.collectionConfig) {
             // create objects
-            let dateFields = this.props.collectionConfig.getDateFields().map((field)=>({
+            
+            let dateFields = this.getDateFieldsFromConfig().map((field)=>({
                 value: field,
                 title: this.props.collectionConfig.toPrettyFieldName(field),
             }));
@@ -123,7 +128,7 @@ class DateFieldSelector extends React.Component {
 
             let analysisFieldSelect = null;
 
-            if(dateFields) { //only if there are date fields available
+            if(dateFields.length > 0) { //only if there are date fields available
                 const sortedDateFields=dateFields;
                 let dateFieldOptions = sortedDateFields.map((dateField) => {
                     return (
@@ -136,7 +141,7 @@ class DateFieldSelector extends React.Component {
 
                 dateFieldOptions.splice(0,0,<option key='null__option' value='null__option'>-- Select --</option>);
 
-                dateFieldSelect = (
+                dateFieldBlock = (
                     <div className="form-group">
                         <label htmlFor="datefield_select">Metadata field for date (X-axis)</label>
                         <select className="form-control" 
@@ -147,12 +152,14 @@ class DateFieldSelector extends React.Component {
                         </select>
                     </div>
                 );
+            } else{
+                dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This dataset doesn't contain any date fields. This means no timeline chart could be generated.</p>
             }
         } 
 
         return (
             <div className={IDUtil.cssClassName('datefield-selector')}>
-                {dateFieldSelect}                
+                {dateFieldBlock}                
             </div>
         )
     }
