@@ -166,13 +166,13 @@ class ProjectQueriesTable extends React.PureComponent {
                     <div className="left">
                         <h3>Filters</h3>
                       <div className="filter-container">
-                        <input
+                          <input
                             className="search"
                             type="text"
                             placeholder="Search"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
-                        {combineQueriesLink}
+                          {combineQueriesLink}
                       </div>
                     </div>
                 </div>

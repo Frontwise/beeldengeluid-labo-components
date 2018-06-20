@@ -1,10 +1,12 @@
 .bg__comparative-search-recipe {
 	.bg__project-queries-view {
 		@import './workspace/index';
+		.tools {
+			width: 110%;
+		}
 	}
 	.combineSavedQueries {
-		position: absolute;
-		right: 0
+		position: relative;
 	}
 	
 	.recharts-legend-wrapper {
@@ -828,6 +830,7 @@
 .bg__comparative-search-recipe {
 	.react-datepicker__input-container {
 		margin-left: 2px;
+		width: 110%;
 		input	{
 			min-width: 130px;
 		}
