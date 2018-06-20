@@ -6,6 +6,7 @@ import ProjectViewWrapper from '../ProjectViewWrapper';
 
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { initHelp } from '../../helpers/helpDoc';
 
 /**
 * Show the details of the given project.
@@ -15,7 +16,9 @@ class ProjectDetailsView extends React.PureComponent {
     componentDidMount(){
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "details");
-    }
+
+        initHelp('User Project Details','https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/user-projects-details.html');
+     }
 
     render() {
         const project = this.props.project;

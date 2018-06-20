@@ -1,10 +1,9 @@
-import IDUtil from '../../../../util/IDUtil';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
-import ProjectQueriesTable from './ProjectQueriesTable';
-
 import classNames from 'classnames';
+import IDUtil from '../../../../util/IDUtil';
+import ProjectQueriesTable from './ProjectQueriesTable';
+import ProjectViewWrapper from '../ProjectViewWrapper';
 import PropTypes from 'prop-types';
+import { initHelp } from '../../helpers/helpDoc';
 
 class ProjectQueriesView extends React.PureComponent {
 
@@ -15,6 +14,8 @@ class ProjectQueriesView extends React.PureComponent {
     componentDidMount(){
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "queries");
+
+        initHelp('Queries', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/queries.html');
     }
 
     render() {

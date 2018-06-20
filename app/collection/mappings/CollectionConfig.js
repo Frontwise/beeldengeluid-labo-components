@@ -348,32 +348,37 @@ class CollectionConfig {
 		return null;
 	}
 
-	//e.g. a field could be "bga:segment.bg:recordings.bg:recording.bg:startdate"
-	toPrettyFieldName(esFieldName) {
-		if(esFieldName) {
-			//first split the field based on a dot
-			const tmp = esFieldName.split('.');
+    //e.g. a field could be "bga:segment.bg:recordings.bg:recording.bg:startdate"
+    toPrettyFieldName(esFieldName) {
+        if(esFieldName) {
+            //first split the field based on a dot
+            let tmp = esFieldName.split('.');
 
-			//if the last field is called raw or keyword (ES reserved names), drop it
-			if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
-				tmp.pop();
-			}
-			//take the leaf field and make it the first in the pretty name
-			let fn = tmp[tmp.length-1];
+            // remove namespaces
+            tmp = tmp.map((field)=>(field.substring(field.indexOf(":") + 1)));
 
-			//remove any prefix particle separated by ':'
-			if(fn.indexOf(':') != -1) {
-				fn = fn.substring(fn.indexOf(':') + 1);
-			}
+            let isKeywordField = false;
 
-			//add between brackets the parent of the leaf field
-			if(tmp.length > 1) {
-			 	fn += ' (in: ' + tmp[tmp.length-2] + ')';
-			}
-			return fn
-		}
-		return esFieldName;
-	}
+            //if the last field is called raw or keyword (ES reserved names), drop it
+            if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
+                isKeywordField = true;
+                tmp.pop();
+            }
+
+            let leaf = tmp.pop();
+
+            // move @ to end of fieldname
+            if (leaf.substring(0,1) == '@'){
+                leaf = leaf.substring(1) + '@';
+            }
+            let origin = tmp.join(".");
+            if (origin){
+                origin = ' => ' + origin;
+            }
+            return leaf + origin + (isKeywordField ? ' *' : '');
+        }
+        return esFieldName;
+    }
 
 	//used to prevent graphs to blow up in case the minimum date is really low (because of incorrect data)
 	getMinimunYear() {

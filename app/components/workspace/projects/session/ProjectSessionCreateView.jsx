@@ -1,13 +1,10 @@
+import ComponentUtil from '../../../../util/ComponentUtil';
 import IDUtil from '../../../../util/IDUtil';
 import ProjectAPI from '../../../../api/ProjectAPI';
-import ComponentUtil from '../../../../util/ComponentUtil';
-
-import SessionSaver from './SessionSaver';
-
-import { setBreadCrumbsFromMatch } from '../../helpers/BreadCrumbs';
-
 import PropTypes from 'prop-types';
-
+import SessionSaver from './SessionSaver';
+import { initHelp } from '../../helpers/helpDoc';
+import { setBreadCrumbsFromMatch } from '../../helpers/BreadCrumbs';
 
 /**
 * Create a new project, using the ProjectForm component
@@ -70,6 +67,8 @@ class ProjectSessionCreateView extends React.PureComponent {
                 this.name.focus();
             });
         });
+
+        initHelp('Create Tool Session', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/create-tool-session.html');
     }
 
     handleSubmit(e){
