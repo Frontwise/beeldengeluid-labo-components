@@ -153,7 +153,7 @@ class DateFieldSelector extends React.Component {
                     </div>
                 );
             } else{
-                dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This dataset doesn't contain any date fields. This means no timeline chart could be generated.</p>
+                dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This collection doesn't contain any date fields. This means no timeline chart could be generated.</p>
             }
         } 
 
