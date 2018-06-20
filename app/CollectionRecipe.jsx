@@ -71,11 +71,6 @@ class CollectionRecipe extends React.Component {
 				);
 
 			}
-		} else if(componentClass == 'CollectionAnalyser') {
-			this.setState({
-				fieldAnalysisStats : data.fieldAnalysisStats,
-				fieldAnalysisTimeline : data.fieldAnalysisTimeline
-			})
 		}
 	}
 
@@ -327,7 +322,6 @@ class CollectionRecipe extends React.Component {
 				<CollectionAnalyser
 					key={'__ca__' + collectionConfig.collectionId}
 					collectionConfig={collectionConfig}
-					onOutput={this.onComponentOutput.bind(this)}
                     onChange={this.onField.bind(this)}
 				/>
 			);

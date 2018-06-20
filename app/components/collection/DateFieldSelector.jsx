@@ -107,11 +107,7 @@ class DateFieldSelector extends React.Component {
         );
     }
 
-    /* --------------------------------- ON OUTPUT -------------------------------- */
-
-   
-
-   
+ 
     render() {
         let dateFieldSelect = null;
 
