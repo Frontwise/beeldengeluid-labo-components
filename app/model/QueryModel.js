@@ -46,10 +46,10 @@ const QueryModel = {
 
 			//(fragment search only) decide whether to return sub fragments as well
 			//(e.g. when retrieving a paragraph it's possible to exclude the list of sentences)
-			includeFragmentChildren: obj.includeFragmentChildren === true || false,
+			includeFragmentChildren: obj.includeFragmentChildren === true ? true : collectionConfig && collectionConfig.includeFragmentChildren(),
 
 			//(fragment search only) decide whether to search/retrieve the document level as well
-			includeMediaObjects: obj.includeMediaObjects === false || true,
+			includeMediaObjects: obj.includeMediaObjects === false ? false : collectionConfig && collectionConfig.includeMediaObjects(),
 
 			//paging within inner hits is not really supported/reflected by the UI (yet)
 			innerHitsOffset: obj.innerHitsOffset || 0,

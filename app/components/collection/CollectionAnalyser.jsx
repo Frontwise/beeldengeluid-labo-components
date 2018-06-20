@@ -2,93 +2,161 @@ import CollectionAPI from '../../api/CollectionAPI';
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import Autosuggest from 'react-autosuggest';
+import FieldSelector from './FieldSelector';
 
 //this component relies on the collection statistics as input
 class CollectionAnalyser extends React.Component {
 
 	constructor(props) {
 		super(props);
+
+        this.prefix = 'ms__ca_';
+
+        // throttle preview requests
+        // needed because to prevent a large amount of pending requests
+        // this keeps the UI / timeline respond fast to changes
+        this.calls = [];
+        this.calling = false;
+        this.isMounted = true;
+
+        // default values
+        const defaultField= window.sessionStorage.getItem(this.prefix + 'defaultField' + this.props.collectionConfig.collectionId) || '';
 		this.state = {
-            value : '', //the label of the selected classification (autocomplete)
-            suggestions : [], //current list of suggestions shown
+            field : defaultField,
+            fields : [], //current list of fields
+            completeness: {}, //store completeness of the fields
+            showFieldSelector: false,
 		}
 	}
 
-	analyseField(analysisField) {
-		this.loadAnalysis(analysisField, (data, timelineData) => {
-			this.onOutput({
-				fieldAnalysisStats : data,
-				fieldAnalysisTimeline : timelineData
-			})
-		});
-	}
+    componentDidMount(){
+        // load fields
+        this.setState({
+            fields: this.getFields()
+        });
 
-    loadAnalysis(analysisField, callback) {
-    	const dateSelect = document.getElementById("datefield_select");
-    	if(dateSelect) {
-	        CollectionAPI.analyseField(
-	            this.props.collectionConfig.collectionId,
-	            this.props.collectionConfig.getDocumentType(),
-	            dateSelect.options[dateSelect.selectedIndex].value,
-	            analysisField ? analysisField : 'null__option',
-	            [], //facets are not yet supported
-	            this.props.collectionConfig.getMinimunYear(),
-	            (data) => {
-	                const timelineData = this.toTimelineData(data);
-	                callback(data, timelineData);
-	            }
-	        );
-	    }
+
+        // auto load the analyse if there are default values
+        if (this.state.field){
+          this.props.onChange(this.state.field);
+        }
+
+        this.previewCompleteness();
     }
 
-    //TODO optimize this.
-	toTimelineData(data) {
-		const timelineData = {};
-		if(data) {
-			let totalChart = [];
-			let missingChart = [];
-			let presentChart = [];
-			for (const item in data.timeline) {
-				totalChart.push({
-					year: data.timeline[item].year, //y-axis
-                    total: data.timeline[item].background_count, //different line on graph
-				})
-				presentChart.push({
-					year : data.timeline[item].year, //y-axis
-					present: data.timeline[item].field_count, //different line on graph
-				})
-				missingChart.push({
-					year : data.timeline[item].year, //y-axis
-					missing:data.timeline[item].background_count - data.timeline[item].field_count //different line on graph
-				})
-			}
+    componentWillUnmount(){
+        this.isMounted = false;
+    }
 
-			timelineData['total'] = {
-				label : 'Total',
-			 	dateField : null, //what to do here?
-			 	prettyQuery : null, //what to do here?
-			 	data : totalChart,
-			 	queryId : 'total_chart'
-			}
+    getFields() {
+        let fields = [];
+        // Collect all field names        
+        Object.keys(this.props.collectionConfig).forEach((key)=>{
+            if (key.endsWith('Fields') && Array.isArray(this.props.collectionConfig[key])){
+                const keyType = key.substring(0,key.length - 6);
+                fields = fields.concat(this.props.collectionConfig[key].map((field)=>(
+                        {
+                            id: field, 
+                            title: this.props.collectionConfig.toPrettyFieldName(field),
+                            type: keyType,
+                        }
+                    ))
+                );
+                }
+            }
+        );
+        return fields;
+    }
+   
+    previewCompleteness(){
+        let fieldNames = [];
 
-			timelineData['missing'] = {
-				label : 'Missing',
-			 	dateField : null, //what to do here?
-			 	prettyQuery : null, //what to do here?
-			 	data : missingChart,
-			 	queryId : 'missing_chart'
-			}
+        // Collect all field names        
+        Object.keys(this.props.collectionConfig).forEach((key)=>{
+            if (key.endsWith('Fields')){
+                fieldNames = fieldNames.concat(this.props.collectionConfig[key]);                
+            }
+        });
 
-			timelineData['present'] = {
-				label : 'Present',
-			 	dateField : null,
-			 	prettyQuery : null, //what to do here?
-			 	data : presentChart,
-			 	queryId : 'present_chart'
-			}
-		}
-		return timelineData;
-	}
+        // For each fieldname request the completeness and store it to the state and sessionstorage
+
+        fieldNames.forEach((field)=>{
+                // retrieve from local storage
+                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
+                if (completeness !== null){
+                    completeness = JSON.parse(completeness);
+                    this.setState((state, props)=>{
+                            const fieldData = {};
+                            fieldData[field] = completeness;
+                            return {
+                                completeness: Object.assign({},state.completeness,fieldData),                                
+                            }
+                        });
+                } else{ 
+
+                    this.previewAnalysis(field, (data)=>{
+                        const completeness = {
+                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
+                            total: data.doc_stats.total,
+                            withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
+                        }
+                        
+                        // store to sessionStorage
+                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
+
+                        // update state
+                        this.setState((state, props)=>{
+                            const fieldData = {};
+                            fieldData[data.analysis_field] = completeness;
+                            return {
+                                completeness: Object.assign({},state.completeness,fieldData),                                
+                            }
+                        });
+                });
+
+            }
+        });
+    }
+
+    previewAnalysis(analysisField, callback){
+        // if there is already a call in progress; 
+        // store the call, so we prevent many synchronous requests
+        // that block other UI requests, like the timeline data request
+        if (this.calling){
+            // store call
+            this.calls.push(
+                this.previewAnalysis.bind(this, analysisField, callback)
+            );
+            return;
+        }
+
+        this.calling = true;
+
+        // perform call
+        CollectionAPI.analyseField(
+            this.props.collectionConfig.collectionId,
+            this.props.collectionConfig.getDocumentType(),
+            'null__option',
+            analysisField ? analysisField : 'null__option',
+            [], //facets are not yet supported
+            this.props.collectionConfig.getMinimunYear(),
+            (data) => {
+                // call is done
+                this.calling = false;
+
+                // call next call in throttle buffer
+                if (this.calls.length > 0 && this.isMounted){
+                     // get and execute first element
+                     // use settimeout, to prevent exceeding max call stack
+                    setTimeout((this.calls.shift())());
+                }
+
+                // callback
+                callback(data);
+            }
+        );
+    }
+	
 
 	/* --------------------------------- ON OUTPUT -------------------------------- */
 
@@ -98,151 +166,123 @@ class CollectionAnalyser extends React.Component {
 		}
 	}
 
-    /* ------------------- functions specifically needed for react-autosuggest ------------------- */
-
-    sortAndBeautifyArray(arrayToSort) {
-        let temp = arrayToSort.map(function(el) {
-            return {
-            	value: el,
-            	beautifiedValue: this.props.collectionConfig.toPrettyFieldName(el)
-			};
-        }, this);
-        // sorting the mapped array containing the reduced values
-        return temp.sort(function (a, b) {
-            return a.beautifiedValue > b.beautifiedValue ? 1 : a.beautifiedValue < b.beautifiedValue ? -1 : 0;
-        });
-	}
-
-    onChange(event, { newValue }) {
+    onShowFieldSelector(){
         this.setState({
-            chosenValue: newValue,
-            value: newValue
+            showFieldSelector: !this.state.showFieldSelector
         });
     }
 
-    onSuggestionsFetchRequested({value}) {
+
+    onFieldSelected(field) {
+
+        // store value to session storage
+        window.sessionStorage.setItem(this.prefix + 'defaultField' + this.props.collectionConfig.collectionId, field.id);
+
         this.setState({
-            suggestions: this.getSuggestions(value)
+            field: field.id,
+            showFieldSelector: false, // hide fieldselector
         });
-    };
 
-    getSuggestions(value, callback) {
-    	const allFields = this.props.collectionConfig.getNonDateFields();
-        if(allFields) {
-	        const inputValue = value.trim();
-	        const filteredFields = inputValue.length == 0 ? allFields : allFields.filter(analysisFieldName =>
-	        	analysisFieldName.includes(inputValue)
-	        );
-	        return this.sortAndBeautifyArray(filteredFields)
-	    }
-	    return []
+        this.props.onChange(field.id);
     }
 
-    onSuggestionSelected(event, {suggestion, suggestionValue, suggestionIndex, sectionIndex}) {
-        this.analyseField(suggestion.value);
-    }
-
-    getSuggestionValue(suggestion) {
-        return suggestion.value;
-    }
-
-    //TODO the rendering should be adapted for different vocabularies
-    renderSuggestion(suggestion) {
-        return (
-            <span key={suggestion.value} value={suggestion.value}>{suggestion.beautifiedValue}</span>
-        );
-    }
-
-    onSuggestionsClearRequested() {
-        this.analyseField(this.state.value);
+    onCloseFieldSelector(){
         this.setState({
-            suggestions : []
+            showFieldSelector: false
+        })
+    }
+
+    getCurrentField(){
+        if (!this.state.field){
+            return null;
+        }
+
+        let field = null;
+        this.state.fields.some((f)=>{
+            if (f.id == this.state.field){
+                field = f;
+                return true;
+            }
+            return false;
         });
-    }
 
-    // Necessary "return true" to enable autosuggestion on input field so the user gets the
-	// complete list of options without having to start typing.
-    shouldRenderSuggestions() {
-        return true;
+        return field;
     }
-
-    submitForm(e) {
-    	e.preventDefault();
-    	return false;
-    }
-    /* ------------------- end of specific react-autosuggest functions ------------------- */
 
 	render() {
+
 		let analysisBlock = null;
 
 		//only draw the rest when a collection is selected (either using the selector or via the props)
 		if(this.props.collectionConfig) {
-			let dateFields = this.props.collectionConfig.getDateFields();
 
-			let dateFieldSelect = null;
-			let analysisFieldSelect = null;
+            // get current field data and completeness
+            const field = this.getCurrentField();
+            const completeness = field && field.id in this.state.completeness ? this.state.completeness[field.id] : null;
 
-			if(dateFields) { //only if there are date fields available
-				const sortedDateFields = this.sortAndBeautifyArray(dateFields);
-				let dateFieldOptions = sortedDateFields.map((dateField) => {
-					return (
-						<option key={dateField.value} value={dateField.value}>{dateField.beautifiedValue}</option>
-					)
-				});
+            // render current field information table
+            const currentField = field != null ? (
+                <div className="current_field">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th>Field</th><td className="title">{field.title}</td>
+                            </tr>
+                            <tr>
+                                <th>Description</th><td>{field.description || "<no description available>"}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th><td> {field.type}</td>
+                            </tr>
+                            <tr>
+                                <th>Completeness</th>
+                                <td className="completeness">
+                                    {completeness ? 
+                                        <div>
+                                            <span>{completeness.value}%</span>
+                                            <span className="total">{completeness.withValue} / {completeness.total}</span>
+                                        </div>
+                                        : <i className="fa fa-circle-o-notch fa-spin"/>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>                                        
+                </div>
+            ) : null;
 
-				dateFieldOptions.splice(0,0,<option key='null__option' value='null__option'>-- Select --</option>);
-
-				dateFieldSelect = (
-					<div className="form-group">
-						<label htmlFor="datefield_select">Metadata field for date (X-axis)</label>
-						<select className="form-control" id="datefield_select" onChange={
-							this.analyseField.bind(this, this.state.value)
-						}>
-							{dateFieldOptions}
-						</select>
-					</div>
-				);
-			}
-
-			analysisFieldSelect = (
-				<div className="form-group">
-					<label htmlFor="analysisfield_select">Metadata field to inspect (Y-axis)</label>
-                    <Autosuggest
-                        ref="classifications"
-                        suggestions={this.state.suggestions}
-                        onSuggestionsFetchRequested={this.onSuggestionsFetchRequested.bind(this)}
-                        onSuggestionsClearRequested={this.onSuggestionsClearRequested.bind(this)}
-                        onSuggestionSelected={this.onSuggestionSelected.bind(this)}
-                        getSuggestionValue={this.getSuggestionValue.bind(this)}
-                        renderSuggestion={this.renderSuggestion.bind(this)}
-						shouldRenderSuggestions={this.shouldRenderSuggestions.bind(this)}
-                        inputProps={{
-				            placeholder: 'Search a field',
-				            value: this.state.value,
-				            onChange: this.onChange.bind(this)
-				        }}
-                    />
-				</div>
-			);
-
+            // create final analysis block
 			analysisBlock = (
-				<form onSubmit={this.submitForm.bind(this)}>
-					{dateFieldSelect}
-					{analysisFieldSelect}
-				</form>
-			)
+				<div className="analysis_field">
+                    <button className="btn btn-primary" onClick={this.onShowFieldSelector.bind(this)}>Select field to analyse</button>
+                    {currentField}                    
+                </div>
+            )
 
-		} else { //if there are no stats available
-			analysisBlock = (<h5>This collection is available in the registry, but is absent in the media suite index</h5>)
-		}
+        } else { //if there are no stats available
+            analysisBlock = (<h5>This collection is available in the registry, but is absent in the media suite index</h5>)
+        }
 
-		return (
-			<div className={IDUtil.cssClassName('collection-analyser')}>
-				<div className="row">
-					<div className="col-md-12">
-						{analysisBlock}
+        return (
+            <div className={IDUtil.cssClassName('collection-analyser')}>
+                
+                <div className="row">
+                    <div className="col-md-12">
+                        {analysisBlock}
 					</div>
 				</div>
+
+                {/* only toggle visibility to keep the component state */}
+                <div style={{display: this.state.showFieldSelector ? 'block' : 'none'}}>
+                    <FieldSelector 
+                        onSelect={this.onFieldSelected.bind(this)} 
+                        onClose={this.onCloseFieldSelector.bind(this)}
+                        current={this.state.field}
+                        fields={this.state.fields} 
+                        completeness={this.state.completeness}                        
+                        />
+                </div>
+
 			</div>
 		)
 	}

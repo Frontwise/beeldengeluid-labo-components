@@ -505,17 +505,191 @@
 /* ==================== Collection package ============================================ */
 
 .bg__collection-analyser {
-		.react-autosuggest__input {
-			border-radius: 6px;
+	cursor: default;
+	.current_field{
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid #aaa;
+		table{
+			font-size: 0.9em;
+			background-color: white;
+			width: 100%;
+			td, th{
+				border-bottom: 1px solid #eee;
+				padding: 5px;
+				vertical-align: top;
+			}
+
+			.title{
+				font-weight: bold;				
+			}
+
+			.total{
+				float: right;
+				color: #aaa;
+				font-size: 0.8em;				
+			}
 		}
+	}
 } /* CollectionAnalyser.jsx */
+
+.bg__field-selector{
+	position: fixed;
+	cursor: default;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,0.6);
+	z-index:9999;
+
+	.container{
+		background-color: #fff;
+		padding: 30px;
+		max-height: calc(100% - 150px);
+		position: relative;
+
+		.close{
+			position: absolute;
+			top: -40px;
+			height: 40px;			
+			line-height: 40px;
+			font-size: 1.2em;
+			display: block;
+			color: white;
+			right: 0px;
+			opacity: 1;
+			padding: 0 10px;
+			text-shadow: none;
+		}
+
+		.row{
+			max-height: calc(100% - 150px);
+			table{
+				width: 100%;
+
+				thead, tbody tr {
+				    width:100%;
+				    display: table;
+				}
+
+				tbody{
+					display: block;
+					width: 100%;
+					height: calc(100vh - 280px);					
+					overflow-y: auto;
+				}
+
+				tr:nth-child(odd) {
+		   			background-color: $clGrey;		   			
+				}
+
+				tr{
+					border-left: 3px solid transparent;
+
+					&.current{
+						border-left: 3px solid $clPrimary;
+					}
+
+					&:hover{
+						background-color: $clGreyTint;
+						border-left: 3px solid $clSecondary;
+						&.current{
+							border-left: 3px solid $clPrimary;
+						}
+					}
+				}
+
+				th{
+					cursor: pointer;
+					border-bottom: 1px solid #ddd;
+					font-size: 0.9em;
+					padding: 5px 10px;		
+
+					&:hover{
+						background-color: $clGreyTint;
+						border-bottom: 3px solid $clSecondary;
+					}
+
+					i{
+						float:right;
+						&.fa-sort-asc{
+							margin-top: 5px;	
+						}						
+					}
+					&.title{
+						width: 34%;
+					}		
+
+					&.completeness{
+						width: 140px;
+					}
+
+					&.active{
+						border-bottom: 3px solid $clSecondary;
+					}
+
+					&.select{
+						width: 110px; // +30px scrollbar
+					}
+
+					&.type{
+						width: 80px;
+					}
+				}
+
+				td{
+					font-size: 0.9em;
+					padding: 5px 10px;
+					vertical-align: top;
+					
+					&.title{						
+						font-weight: bold;
+						width: 35%;
+					}
+					
+					&.completeness{
+						text-align: right;
+						span{
+							font-weight: bold;
+							font-size: 0.8em;
+							display: inline-block;
+							padding: 5px;
+							border-radius: 10px;
+							&.total{
+								font-size: 0.8em;
+								color: #aaa;
+								font-weight: normal;
+								padding: 0 5px;
+							}
+						}
+						width: 140px;
+					}		
+					
+					&.description{
+						// auto width
+					}			
+
+					&.select{
+						width: 80px;
+					}
+
+					&.type{
+						width: 80px;
+					}
+				}
+			}
+		}
+	}
+} /* FieldSelector.jsx */
+
 
 .bg__collection-selector { /* CollectionSelector.jsx */
 	.bg__cls__collection {
 		border: 1px solid grey;
 	    border-radius: $border-radius;
 	    float: left;
-	    height: 150px;
+	    height: 175px;
 	    margin: 1% 1% 1% 1%;
 	    overflow:hidden;
 	    padding: 10px;
