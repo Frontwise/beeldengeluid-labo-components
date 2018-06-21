@@ -1095,3 +1095,37 @@ $backColorBtnInactive :#7aabd6;
 		}
 	}
 }
+
+// Spinner (loading ) icon
+@keyframes spinner {
+	to {transform: rotate(360deg);}
+}
+
+.spinner:after {
+	content: '';
+	box-sizing: border-box;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 45px;
+	height: 45px;
+	margin-top: -10px;
+	margin-left: -10px;
+	border-radius: 50%;
+	border: 8px solid #ccc;
+	border-top-color: #333;
+	animation: spinner .6s linear infinite;
+}
+.spinner {
+	position: fixed; /* Sit on top of the page content */
+	width: 100%; /* Full width (cover the whole page) */
+	height: 100%; /* Full height (cover the whole page) */
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 22334; /* Specify a stack order in case you're using a different order for other elements */
+	cursor: pointer; /* Add a pointer on hover */
+	opacity: .6;
+}
+// end of spinner stylings

@@ -55,6 +55,7 @@ class QueryComparisonRecipe extends React.Component {
             awaitingProcess : null, //which process is awaiting the output of the project selector
             projectId : ComponentUtil.getJSONFromLocalStorage('activeProject').id || null,
         };
+        this.layout = document.querySelector("body");
     }
 
     //this function receives all output of components that generate output and orchestrates where
@@ -242,7 +243,7 @@ class QueryComparisonRecipe extends React.Component {
                 });
                 this.setState({
                     lineChartData: queriesData
-                })
+                }, () => this.layout.classList.remove("spinner"))
             },
         )
     }
@@ -277,10 +278,11 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     compareQueries() {
-        const checkedBoxes =  Array.from(document.querySelectorAll(".bg__sort-table > table > tbody input"));
+        const checkedBoxes = Array.from(document.querySelectorAll(".bg__sort-table > table > tbody input"));
+        this.layout.classList.add("spinner");
         let queries = [];
         Object.keys(checkedBoxes).forEach((item, index) => {
-            if(checkedBoxes[item].checked) {
+            if (checkedBoxes[item].checked) {
                 queries.push(this.state.activeProject.queries[index])
             }
         });
@@ -419,6 +421,7 @@ class QueryComparisonRecipe extends React.Component {
 
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
+                <div className="overlay"></div>
                 <div className="row">
                     {searchComponent}&nbsp;{chooseProjectBtn}
                     {projectModal}
