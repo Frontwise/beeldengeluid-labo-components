@@ -64,9 +64,13 @@ class QueryComparisonRecipe extends React.Component {
         if(componentClass == 'QueryFactory') {
             this.onSearched(data);
         } else if(componentClass == 'ProjectSelector') {
+            console.log('mmmm....', this)
             this.setState(
-                {activeProject : data,
-                    projectId: data.id},
+                {
+                    activeProject: data,
+                    projectId: data.id,
+                    lineChartData: null
+                },
                 () => {
                     this.onProjectChanged.call(this, data)
                 }
@@ -302,7 +306,7 @@ class QueryComparisonRecipe extends React.Component {
                         user={this.props.user}/>
                 </div>
             );
-            if(Object.keys(this.state.lineChartData).length > 0) {
+            if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
                 const ramdom = Math.floor(Math.random() * 1000000);
                 lineChart = (
                     <QueryComparisonLineChart
@@ -347,7 +351,7 @@ class QueryComparisonRecipe extends React.Component {
 
         //TODO only render when there is linechart data
         if(this.props.recipe.ingredients.output === 'lineChart') {
-            if(Object.keys(this.state.lineChartData).length > 0) {
+            if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
                 lineChart = (
                     <QueryComparisonLineChart
                         data={this.state.lineChartData}
