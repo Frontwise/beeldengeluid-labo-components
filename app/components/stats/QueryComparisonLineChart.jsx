@@ -30,6 +30,7 @@ class QueryComparisonLineChart extends React.Component {
             collectionList : null
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
+        this.layout = document.querySelector("body");
     }
 
     componentDidMount() {
@@ -77,7 +78,8 @@ class QueryComparisonLineChart extends React.Component {
             this.setState({
                 isSearching: false,
                 data: relativeData
-            });
+            }, () =>  this.layout.classList.remove("spinner")
+        );
         }
     }
 
@@ -156,7 +158,8 @@ class QueryComparisonLineChart extends React.Component {
                         term: ''
                     }
                 }, () => {
-                    this.processData(this.props.data, false)
+                    this.processData(this.props.data, false);
+                    this.layout.classList.add("spinner");
                 }
             )}
     }

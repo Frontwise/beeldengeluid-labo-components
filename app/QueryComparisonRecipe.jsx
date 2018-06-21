@@ -78,80 +78,9 @@ class QueryComparisonRecipe extends React.Component {
         }
     }
 
-    onSearched(data) {
-        if(!data) { //if there are no results
-            alert('Your query did not yield any results');
-        } else if(data.pagingOutOfBounds) { //due to ES limitations
-            alert('The last page cannot be retrieved, please refine your search');
-        } else {
-            const csr = this.state.combinedSearchResults;
-            const lineChartData = this.state.lineChartData;
-
-            if(data.deleted === true && data.queryId) { //the query factory deleted a query
-                delete csr[data.queryId];
-                delete lineChartData[data.queryId];
-            } else { //the data is the same stuff returned by a QueryBuilder
-                const newData = ElasticsearchDataUtil.searchResultsToTimeLineData(
-                    data.query,
-                    data.aggregations
-                );
-                if(newData) {
-                    //TODO add more information about the query
-                    lineChartData[data.query.id] = {
-                        label : 'Query #',
-                        dateField : data.dateRange ? data.dateRange.field : null,
-                        prettyQuery : QueryModel.toHumanReadableString(data.query),
-                        data : newData,
-                        queryId : data.query.id,
-                        query : this.state.combinedSearchResults[data.query.id]
-                            ? this.state.combinedSearchResults[data.query.id].query
-                            : null,
-                        collectionConfig: this.state.combinedSearchResults[data.query.id] ? this.state.combinedSearchResults[data.query.id].collectionConfig : null
-                    }
-                }
-                csr[data.query.id] = data;
-            }
-
-            //finally set the state with the queries & line chart data
-            this.setState({
-                combinedSearchResults : csr,
-                lineChartData : lineChartData,
-                comparisonId : IDUtil.guid() //for updating the line chart
-            });
-        }
-    }
-
     /* ------------------------------------------------------------------------------
     ------------------------------- SEARCH RELATED FUNCTIONS --------------------
     ------------------------------------------------------------------------------- */
-
-    //TODO figure out how to call this without needing the QueryBuilder
-    gotoPage(queryId, pageNumber) {
-        if(this.state.combinedSearchResults[queryId]) {
-            const query = this.state.combinedSearchResults[queryId].query;
-            query.offset = (pageNumber-1) * this.state.pageSize;
-            SearchAPI.search(
-                query,
-                this.state.combinedSearchResults[queryId].collectionConfig,
-                this.onSearched.bind(this),
-                false
-            )
-        }
-    }
-
-    sortResults(queryId, sortParams) {
-        if(this.state.combinedSearchResults[queryId]) {
-            const query = this.state.combinedSearchResults[queryId].query;
-            query.offset = 0;
-            query.sort = sortParams;
-            SearchAPI.search(
-                query,
-                this.state.combinedSearchResults[queryId].collectionConfig,
-                this.onSearched.bind(this),
-                false
-            )
-        }
-    }
     onProjectChanged(project) {
         ComponentUtil.storeJSONInLocalStorage('activeProject', project)
         ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
@@ -291,11 +220,22 @@ class QueryComparisonRecipe extends React.Component {
         }, () => this.processData(this.state.selectedQueries))
     }
 
+    __getBaseUrl() {
+        const temp = window.location.href;
+        const arr = temp.split("/");
+        return arr[0] + "//" + arr[2];
+    }
+
+    goToSingleSearch() {
+        let url = this.__getBaseUrl() + '/tool/single-search';
+        console.log(url)
+        document.location.href = url;
+    }
+
     render() {
         const compareLink = {"label": "Combine queries ..."}
         let lineChart = null,
             aggregatedHits = null,
-            searchComponent = null,
             projectModal = null,
             projectQueriesTable = (
                 <div className={IDUtil.cssClassName('project-queries-view')}>
@@ -338,16 +278,9 @@ class QueryComparisonRecipe extends React.Component {
         }
 
         //generates a tabbed pane with a search component for each collection + a collection browser
-        searchComponent = (
-            <QueryFactory
-                clientId={this.props.clientId}
-                user={this.props.user}
-                pageSize={this.state.pageSize}
-                initialCollections={this.state.collections}
-                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-                aggregationView={this.props.recipe.ingredients.aggregationView}
-                dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
-                onOutput={this.onComponentOutput.bind(this)}/>
+        const searchComponent = (
+            <button className="btn btn-primary" onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i
+                className="fa fa-plus"></i></button>
         );
 
         //TODO only render when there is linechart data
@@ -423,7 +356,7 @@ class QueryComparisonRecipe extends React.Component {
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
                 <div className="overlay"></div>
                 <div className="row">
-                    {searchComponent}&nbsp;{chooseProjectBtn}
+                    <div className="bg__queryComparisonRecipe-header-btns">{searchComponent}&nbsp;{chooseProjectBtn}</div>
                     {projectModal}
                     {projectQueriesTable}
                 </div>
