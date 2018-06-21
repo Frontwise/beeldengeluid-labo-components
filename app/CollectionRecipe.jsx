@@ -10,7 +10,7 @@ import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
 import CollectionStats from './components/collection/CollectionStats';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
-import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import CollectionInspectorLineChart from './components/stats/CollectionInspectorLineChart';
 import {ResponsiveContainer, PieChart, Pie, Sector, Cell, Legend, Label, LabelList} from 'recharts';
 
 import PropTypes from 'prop-types';
@@ -319,7 +319,7 @@ class CollectionRecipe extends React.Component {
 
 			if(this.state.fieldAnalysisTimeline) {
 				fieldAnalysisTimeline = (
-					<QueryComparisonLineChart
+					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
 						comparisonId={IDUtil.guid()}/>
 				);
