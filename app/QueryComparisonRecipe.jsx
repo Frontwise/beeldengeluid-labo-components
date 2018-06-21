@@ -64,7 +64,6 @@ class QueryComparisonRecipe extends React.Component {
         if(componentClass == 'QueryFactory') {
             this.onSearched(data);
         } else if(componentClass == 'ProjectSelector') {
-            console.log('mmmm....', this)
             this.setState(
                 {
                     activeProject: data,
