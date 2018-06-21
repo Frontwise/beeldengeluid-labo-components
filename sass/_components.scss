@@ -834,7 +834,13 @@
 		input	{
 			min-width: 130px;
 		}
-
+	}
+	.bg__query-factory {
+		display: inline-block;
+		vertical-align: top;
+	}
+	.btn-primary {
+		display: inline-block;
 	}
 } /* ComparativeSearchRecipe.jsx */
 
@@ -1080,9 +1086,11 @@ $backColorBtnInactive :#7aabd6;
 		p{
 			color: #2D343A;
 			padding: 0 20px;
+			line-height: 1.2rem;
 		}
 		li {
 			color: #2D343A;
+			list-style-type: none;
 		}
 	}
 }

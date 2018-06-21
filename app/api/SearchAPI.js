@@ -35,6 +35,9 @@ const SearchAPI = {
 							delete data.params
 
 							callback(data);
+						} else {
+							// Success call without proper responseText
+							callback(null);
 						}
 					} else {
 						callback(null);

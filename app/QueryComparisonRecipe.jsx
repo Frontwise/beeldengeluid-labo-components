@@ -165,13 +165,12 @@ class QueryComparisonRecipe extends React.Component {
               collectionId = that.state.selectedQueries[key].query.collectionId,
               clientId = that.props.clientId,
               user = that.props.user;
-;
+
         return new Promise(function(resolve, reject) {
             CollectionUtil.generateCollectionConfig(clientId, user, collectionId, (collectionConfig) => {
                 const desiredFacets = that.state.selectedQueries[key].query.desiredFacets,
                     field = collectionConfig.getPreferredDateField() || null;
                 if(field !== null) {
-                //here continue
                     desiredFacets.push({
                         "field": field,
                         "id": field,
@@ -180,69 +179,69 @@ class QueryComparisonRecipe extends React.Component {
                     });
                 }
 
+                const currentTime = new Date().getTime(),
+                    query = {
+                        ...that.state.selectedQueries[key].query,
+                        dateRange: {
+                            field: that.state.selectedQueries[key].query.dateRange ?
+                                that.state.selectedQueries[key].query.dateRange.field :
+                                collectionConfig.getPreferredDateField(),
+                            end: that.state.selectedQueries[key].query.dateRange ?
+                                that.state.selectedQueries[key].query.dateRange.end : currentTime,
+                            start: that.state.selectedQueries[key].query.dateRange ?
+                                that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
+                        },
+                        fragmentFields: null,
+                        fragmentPath: null,
+                        desiredFacets: desiredFacets,
+                        collectionConfig: collectionConfig
+                    };
 
-                const query = {
-                    ...that.state.selectedQueries[key].query,
-                    dateRange: {
-                        field: that.state.selectedQueries[key].query.dateRange ?
-                            that.state.selectedQueries[key].query.dateRange.field :
-                            collectionConfig.getPreferredDateField(),
-                        end: that.state.selectedQueries[key].query.dateRange ?
-                            that.state.selectedQueries[key].query.dateRange.end : null,
-                        start:that.state.selectedQueries[key].query.dateRange ?
-                            that.state.selectedQueries[key].query.dateRange.start : null
-                    },
-                    fragmentFields: null,
-                    fragmentPath: null,
-                    desiredFacets: desiredFacets
-                };
                 // TODO : remove call to CKANAPI since the title for the collection is in the collectionConfig
-                // console.log('getting query ?',
-                //     query,
-                //     collectionConfig
-                // )
                 SearchAPI.search(
                     query,
                     collectionConfig,
                     data => {
-                        if (data) {
-                            resolve(data)
+                        if (data === null && typeof data === "object") {
+                            reject(data => {
+                                    if (data === null)
+                                        return 'rejected'
+                                }
+                            )
                         } else {
-                            console.log('something went wrong')
+                            resolve(data)
                         }
                     },
                     false
                 )
             })
-        })
+        }).catch(err => console.log('No data returned from query'));
     }
 
     async processData(queries) {
         const promises = Object.keys(queries).map(this.getData.bind(this));
         let queriesData = {};
-        await Promise.all(promises).catch(function(err) {
-            // dispatch a failure and throw error
-            throw err;
-        }).then(
+        await Promise.all(promises).then(
             (dataPerQuery) => {
                 dataPerQuery.map(data => {
-
-                    let queryObj = {};
-                    const objData = ElasticsearchDataUtil.searchResultsToTimeLineData(
-                        data.query,
-                        data.aggregations,
-                    );
-                    queryObj.data = objData;
-                    queryObj.comparisonId = data.query.id;
-                    queryObj.query = data.query;
-                    queriesData[data.query.id] = queryObj;
-
+                    if(data) {
+                        let queryObj = {};
+                        const objData = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                            data.query,
+                            data.aggregations,
+                        );
+                        queryObj.data = objData;
+                        queryObj.comparisonId = data.query.id;
+                        queryObj.query = data.query;
+                        queryObj.collectionConfig = data.collectionConfig;
+                        queriesData[data.query.id] = queryObj;
+                    }
                 });
                 this.setState({
                     lineChartData: queriesData
                 })
             },
-        );
+        )
     }
 
     onOutput(data) {

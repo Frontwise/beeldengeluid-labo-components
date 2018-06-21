@@ -65,10 +65,13 @@ class QueryComparisonLineChart extends React.Component {
 
     onOutput(data) {
         if (this.state.viewMode === 'relative') {
-            let relativeData = data.map(
-                dataSet => (
-                    this.commonData(dataSet, this.props.data, Object.keys(dataSet[0])[1])
-                )
+            let relativeData = [];
+            data.map(
+                dataSet => {
+                    if (dataSet.length > 0) {
+                        relativeData.push(this.commonData(dataSet, this.props.data, Object.keys(dataSet[0])[1]))
+                    }
+                }
             );
             this.getRelValues(relativeData);
             this.setState({
@@ -87,8 +90,8 @@ class QueryComparisonLineChart extends React.Component {
     }
 
     getRelValues(relData) {
-        const that = this.props.data;
-        Object.keys(that).map(function (queryID, i) {
+        const that = this.props.data; // absolute values
+        Object.keys(that).map(function (queryID) {
             relData.map(
                 item => {
                     item.map((val, index) => {
@@ -112,7 +115,7 @@ class QueryComparisonLineChart extends React.Component {
                 dateRange: {
                     ...that.props.data[key].query.dateRange,
                     end:null,
-                    start:null
+                    start: (that.props.data[key].collectionConfig && that.props.data[key].collectionConfig.getMinimunYear()) || null
                 }
             };
 
@@ -127,7 +130,7 @@ class QueryComparisonLineChart extends React.Component {
 
     async processData(data) {
         const promises = Object.keys(data).map(this.getData.bind(this));
-        await Promise.all(promises).then(
+        await Promise.all(promises).catch(d => console.log(d)).then(
             (dataPerQuery) => {
                 let formattedData = [];
                 dataPerQuery.map( data => {
@@ -259,10 +262,7 @@ const CustomLegend = React.createClass({
         return {
             color: p,
             listStyle: 'none',
-            // display: 'block',
-            // right: '0',
-            // margin: '0',
-            padding: '20'
+            padding: '10px 20px'
         }
     },
 
@@ -344,9 +344,9 @@ const CustomLegend = React.createClass({
                                     if(dateField && dateStart && dateEnd) {
                                         return (
                                             <ul>
-                                                <li>Selected date field: {dateField}</li>
-                                                <li>Initial date: {dateStart}</li>
-                                                <li>End date: {dateEnd}</li>
+                                                <li><u>Selected date field:</u> {dateField}</li>
+                                                <li><u>Initial date:</u> {dateStart}</li>
+                                                <li><u>End date:</u> {dateEnd}</li>
                                             </ul>
                                         )
                                     }
