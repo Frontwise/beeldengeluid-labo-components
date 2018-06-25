@@ -24,7 +24,7 @@ class CollectionAnalyser extends React.Component {
         const defaultField= window.sessionStorage.getItem(this.prefix + 'defaultField' + this.props.collectionConfig.collectionId) || '';
 		this.state = {
             field : defaultField,
-            fields : [], //current list of fields
+            fields: this.props.collectionConfig.getAllFields(),
             completeness: {}, //store completeness of the fields
             showFieldSelector: false,
             descriptions: null, // field descriptions
@@ -32,12 +32,6 @@ class CollectionAnalyser extends React.Component {
 	}
 
     componentDidMount(){
-        // load fields
-        this.setState({
-            fields: this.getFields()
-        });
-
-
         // auto load the analyse if there are default values
         if (this.state.field){
           this.props.onChange(this.state.field);
@@ -62,26 +56,6 @@ class CollectionAnalyser extends React.Component {
         this.isMounted = false;
     }
 
-    getFields() {
-        let fields = [];
-        // Collect all field names        
-        Object.keys(this.props.collectionConfig).forEach((key)=>{
-            if (key.endsWith('Fields') && Array.isArray(this.props.collectionConfig[key])){
-                const keyType = key.substring(0,key.length - 6);
-                fields = fields.concat(this.props.collectionConfig[key].map((field)=>(
-                        {
-                            id: field, 
-                            title: this.props.collectionConfig.toPrettyFieldName(field),
-                            type: keyType,
-                        }
-                    ))
-                );
-                }
-            }
-        );
-        return fields;
-    }
-   
     previewCompleteness(){
         let fieldNames = [];
 

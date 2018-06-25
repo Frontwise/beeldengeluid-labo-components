@@ -30,6 +30,7 @@ class CollectionConfig {
 		this.keywordFields = null;
 		this.longFields = null;
 		this.doubleFields = null;
+		this.nestedFields = null;
 
 		if(collectionStats && collectionStats.collection_statistics) {
 			let temp = null;
@@ -59,6 +60,8 @@ class CollectionConfig {
 				this.dateFields = temp.fields['date'];
 				this.longFields = temp.fields['long'];
 				this.doubleFields = temp.fields['double'];
+
+				this.nestedFields = temp.fields['nested'];
 			}
 		}
 	}
@@ -195,37 +198,75 @@ class CollectionConfig {
 	}
 
 	//used by the collection analyzer (field analysis pull down)
-	getNonDateFields() {
+	getAllFields() {
 		let tmp = []
 
+		//console.debug(this.keywordFields);
+
+		if(this.dateFields) {
+			this.dateFields.forEach(f => {
+				tmp.push({id : f, type : 'date', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
+		}
+
 		if(this.stringFields) {
-			tmp = tmp.concat(this.stringFields);
+			this.stringFields.forEach(f => {
+				tmp.push({id : f, type : 'text', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 		if(this.textFields) {
-			tmp = tmp.concat(this.textFields);
+			this.textFields.forEach(f => {
+				tmp.push({id : f, type : 'text', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 
 		if(this.longFields) {
-			tmp = tmp.concat(this.longFields);
+			this.longFields.forEach(f => {
+				tmp.push({id : f, type : 'numeric', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 		if(this.doubleFields) {
-			tmp = tmp.concat(this.doubleFields);
+			this.doubleFields.forEach(f => {
+				tmp.push({id : f, type : 'numeric', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
+		}
+
+		//mark all the nested fields
+		tmp.forEach(f => {
+			if(this.nestedFields && this.nestedFields.indexOf(f.id) != -1) {
+				f.nested = true;
+			}
+		});
+
+		//mark all the fields that are a multi-field keyword field
+		if(this.keywordFields) {
+			tmp.forEach(f => {
+				if(this.keywordFields.indexOf(f.id + '.keyword') != -1) {
+					f.keywordMultiField = true;
+				}
+			});
 		}
 		if(this.nonAnalyzedFields) {
-			tmp = tmp.concat(this.nonAnalyzedFields);
-		}
-		//remove duplicates
-		tmp.filter((elem, pos, arr) => {
-			return arr.indexOf(elem) == pos;
-		})
-
-		if(this.keywordFields) {
-			this.keywordFields.forEach((k) => {
-				if(tmp.indexOf(k.replace('.keyword', '')) == -1) {
-					tmp.push(k);
+			tmp.forEach(f => {
+				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') != -1) {
+					f.keywordMultiField = true;
 				}
-			})
+			});
 		}
+
+		//finally add all the pure keyword fields
+		if(this.keywordFields) {
+			this.keywordFields.forEach(f => {
+				if(f.indexOf('.keyword') == -1) {
+					tmp.push({id : f, type : 'keyword', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+				}
+			});
+		}
+
+		// console.debug('nested', tmp.filter(f => f.nested))
+		// console.debug('keyword multi fields', tmp.filter(f => f.keywordMultiField))
+		// console.debug('pure keyword fields', tmp.filter(f => f.type == 'keyword'))
+
 		return tmp.length > 0 ? tmp : null;
 	}
 
