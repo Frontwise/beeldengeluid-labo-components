@@ -36,12 +36,12 @@ const SearchAPI = {
 							delete data.params
 
 							callback(data);
+						} else {
+							callback({searchId : searchId, error : 'Server returned no results'});
 						}
 					} else {
-						callback({searchId : searchId, error : 'Server returned no results'});
+						callback({searchId : searchId, error : 'Server returned an error response'});
 					}
-				} else {
-					callback({searchId : searchId, error : 'Search call never returned'});
 				}
 			}
 			xhr.open("POST", url);
