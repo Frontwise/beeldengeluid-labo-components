@@ -16,6 +16,7 @@ class CollectionStats extends React.Component {
 			case 'keyword' : l = 'KEYWORD: Metadata fields that are optimized for facet search and filtering';break;
 			case 'date' : l = 'DATE: Metadata fields that specify dates, which can be used for range filters and timelines';break;
 			case 'long' : l = 'NUMERIC: Metadata fields that specify numeric values, which could be used for range filters or line charts';break;
+			case 'nested' : l = 'NESTED: Metadata fields that are part of a sub document';break;
 
 			default : l = 'UNKNOWN: Metadata fields of an unknown type';break;
 		}
