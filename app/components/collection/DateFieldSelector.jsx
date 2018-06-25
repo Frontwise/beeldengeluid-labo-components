@@ -16,17 +16,12 @@ class DateFieldSelector extends React.Component {
         const defaultDateField = window.sessionStorage.getItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId) || this.props.collectionConfig.getPreferredDateField();
         this.state = {
             dateField: defaultDateField,
-            fields : [], //current list of fields
+            fields : this.getFields(),
             completeness: {}, //store completeness of the fields
         }
     }
 
     componentDidMount(){
-        // load fields
-        this.setState({
-            fields: this.getFields()
-        });
-
         if (this.state.dateField){
           this.props.onChange(this.state.dateField);
         }

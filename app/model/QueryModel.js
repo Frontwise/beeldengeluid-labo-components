@@ -59,19 +59,28 @@ const QueryModel = {
 
 	determineSearchLayers(query, config) {
 		let searchLayers = null;
+		let foundLayer = false;
 		if(config && config.getCollectionIndices()) {
 			searchLayers = {};
 			config.getCollectionIndices().forEach((layer) => {
 				if(query && query.searchLayers) {
 					if(query.searchLayers[layer] !== undefined) {
 						searchLayers[layer] = query.searchLayers[layer];
+						foundLayer = true;
 					} else {
 						searchLayers[layer] = false;
 					}
 				} else { //include all default layers
 					searchLayers[layer] = true;
+					foundLayer = true;
 				}
 			});
+		}
+		//if for some shitty reason the search layer (entered in the URL) does not match the collection ID
+		//just set it manually (maybe this is being too nice)
+		if(!foundLayer) {
+			searchLayers = {}
+			searchLayers[config.getCollectionId()] = true;
 		}
 		return searchLayers;
 	},
@@ -227,7 +236,6 @@ const QueryModel = {
 				searchLayers[layer] = true;
 			});
 		}
-		console.debug(searchLayers)
 
 		//populate the date range TODO think of a way to include min/max :s
 		let dateRange = null;
