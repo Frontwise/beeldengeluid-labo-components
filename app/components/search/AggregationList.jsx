@@ -125,6 +125,19 @@ class AggregationList extends React.Component {
         this.onOutput(desiredFacets, this.props.selectedFacets);
     }
 
+    sorting(arr, order="asc"){
+        let facetA, facetB;
+        arr.sort(function (a, b) {
+            //define order
+            if (order === 'desc') {
+                facetA = b.key.toLowerCase(), facetB = a.key.toLowerCase();
+            } else {
+                facetA = a.key.toLowerCase(), facetB = b.key.toLowerCase();
+            }
+            return (facetA < facetB ? -1 : 1);
+        });
+    }
+
     render() {
         const facets = [],
             nonDateAggregations = this.props.desiredFacets.filter(aggr => aggr.type !== 'date_histogram');
@@ -154,6 +167,8 @@ class AggregationList extends React.Component {
             let sortedOpts = [],
                 options = null;
             if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
+                // sort elements alphabetically.
+                this.sorting(this.props.aggregations[key['field']], 'asc');
                 options = this.props.aggregations[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key,
                         facetId = key['field'] + '|' + value;
