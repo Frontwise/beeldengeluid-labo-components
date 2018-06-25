@@ -524,6 +524,11 @@
 		.react-autosuggest__input {
 			border-radius: 6px;
 		}
+	.form-group {
+		label {
+			color: #2D343A;
+		}
+	}
 } /* CollectionAnalyser.jsx */
 
 .bg__collection-selector { /* CollectionSelector.jsx */
@@ -765,7 +770,9 @@
 	margin-bottom: $default-margin;
 	padding: 10px 0;
 	.bg__fb__open {
+		color: #666;
 		float:right;
+		margin-bottom: 1rem;
 		&:after {
 			content: "\25BC";
 		}
@@ -1133,3 +1140,82 @@ $backColorBtnInactive :#7aabd6;
 	opacity: .6;
 }
 // end of spinner stylings
+
+//Collection recipe
+.bg__collection-recipe-sel {
+	color: #f3f3f3;
+	margin: 0;
+	padding: 1rem 0;
+	text-transform: capitalize;
+	display: flex;
+	flex-flow: row wrap;
+	.rightAlign {
+		float: right;
+		margin-left: 10px;
+		right: 0;
+	}
+	.bg__collection-block {
+		width: calc(100% / 3);
+		flex-wrap: wrap;
+		flex: initial;
+		padding: 0 15px;
+		background-color: #fefefe;
+		border: 1px solid #DEDEDA;
+		border-radius: 6px;
+		box-shadow: 1px 1px 1px 0 #999;
+		display: inline-block;
+		margin: 0 10px 0 0;
+		width: 48%;
+		vertical-align: top;
+
+		.bg__query-line-chart { /* QueryComparisonLineChart.jsx */
+			background-color: transparent;
+			border-radius: 0;
+			box-shadow: none;
+			padding: 0;
+			margin-top: 0;
+		}
+		.bg__pieChart {
+			background-color: transparent;
+			border-radius: 0;
+			box-shadow: none;
+			padding: 0;
+			.recharts-default-legend {
+				margin-bottom: 0;
+				padding-left: 30px;
+				li {
+					padding-top: 0;
+				}
+			}
+		}
+
+		&.col-md-3 {
+			width: 27%;
+		}
+		&.col-md-9 {
+			width: 70%;
+		}
+		p{
+			color: #2D343A;
+			padding: 0 20px;
+			line-height: 1.2rem;
+		}
+		li {
+			color: #2D343A;
+			list-style-type: none;
+		}
+		.list-group-item {
+			color: #2D343A;
+			&.active {
+				color: white;
+			}
+		}
+	}
+}
+// end of collection recipe
+
+.PowerSelect__Option {
+	.alignRight {
+		float: right;
+	}
+}

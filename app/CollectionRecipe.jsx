@@ -250,7 +250,6 @@ class CollectionRecipe extends React.Component {
 			});
 			collectionBlock = (
 				<FlexBox title="Selected collections">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
 						<div className="text-right">
 							<button className="btn btn-primary"	onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
 								Add collection&nbsp;<i className="fa fa-plus"></i>
@@ -260,7 +259,6 @@ class CollectionRecipe extends React.Component {
 						<ul className="list-group">
 							{items}
 						</ul>
-					</div>
 				</FlexBox>
 			)
 		}
@@ -327,13 +325,11 @@ class CollectionRecipe extends React.Component {
 
 			analysisBlock = (
 				<FlexBox title="Collection analysis">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
 						<div className="row">
 							<div className="col-md-12">
 								{collectionAnalyser}
 							</div>
 						</div>
-					</div>
 				</FlexBox>
 			)
 		}
@@ -342,19 +338,19 @@ class CollectionRecipe extends React.Component {
 			<div className={IDUtil.cssClassName('collection-recipe')}>
 				{collectionModal}
 				{statsModal}
-				<div className="row">
-					<div className="col-md-6">
+				<div className="row bg__collection-recipe-sel">
+					<div className="bg__collection-block">
 						{collectionBlock}
 					</div>
-					<div className="col-md-6">
+					<div className="bg__collection-block">
 						{analysisBlock}
 					</div>
 				</div>
-				<div className="row">
-					<div className="col-md-9">
+				<div className="row bg__collection-recipe-sel">
+					<div className="col-md-9 bg__collection-block">
 						{fieldAnalysisTimeline}
 					</div>
-                    <div className="col-md-3">
+                    <div className="col-md-3 bg__collection-block">
                         {piecharts}
                     </div>
 				</div>
