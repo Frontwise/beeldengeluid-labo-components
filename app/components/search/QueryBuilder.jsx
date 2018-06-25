@@ -50,7 +50,10 @@ class QueryBuilder extends React.Component {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
 			this.refs.searchTerm.value = this.props.query.term;
-			this.doSearch(this.props.query);
+			//never search with an empty search term on init
+			if(this.props.query.term && this.props.query.term.trim() != '') {
+				this.doSearch(this.props.query);
+			}
 		}
 	}
 
@@ -241,21 +244,24 @@ class QueryBuilder extends React.Component {
         }
         if (data && !data.error) {
 
-            this.setState({
-            	//so involved components know that a new search was done
-            	searchId: data.searchId,
+            this.setState(
+            	{
+	            	//so involved components know that a new search was done
+	            	searchId: data.searchId,
 
-            	//refresh params of the query object
-            	query : data.query,
+	            	//refresh params of the query object
+	            	query : data.query,
 
-                //actual OUTPUT of the query
-                aggregations: data.aggregations, //for drawing the AggregationBox/List/Histogram
-                totalHits: data.totalHits, //shown in the stats
-                totalUniqueHits: data.totalUniqueHits, //shown in the stats
-
-                //we're not searching anymore
-                isSearching: false
-            });
+	                //actual OUTPUT of the query
+	                aggregations: data.aggregations, //for drawing the AggregationBox/List/Histogram
+	                totalHits: data.totalHits, //shown in the stats
+	                totalUniqueHits: data.totalUniqueHits //shown in the stats
+            	},
+            	() => {
+            		//we're not searching anymore
+            		this.setState({isSearching: false});
+            	}
+            );
         } else {
         	//Note: searchLayers & desiredFacets & selectedSortParams stay the same
         	let q = this.state.query;
@@ -263,19 +269,25 @@ class QueryBuilder extends React.Component {
         	q.selectedFacets = {};
         	//q.fieldCategory = null;
 
-            this.setState({
-            	searchId: null,
+            this.setState(
+            	{
+            		searchId: data ? data.searchId : null, //null should never happen!!!
 
-            	query : q,
+	            	query : q,
 
-                //query OUTPUT is all empty
-				aggregations: null,
-                totalHits: 0,
-                totalUniqueHits: 0,
+	                //query OUTPUT is all empty
+					aggregations: null,
+	                totalHits: 0,
+	                totalUniqueHits: 0,
 
-                //we're not searching anymore
-                isSearching: false
-            });
+	                //we're not searching anymore
+	                isSearching: false
+            	},
+            	() => {
+            		//we're not searching anymore
+            		this.setState({isSearching: false});
+            	}
+            );
         }
 
         if(data && data.error == 'access denied') {
@@ -596,7 +608,7 @@ class QueryBuilder extends React.Component {
                     )
                 }
 
-			} else if(this.state.searchId != null) {
+			} else if(this.state.searchId != null && !this.state.isSearching) {
 				let dateRangeMessage = null;
 				if(this.state.query.dateRange) {
 					dateRangeMessage = (

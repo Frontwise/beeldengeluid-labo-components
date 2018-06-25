@@ -34,8 +34,8 @@ class CollectionSelector extends React.Component {
 		});
 		//TODO add collections to the list!!
 		CollectionAPI.listCollections('personalcollection__clariah_test', (collections) => {
-			console.debug('got my personal collections back!')
-			console.debug(collections);
+			//console.debug('got my personal collections back!')
+			//console.debug(collections);
 		})
 	}
 

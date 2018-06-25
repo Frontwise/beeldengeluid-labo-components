@@ -11,13 +11,14 @@ const SearchAPI = {
 		if(query.offset + query.size <= 10000) {
 			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId
 			const xhr = new XMLHttpRequest();
+			const searchId = IDUtil.guid();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState == XMLHttpRequest.DONE) {
 					if(xhr.status == 200) {
 						const data = JSON.parse(xhr.responseText);
 						if(data && data.params) {
 							//always add a fresh search ID, so the UI knows when to refresh certain components
-							data.searchId = IDUtil.guid(); //still a bit weird, has to go probably
+							data.searchId = searchId; //still a bit weird, has to go probably
 
 							//for convenience add the collection config to the resulting data
 							data.collectionConfig = collectionConfig;
@@ -37,8 +38,10 @@ const SearchAPI = {
 							callback(data);
 						}
 					} else {
-						callback(null);
+						callback({searchId : searchId, error : 'Server returned no results'});
 					}
+				} else {
+					callback({searchId : searchId, error : 'Search call never returned'});
 				}
 			}
 			xhr.open("POST", url);
