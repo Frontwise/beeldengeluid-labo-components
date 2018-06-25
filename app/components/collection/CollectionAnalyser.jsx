@@ -57,20 +57,10 @@ class CollectionAnalyser extends React.Component {
     }
 
     previewCompleteness(){
-        let fieldNames = [];
-
-        // Collect all field names        
-        Object.keys(this.props.collectionConfig).forEach((key)=>{
-            if (key.endsWith('Fields')){
-                fieldNames = fieldNames.concat(this.props.collectionConfig[key]);                
-            }
-        });
-
         // For each fieldname request the completeness and store it to the state and sessionstorage
-
-        fieldNames.forEach((field)=>{
+        this.state.fields.forEach((field)=>{
                 // retrieve from local storage
-                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
+                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field.id);
                 if (completeness !== null){
                     completeness = JSON.parse(completeness);
                     this.setState((state, props)=>{
@@ -82,7 +72,9 @@ class CollectionAnalyser extends React.Component {
                         });
                 } else{ 
 
-                    this.previewAnalysis(field, (data)=>{
+                    // TODO: send full field object
+                    this.previewAnalysis(field.id, (data)=>{
+                        console.log(data.analysis_field);
                         const completeness = {
                             value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
                             total: data.doc_stats.total,
