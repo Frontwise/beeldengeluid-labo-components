@@ -262,11 +262,6 @@ class CollectionConfig {
 				}
 			});
 		}
-
-		// console.debug('nested', tmp.filter(f => f.nested))
-		// console.debug('keyword multi fields', tmp.filter(f => f.keywordMultiField))
-		// console.debug('pure keyword fields', tmp.filter(f => f.type == 'keyword'))
-
 		return tmp.length > 0 ? tmp : null;
 	}
 

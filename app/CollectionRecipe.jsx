@@ -123,7 +123,7 @@ class CollectionRecipe extends React.Component {
 		}
 		return null;
 	}
-   
+
     /**
      * Data  Analysis
      */
@@ -136,9 +136,9 @@ class CollectionRecipe extends React.Component {
         });
     }
 
-    loadAnalysis(analysisField, callback) {              
+    loadAnalysis(analysisField, callback) {
         const collectionConfig = this.getCollectionData(this.state.activeCollection);
-        
+
         CollectionAPI.analyseField(
             collectionConfig.collectionId,
             collectionConfig.getDocumentType(),
@@ -146,6 +146,7 @@ class CollectionRecipe extends React.Component {
             analysisField ? analysisField : 'null__option',
             [], //facets are not yet supported
             collectionConfig.getMinimunYear(),
+            false, //TODO determine nested
             (data) => {
                 const timelineData = this.toTimelineData(data);
                 callback(data, timelineData);
@@ -216,7 +217,7 @@ class CollectionRecipe extends React.Component {
         });
     }
 
-	render() {       
+	render() {
 		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 		let collectionModal = null; //for selecting collections for the list
 		let collectionBlock = null; //shows all selected collections
@@ -297,8 +298,8 @@ class CollectionRecipe extends React.Component {
 
             // only show datefield selector when a field has been chosen
             if(this.state.field) {
-                dateFieldSelector = (  
-                    <FlexBox title="Date Field selector">       
+                dateFieldSelector = (
+                    <FlexBox title="Date Field selector">
                         <div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
                             <DateFieldSelector
                                 key={'__dfs__' + collectionConfig.collectionId}
@@ -326,9 +327,9 @@ class CollectionRecipe extends React.Component {
 				);
 			} else{
                 if (this.state.field && this.state.dateField){
-                    fieldAnalysisTimeline = 
+                    fieldAnalysisTimeline =
                         <div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
-                            <i className="fa fa-circle-o-notch fa-spin"/> Loading chart... 
+                            <i className="fa fa-circle-o-notch fa-spin"/> Loading chart...
                         </div>
                 }
             }
@@ -361,12 +362,12 @@ class CollectionRecipe extends React.Component {
 				<div className="row">
 					<div className="col-md-12">
 						{fieldAnalysisTimeline}
-					</div>                    
+					</div>
 				</div>
                 <div className="row">
                     <div className="col-md-12">
                         {dateFieldSelector}
-                    </div>                    
+                    </div>
                 </div>
 				<div className="row">
 					<div className="col-md-12">

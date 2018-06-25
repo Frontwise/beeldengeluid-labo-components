@@ -16,12 +16,17 @@ class DateFieldSelector extends React.Component {
         const defaultDateField = window.sessionStorage.getItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId) || this.props.collectionConfig.getPreferredDateField();
         this.state = {
             dateField: defaultDateField,
-            fields : this.getFields(),
+            fields : [], //current list of fields
             completeness: {}, //store completeness of the fields
         }
     }
 
     componentDidMount(){
+        // load fields
+        this.setState({
+            fields: this.getFields()
+        });
+
         if (this.state.dateField){
           this.props.onChange(this.state.dateField);
         }
@@ -36,10 +41,10 @@ class DateFieldSelector extends React.Component {
     getFields() {
         let fields = [];
 
-        // Collect all date field names        
+        // Collect all date field names
         fields = this.getDateFieldsFromConfig().map((field)=>(
             {
-                id: field, 
+                id: field,
                 title: this.props.collectionConfig.toPrettyFieldName(field),
                 type: 'Date',
             }
@@ -47,7 +52,7 @@ class DateFieldSelector extends React.Component {
         return fields;
     }
 
-    onDateFieldChange(e){        
+    onDateFieldChange(e){
         window.sessionStorage.setItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId, e.target.value);
         this.props.onChange(e.target.value);
     }
@@ -65,17 +70,17 @@ class DateFieldSelector extends React.Component {
                             const fieldData = {};
                             fieldData[field] = completeness;
                             return {
-                                completeness: Object.assign({},state.completeness,fieldData),                                
+                                completeness: Object.assign({},state.completeness,fieldData),
                             }
                         });
-                } else{ 
+                } else{
                     this.previewAnalysis(field, (data)=>{
                         const completeness = {
                             value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
                             total: data.doc_stats.total,
                             withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
                         }
-                        
+
                         // store to sessionStorage
                         window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
 
@@ -84,7 +89,7 @@ class DateFieldSelector extends React.Component {
                             const fieldData = {};
                             fieldData[data.analysis_field] = completeness;
                             return {
-                                completeness: Object.assign({},state.completeness,fieldData),                                
+                                completeness: Object.assign({},state.completeness,fieldData),
                             }
                         });
                 });
@@ -106,18 +111,18 @@ class DateFieldSelector extends React.Component {
         );
     }
 
- 
+
     render() {
         let dateFieldBlock = null;
 
         if(this.props.collectionConfig) {
             // create objects
-            
+
             let dateFields = this.getDateFieldsFromConfig().map((field)=>({
                 value: field,
                 title: this.props.collectionConfig.toPrettyFieldName(field),
             }));
-                
+
             // sort by title
             dateFields = dateFields.sort((a,b)=>(a.title > b.title ? 1 : -1));
 
@@ -139,9 +144,9 @@ class DateFieldSelector extends React.Component {
                 dateFieldBlock = (
                     <div className="form-group">
                         <label htmlFor="datefield_select">Metadata field for date (X-axis)</label>
-                        <select className="form-control" 
-                            id="datefield_select" 
-                            defaultValue={this.state.dateField} 
+                        <select className="form-control"
+                            id="datefield_select"
+                            defaultValue={this.state.dateField}
                             onChange={this.onDateFieldChange.bind(this)}>
                             {dateFieldOptions}
                         </select>
@@ -150,11 +155,11 @@ class DateFieldSelector extends React.Component {
             } else{
                 dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This collection doesn't contain any date fields. This means no timeline chart could be generated.</p>
             }
-        } 
+        }
 
         return (
             <div className={IDUtil.cssClassName('datefield-selector')}>
-                {dateFieldBlock}                
+                {dateFieldBlock}
             </div>
         )
     }
