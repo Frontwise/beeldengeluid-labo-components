@@ -2,6 +2,7 @@ import CollectionAPI from '../../api/CollectionAPI';
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import Autosuggest from 'react-autosuggest';
+import FieldDescriptionUtil from '../../util/FieldDescriptionUtil';
 import FieldSelector from './FieldSelector';
 
 //this component relies on the collection statistics as input
@@ -26,6 +27,7 @@ class CollectionAnalyser extends React.Component {
             fields : [], //current list of fields
             completeness: {}, //store completeness of the fields
             showFieldSelector: false,
+            descriptions: null, // field descriptions
 		}
 	}
 
@@ -42,6 +44,18 @@ class CollectionAnalyser extends React.Component {
         }
 
         this.previewCompleteness();
+
+        this.loadDescriptions(this.props.collectionConfig.collectionId);
+    }
+
+    loadDescriptions(collectionId){
+        FieldDescriptionUtil.getDescriptions(collectionId, this.setDescriptions.bind(this));
+    }
+
+    setDescriptions(descriptions){
+        this.setState({
+            descriptions
+        })
     }
 
     componentWillUnmount(){
@@ -202,7 +216,6 @@ class CollectionAnalyser extends React.Component {
     }
 
 	render() {
-
 		let analysisBlock = null;
 
 		//only draw the rest when a collection is selected (either using the selector or via the props)
@@ -211,6 +224,7 @@ class CollectionAnalyser extends React.Component {
             // get current field data and completeness
             const field = this.getCurrentField();
             const completeness = field && field.id in this.state.completeness ? this.state.completeness[field.id] : null;
+            const description = this.state.descriptions !== null ? (field && field.id in this.state.descriptions ? this.state.descriptions[field.id].description || '-' : '-') : null;
 
             // render current field information table
             const currentField = field != null ? (
@@ -221,10 +235,10 @@ class CollectionAnalyser extends React.Component {
                                 <th>Field</th><td className="title">{field.title}</td>
                             </tr>
                             <tr>
-                                <th>Description</th><td>{field.description || "<no description available>"}</td>
+                                <th>Description</th><td>{description !== null ? description : <i className="fa fa-circle-o-notch fa-spin"/>}</td>
                             </tr>
                             <tr>
-                                <th>Type</th><td> {field.type}</td>
+                                <th>Type</th><td>{field.type}</td>
                             </tr>
                             <tr>
                                 <th>Completeness</th>
@@ -271,7 +285,8 @@ class CollectionAnalyser extends React.Component {
                         onClose={this.onCloseFieldSelector.bind(this)}
                         current={this.state.field}
                         fields={this.state.fields} 
-                        completeness={this.state.completeness}                        
+                        completeness={this.state.completeness} 
+                        descriptions={this.state.descriptions}                       
                         />
                 </div>
 

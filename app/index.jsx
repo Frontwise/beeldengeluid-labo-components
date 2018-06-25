@@ -112,7 +112,6 @@ export {default as PlayoutAPI} from './api/PlayoutAPI';
 
 //collection components
 export {default as CollectionSelector} from './components/collection/CollectionSelector';
-export {default as CollectionStats} from './components/collection/CollectionStats';
 export {default as CollectionAnalyser} from './components/collection/CollectionAnalyser';
 
 //search components
