@@ -40,6 +40,7 @@ class DateFieldSelector extends React.Component {
 
     getFields() {
         let fields = [];
+
         // Collect all date field names
         fields = this.getDateFieldsFromConfig().map((field)=>(
             {

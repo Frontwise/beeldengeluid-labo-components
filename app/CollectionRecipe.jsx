@@ -9,7 +9,6 @@ import FlexModal from './components/FlexModal';
 
 import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
-import CollectionStats from './components/collection/CollectionStats';
 import DateFieldSelector from './components/collection/DateFieldSelector';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
 import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
@@ -116,17 +115,6 @@ class CollectionRecipe extends React.Component {
 			params,
 			this.constructor.name
 		);
-	}
-
-	showCollectionStats(collectionId, e) {
-		e.stopPropagation();
-		const collectionData = this.getCollectionData(collectionId);
-		if(collectionData) {
-			this.setState({
-				showStatsModal : true,
-				activeCollectionStats : collectionData.collectionStats
-			});
-		}
 	}
 
 	getCollectionData(collectionId) {
@@ -254,10 +242,6 @@ class CollectionRecipe extends React.Component {
 						<span className="fa fa-remove" onClick={this.removeCollection.bind(this, key)}></span>
 						&nbsp;
 						{collectionTitle}
-						<button className="btn btn-default" style={{float : 'right', marginTop : '-5px'}}
-							onClick={this.showCollectionStats.bind(this, key)} title="Inspect collection">
-							<span className="fa fa-bar-chart text-muted"></span>
-						</button>
 					</li>
 				)
 			});
@@ -299,20 +283,6 @@ class CollectionRecipe extends React.Component {
 			)
 		}
 
-		//showing the (Elasticsearch) stats of the selected collection
-		if(this.state.showStatsModal) {
-			statsModal = (
-				<FlexModal
-					elementId="stats__modal"
-					stateVariable="showStatsModal"
-					owner={this}
-					size="large"
-					title="Collection stats">
-						<CollectionStats collectionConfig={collectionConfig}/>
-				</FlexModal>
-			)
-		}
-
 		//TODO make sure that this is only shown when a collection has been selected
 		if(collectionConfig) {
 			let collectionAnalyser = null;
@@ -335,7 +305,6 @@ class CollectionRecipe extends React.Component {
                                 key={'__dfs__' + collectionConfig.collectionId}
                                 collectionConfig={collectionConfig}
                                 onChange={this.onDateField.bind(this)}
-
                             />
                         </div>
                     </FlexBox>
