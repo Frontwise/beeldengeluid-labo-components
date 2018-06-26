@@ -8,7 +8,7 @@
 	.combineSavedQueries {
 		position: relative;
 	}
-	
+
 	.recharts-legend-wrapper {
 		position: relative;
 	}
@@ -537,13 +537,13 @@
 			}
 
 			.title{
-				font-weight: bold;				
+				font-weight: bold;
 			}
 
 			.total{
 				float: right;
 				color: #aaa;
-				font-size: 0.8em;				
+				font-size: 0.8em;
 			}
 		}
 	}
@@ -568,7 +568,7 @@
 		.close{
 			position: absolute;
 			top: -40px;
-			height: 40px;			
+			height: 40px;
 			line-height: 40px;
 			font-size: 1.2em;
 			display: block;
@@ -592,12 +592,12 @@
 				tbody{
 					display: block;
 					width: 100%;
-					height: calc(100vh - 280px);					
+					height: calc(100vh - 280px);
 					overflow-y: auto;
 				}
 
 				tr:nth-child(odd) {
-		   			background-color: $clGrey;		   			
+		   			background-color: $clGrey;
 				}
 
 				tr{
@@ -620,7 +620,7 @@
 					cursor: pointer;
 					border-bottom: 1px solid #ddd;
 					font-size: 0.8em;
-					padding: 5px 10px;		
+					padding: 5px 10px;
 
 					&:hover{
 						background-color: $clGreyTint;
@@ -630,12 +630,16 @@
 					i{
 						float:right;
 						&.fa-sort-asc{
-							margin-top: 5px;	
-						}						
+							margin-top: 5px;
+						}
 					}
 					&.title{
 						width: 34%;
-					}		
+					}
+
+					&.level{
+						width: 80px;
+					}
 
 					&.completeness{
 						width: 140px;
@@ -658,12 +662,16 @@
 					font-size: 0.8em;
 					padding: 5px 10px;
 					vertical-align: top;
-					
-					&.title{						
+
+					&.title{
 						font-weight: bold;
 						width: 35%;
 					}
-					
+
+					&.level{
+						width: 80px;
+					}
+
 					&.completeness{
 						text-align: right;
 						span{
@@ -680,11 +688,11 @@
 							}
 						}
 						width: 140px;
-					}		
-					
+					}
+
 					&.description{
 						// auto width
-					}			
+					}
 
 					&.select{
 						width: 80px;
