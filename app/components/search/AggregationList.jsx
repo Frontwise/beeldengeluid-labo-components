@@ -125,14 +125,22 @@ class AggregationList extends React.Component {
         this.onOutput(desiredFacets, this.props.selectedFacets);
     }
 
-    sorting(arr, order="asc"){
+    sorting(arr, order="asc", type="alpha"){
         let facetA, facetB;
         arr.sort(function (a, b) {
             //define order
-            if (order === 'desc') {
-                facetA = b.key.toLowerCase(), facetB = a.key.toLowerCase();
+            if(type === "alpha") {
+                if (order === 'desc') {
+                    facetA = b.key.toLowerCase(), facetB = a.key.toLowerCase();
+                } else {
+                    facetA = a.key.toLowerCase(), facetB = b.key.toLowerCase();
+                }
             } else {
-                facetA = a.key.toLowerCase(), facetB = b.key.toLowerCase();
+                if (order === 'desc') {
+                    facetA = b.doc_count, facetB = a.doc_count;
+                } else {
+                    facetA = a.doc_count, facetB = b.doc_count;
+                }
             }
             return (facetA < facetB ? -1 : 1);
         });
@@ -168,7 +176,8 @@ class AggregationList extends React.Component {
                 options = null;
             if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
                 // sort elements alphabetically.
-                this.sorting(this.props.aggregations[key['field']], 'asc');
+                this.sorting(this.props.aggregations[key['field']], 'asc', 'alpha');
+
                 options = this.props.aggregations[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key,
                         facetId = key['field'] + '|' + value;
