@@ -274,6 +274,31 @@ class ItemDetailsRecipe extends React.Component {
 		})
 	}
 
+	//tied to the annotateResourceBtn; used to annotate a resource as a whole
+	annotateResource() {
+		if(this.state.collectionConfig && this.state.itemData) {
+			let annotation = this.getResourceAnnotation();
+			if(!annotation) {
+				annotation = AnnotationUtil.generateW3CEmptyAnnotation(
+					this.props.user,
+					this.state.activeProject,
+					this.state.collectionConfig.getCollectionId(),
+					this.state.itemData.resourceId
+				);
+			}
+			this.editAnnotation(annotation, null);
+		}
+	}
+
+	getResourceAnnotation() {
+		let annotation = null;
+		if(this.state.resourceAnnotations) {
+			let temp = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking')
+			annotation = temp.length > 0 ? temp[0] : null;
+		}
+		return annotation
+	}
+
 	//show the annnotation form with the correct annotation target
 	//TODO extend this so the target can also be a piece of text or whatever
 	editAnnotation(annotation, subAnnotation) {
@@ -387,6 +412,8 @@ class ItemDetailsRecipe extends React.Component {
 			this.refreshResourceAnnotations();
 		})
 	}
+
+
 
 	/************************************************************************
 	************************ CALLED BY RENDER *******************************
@@ -661,6 +688,7 @@ class ItemDetailsRecipe extends React.Component {
 
 			let projectSelectorBtn = null;
 			let bookmarkBtn = null;
+			let resourceAnnotationBtn = null;
 
 
 			//on the top level we only check if there is any form of annotationSupport
@@ -692,6 +720,13 @@ class ItemDetailsRecipe extends React.Component {
 						annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
 					/>
 				);
+
+				/*ACTIVATE LATER
+				resourceAnnotationBtn = (
+					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
+						Annotate resource
+					</button>
+				)*/
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
@@ -736,13 +771,20 @@ class ItemDetailsRecipe extends React.Component {
 					</button>
 				)
 
+				//let's determine whether the resource was added to a bookmark group
+				let partOfBookmarkGroup = false;
+				if(this.state.resourceAnnotations) {
+					let groups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
+					partOfBookmarkGroup = groups.length > 0;
+				}
+
 				//bookmark button (TODO query for determining existing bookmark should be updated!!!)
 				bookmarkBtn = (
 					<button className="btn btn-primary" onClick={this.bookmark.bind(this)}>
 						Bookmark
 						&nbsp;
 						<i className="fa fa-star" style={
-							this.state.resourceAnnotations.length > 0 ? {color: 'red'} : {color: 'white'}
+							partOfBookmarkGroup ? {color: 'red'} : {color: 'white'}
 						}></i>
 					</button>
 				)
@@ -760,6 +802,7 @@ class ItemDetailsRecipe extends React.Component {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
+			//make this pretty & nice and work with awesome LD later on
 			if(1 == 2) {
 				ldResourceViewer = (
 					<LDResourceViewer resourceId={this.state.itemData.resourceId}

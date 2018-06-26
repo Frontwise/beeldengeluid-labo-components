@@ -30,6 +30,7 @@ class CollectionConfig {
 		this.keywordFields = null;
 		this.longFields = null;
 		this.doubleFields = null;
+		this.nestedFields = null;
 
 		if(collectionStats && collectionStats.collection_statistics) {
 			let temp = null;
@@ -59,6 +60,8 @@ class CollectionConfig {
 				this.dateFields = temp.fields['date'];
 				this.longFields = temp.fields['long'];
 				this.doubleFields = temp.fields['double'];
+
+				this.nestedFields = temp.fields['nested'];
 			}
 		}
 	}
@@ -120,6 +123,11 @@ class CollectionConfig {
 
 	requiresPlayoutAccess() {
 		return false;
+	}
+
+	//should always be overloaded
+	loadFieldDescriptions(callback) {
+		callback([])
 	}
 
 	getDocumentType() {
@@ -195,36 +203,69 @@ class CollectionConfig {
 	}
 
 	//used by the collection analyzer (field analysis pull down)
-	getNonDateFields() {
+	getAllFields() {
 		let tmp = []
 
+		//console.debug(this.keywordFields);
+
+		if(this.dateFields) {
+			this.dateFields.forEach(f => {
+				tmp.push({id : f, type : 'date', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
+		}
+
 		if(this.stringFields) {
-			tmp = tmp.concat(this.stringFields);
+			this.stringFields.forEach(f => {
+				tmp.push({id : f, type : 'text', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 		if(this.textFields) {
-			tmp = tmp.concat(this.textFields);
+			this.textFields.forEach(f => {
+				tmp.push({id : f, type : 'text', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 
 		if(this.longFields) {
-			tmp = tmp.concat(this.longFields);
+			this.longFields.forEach(f => {
+				tmp.push({id : f, type : 'numeric', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
 		}
 		if(this.doubleFields) {
-			tmp = tmp.concat(this.doubleFields);
+			this.doubleFields.forEach(f => {
+				tmp.push({id : f, type : 'numeric', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+			});
+		}
+
+		//mark all the nested fields
+		tmp.forEach(f => {
+			if(this.nestedFields && this.nestedFields.indexOf(f.id) != -1) {
+				f.nested = true;
+			}
+		});
+
+		//mark all the fields that are a multi-field keyword field
+		if(this.keywordFields) {
+			tmp.forEach(f => {
+				if(this.keywordFields.indexOf(f.id + '.keyword') != -1) {
+					f.keywordMultiField = true;
+				}
+			});
 		}
 		if(this.nonAnalyzedFields) {
-			tmp = tmp.concat(this.nonAnalyzedFields);
-		}
-		//remove duplicates
-		tmp.filter((elem, pos, arr) => {
-			return arr.indexOf(elem) == pos;
-		})
-
-		if(this.keywordFields) {
-			this.keywordFields.forEach((k) => {
-				if(tmp.indexOf(k.replace('.keyword', '')) == -1) {
-					tmp.push(k);
+			tmp.forEach(f => {
+				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') != -1) {
+					f.keywordMultiField = true;
 				}
-			})
+			});
+		}
+
+		//finally add all the pure keyword fields
+		if(this.keywordFields) {
+			this.keywordFields.forEach(f => {
+				if(f.indexOf('.keyword') == -1) {
+					tmp.push({id : f, type : 'keyword', keywordMultiField : false, title : this.toPrettyFieldName(f)})
+				}
+			});
 		}
 		return tmp.length > 0 ? tmp : null;
 	}
@@ -348,32 +389,37 @@ class CollectionConfig {
 		return null;
 	}
 
-	//e.g. a field could be "bga:segment.bg:recordings.bg:recording.bg:startdate"
-	toPrettyFieldName(esFieldName) {
-		if(esFieldName) {
-			//first split the field based on a dot
-			const tmp = esFieldName.split('.');
+    //e.g. a field could be "bga:segment.bg:recordings.bg:recording.bg:startdate"
+    toPrettyFieldName(esFieldName) {
+        if(esFieldName) {
+            //first split the field based on a dot
+            let tmp = esFieldName.split('.');
 
-			//if the last field is called raw or keyword (ES reserved names), drop it
-			if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
-				tmp.pop();
-			}
-			//take the leaf field and make it the first in the pretty name
-			let fn = tmp[tmp.length-1];
+            // remove namespaces
+            tmp = tmp.map((field)=>(field.substring(field.indexOf(":") + 1)));
 
-			//remove any prefix particle separated by ':'
-			if(fn.indexOf(':') != -1) {
-				fn = fn.substring(fn.indexOf(':') + 1);
-			}
+            let isKeywordField = false;
 
-			//add between brackets the parent of the leaf field
-			if(tmp.length > 1) {
-			 	fn += ' (in: ' + tmp[tmp.length-2] + ')';
-			}
-			return fn
-		}
-		return esFieldName;
-	}
+            //if the last field is called raw or keyword (ES reserved names), drop it
+            if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
+                isKeywordField = true;
+                tmp.pop();
+            }
+
+            let leaf = tmp.pop();
+
+            // move @ to end of fieldname
+            if (leaf.substring(0,1) == '@'){
+                leaf = leaf.substring(1) + '@';
+            }
+            let origin = tmp.join(".");
+            if (origin){
+                origin = ' => ' + origin;
+            }
+            return leaf + origin + (isKeywordField ? ' *' : '');
+        }
+        return esFieldName;
+    }
 
 	//used to prevent graphs to blow up in case the minimum date is really low (because of incorrect data)
 	getMinimunYear() {

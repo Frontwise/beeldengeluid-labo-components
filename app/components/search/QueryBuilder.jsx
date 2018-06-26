@@ -33,7 +33,7 @@ class QueryBuilder extends React.Component {
 			graphType : null,
 			isSearching : false,
 
-			query : this.props.query,
+			query : this.props.query, //this is only set by the owner after choosing a collection or loading the page
 
 			//query OUTPUT
             currentCollectionHits: this.getCollectionHits(this.props.collectionConfig),
@@ -50,7 +50,10 @@ class QueryBuilder extends React.Component {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
 			this.refs.searchTerm.value = this.props.query.term;
-			this.doSearch(this.props.query);
+			//never search with an empty search term on init
+			if(this.props.query.term && this.props.query.term.trim() != '') {
+				this.doSearch(this.props.query);
+			}
 		}
 	}
 
@@ -85,12 +88,14 @@ class QueryBuilder extends React.Component {
 	doSearch(query, updateUrl = false) {
 		this.setState(
 			{isSearching : true},
-			SearchAPI.search(
-				query,
-				this.props.collectionConfig,
-				this.onOutput.bind(this),
-				updateUrl
-			)
+			() => {
+				SearchAPI.search(
+					query,
+					this.props.collectionConfig,
+					this.onOutput.bind(this),
+					updateUrl
+				)
+			}
 		)
 	}
 
@@ -104,9 +109,9 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 
 		//reset certain query properties
-		q.fieldCategory = null;
+		//q.fieldCategory = null;
 		q.selectedFacets = {};
-		q.dateRange = null;
+		//q.dateRange = null;
 		q.offset = 0;
 		q.term = this.refs.searchTerm.value;
 
@@ -138,7 +143,6 @@ class QueryBuilder extends React.Component {
 			q.selectedFacets = data.selectedFacets;
 			q.offset = 0;
 			q.term = this.refs.searchTerm.value;
-
 			this.doSearch(q, true);
 		} else if(componentClass == 'DateRangeSelector') {
 			//first delete the old selection from the desired facets
@@ -240,42 +244,46 @@ class QueryBuilder extends React.Component {
             this.props.onOutput(this.constructor.name, data);
         }
         if (data && !data.error) {
+            this.setState(
+            	{
+	            	//so involved components know that a new search was done
+	            	searchId: data.searchId,
 
-            this.setState({
-            	//so involved components know that a new search was done
-            	searchId: data.searchId,
+	            	//refresh params of the query object
+	            	query : data.query,
 
-            	//refresh params of the query object
-            	query : data.query,
-
-                //actual OUTPUT of the query
-                aggregations: data.aggregations, //for drawing the AggregationBox/List/Histogram
-                totalHits: data.totalHits, //shown in the stats
-                totalUniqueHits: data.totalUniqueHits, //shown in the stats
-
-                //we're not searching anymore
-                isSearching: false
-            });
+	                //actual OUTPUT of the query
+	                aggregations: data.aggregations, //for drawing the AggregationBox/List/Histogram
+	                totalHits: data.totalHits, //shown in the stats
+	                totalUniqueHits: data.totalUniqueHits //shown in the stats
+            	},
+            	() => {
+            		this.setState({isSearching: false});
+            	}
+            );
         } else {
         	//Note: searchLayers & desiredFacets & selectedSortParams stay the same
         	let q = this.state.query;
-        	q.dateRange = null;
+        	//q.dateRange = null;
         	q.selectedFacets = {};
-        	q.fieldCategory = null;
+        	//q.fieldCategory = null;
 
-            this.setState({
-            	searchId: null,
+            this.setState(
+            	{
+            		searchId: null,
 
-            	query : q,
+	            	query : q,
 
-                //query OUTPUT is all empty
-				aggregations: null,
-                totalHits: 0,
-                totalUniqueHits: 0,
+	                //query OUTPUT is all empty
+					aggregations: null,
+	                totalHits: 0,
+	                totalUniqueHits: 0
 
-                //we're not searching anymore
-                isSearching: false
-            });
+            	},
+            	() => {
+            		this.setState({isSearching: false});
+            	}
+            );
         }
 
         if(data && data.error == 'access denied') {
@@ -595,8 +603,8 @@ class QueryBuilder extends React.Component {
                         </div>
                     )
                 }
-
-			} else if(this.state.searchId != null) {
+            //if hits is not greater than 0
+			} else if(this.state.searchId != null && this.state.isSearching === false) {
 				let dateRangeMessage = null;
 				if(this.state.query.dateRange) {
 					dateRangeMessage = (
@@ -616,7 +624,7 @@ class QueryBuilder extends React.Component {
 			}
 
 			//determine which icon to show after the search input
-			if(this.state.isSearching) {
+			if(this.state.isSearching === true) {
 				searchIcon = (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>)
 			} else {
 				searchIcon = (<i className="fa fa-search"></i>)

@@ -48,7 +48,7 @@ class SingleSearchRecipe extends React.Component {
 
 			//use for a lot TODO write proper reasons
 			collectionConfig : null, //loaded after mounting, without it nothing works
-			query : null,
+			initialQuery : null, //yikes this is only used for storing the initial query
 
 			//for doing actions on the search results
 			selectedRows : {},
@@ -86,7 +86,7 @@ class SingleSearchRecipe extends React.Component {
 			{
 				collectionId : config.collectionId,
 				collectionConfig : config,
-				query : query,
+				initialQuery : query,
 				currentOutput : null,
 			},
 			fromUrl ? null : this.hideModalAndChangeHistory(config)
@@ -251,7 +251,6 @@ class SingleSearchRecipe extends React.Component {
 				}
 			})
 
-			console.log(annotation);
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API
@@ -399,7 +398,7 @@ class SingleSearchRecipe extends React.Component {
 		}
 
 		//only draw when a collection config is properly loaded
-		if(this.state.collectionId && this.state.collectionConfig) { // && this.state.query
+		if(this.state.collectionId && this.state.collectionConfig) { // && this.state.initialQuery
 
 			//this components outputs: search results, aggregations & sorting & paging functions!
 			searchComponent = (
@@ -412,7 +411,7 @@ class SingleSearchRecipe extends React.Component {
 					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
 					showTimeLine={true}
 
-					query={this.state.query || QueryModel.ensureQuery(null, this.state.collectionConfig) }
+					query={this.state.initialQuery || QueryModel.ensureQuery(null, this.state.collectionConfig) }
 					collectionConfig={this.state.collectionConfig}
 
 					onOutput={this.onComponentOutput.bind(this)}/>

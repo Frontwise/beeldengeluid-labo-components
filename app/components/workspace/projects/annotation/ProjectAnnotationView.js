@@ -1,13 +1,9 @@
-import ProjectAPI from '../../../../api/ProjectAPI';
-
-import IDUtil from '../../../../util/IDUtil';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
-
 import AnnotationTable from './AnnotationTable';
-
-
+import IDUtil from '../../../../util/IDUtil';
+import ProjectAPI from '../../../../api/ProjectAPI';
+import ProjectViewWrapper from '../ProjectViewWrapper';
 import PropTypes from 'prop-types';
+import { initHelp } from '../../helpers/helpDoc';
 
 /**
 * Main page for a project's bookmarks and annotations. This page mainly handles
@@ -52,6 +48,8 @@ class ProjectAnnotationView extends React.PureComponent {
 
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "annotations");
+
+        initHelp('Annotations', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/annotations.html');
     }
 
     componentWillUnmount() {
