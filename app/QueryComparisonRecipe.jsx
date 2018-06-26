@@ -43,6 +43,9 @@ class QueryComparisonRecipe extends React.Component {
         } else if(this.props.recipe.ingredients.collections) {
             collections = this.props.recipe.ingredients.collections;
         }
+
+        const project = ComponentUtil.getJSONFromLocalStorage('activeProject')
+
         this.state = {
             lineChartData: {},
             collections : collections,
@@ -50,10 +53,10 @@ class QueryComparisonRecipe extends React.Component {
             pageSize : 10,
             selectedQueries : [],
             combinedSearchResults : {},
-            activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
+            activeProject : project,
             showModal : false, //for the collection selector
             awaitingProcess : null, //which process is awaiting the output of the project selector
-            projectId : ComponentUtil.getJSONFromLocalStorage('activeProject').id || null,
+            projectId : project ? project.id : null,
         };
         this.layout = document.querySelector("body");
     }
