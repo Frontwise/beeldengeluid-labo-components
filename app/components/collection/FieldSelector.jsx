@@ -40,6 +40,9 @@ class FieldSelector extends React.Component {
             case 'type':
                 fields = fields.sort((a,b)=>(a.type > b.type ? -1 : 1))
             break;
+            case 'level':
+                fields = fields.sort((a,b)=>(a.level > b.level ? -1 : 1))
+            break;
             case 'completeness':
                 const getFloatValueOrZero = (v)=> (v ? parseFloat(v.value) : 0);
                 fields = fields.sort((a,b)=>(getFloatValueOrZero(this.props.completeness[a.id]) < getFloatValueOrZero(this.props.completeness[b.id]) ? -1 : 1))
@@ -91,6 +94,18 @@ class FieldSelector extends React.Component {
 
         const sortArrow = <i className={"fa fa-sort-"+this.state.sortOrder}/>;
 
+        let levelTableHead = null;
+
+        if(this.props.showLevelColumn) {
+            levelTableHead = (
+                <th onClick={()=>{this.onSort('level')}}
+                    className={classNames('level',{active:this.state.sortField === 'level'})}>
+                    Level
+                    {this.state.sortField === 'level' ? sortArrow : null}
+                </th>
+            )
+        }
+
         return (
             <div className={IDUtil.cssClassName('field-selector')}>
 
@@ -116,6 +131,8 @@ class FieldSelector extends React.Component {
                                         Field
                                         {this.state.sortField === 'title' ? sortArrow : null}
                                         </th>
+
+                                    {levelTableHead}
 
                                     <th onClick={()=>{this.onSort('description')}}
                                         className={classNames('description',{active:this.state.sortField === 'description'})}>
@@ -144,6 +161,9 @@ class FieldSelector extends React.Component {
                                             <td className="title" title={field.id}>
                                                 {field.title}
                                             </td>
+                                            {this.props.showLevelColumn ? <td className="level" title={field.level}>
+                                                {field.level}
+                                            </td> : null }
                                             <td className="description">
                                                 {this.props.descriptions !== null ?
                                                     (this.props.descriptions[field.id] !== undefined ?

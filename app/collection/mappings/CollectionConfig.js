@@ -270,6 +270,10 @@ class CollectionConfig {
 		return tmp.length > 0 ? tmp : null;
 	}
 
+	usesLayeredModel() {
+		return false;
+	}
+
 	//simply return the first date field by default (this function is used by QueryBuilder)
 	getPreferredDateField() {
 		const dfs = this.getDateFields();

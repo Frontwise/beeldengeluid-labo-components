@@ -249,8 +249,8 @@ class CollectionAnalyser extends React.Component {
                         fields={this.state.fields}
                         completeness={this.state.completeness}
                         descriptions={this.state.descriptions}
-
-                        />
+                        showLevelColumn={this.props.collectionConfig.usesLayeredModel()}
+                    />
                 </div>
 
 			</div>
