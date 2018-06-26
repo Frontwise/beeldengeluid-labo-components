@@ -250,6 +250,7 @@ class CollectionRecipe extends React.Component {
 			});
 			collectionBlock = (
 				<FlexBox title="Selected collections">
+                    <div className="box">
 						<div className="text-right">
 							<button className="btn btn-primary"	onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
 								Add collection&nbsp;<i className="fa fa-plus"></i>
@@ -259,6 +260,7 @@ class CollectionRecipe extends React.Component {
 						<ul className="list-group">
 							{items}
 						</ul>
+                    </div>
 				</FlexBox>
 			)
 		}
@@ -333,7 +335,7 @@ class CollectionRecipe extends React.Component {
 
 			analysisBlock = (
 				<FlexBox title="Collection analysis">
-						<div className="row">
+						<div className="row box">
 							<div className="col-md-12">
 								{collectionAnalyser}
 							</div>

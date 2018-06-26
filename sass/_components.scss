@@ -997,6 +997,15 @@
 	.ms_toggle_btn {
 		display: none;
 	}
+
+	.box{
+		background-color: $subdued-bg;
+	    border-radius: 6px;
+	    box-shadow: 1px 2px 2px 2px #999;
+	    margin-top: 5px;
+	    padding: 2rem;
+	    margin-right: 5px;
+	}
 }
 
 .bg__item-details-recipe { /* ItemDetailsRecipe.jsx */
