@@ -44,19 +44,15 @@ class QueryComparisonRecipe extends React.Component {
             collections = this.props.recipe.ingredients.collections;
         }
 
-        const project = ComponentUtil.getJSONFromLocalStorage('activeProject')
-
         this.state = {
             lineChartData: {},
             collections : collections,
             data : null,
             pageSize : 10,
             selectedQueries : [],
-            combinedSearchResults : {},
-            activeProject : project,
+            activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
             showModal : false, //for the collection selector
             awaitingProcess : null, //which process is awaiting the output of the project selector
-            projectId : project ? project.id : null,
         };
         this.layout = document.querySelector("body");
     }
@@ -71,7 +67,6 @@ class QueryComparisonRecipe extends React.Component {
             this.setState(
                 {
                     activeProject: data,
-                    projectId: data.id,
                     lineChartData: null
                 },
                 () => {
@@ -214,7 +209,7 @@ class QueryComparisonRecipe extends React.Component {
         this.layout.classList.add("spinner");
         let queries = [];
         Object.keys(checkedBoxes).forEach((item, index) => {
-            if (checkedBoxes[item].checked) {
+            if (checkedBoxes[item].checked && this.state.activeProject) {
                 queries.push(this.state.activeProject.queries[index])
             }
         });
@@ -237,34 +232,46 @@ class QueryComparisonRecipe extends React.Component {
 
     render() {
         const compareLink = {"label": "Combine queries ..."}
-        let lineChart = null,
-            aggregatedHits = null,
-            projectModal = null,
+
+        const chooseProjectBtn = (
+            <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
+                Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
+            </button>
+        )
+
+                //generates a tabbed pane with a search component for each collection + a collection browser
+        const searchComponent = (
+            <button className="btn btn-primary" onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i
+                className="fa fa-plus"></i></button>
+        )
+
+        let lineChart = null;
+        let aggregatedHits = null;
+        let projectModal = null;
+        let projectQueriesTable = null;
+
+        if(this.state.activeProject) {
             projectQueriesTable = (
                 <div className={IDUtil.cssClassName('project-queries-view')}>
                     <ProjectQueriesTable
+                        key={this.state.activeProject.id}
                         handleCompareLink={this.compareQueries.bind(this)}
                         compareQueryLink={compareLink}
-                        key={this.state.projectId}
                         project={this.state.activeProject}
                         user={this.props.user}/>
                 </div>
             );
+
             if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
                 const ramdom = Math.floor(Math.random() * 1000000);
                 lineChart = (
                     <QueryComparisonLineChart
                         data={this.state.lineChartData}
                         comparisonId={ramdom}
-            />
+                    />
                 );
             }
-
-        let chooseProjectBtn = (
-            <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
-                Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
-            </button>
-        )
+        }
 
         //project modal
         if(this.state.showProjectModal) {
@@ -280,12 +287,6 @@ class QueryComparisonRecipe extends React.Component {
             )
         }
 
-        //generates a tabbed pane with a search component for each collection + a collection browser
-        const searchComponent = (
-            <button className="btn btn-primary" onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i
-                className="fa fa-plus"></i></button>
-        );
-
         //TODO only render when there is linechart data
         if(this.props.recipe.ingredients.output === 'lineChart') {
             if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
@@ -299,67 +300,13 @@ class QueryComparisonRecipe extends React.Component {
             }
         }
 
-        if(this.props.recipe.ingredients.showSearchResults) {
-            //TODO put this in a Comerda Component (move the functions gotoPage and sortResults there too)
-            aggregatedHits = Object.keys(this.state.combinedSearchResults).map((queryId, index) => {
-                let paging = null;
-                let sortButtons = null;
-
-                const searchResults = this.state.combinedSearchResults[queryId];
-                const collectionTitle = searchResults.collectionConfig.collectionInfo.title;
-
-                //draw the search hits in here, so it's possible to put the linechart in between the search box and the results
-                if(searchResults && searchResults.results && searchResults.results.length > 0) {
-                    //draw the paging buttons
-                    if(searchResults.currentPage > 0) {
-                        paging = <Paging
-                            queryId={queryId}
-                            currentPage={searchResults.currentPage}
-                            numPages={Math.ceil(searchResults.totalHits / this.state.pageSize)}
-                            gotoPage={this.gotoPage.bind(this)}/>
-                    }
-
-                    //draw the sorting buttons
-                    if(searchResults.query.sort) {
-                        sortButtons = <Sorting
-                            queryId={queryId}
-                            collectionConfig={searchResults.collectionConfig}
-                            sortResults={this.sortResults.bind(this)}
-                            sortParams={searchResults.query.sort}
-                            dateField={searchResults.query.dateRange ? searchResults.query.dateRange.field : null}/>
-                    }
-
-                    //draw the list of search results
-                    const items = searchResults.results.map((result, index) => {
-                        return (
-                            <SearchHit
-                                key={'__' + index}
-                                result={result}
-                                searchTerm={searchResults.query.term}
-                                collectionConfig={searchResults.collectionConfig}
-                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}/>
-                        )
-                    }, this);
-                    return (
-                        <FlexBox title={'Results for query #' + (index + 1) + ' ('+collectionTitle+')'}>
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {paging}&nbsp;{sortButtons}
-                                    {items}
-                                    {paging}
-                                </div>
-                            </div>
-                        </FlexBox>
-                    )
-                }
-            });
-        }
-
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
                 <div className="overlay"></div>
                 <div className="row">
-                    <div className="bg__queryComparisonRecipe-header-btns">{searchComponent}&nbsp;{chooseProjectBtn}</div>
+                    <div className="bg__queryComparisonRecipe-header-btns">
+                        {searchComponent}&nbsp;{chooseProjectBtn}
+                    </div>
                     {projectModal}
                     {projectQueriesTable}
                 </div>
