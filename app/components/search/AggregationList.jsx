@@ -4,13 +4,14 @@ import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import ComponentUtil from "../../util/ComponentUtil";
 import ReactTooltip from 'react-tooltip';
-
+import {CSVLink, CSVDownload} from 'react-csv';
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            showModal: false
+            showModal: false,
+            facetItems: this.props.aggregations || null
         };
         this.CLASS_PREFIX = 'agl';
         this.minToShow = 2;
@@ -125,7 +126,8 @@ class AggregationList extends React.Component {
         this.onOutput(desiredFacets, this.props.selectedFacets);
     }
 
-    sorting(arr, order="asc", type="alpha"){
+    sorting(arr, order="asc", type="alpha", index){
+        const currentFacets = arr;
         let facetA, facetB;
         arr.sort(function (a, b) {
             //define order
@@ -144,6 +146,13 @@ class AggregationList extends React.Component {
             }
             return (facetA < facetB ? -1 : 1);
         });
+        this.setState(
+            {
+                facetItems: {
+                    ...this.state.facetItems,
+                    index: currentFacets
+                }
+            }, () => console.log(this.state.facetItems));
     }
 
     render() {
@@ -174,11 +183,8 @@ class AggregationList extends React.Component {
         nonDateAggregations.forEach((key, index) => {
             let sortedOpts = [],
                 options = null;
-            if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
-                // sort elements alphabetically.
-                this.sorting(this.props.aggregations[key['field']], 'asc', 'alpha');
-
-                options = this.props.aggregations[key['field']].map((facet, fIndex) => {
+            if (this.state.facetItems[key['field']] && this.state.facetItems[key['field']].length > 0) {
+                options = this.state.facetItems[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key,
                         facetId = key['field'] + '|' + value;
                     let checkedOpt = false;
@@ -218,7 +224,7 @@ class AggregationList extends React.Component {
                         sortedOpts.push(item);
                     }
                 });
-            } else if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length === 0) {
+            } else if (this.state.facetItems[key['field']] && this.state.facetItems[key['field']].length === 0) {
                 emptyAggregations.push(
                     {
                         "aggregationField": key['field'],
@@ -258,14 +264,43 @@ class AggregationList extends React.Component {
                 if (hiddenCheckboxes) {
                     changeViewItems = this.__setViewItems(index, 'more');
                 }
+                const facetId = "facets__" + index,
+                    facetName = ElasticsearchDataUtil.getAggregationTitle(key['field'], this.props.facets),
+                    headers = [
+                        {label: 'Value', key: 'key'},
+                        {label: 'Count', key: 'doc_count'}
+                    ];
+
                 facets.push((
                     <div className="checkboxGroup" key={'facet__' + index} id={'index__' + index}>
-                        <h4>{ElasticsearchDataUtil.getAggregationTitle(key['field'], this.props.facets)}
-                            <span data-for={'tooltip__' + index} data-tip={key['field']} data-html={true}>
-							    <i className="fa fa-info-circle"/>
+                        <div className="bg__hamburger-facets-container">
+                            <input type="checkbox" id={facetId}/>
+                            <label htmlFor={facetId}>
+                                <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={key['field']}
+                                      data-html={true}>
+                                   <i className="fa fa-info-circle"/> {facetName}
+
 						    </span>
-                            <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key['field'])}/>
-                        </h4>
+                                <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key['field'])}/>
+                                <div className="hb">
+                                    <div className="hb-line hb-line-top"></div>
+                                    <div className="hb-line hb-line-center"></div>
+                                </div>
+                            </label>
+                            <ul className={facetId}>
+                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "alpha", key['field'])}>
+                                    <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
+                                </li>
+                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "alpha", key['field'])}>
+                                    <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
+                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "non-alpha", key['field'])}>
+                                    <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
+                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
+                                    <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
+                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
+                                    <CSVLink filename={facetName} headers={headers} data={this.state.facetItems[key['field']]} ><i className="fa fa-download" aria-hidden="true"></i></CSVLink></li>
+                            </ul>
+                        </div>
                         <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
                             {sortedOpts}
                         </ul>
