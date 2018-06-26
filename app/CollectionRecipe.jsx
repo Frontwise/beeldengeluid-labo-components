@@ -11,8 +11,7 @@ import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
 import DateFieldSelector from './components/collection/DateFieldSelector';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
-import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
-
+import CollectionInspectorLineChart from './components/stats/CollectionInspectorLineChart';
 
 import PropTypes from 'prop-types';
 
@@ -251,7 +250,6 @@ class CollectionRecipe extends React.Component {
 			});
 			collectionBlock = (
 				<FlexBox title="Selected collections">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
 						<div className="text-right">
 							<button className="btn btn-primary"	onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
 								Add collection&nbsp;<i className="fa fa-plus"></i>
@@ -261,7 +259,6 @@ class CollectionRecipe extends React.Component {
 						<ul className="list-group">
 							{items}
 						</ul>
-					</div>
 				</FlexBox>
 			)
 		}
@@ -321,7 +318,7 @@ class CollectionRecipe extends React.Component {
 
 			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
 				fieldAnalysisTimeline = (
-					<QueryComparisonLineChart
+					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
 						comparisonId={IDUtil.guid()}/>
 				);
@@ -336,13 +333,11 @@ class CollectionRecipe extends React.Component {
 
 			analysisBlock = (
 				<FlexBox title="Collection analysis">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
 						<div className="row">
 							<div className="col-md-12">
 								{collectionAnalyser}
 							</div>
 						</div>
-					</div>
 				</FlexBox>
 			)
 		}
