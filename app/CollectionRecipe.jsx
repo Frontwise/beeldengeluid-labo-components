@@ -346,11 +346,11 @@ class CollectionRecipe extends React.Component {
 			<div className={IDUtil.cssClassName('collection-recipe')}>
 				{collectionModal}
 				{statsModal}
-				<div className="row bg__collection-recipe-sel">
-					<div className="bg__collection-block">
+				<div className="row">
+					<div className="col-md-6">
 						{collectionBlock}
 					</div>
-					<div className="bg__collection-block">
+					<div className="col-md-6">
 						{analysisBlock}
 					</div>
 				</div>
