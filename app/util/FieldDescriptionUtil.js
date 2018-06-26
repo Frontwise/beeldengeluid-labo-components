@@ -3,13 +3,13 @@
  */
 
 const cache = {};
-const dataRoot = "https://transfer.frontwise.com/beeldengeluid/mediasuite/examples/fielddescriptions/";
+const dataRoot = "http://mediasuitedata.clariah.nl/fielddescriptions/";
 
 const FieldDescriptionUtil = {
 
     getDescriptions(collectionId, callback){
         const url = dataRoot +  collectionId + '.json';
-        
+
         // return cached data if available
         if (collectionId in cache){
             callback(cache[collectionId]);
@@ -20,7 +20,7 @@ const FieldDescriptionUtil = {
         // so it is clear that loading finished, but no data is there
         const callError = ()=>{
             console.debug('No field descriptions could be loaded for ' + collectionId);
-            cache[collectionId] = [];   
+            cache[collectionId] = [];
             callback([]);
         }
 
@@ -32,7 +32,7 @@ const FieldDescriptionUtil = {
             return response.json();
         }).then((json)=>{
             // store to cache for later use
-            cache[collectionId] = json;   
+            cache[collectionId] = json;
 
             // callback with the json data
             callback(json);

@@ -2,7 +2,6 @@ import CollectionAPI from '../../api/CollectionAPI';
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import Autosuggest from 'react-autosuggest';
-import FieldDescriptionUtil from '../../util/FieldDescriptionUtil';
 import FieldSelector from './FieldSelector';
 
 //this component relies on the collection statistics as input
@@ -21,7 +20,9 @@ class CollectionAnalyser extends React.Component {
         this.isMounted = true;
 
         // default values
-        const defaultField= window.sessionStorage.getItem(this.prefix + 'defaultField' + this.props.collectionConfig.collectionId) || '';
+        const defaultField = window.sessionStorage.getItem(
+            this.prefix + 'defaultField' + this.props.collectionConfig.collectionId
+        ) || '';
 		this.state = {
             field : defaultField,
             fields: this.props.collectionConfig.getAllFields(),
@@ -39,14 +40,10 @@ class CollectionAnalyser extends React.Component {
 
         this.previewCompleteness();
 
-        this.loadDescriptions(this.props.collectionConfig.collectionId);
+        this.props.collectionConfig.loadFieldDescriptions(this.setDescriptions.bind(this))
     }
 
-    loadDescriptions(collectionId){
-        FieldDescriptionUtil.getDescriptions(collectionId, this.setDescriptions.bind(this));
-    }
-
-    setDescriptions(descriptions){
+    setDescriptions(descriptions) {
         this.setState({
             descriptions
         })
@@ -109,7 +106,6 @@ class CollectionAnalyser extends React.Component {
         }
 
         this.calling = true;
-        console.debug('CA', analysisField);
 
         // perform call
         CollectionAPI.analyseField(

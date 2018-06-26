@@ -125,6 +125,11 @@ class CollectionConfig {
 		return false;
 	}
 
+	//should always be overloaded
+	loadFieldDescriptions(callback) {
+		callback([])
+	}
+
 	getDocumentType() {
 		return this.docType;
 	}
