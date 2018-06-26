@@ -1,14 +1,9 @@
 /**
- * Enable question mark button and
+ * Enable question mark button and show help
  */
-
 
 let initialized = false;
 let container, button, title, close, content;
-
-
-
-
 
 // initialize
 const initDOM = () => {
