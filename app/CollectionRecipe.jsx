@@ -11,7 +11,7 @@ import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
 import DateFieldSelector from './components/collection/DateFieldSelector';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
-import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import CollectionInspectorLineChart from './components/stats/CollectionInspectorLineChart';
 
 import PropTypes from 'prop-types';
 
