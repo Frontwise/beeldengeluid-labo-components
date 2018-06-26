@@ -3,7 +3,7 @@
  */
 
 const cache = {};
-const dataRoot = "http://mediasuitedata.clariah.nl/fielddescriptions/";
+const dataRoot = "/fielddescriptions/";
 
 const FieldDescriptionUtil = {
 
