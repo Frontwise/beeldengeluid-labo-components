@@ -152,7 +152,7 @@ class AggregationList extends React.Component {
                     ...this.state.facetItems,
                     index: currentFacets
                 }
-            }, () => console.log(this.state.facetItems));
+            });
     }
 
     render() {
@@ -288,17 +288,20 @@ class AggregationList extends React.Component {
                                 </div>
                             </label>
                             <ul className={facetId}>
-                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "alpha", key['field'])}>
+                                <li title="Alphanumeric descending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "alpha", key['field'])}>
                                     <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
                                 </li>
-                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "alpha", key['field'])}>
+                                <li title="Alphanumeric ascending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "alpha", key['field'])}>
                                     <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
-                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "non-alpha", key['field'])}>
+                                <li title="Numeric Asceding" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
-                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
+                                <li title="Numeric descending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
-                                <li onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
-                                    <CSVLink filename={facetName} headers={headers} data={this.state.facetItems[key['field']]} ><i className="fa fa-download" aria-hidden="true"></i></CSVLink></li>
+                                <li title="Download as CSV" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
+                                    <CSVLink filename={facetName} headers={headers} data={this.state.facetItems[key['field']]} >
+                                        <i className="fa fa-download" aria-hidden="true"></i>
+                                    </CSVLink>
+                                </li>
                             </ul>
                         </div>
                         <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
