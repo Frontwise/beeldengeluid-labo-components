@@ -182,6 +182,8 @@
 	}
 	.bg__agl__facet-group {
 		margin:0;
+		max-height: 400px;
+		overflow: auto;
 
 		.bg__agl__facet-item {
 			color: $list-item-color;
