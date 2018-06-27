@@ -1209,35 +1209,35 @@ $transition-time : .8s;
 .bg__hamburger-facets-container {
 	background-color: #468dcb;
 	border-radius: 3px 3px 0 0;
-	padding: 5px;
 	position: relative;
 	.hb {
 		cursor: pointer;
 		height: 25px;
+		padding: 4px 0 26px 10px;
 		position: relative;
 	}
 	.hb-line {
 		background-color: #fff;
 		border-radius: 10px;
-		height: 4px;
+		height: 3px;
 		position: absolute;
-		width: 6px;
+		width: 18px;
 	}
 	.hb-line-top {
-		top: 0;
+		top: 6px;
 	}
 	.hb-line-center {
 		position: absolute;
-		top: 10px;
+		top: 12px;
 	}
 	.hb-line-center::after {
 		background-color: #fff;
 		border-radius: 10px;
 		content: '';
-		height: 4px;
+		height: 3px;
 		position: absolute;
-		top: 10px;
-		width: 6px;
+		top: 6px;
+		width: 18px;
 	}
 	input, ul {
 		display: none;
@@ -1279,7 +1279,7 @@ $transition-time : .8s;
 		font-size: 20px;
 		position: absolute;
 		right: 0;
-		top: 7px;
+		top: 5px;
 		z-index: 12;
 	}
 	span {
@@ -1289,8 +1289,14 @@ $transition-time : .8s;
 			font-weight: normal;
 			left: 18%;
 			position: absolute;
-			top: 5px;
+			top: 2px;
 			z-index: 10;
+
+			.fa-info-circle {
+				float: left;
+				font-size: 13px;
+				margin-right: 4px;
+			}
 		}
 	}
 }
