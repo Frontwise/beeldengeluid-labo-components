@@ -168,12 +168,16 @@ class ProjectSessionView extends React.PureComponent {
 
             // dive-vu via within media suite
             case 'dive-vu':
-                return "/tool/exploratory-search?path=/browser/session%3F"+encodeURIComponent(session.data.annotationId);
+                //return "/tool/exploratory-search?path=/browser/session%3Fid="+encodeURIComponent(session.data.annotationId);
+                return "http://clariahvu.diveplus.frontwise.com/browser/session?id="+encodeURIComponent(session.data.annotationId);
             break;
 
             // dive frontwise open beelden
             case 'dive-fw':
-                return "http://openbeelden.diveplus.frontwise.com/browser/session?id="+encodeURIComponent(session.data.annotationId);
+                // When openbeelden is the Explore tool default                
+                return "/tool/exploratory-search?path=/browser/session%3Fid="+encodeURIComponent(session.data.annotationId);
+
+                //return "http://openbeelden.diveplus.frontwise.com/browser/session?id="+encodeURIComponent(session.data.annotationId);
             break;
 
             default:
@@ -215,7 +219,7 @@ class ProjectSessionView extends React.PureComponent {
                 row={session => [
                     {
                         props: { className: 'primary' },
-                        content: <Link to={session.id}>{session.name}</Link>
+                        content: <a href={this.generateSessionUrl(session)} target="_blank" rel="noopener noreferrer" >{session.name}</a>
                     },
                     { content: session.tool },
                     { content: session.created ? session.created.substring(0, 10)  : '-'},
