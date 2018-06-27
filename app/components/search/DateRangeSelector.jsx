@@ -79,17 +79,33 @@ class DateRangeSelector extends React.Component {
         if(this.props.dateRange && this.props.dateRange.field) {
             const buckets = this.props.aggregations[this.props.dateRange.field];
             if(buckets && buckets.length > 0) {
+                const realMinYear = moment(buckets[0].date_millis, 'x').year()
+                const minYear = this.props.collectionConfig.getMinimunYear();
+
+                //if there is no date, set it to the minimum value to avoid weird graphs
+                if(minYear > 0 && realMinYear < minYear) {
+                    const minDate = moment().set({'year': minYear, 'month': 0, 'date': 1})
+                    return minDate
+                }
                 return moment(buckets[0].date_millis, 'x')
             }
         }
         return null
     }
 
+
+
     getMaxDate() {
         if(this.props.dateRange && this.props.dateRange.field) {
             const buckets = this.props.aggregations[this.props.dateRange.field];
             if(buckets && buckets.length > 0) {
-                return moment(buckets[buckets.length -1].date_millis, 'x')
+                const maxDate = moment(buckets[buckets.length -1].date_millis, 'x')
+                const today = moment()
+                if(maxDate.isBefore(today)) {
+                    return maxDate
+                } else {
+                    return today
+                }
             }
         }
         return null

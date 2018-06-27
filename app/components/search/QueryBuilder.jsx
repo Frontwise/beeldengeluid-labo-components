@@ -17,6 +17,8 @@ import Histogram from '../stats/Histogram';
 import CollectionConfig from '../../collection/mappings/CollectionConfig';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
+
+import moment from 'moment';
 /*
 Notes about this component TODO rewrite:
 
@@ -50,7 +52,8 @@ class QueryBuilder extends React.Component {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
 			this.refs.searchTerm.value = this.props.query.term;
-			//never search with an empty search term on init
+
+			//never search with an empty search term on init (FIXME not always desirable)
 			if(this.props.query.term && this.props.query.term.trim() != '') {
 				this.doSearch(this.props.query);
 			}
@@ -253,7 +256,7 @@ class QueryBuilder extends React.Component {
 	            	query : data.query,
 
 	                //actual OUTPUT of the query
-	                aggregations: data.aggregations, //for drawing the AggregationBox/List/Histogram
+	                aggregations: this.filterWeirdDates(data.aggregations, data.query.dateRange),
 	                totalHits: data.totalHits, //shown in the stats
 	                totalUniqueHits: data.totalUniqueHits //shown in the stats
             	},
@@ -289,6 +292,38 @@ class QueryBuilder extends React.Component {
         if(data && data.error == 'access denied') {
         	alert('The system is not allowed to search through this collection');
         }
+    }
+
+    filterWeirdDates(aggregations, dateRange) {
+    	if(dateRange && aggregations) {
+	    	const buckets = aggregations[dateRange.field];
+	        if(buckets && buckets.length > 0) {
+	            const desiredMinYear = this.props.collectionConfig.getMinimunYear();
+	            const desiredMaxYear = this.props.collectionConfig.getMaximumYear();
+
+                let maxDate = null;
+                if(desiredMaxYear != -1) {
+                	maxDate = moment().set({'year': desiredMaxYear, 'month': 0, 'date': 1})
+                } else {
+                	maxDate = moment()
+                }
+
+                let i = buckets.findIndex(d => {
+                	return desiredMinYear == moment(d.date_millis, 'x').year()
+                })
+                i = i == -1 ? 0 : i;
+
+                let j = buckets.findIndex(d => {
+                	return maxDate.isBefore(moment(d.date_millis, 'x'))
+                })
+				j = j == -1 ? buckets.length -1 : j;
+
+                if(!(i == 0 && j == (buckets.length -1))) {
+                	aggregations[dateRange.field] = aggregations[dateRange.field].splice(i, j - i);
+                }
+	        }
+	    }
+	    return aggregations
     }
 
     render() {
