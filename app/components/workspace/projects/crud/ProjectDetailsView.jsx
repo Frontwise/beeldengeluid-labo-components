@@ -17,7 +17,8 @@ class ProjectDetailsView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "details");
 
-        initHelp('User Project Details','/help/pages/workspace/user-projects-details.html');
+        initHelp('User Project Details','/feature-doc/workspace/user-projects/details');
+
      }
 
     render() {

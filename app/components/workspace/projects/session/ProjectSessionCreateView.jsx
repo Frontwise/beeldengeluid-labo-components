@@ -3,7 +3,6 @@ import IDUtil from '../../../../util/IDUtil';
 import ProjectAPI from '../../../../api/ProjectAPI';
 import PropTypes from 'prop-types';
 import SessionSaver from './SessionSaver';
-import { initHelp } from '../../helpers/helpDoc';
 import { setBreadCrumbsFromMatch } from '../../helpers/BreadCrumbs';
 
 /**
@@ -68,7 +67,6 @@ class ProjectSessionCreateView extends React.PureComponent {
             });
         });
 
-        initHelp('Create Tool Session', '/help/pages/workspace/create-tool-session.html');
     }
 
     handleSubmit(e){
