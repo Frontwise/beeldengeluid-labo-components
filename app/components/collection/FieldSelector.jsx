@@ -64,6 +64,7 @@ class FieldSelector extends React.Component {
             keywords.forEach((keyword)=>{
                 fields = fields.filter((field)=>(
                     field.title.toLowerCase().includes(keyword) ||
+                    (field.level && field.level.toLowerCase().includes(keyword)) ||
                     (field.id in this.props.descriptions && this.props.descriptions[field.id].description && this.props.descriptions[field.id].description.toLowerCase().includes(keyword)) ||
                     (field.type && field.type.toLowerCase().includes(keyword))
                 ));
