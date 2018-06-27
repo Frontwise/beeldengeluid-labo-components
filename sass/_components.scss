@@ -1219,7 +1219,7 @@ $transition-time : .8s;
 		border-radius: 10px;
 		height: 4px;
 		position: absolute;
-		width: 8px;
+		width: 6px;
 	}
 	.hb-line-top {
 		top: 0;
@@ -1235,7 +1235,7 @@ $transition-time : .8s;
 		height: 4px;
 		position: absolute;
 		top: 10px;
-		width: 8px;
+		width: 6px;
 	}
 	input, ul {
 		display: none;
@@ -1252,7 +1252,7 @@ $transition-time : .8s;
 		margin-top: 1em;
 		padding: 0;
 		text-align: center;
-		margin-bottom: 0px;
+		margin-bottom: 0;
 		li {
 			background-color: transparent !important;
 			flex-grow: 1;

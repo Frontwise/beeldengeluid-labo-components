@@ -84,7 +84,7 @@ class AggregationList extends React.Component {
 
     switchListView(index) {
         const btnText = document.querySelectorAll("#index__" + index + " .switchViewText")[0].textContent,
-            jCurrentList = Array.from(document.querySelectorAll("#index__" + index + " ul > li"));
+            jCurrentList = Array.from(document.querySelectorAll("#index__" + index + " ul > li[class='bg__agl__facet-item']"));
         let currentlyChecked = 0;
 
         if (btnText === "Show More") {
