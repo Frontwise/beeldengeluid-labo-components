@@ -188,7 +188,7 @@ class ProjectQueriesTable extends React.PureComponent {
                 row={query => [
                     {
                         props: { className: 'primary' },
-                        content: query.name
+                        content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
                     },
                     { content: QueryModel.toHumanReadableString(query.query)},
                     {
