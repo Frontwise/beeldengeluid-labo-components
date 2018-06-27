@@ -434,6 +434,10 @@ class CollectionConfig {
 		return -1
 	}
 
+	getFieldsToExclude() {
+		return null
+	}
+
 }
 
 export default CollectionConfig;

@@ -53,7 +53,10 @@ const QueryModel = {
 
 			//paging within inner hits is not really supported/reflected by the UI (yet)
 			innerHitsOffset: obj.innerHitsOffset || 0,
-			innerHitsSize: obj.innerHitsSize || 5
+			innerHitsSize: obj.innerHitsSize || 5,
+
+			//remove certain fields from the returned data
+			exclude: obj.exclude || collectionConfig ? collectionConfig.getFieldsToExclude() : null
 		}
 	},
 
