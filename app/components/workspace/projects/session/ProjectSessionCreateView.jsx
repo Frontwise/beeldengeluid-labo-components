@@ -68,7 +68,7 @@ class ProjectSessionCreateView extends React.PureComponent {
             });
         });
 
-        initHelp('Create Tool Session', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/create-tool-session.html');
+        initHelp('Create Tool Session', '/help/pages/workspace/create-tool-session.html');
     }
 
     handleSubmit(e){

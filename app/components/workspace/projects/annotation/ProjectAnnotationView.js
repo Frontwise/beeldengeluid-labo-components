@@ -49,7 +49,7 @@ class ProjectAnnotationView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "annotations");
 
-        initHelp('Annotations', 'https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/annotations.html');
+        initHelp('Annotations', '/help/pages/workspace/annotations.html');
     }
 
     componentWillUnmount() {
