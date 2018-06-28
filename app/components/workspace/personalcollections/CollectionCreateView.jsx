@@ -7,11 +7,14 @@ import { setBreadCrumbsFromMatch } from '../helpers/BreadCrumbs';
 import CollectionForm from './CollectionForm';
 
 import PropTypes from 'prop-types';
+import { initHelp } from '../helpers/helpDoc';
 
 class CollectionCreateView extends React.PureComponent {
 
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
+
+        initHelp('User Collection Create', '/feature-doc/workspace/user-collections/create');
     }
 
     render() {
