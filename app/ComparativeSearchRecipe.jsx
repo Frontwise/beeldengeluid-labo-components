@@ -15,6 +15,8 @@ import QueryComparisonLineChart from './components/stats/QueryComparisonLineChar
 
 import PropTypes from 'prop-types';
 
+import { initHelp } from './components/workspace/helpers/helpDoc';
+
 /*
 Notes about this component:
 
@@ -43,6 +45,10 @@ class ComparativeSearchRecipe extends React.Component {
 			pageSize : 10,
 			combinedSearchResults : {}
 		};
+	}
+
+	componentDidMount(){
+		initHelp("Compare", "/feature-doc/tools/compartive-search");
 	}
 
 	//this function receives all output of components that generate output and orchestrates where
@@ -78,7 +84,11 @@ class ComparativeSearchRecipe extends React.Component {
 					 	dateField : data.dateRange ? data.dateRange.field : null,
 					 	prettyQuery : QueryModel.toHumanReadableString(data.query),
 					 	data : newData,
-					 	queryId : data.query.id
+					 	queryId : data.query.id,
+						query : this.state.combinedSearchResults[data.query.id]
+                            ? this.state.combinedSearchResults[data.query.id].query
+                            : null,
+						collectionConfig: this.state.combinedSearchResults[data.query.id] ? this.state.combinedSearchResults[data.query.id].collectionConfig : null
 					}
 				}
 				csr[data.query.id] = data;

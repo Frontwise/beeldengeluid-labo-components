@@ -6,7 +6,7 @@ const BUILD_DIR = path.resolve(__dirname, '../dist');
 const APP_DIR =  path.resolve(__dirname, '../app');
 
 module.exports = {
-    entry: [APP_DIR + '/index.jsx'],
+    entry: ["babel-polyfill", APP_DIR + '/index.jsx'],
     devtool: 'source-map',
     output: {
         path: BUILD_DIR,

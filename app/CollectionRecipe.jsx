@@ -9,13 +9,13 @@ import FlexModal from './components/FlexModal';
 
 import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
-import CollectionStats from './components/collection/CollectionStats';
 import DateFieldSelector from './components/collection/DateFieldSelector';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
-import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
-
+import CollectionInspectorLineChart from './components/stats/CollectionInspectorLineChart';
 
 import PropTypes from 'prop-types';
+
+import { initHelp } from './components/workspace/helpers/helpDoc';
 
 class CollectionRecipe extends React.Component {
 
@@ -42,6 +42,8 @@ class CollectionRecipe extends React.Component {
 				this.onConfigsLoaded.bind(this)
 			);
 		}
+
+        initHelp("Collection Inspector", "/feature-doc/tools/collection-inspector");
 	}
 
 	onConfigsLoaded(configs) {
@@ -118,24 +120,13 @@ class CollectionRecipe extends React.Component {
 		);
 	}
 
-	showCollectionStats(collectionId, e) {
-		e.stopPropagation();
-		const collectionData = this.getCollectionData(collectionId);
-		if(collectionData) {
-			this.setState({
-				showStatsModal : true,
-				activeCollectionStats : collectionData.collectionStats
-			});
-		}
-	}
-
 	getCollectionData(collectionId) {
 		if(this.state.selectedCollections) {
 			return this.state.selectedCollections[collectionId];
 		}
 		return null;
 	}
-   
+
     /**
      * Data  Analysis
      */
@@ -148,9 +139,9 @@ class CollectionRecipe extends React.Component {
         });
     }
 
-    loadAnalysis(analysisField, callback) {              
+    loadAnalysis(analysisField, callback) {
         const collectionConfig = this.getCollectionData(this.state.activeCollection);
-        
+
         CollectionAPI.analyseField(
             collectionConfig.collectionId,
             collectionConfig.getDocumentType(),
@@ -158,6 +149,7 @@ class CollectionRecipe extends React.Component {
             analysisField ? analysisField : 'null__option',
             [], //facets are not yet supported
             collectionConfig.getMinimunYear(),
+            false, //TODO determine nested
             (data) => {
                 const timelineData = this.toTimelineData(data);
                 callback(data, timelineData);
@@ -228,7 +220,7 @@ class CollectionRecipe extends React.Component {
         });
     }
 
-	render() {       
+	render() {
 		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 		let collectionModal = null; //for selecting collections for the list
 		let collectionBlock = null; //shows all selected collections
@@ -253,10 +245,6 @@ class CollectionRecipe extends React.Component {
 						<span className="fa fa-remove" onClick={this.removeCollection.bind(this, key)}></span>
 						&nbsp;
 						{collectionTitle}
-						<button className="btn btn-default" style={{float : 'right', marginTop : '-5px'}}
-							onClick={this.showCollectionStats.bind(this, key)} title="Inspect collection">
-							<span className="fa fa-bar-chart text-muted"></span>
-						</button>
 					</li>
 				)
 			});
@@ -266,7 +254,7 @@ class CollectionRecipe extends React.Component {
 			});
 			collectionBlock = (
 				<FlexBox title="Selected collections">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
+                    <div className="box">
 						<div className="text-right">
 							<button className="btn btn-primary"	onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
 								Add collection&nbsp;<i className="fa fa-plus"></i>
@@ -276,7 +264,7 @@ class CollectionRecipe extends React.Component {
 						<ul className="list-group">
 							{items}
 						</ul>
-					</div>
+                    </div>
 				</FlexBox>
 			)
 		}
@@ -298,20 +286,6 @@ class CollectionRecipe extends React.Component {
 			)
 		}
 
-		//showing the (Elasticsearch) stats of the selected collection
-		if(this.state.showStatsModal) {
-			statsModal = (
-				<FlexModal
-					elementId="stats__modal"
-					stateVariable="showStatsModal"
-					owner={this}
-					size="large"
-					title="Collection stats">
-						<CollectionStats collectionConfig={collectionConfig}/>
-				</FlexModal>
-			)
-		}
-
 		//TODO make sure that this is only shown when a collection has been selected
 		if(collectionConfig) {
 			let collectionAnalyser = null;
@@ -327,14 +301,13 @@ class CollectionRecipe extends React.Component {
 
             // only show datefield selector when a field has been chosen
             if(this.state.field) {
-                dateFieldSelector = (  
-                    <FlexBox title="Date Field selector">       
+                dateFieldSelector = (
+                    <FlexBox title="Date Field selector">
                         <div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
                             <DateFieldSelector
                                 key={'__dfs__' + collectionConfig.collectionId}
                                 collectionConfig={collectionConfig}
                                 onChange={this.onDateField.bind(this)}
-
                             />
                         </div>
                     </FlexBox>
@@ -351,28 +324,26 @@ class CollectionRecipe extends React.Component {
 
 			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
 				fieldAnalysisTimeline = (
-					<QueryComparisonLineChart
+					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
 						comparisonId={IDUtil.guid()}/>
 				);
 			} else{
                 if (this.state.field && this.state.dateField){
-                    fieldAnalysisTimeline = 
+                    fieldAnalysisTimeline =
                         <div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
-                            <i className="fa fa-circle-o-notch fa-spin"/> Loading chart... 
+                            <i className="fa fa-circle-o-notch fa-spin"/> Loading chart...
                         </div>
                 }
             }
 
 			analysisBlock = (
 				<FlexBox title="Collection analysis">
-					<div className={IDUtil.cssClassName('input-area', this.CLASS_PREFIX)}>
-						<div className="row">
+						<div className="row box">
 							<div className="col-md-12">
 								{collectionAnalyser}
 							</div>
 						</div>
-					</div>
 				</FlexBox>
 			)
 		}
@@ -392,12 +363,12 @@ class CollectionRecipe extends React.Component {
 				<div className="row">
 					<div className="col-md-12">
 						{fieldAnalysisTimeline}
-					</div>                    
+					</div>
 				</div>
                 <div className="row">
                     <div className="col-md-12">
                         {dateFieldSelector}
-                    </div>                    
+                    </div>
                 </div>
 				<div className="row">
 					<div className="col-md-12">

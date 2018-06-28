@@ -57,7 +57,7 @@
         }
       }
     }
-    
+
 
     tbody{
       &.loading{
@@ -73,9 +73,9 @@
         border-bottom: 1px solid $clGreyTint;
         max-width: 20%;
         max-width: 600px;
-        white-space: nowrap;
+        /*white-space: nowrap;*/
         overflow: hidden;
-        text-overflow: ellipsis;    
+        text-overflow: ellipsis;
 
         &.primary{
           a{

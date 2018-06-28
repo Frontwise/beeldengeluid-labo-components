@@ -55,14 +55,15 @@ const CollectionAPI = {
 		xhr.send(JSON.stringify(postData));
 	},
 
-	analyseField: function(collectionId, docType, dateField, analysisField, facets, minYear, callback) {
+	analyseField: function(collectionId, docType, dateField, analysisField, facets, minYear, nested, callback) {
 		const url = _config.COLLECTION_API_BASE + '/analyse_field/' + collectionId;
 		const postData = {
 			docType : docType,
 			dateField : dateField,
 			analysisField : analysisField,
 			facets : facets,
-			minYear : minYear
+			minYear : minYear,
+			nested : nested
 		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {

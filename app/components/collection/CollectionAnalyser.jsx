@@ -20,106 +20,81 @@ class CollectionAnalyser extends React.Component {
         this.isMounted = true;
 
         // default values
-        const defaultField= window.sessionStorage.getItem(this.prefix + 'defaultField' + this.props.collectionConfig.collectionId) || '';
+        const defaultField = window.sessionStorage.getItem(
+            this.prefix + 'defaultField' + this.props.collectionConfig.collectionId
+        ) || '';
 		this.state = {
             field : defaultField,
-            fields : [], //current list of fields
+            fields: this.props.collectionConfig.getAllFields(),
             completeness: {}, //store completeness of the fields
             showFieldSelector: false,
+            descriptions: null, // field descriptions
 		}
 	}
 
     componentDidMount(){
-        // load fields
-        this.setState({
-            fields: this.getFields()
-        });
-
-
         // auto load the analyse if there are default values
         if (this.state.field){
-          this.props.onChange(this.state.field);
+            this.props.onChange(this.state.field);
         }
 
         this.previewCompleteness();
+
+        this.props.collectionConfig.loadFieldDescriptions(this.setDescriptions.bind(this))
+    }
+
+    setDescriptions(descriptions) {
+        this.setState({
+            descriptions
+        })
     }
 
     componentWillUnmount(){
         this.isMounted = false;
     }
 
-    getFields() {
-        let fields = [];
-        // Collect all field names        
-        Object.keys(this.props.collectionConfig).forEach((key)=>{
-            if (key.endsWith('Fields') && Array.isArray(this.props.collectionConfig[key])){
-                const keyType = key.substring(0,key.length - 6);
-                fields = fields.concat(this.props.collectionConfig[key].map((field)=>(
-                        {
-                            id: field, 
-                            title: this.props.collectionConfig.toPrettyFieldName(field),
-                            type: keyType,
-                        }
-                    ))
-                );
-                }
-            }
-        );
-        return fields;
-    }
-   
     previewCompleteness(){
-        let fieldNames = [];
-
-        // Collect all field names        
-        Object.keys(this.props.collectionConfig).forEach((key)=>{
-            if (key.endsWith('Fields')){
-                fieldNames = fieldNames.concat(this.props.collectionConfig[key]);                
-            }
-        });
-
         // For each fieldname request the completeness and store it to the state and sessionstorage
-
-        fieldNames.forEach((field)=>{
-                // retrieve from local storage
-                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
-                if (completeness !== null){
-                    completeness = JSON.parse(completeness);
-                    this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),                                
-                            }
-                        });
-                } else{ 
-
-                    this.previewAnalysis(field, (data)=>{
-                        const completeness = {
-                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
-                            total: data.doc_stats.total,
-                            withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
-                        }
-                        
-                        // store to sessionStorage
-                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
-
-                        // update state
-                        this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[data.analysis_field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),                                
-                            }
-                        });
+        this.state.fields.forEach((field)=> {
+            // retrieve from local storage
+            let completeness = window.sessionStorage.getItem(
+                this.prefix + this.props.collectionConfig.collectionId + field.id
+            );
+            if (completeness !== null){
+                completeness = JSON.parse(completeness);
+                this.setState((state, props)=> {
+                    const fieldData = {};
+                    fieldData[field.id] = completeness;
+                    return {
+                        completeness: Object.assign({},state.completeness,fieldData),
+                    }
                 });
+            } else {
+                this.previewAnalysis(field, (data)=>{
+                    const completeness = {
+                        value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
+                        total: data.doc_stats.total,
+                        withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
+                    }
 
+                    // store to sessionStorage
+                    window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
+
+                    // update state
+                    this.setState((state, props)=>{
+                        const fieldData = {};
+                        fieldData[data.analysis_field] = completeness;
+                        return {
+                            completeness: Object.assign({},state.completeness,fieldData),
+                        }
+                    });
+                });
             }
         });
     }
 
     previewAnalysis(analysisField, callback){
-        // if there is already a call in progress; 
+        // if there is already a call in progress;
         // store the call, so we prevent many synchronous requests
         // that block other UI requests, like the timeline data request
         if (this.calling){
@@ -137,9 +112,10 @@ class CollectionAnalyser extends React.Component {
             this.props.collectionConfig.collectionId,
             this.props.collectionConfig.getDocumentType(),
             'null__option',
-            analysisField ? analysisField : 'null__option',
+            analysisField ? analysisField.id : 'null__option',
             [], //facets are not yet supported
             this.props.collectionConfig.getMinimunYear(),
+            analysisField.nested, //TODO determine nested
             (data) => {
                 // call is done
                 this.calling = false;
@@ -156,7 +132,7 @@ class CollectionAnalyser extends React.Component {
             }
         );
     }
-	
+
 
     onShowFieldSelector(){
         this.setState({
@@ -178,7 +154,7 @@ class CollectionAnalyser extends React.Component {
         this.props.onChange(field.id);
     }
 
-    onCloseFieldSelector(){
+    onCloseFieldSelector() {
         this.setState({
             showFieldSelector: false
         })
@@ -202,7 +178,6 @@ class CollectionAnalyser extends React.Component {
     }
 
 	render() {
-
 		let analysisBlock = null;
 
 		//only draw the rest when a collection is selected (either using the selector or via the props)
@@ -211,6 +186,7 @@ class CollectionAnalyser extends React.Component {
             // get current field data and completeness
             const field = this.getCurrentField();
             const completeness = field && field.id in this.state.completeness ? this.state.completeness[field.id] : null;
+            const description = this.state.descriptions !== null ? (field && field.id in this.state.descriptions ? this.state.descriptions[field.id].description || '-' : '-') : null;
 
             // render current field information table
             const currentField = field != null ? (
@@ -221,15 +197,15 @@ class CollectionAnalyser extends React.Component {
                                 <th>Field</th><td className="title">{field.title}</td>
                             </tr>
                             <tr>
-                                <th>Description</th><td>{field.description || "<no description available>"}</td>
+                                <th>Description</th><td>{description !== null ? description : <i className="fa fa-circle-o-notch fa-spin"/>}</td>
                             </tr>
                             <tr>
-                                <th>Type</th><td> {field.type}</td>
+                                <th>Type</th><td>{field.type}</td>
                             </tr>
                             <tr>
                                 <th>Completeness</th>
                                 <td className="completeness">
-                                    {completeness ? 
+                                    {completeness ?
                                         <div>
                                             <span>{completeness.value}%</span>
                                             <span className="total">{completeness.withValue} / {completeness.total}</span>
@@ -239,7 +215,7 @@ class CollectionAnalyser extends React.Component {
                                 </td>
                             </tr>
                         </tbody>
-                    </table>                                        
+                    </table>
                 </div>
             ) : null;
 
@@ -247,7 +223,7 @@ class CollectionAnalyser extends React.Component {
 			analysisBlock = (
 				<div className="analysis_field">
                     <button className="btn btn-primary" onClick={this.onShowFieldSelector.bind(this)}>Select field to analyse</button>
-                    {currentField}                    
+                    {currentField}
                 </div>
             )
 
@@ -257,7 +233,7 @@ class CollectionAnalyser extends React.Component {
 
         return (
             <div className={IDUtil.cssClassName('collection-analyser')}>
-                
+
                 <div className="row">
                     <div className="col-md-12">
                         {analysisBlock}
@@ -266,13 +242,15 @@ class CollectionAnalyser extends React.Component {
 
                 {/* only toggle visibility to keep the component state */}
                 <div style={{display: this.state.showFieldSelector ? 'block' : 'none'}}>
-                    <FieldSelector 
-                        onSelect={this.onFieldSelected.bind(this)} 
+                    <FieldSelector
+                        onSelect={this.onFieldSelected.bind(this)}
                         onClose={this.onCloseFieldSelector.bind(this)}
                         current={this.state.field}
-                        fields={this.state.fields} 
-                        completeness={this.state.completeness}                        
-                        />
+                        fields={this.state.fields}
+                        completeness={this.state.completeness}
+                        descriptions={this.state.descriptions}
+                        showLevelColumn={this.props.collectionConfig.usesLayeredModel()}
+                    />
                 </div>
 
 			</div>
