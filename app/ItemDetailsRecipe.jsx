@@ -721,12 +721,12 @@ class ItemDetailsRecipe extends React.Component {
 					/>
 				);
 
-				/*ACTIVATE LATER
+
 				resourceAnnotationBtn = (
 					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
 						Annotate resource
 					</button>
-				)*/
+				)
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
@@ -820,6 +820,8 @@ class ItemDetailsRecipe extends React.Component {
 							{projectSelectorBtn}
 							&nbsp;
 							{bookmarkBtn}
+							&nbsp;
+							{resourceAnnotationBtn}
 							<br/>
 							{mediaPanel}
 							<div className="row">
