@@ -68,7 +68,7 @@ class Histogram extends React.Component {
                             <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
 						</YAxis>
-						<Tooltip cursor={{ fill: '#F5F5F5' }}/>
+						<Tooltip content={<CustomTooltip/>}/>
 						<Bar dataKey="count" fill="#3173ad" name={graphTitle}/>
 					</BarChart>
 				</ResponsiveContainer>
@@ -76,4 +76,35 @@ class Histogram extends React.Component {
         )
     }
 }
+
+const CustomTooltip = React.createClass({
+    render() {
+        const {active} = this.props;
+        if (active) {
+            const {payload, label} = this.props,
+                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                dataType = payload[0].payload.dataType;
+            if (dataType === 'relative') {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                    </div>
+                );
+            }
+
+        }
+
+        return null;
+    }
+});
 export default Histogram;
