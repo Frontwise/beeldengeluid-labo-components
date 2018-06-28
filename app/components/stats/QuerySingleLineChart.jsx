@@ -110,20 +110,30 @@ class QuerySingleLineChart extends React.Component {
                 return point;
             }, this);
         }
-
+        let totalHitsPerQuery = 0;
+        this.props.data.map(item => totalHitsPerQuery += item.doc_count);
+        const graphTitle = totalHitsPerQuery + " records for query",
+            prettySelectedFieldName = this.props.collectionConfig.toPrettyFieldName(this.props.query.dateRange.field);
         return (
             <div className={IDUtil.cssClassName('query-line-chart')}>
                 <span className="ms_toggle_btn" >
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
-                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
+                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                 </span>
                 <ResponsiveContainer width="100%" height="40%">
                     <LineChart  key={viewModeLabel}  width={600} height={300} data={dataPrettyfied} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-                        <XAxis dataKey="date"/>
-                        <YAxis/>
+                        <Legend verticalAlign="top" height={36}/>
+                        <XAxis dataKey="date" height={100}>
+                            <Label value={prettySelectedFieldName} offset={0} position="outside"
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
+                        </XAxis>
+                        <YAxis width={100} >
+                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                        </YAxis>
                         <Tooltip content={<CustomTooltip/>}/>
-                        <Legend />
-                        <Line type="monotone" isAnimationActive={true} dataKey="count" stroke={dataPrettyfied[0].strokeColor} activeDot={{r: 8}}/>
+                        <Line type="monotone" isAnimationActive={true} dataKey="count"
+                              stroke={dataPrettyfied[0].strokeColor} activeDot={{r: 8}} name={graphTitle}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>
