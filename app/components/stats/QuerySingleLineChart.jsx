@@ -123,6 +123,7 @@ class QuerySingleLineChart extends React.Component {
                 <ResponsiveContainer width="100%" height="40%">
                     <LineChart  key={viewModeLabel}  width={600} height={300} data={dataPrettyfied} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
                         <Legend verticalAlign="top" height={36}/>
+                        <CartesianGrid strokeDasharray="1 6"/>
                         <XAxis dataKey="date" height={100}>
                             <Label value={prettySelectedFieldName} offset={0} position="outside"
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
