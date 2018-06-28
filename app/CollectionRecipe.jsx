@@ -319,10 +319,14 @@ class CollectionRecipe extends React.Component {
 			}
 
 			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
-				fieldAnalysisTimeline = (
+				const selectedCollection = Object.keys(this.state.selectedCollections)[0];
+				const prettyfiedDateField = this.state.selectedCollections[selectedCollection].toPrettyFieldName(this.state.dateField)
+            	fieldAnalysisTimeline = (
 					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
-						comparisonId={IDUtil.guid()}/>
+						comparisonId={IDUtil.guid()}
+						dateField={prettyfiedDateField}
+					/>
 				);
 			} else{
                 if (this.state.field && this.state.dateField){

@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
+import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 
 /*
 See:
@@ -102,8 +102,14 @@ class CollectionInspectorLineChart extends React.Component {
                         {lines[3]}
                         {lines[4]}
                         <CartesianGrid stroke="#cacaca"/>
-                        <XAxis dataKey="year"/>
-                        <YAxis/>
+                        <XAxis dataKey="year" height={100}>
+                            <Label value={this.props.dateField} offset={0} position="outside"
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
+                        </XAxis>
+                        <YAxis width={100}>
+                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                        </YAxis>
                         <Tooltip/>
                         <Legend verticalAlign="top" onClick={this.toggleLine.bind(this)} height={36}/>
                     </LineChart>
