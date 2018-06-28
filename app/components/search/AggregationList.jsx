@@ -14,7 +14,7 @@ class AggregationList extends React.Component {
             facetItems: this.props.aggregations || null
         };
         this.CLASS_PREFIX = 'agl';
-        this.minToShow = 2;
+        this.minToShow = 5;
     }
 
     //communicates the selected facets back to the parent component
