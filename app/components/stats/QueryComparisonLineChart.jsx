@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart,Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
+import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
 import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
 import PropTypes from 'prop-types';
