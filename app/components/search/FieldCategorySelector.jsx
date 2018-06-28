@@ -103,6 +103,7 @@ class FieldCategorySelector extends React.Component {
 			const optionsToSelect = this.props.collectionConfig.getMetadataFieldCategories().filter((fc)=> {
 				return !this.isSelected(fc, selectedFields);
 			});
+			//console.debug(selectedFields);
 			fieldCategorySelector = (
 				<div className={IDUtil.cssClassName('field-category-selector')}>
 					<PowerSelectMultiple
