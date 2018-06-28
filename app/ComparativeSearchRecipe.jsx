@@ -15,6 +15,8 @@ import QueryComparisonLineChart from './components/stats/QueryComparisonLineChar
 
 import PropTypes from 'prop-types';
 
+import { initHelp } from './components/workspace/helpers/helpDoc';
+
 /*
 Notes about this component:
 
@@ -43,6 +45,10 @@ class ComparativeSearchRecipe extends React.Component {
 			pageSize : 10,
 			combinedSearchResults : {}
 		};
+	}
+
+	componentDidMount(){
+		initHelp("Compare", "/feature-doc/tools/compartive-search");
 	}
 
 	//this function receives all output of components that generate output and orchestrates where

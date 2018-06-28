@@ -24,7 +24,8 @@ import Paging from './components/search/Paging';
 import Sorting from './components/search/Sorting';
 
 import PropTypes from 'prop-types';
-
+import { initHelp } from './components/workspace/helpers/helpDoc';
+    
 class SingleSearchRecipe extends React.Component {
 	constructor(props) {
 		super(props);
@@ -72,6 +73,8 @@ class SingleSearchRecipe extends React.Component {
 		window.onpopstate = function(event) {
   			document.location.href=document.location;
 		};
+
+		initHelp("Search", "/feature-doc/tools/single-search");
 	}
 
 	//whenever the collectionConfig is changed (via URL or collection selector)

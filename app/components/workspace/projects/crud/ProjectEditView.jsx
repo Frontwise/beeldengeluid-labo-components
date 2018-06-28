@@ -7,6 +7,7 @@ import { setBreadCrumbsFromMatch } from '../../helpers/BreadCrumbs';
 import ProjectForm from './ProjectForm';
 
 import PropTypes from 'prop-types';
+import { initHelp } from '../../helpers/helpDoc';
 
 /**
 * Edit the project as specified by the router, using the ProjectForm component
@@ -40,6 +41,8 @@ class ProjectEditView extends React.PureComponent {
                 project
             });
         });
+        initHelp('User Project Create','/feature-doc/workspace/user-projects/edit');
+
     }
 
     render() {
