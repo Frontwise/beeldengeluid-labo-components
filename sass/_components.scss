@@ -744,10 +744,6 @@
 
 /* ==================== Statistics package ============================================ */
 .bg__query-line-chart { /* QueryComparisonLineChart.jsx */
-	background-color: #efefef;
-	border-radius: 6px;
-	box-shadow: 1px 1px 1px 0 #999;
-
 	padding: 10px;
 	margin-top: 3rem;
 	.axis path,	.axis line { /* overridden d3 class */
@@ -763,6 +759,9 @@
 	.bg__qlc__line {
 		fill: none;
 		stroke-width: 1.5px;
+	}
+	.bg__header-inspector-graph {
+		text-align: center;
 	}
 }
 
@@ -1358,13 +1357,6 @@ $backColorBtnInactive :#7aabd6;
 		width: 48%;
 		vertical-align: top;
 
-		.bg__query-line-chart { /* QueryComparisonLineChart.jsx */
-			background-color: transparent;
-			border-radius: 0;
-			box-shadow: none;
-			padding: 0;
-			margin-top: 0;
-		}
 		.bg__pieChart {
 			background-color: transparent;
 			border-radius: 0;
@@ -1507,3 +1499,7 @@ $backColorBtnInactive :#7aabd6;
 	}
 }
 
+// histogram styles
+.bg__histogram {
+	margin-bottom: 2rem;
+}
