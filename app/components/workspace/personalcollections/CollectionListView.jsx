@@ -1,7 +1,7 @@
 import IDUtil from '../../../util/IDUtil';
 
 import { setBreadCrumbsFromMatch } from '../helpers/BreadCrumbs';
-
+import { initHelp } from '../helpers/helpDoc';
 import CollectionTable from './CollectionTable';
 
 import PropTypes from 'prop-types';
@@ -19,6 +19,7 @@ class CollectionListView extends React.PureComponent {
 
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
+        initHelp('User Collections', '/feature-doc/workspace/user-collections');
     }
 
     render() {

@@ -15,6 +15,8 @@ import CollectionInspectorLineChart from './components/stats/CollectionInspector
 
 import PropTypes from 'prop-types';
 
+import { initHelp } from './components/workspace/helpers/helpDoc';
+
 class CollectionRecipe extends React.Component {
 
 	constructor(props) {
@@ -40,6 +42,8 @@ class CollectionRecipe extends React.Component {
 				this.onConfigsLoaded.bind(this)
 			);
 		}
+
+        initHelp("Collection Inspector", "/feature-doc/tools/collection-inspector");
 	}
 
 	onConfigsLoaded(configs) {

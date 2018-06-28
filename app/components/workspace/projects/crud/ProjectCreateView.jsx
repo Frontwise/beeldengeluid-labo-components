@@ -5,7 +5,7 @@ import { setBreadCrumbsFromMatch } from '../../helpers/BreadCrumbs';
 import ProjectForm from './ProjectForm';
 
 import PropTypes from 'prop-types';
-
+import { initHelp } from '../../helpers/helpDoc';
 
 /**
 * Create a new project, using the ProjectForm component
@@ -14,6 +14,7 @@ class ProjectCreateView extends React.PureComponent {
 
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
+        initHelp('User Project Create','/feature-doc/workspace/user-projects/create');
     }
 
     render() {

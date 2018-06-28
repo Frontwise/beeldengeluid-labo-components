@@ -198,6 +198,8 @@
 	}
 	.bg__agl__facet-group {
 		margin:0;
+		max-height: 400px;
+		overflow: auto;
 
 		.bg__agl__facet-item {
 			color: $list-item-color;
@@ -244,6 +246,7 @@
 		background-color: #ebebeb;
 		border-radius: 6px;
 		box-shadow: 0 6px 4px -6px black;
+		margin-bottom: 12px;
 
 		h4 {
 			padding: 10px 0 8px 0;
@@ -263,6 +266,7 @@
 			float: left;
 			margin-left: 1.4rem;
 			margin-right: 1rem;
+			padding-top: 4px;
 		}
 		ul {
 			padding-left: 0;
@@ -619,7 +623,8 @@
 				th{
 					cursor: pointer;
 					border-bottom: 1px solid #ddd;
-					font-size: 0.8em;
+					font-size: 0.9em;
+
 					padding: 5px 10px;
 
 					&:hover{
@@ -636,7 +641,6 @@
 					&.title{
 						width: 34%;
 					}
-
 					&.level{
 						width: 80px;
 					}
@@ -1390,6 +1394,103 @@ $backColorBtnInactive :#7aabd6;
 		}
 	}
 }
+
+// hamburger menu
+.bg__hamburger-facets-container {
+	background-color: #468dcb;
+	border-radius: 3px 3px 0 0;
+	position: relative;
+	.hb {
+		cursor: pointer;
+		height: 25px;
+		padding: 4px 0 26px 10px;
+		position: relative;
+	}
+	.hb-line {
+		background-color: #fff;
+		border-radius: 10px;
+		height: 3px;
+		position: absolute;
+		width: 18px;
+	}
+	.hb-line-top {
+		top: 6px;
+	}
+	.hb-line-center {
+		position: absolute;
+		top: 12px;
+	}
+	.hb-line-center::after {
+		background-color: #fff;
+		border-radius: 10px;
+		content: '';
+		height: 3px;
+		position: absolute;
+		top: 6px;
+		width: 18px;
+	}
+	input, ul {
+		display: none;
+	}
+	input:checked ~ ul {
+		border-top: 1px solid #d3d3d3;
+		display: flex;
+		width: 100%;
+	}
+	ul {
+		color: #fff;
+		font-family: sans-serif;
+		list-style-type: none;
+		margin-top: 1em;
+		padding: 0;
+		text-align: center;
+		margin-bottom: 0;
+		li {
+			background-color: transparent !important;
+			flex-grow: 1;
+			cursor: pointer;
+
+			a {
+				color: white;
+				font-size: 2rem;
+			}
+		}
+	}
+	label {
+		display: inline;
+	}
+	.rightAlign {
+		float: right;
+		margin-left: 10px;
+		right: 0;
+	}
+	.fa-remove {
+		color: white;
+		font-size: 20px;
+		position: absolute;
+		right: 0;
+		top: 5px;
+		z-index: 12;
+	}
+	span {
+		&.bg__facet-title {
+			color: #fff;
+			font-size: 18px;
+			font-weight: normal;
+			left: 18%;
+			position: absolute;
+			top: 2px;
+			z-index: 10;
+
+			.fa-info-circle {
+				float: left;
+				font-size: 13px;
+				margin-right: 4px;
+			}
+		}
+	}
+}
+
 // end of collection recipe
 
 .PowerSelect__Option {

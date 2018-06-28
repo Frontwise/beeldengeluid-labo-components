@@ -17,7 +17,7 @@ class ProjectDetailsView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "details");
 
-        initHelp('User Project Details','https://raw.githubusercontent.com/CLARIAH/mediasuite-info/master/pages/workspace/user-projects-details.html');
+        initHelp('Details','/feature-doc/workspace/user-projects/details');
      }
 
     render() {

@@ -49,10 +49,15 @@ class MetadataTable extends React.Component {
 		if(this.props.data.externalSourceInfo) {
 			let externalSourceInfo = null;
 			if(this.props.data.externalSourceInfo.url) {
-				externalSourceInfo = (<a href={this.props.data.externalSourceInfo.url} target="_source">View in catalogue</a>)
+				let message = this.props.data.externalSourceInfo.message;
+	            if (message ==  null) {
+    	                message = "View in catalogue";
+        	    }
+            	externalSourceInfo = (<a href={this.props.data.externalSourceInfo.url} target="_source">{message}</a>)
 			} else if(this.props.data.externalSourceInfo.message) {
 				externalSourceInfo = (<span>{this.props.data.externalSourceInfo.message}</span>)
 			}
+
 			if(externalSourceInfo) {
 				source = (<tr className={IDUtil.cssClassName('source', this.CLASS_PREFIX)}>
 					<td><label>Source</label></td>

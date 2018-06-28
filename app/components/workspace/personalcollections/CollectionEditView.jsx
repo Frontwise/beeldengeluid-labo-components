@@ -8,6 +8,8 @@ import CollectionForm from './CollectionForm';
 import DataEntryTable from './DataEntryTable'
 
 import PropTypes from 'prop-types';
+import { initHelp } from '../helpers/helpDoc';
+
 
 class CollectionEditView extends React.PureComponent {
 
@@ -39,6 +41,8 @@ class CollectionEditView extends React.PureComponent {
                 dataList: collection['dataentries']
             });
         });
+
+        initHelp('User Collection Edit', '/feature-doc/workspace/user-collections/edit');
     }
 
     render() {
