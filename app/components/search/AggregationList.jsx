@@ -183,8 +183,8 @@ class AggregationList extends React.Component {
         nonDateAggregations.forEach((key, index) => {
             let sortedOpts = [],
                 options = null;
-            if (this.state.facetItems[key['field']] && this.state.facetItems[key['field']].length > 0) {
-                options = this.state.facetItems[key['field']].map((facet, fIndex) => {
+            if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
+                options = this.props.aggregations[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key,
                         facetId = key['field'] + '|' + value;
                     let checkedOpt = false;
@@ -224,7 +224,7 @@ class AggregationList extends React.Component {
                         sortedOpts.push(item);
                     }
                 });
-            } else if (this.state.facetItems[key['field']] && this.state.facetItems[key['field']].length === 0) {
+            } else if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length === 0) {
                 emptyAggregations.push(
                     {
                         "aggregationField": key['field'],
@@ -288,17 +288,17 @@ class AggregationList extends React.Component {
                                 </div>
                             </label>
                             <ul className={facetId}>
-                                <li title="Alphanumeric descending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "alpha", key['field'])}>
+                                <li title="Alphanumeric descending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "alpha", key['field'])}>
                                     <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
                                 </li>
-                                <li title="Alphanumeric ascending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "alpha", key['field'])}>
+                                <li title="Alphanumeric ascending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'asc', "alpha", key['field'])}>
                                     <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
-                                <li title="Numeric Asceding" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'asc', "non-alpha", key['field'])}>
+                                <li title="Numeric Asceding" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'asc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
-                                <li title="Numeric descending" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
+                                <li title="Numeric descending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
-                                <li title="Download as CSV" onClick={this.sorting.bind(this, this.state.facetItems[key['field']], 'desc', "non-alpha", key['field'])}>
-                                    <CSVLink filename={facetName} headers={headers} data={this.state.facetItems[key['field']]} >
+                                <li title="Download as CSV" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
+                                    <CSVLink filename={facetName} headers={headers} data={this.props.aggregations[key['field']]} >
                                         <i className="fa fa-download" aria-hidden="true"></i>
                                     </CSVLink>
                                 </li>
