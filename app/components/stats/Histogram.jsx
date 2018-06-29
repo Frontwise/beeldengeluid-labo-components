@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Legend, Bar } from 'recharts';
+import { LineChart, Line, Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Legend, Bar } from 'recharts';
 /*
 See:
 	- http://rawgraphs.io/
@@ -51,16 +51,25 @@ class Histogram extends React.Component {
     //TODO better ID!! (include some unique part based on the query)
     render() {
         const data = this.getGraphData();
+        let totalHitsPerQuery = 0;
+        data.map(item => totalHitsPerQuery += item.count);
+        const graphTitle = totalHitsPerQuery + " records for query";
         return (
         	<div className={IDUtil.cssClassName('histogram')}>
 				<ResponsiveContainer width="100%" height="40%">
 					<BarChart width={830} height={250} data={data} barCategoryGap="1%">
+                        <Legend verticalAlign="top" height={36}/>
 						<CartesianGrid strokeDasharray="1 6"/>
-						<XAxis dataKey="year"/>
-						<YAxis/>
-						<Tooltip cursor={{ fill: '#F5F5F5' }}/>
-						<Legend/>
-						<Bar dataKey="count" fill="#3173ad"/>
+						<XAxis dataKey="year" height={100}>
+                        	<Label value={this.props.title} offset={0} position="outside"
+								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
+						</XAxis>
+						<YAxis width={100} >
+                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+						</YAxis>
+						<Tooltip content={<CustomTooltip/>}/>
+						<Bar dataKey="count" fill="#3173ad" name={graphTitle}/>
 					</BarChart>
 				</ResponsiveContainer>
 			</div>
@@ -68,4 +77,34 @@ class Histogram extends React.Component {
     }
 }
 
+const CustomTooltip = React.createClass({
+    render() {
+        const {active} = this.props;
+        if (active) {
+            const {payload, label} = this.props,
+                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                dataType = payload[0].payload.dataType;
+            if (dataType === 'relative') {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} value</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                    </div>
+                );
+            }
+
+        }
+
+        return null;
+    }
+});
 export default Histogram;
