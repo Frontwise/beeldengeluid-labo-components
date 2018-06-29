@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart,Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
+import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
 import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
 import PropTypes from 'prop-types';
@@ -241,7 +241,10 @@ class QueryComparisonLineChart extends React.Component {
                         {lines}
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
-                        <YAxis/>
+                        <YAxis width={100} >
+                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                        </YAxis>
                         <Tooltip content={<CustomTooltip  viewMode={this.state.viewMode}/>}/>
                         <Legend
                             verticalAlign="bottom"

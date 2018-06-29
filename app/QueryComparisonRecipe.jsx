@@ -21,7 +21,7 @@ import CollectionUtil from './util/CollectionUtil';
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
 import { initHelp } from './components/workspace/helpers/helpDoc';
-   
+
 /*
 Notes about this component:
 
@@ -160,7 +160,7 @@ class QueryComparisonRecipe extends React.Component {
         await Promise.all(promises).then(
             (dataPerQuery) => {
                 dataPerQuery.map(data => {
-                    if(data) {
+                    if(data && data.query) {
                         let queryObj = {};
                         const objData = ElasticsearchDataUtil.searchResultsToTimeLineData(
                             data.query,

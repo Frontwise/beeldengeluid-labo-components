@@ -219,7 +219,22 @@ class CollectionRecipe extends React.Component {
             this.analyseField(this.state.field);
         });
     }
+    getCurrentField(fields, fieldToSearch){
+        if (!fields){
+            return null;
+        }
 
+        let field = null;
+        fields.some((f)=>{
+            if (f.id == fieldToSearch){
+                field = f;
+                return true;
+            }
+            return false;
+        });
+
+        return field;
+    }
 	render() {
 		const collectionConfig = this.getCollectionData(this.state.activeCollection);
 		let collectionModal = null; //for selecting collections for the list
@@ -321,12 +336,19 @@ class CollectionRecipe extends React.Component {
 					</div>
 				);
 			}
-
 			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
-				fieldAnalysisTimeline = (
+				const selectedCollection = Object.keys(this.state.selectedCollections)[0];
+				const fields = this.state.selectedCollections[selectedCollection].getAllFields();
+                const prettyfiedDateField = this.state.selectedCollections[selectedCollection].toPrettyFieldName(this.state.dateField)
+				const analysisField = this.getCurrentField(fields, this.state.field) || null;
+
+                fieldAnalysisTimeline = (
 					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
-						comparisonId={IDUtil.guid()}/>
+						comparisonId={IDUtil.guid()}
+						dateField={prettyfiedDateField}
+                        analysisField={analysisField}
+					/>
 				);
 			} else{
                 if (this.state.field && this.state.dateField){

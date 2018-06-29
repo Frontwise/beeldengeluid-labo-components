@@ -103,6 +103,7 @@ class FieldCategorySelector extends React.Component {
 			const optionsToSelect = this.props.collectionConfig.getMetadataFieldCategories().filter((fc)=> {
 				return !this.isSelected(fc, selectedFields);
 			});
+			//console.debug(selectedFields);
 			fieldCategorySelector = (
 				<div className={IDUtil.cssClassName('field-category-selector')}>
 					<PowerSelectMultiple
@@ -149,20 +150,12 @@ export const ListOption = ({ option, collectionConfig }) => (
 	</div>
 );
 
-export const SelectedOption = ({option, optionLabelPath, onCloseClick, select, queryId, collectionConfig}) => (
+export const SelectedOption = ({option, queryId, collectionConfig}) => (
 	<li className="PowerSelectMultiple__SelectedOption">
 		<span className="PowerSelectMultiple__SelectedOption__Label"
 			title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
-			{option[optionLabelPath]}
+			{option.label}
 		</span>
-		<span
-			className="PowerSelectMultiple__SelectedOption__Close"
-			onClick={event => {
-				event.stopPropagation();
-				onCloseClick({ option, select });
-			}}
-		>
-		×
-		</span>
+
 	</li>
 );

@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
+import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 
 /*
 See:
@@ -90,32 +90,62 @@ class CollectionInspectorLineChart extends React.Component {
             return d;
         });
 
-
         //TODO fix the stupid manual multiple lines
         return (
             <div className={IDUtil.cssClassName('query-line-chart')}>
+                <h4 className="bg__header-inspector-graph">Completeness of metadata field "{this.props.analysisField.title}" over time for the selected date field</h4>
                 <ResponsiveContainer width="100%" height="50%">
                     <LineChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
-                        {lines[0]}
-                        {lines[1]}
-                        {lines[2]}
-                        {lines[3]}
-                        {lines[4]}
+                        {lines}
                         <CartesianGrid stroke="#cacaca"/>
-                        <XAxis dataKey="year"/>
-                        <YAxis/>
-                        <Tooltip/>
+                        <XAxis dataKey="year" height={100}>
+                            <Label value={this.props.dateField} offset={0} position="outside"
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
+                        </XAxis>
+                        <YAxis width={100}>
+                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                        </YAxis>
+                        <Tooltip content={<CustomTooltip/>}/>
                         <Legend verticalAlign="top" onClick={this.toggleLine.bind(this)} height={36}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>
         )
     }
-
 }
-
-export default CollectionInspectorLineChart;
-
+// Custom tooltip.
+// TODO: Make it a separated component more customizable.
+const CustomTooltip = React.createClass({
+    render() {
+        const {active} = this.props;
+        if (active) {
+            const {payload, label} = this.props,
+                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                dataType = payload[0].payload.dataType;
+            if (dataType === 'relative') {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>{dataType} Completeness</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>Field Completeness</h4>
+                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                        <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
+                        <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
+                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                    </div>
+                );
+            }
+        }
+        return null;
+    }
+});
 
 export class LabelAsPoint extends React.Component {
     constructor(props) {
@@ -141,3 +171,4 @@ export class LabelAsPoint extends React.Component {
         );
     }
 }
+export default CollectionInspectorLineChart;
