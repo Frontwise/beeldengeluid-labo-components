@@ -30,6 +30,8 @@ import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
 import PropTypes from 'prop-types';
 
+import { initHelp } from './components/workspace/helpers/helpDoc';
+
 //import TranscriptExample from './components/transcript.json';
 
 /*
@@ -104,6 +106,8 @@ class ItemDetailsRecipe extends React.Component {
 				this.onLoadItemData.bind(this)
 			);
 		}
+
+		initHelp("Resource viewer", "/feature-doc/tools/resource-viewer");
 	}
 
 	//makes sure to update the annotation target whenever the user selects another media object by
