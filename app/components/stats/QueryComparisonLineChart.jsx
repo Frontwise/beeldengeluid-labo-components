@@ -40,7 +40,6 @@ class QueryComparisonLineChart extends React.Component {
     }
 
     toggleLine(event) {
-        console.log(event, this.state)
         const dataKey = event.dataKey;
         let currentKeyValue = this.state.opacity[dataKey];
         let opacity = this.state.opacity;
@@ -182,7 +181,6 @@ class QueryComparisonLineChart extends React.Component {
                     //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
                 />);
         });
-
         //concatenate all the data for each query, because rechart likes it this way (TODO make nicer)
         const temp = {};
         if (this.state.viewMode === 'relative') {

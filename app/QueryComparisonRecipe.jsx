@@ -115,23 +115,22 @@ class QueryComparisonRecipe extends React.Component {
                     });
                 }
 
-                const currentTime = new Date().getTime(),
-                    query = {
-                        ...that.state.selectedQueries[key].query,
-                        dateRange: {
-                            field: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.field :
-                                collectionConfig.getPreferredDateField(),
-                            end: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.end : currentTime,
-                            start: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
-                        },
-                        fragmentFields: null,
-                        fragmentPath: null,
-                        desiredFacets: desiredFacets,
-                        collectionConfig: collectionConfig
-                    };
+                const currentTime = new Date().getTime();
+
+                const query = QueryModel.ensureQuery(that.state.selectedQueries[key].query, collectionConfig)
+
+                query.dateRange = {
+                    field: that.state.selectedQueries[key].query.dateRange ?
+                        that.state.selectedQueries[key].query.dateRange.field :
+                        collectionConfig.getPreferredDateField(),
+                    end: that.state.selectedQueries[key].query.dateRange ?
+                        that.state.selectedQueries[key].query.dateRange.end : currentTime,
+                    start: that.state.selectedQueries[key].query.dateRange ?
+                        that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
+                }
+                query.fragmentFields = null;
+                query.fragmentPath = null;
+                query.desiredFacets = desiredFacets;
 
                 // TODO : remove call to CKANAPI since the title for the collection is in the collectionConfig
                 SearchAPI.search(
@@ -171,6 +170,8 @@ class QueryComparisonRecipe extends React.Component {
                         queryObj.query = data.query;
                         queryObj.collectionConfig = data.collectionConfig;
                         queriesData[data.query.id] = queryObj;
+                    } else {
+                        console.debug('no dice', data)
                     }
                 });
                 this.setState({

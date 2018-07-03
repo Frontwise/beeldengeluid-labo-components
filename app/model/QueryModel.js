@@ -5,6 +5,7 @@ const QueryModel = {
 	//when a collectionConfig is provided, it means that defaults from this should be used to populate the query object
 	ensureQuery : function(obj, collectionConfig) {
 		obj = obj || {};
+		//console.debug(obj.sort)
 		return {
 			//give the query an ID for internal reference (e.g. for components that can handle multiple queries)
 			id : obj.id || IDUtil.guid(),
@@ -32,7 +33,7 @@ const QueryModel = {
 			desiredFacets: obj.desiredFacets || QueryModel.getInitialDesiredFacets(obj, collectionConfig),
 
 			//sort by a certain field and order (asc/desc)
-			sort: obj.sort || { "field": "_score", "order": "desc"},
+			sort: obj.sort && obj.sort.field ? obj.sort : { "field": "_score", "order": "desc"},
 
 			//used for paging
 			offset: obj.offset || 0,
