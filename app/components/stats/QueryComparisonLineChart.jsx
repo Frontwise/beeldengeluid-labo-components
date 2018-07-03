@@ -107,6 +107,7 @@ class QueryComparisonLineChart extends React.Component {
     async getData(key) {
         const that = this;
 
+        //FIXME this is not right, fix this with the query model
         return new Promise(function(resolve, reject) {
             const query = {
             ...that.props.data[key].query,
