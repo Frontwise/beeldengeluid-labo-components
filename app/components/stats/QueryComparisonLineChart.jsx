@@ -238,7 +238,14 @@ class QueryComparisonLineChart extends React.Component {
                 <ResponsiveContainer width="100%" height="50%">
                     <LineChart width={1200} height={200} data={timelineData}
                                margin={{top: 5, right: 20, bottom: 5, left: 0}}>
-                        {lines}
+                        {lines[0]}
+                        {lines[1]}
+                        {lines[2]}
+                        {lines[3]}
+                        {lines[4]}
+                        {lines[5]}
+                        {lines[6]}
+                        {lines[7]}
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
                         <YAxis width={100} >
