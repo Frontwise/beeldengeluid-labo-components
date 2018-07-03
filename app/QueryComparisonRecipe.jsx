@@ -117,6 +117,10 @@ class QueryComparisonRecipe extends React.Component {
 
                 const currentTime = new Date().getTime();
 
+                //remove the query ID so they are all unique
+                if(that.state.selectedQueries[key].query && that.state.selectedQueries[key].query.id) {
+                    that.state.selectedQueries[key].query.id = null;
+                }
                 const query = QueryModel.ensureQuery(that.state.selectedQueries[key].query, collectionConfig)
 
                 query.dateRange = {
