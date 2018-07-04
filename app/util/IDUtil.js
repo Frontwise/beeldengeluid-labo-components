@@ -33,8 +33,9 @@ const IDUtil = {
 		return 'bg__' + componentAttribute;
 	},
 
+	//de user ID moet naar lowercase, omdat ES geen indexen met hoofdletters accepteert!
 	personalCollectionId(clientId, userId, collectionId) {
-		return 'pc__' + [clientId, userId, collectionId].join('__');
+		return 'pc__' + [clientId, userId.toLowerCase(), collectionId].join('__');
 	}
 }
 
