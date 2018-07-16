@@ -99,7 +99,7 @@ class AggregationList extends React.Component {
             });
         } else {
             // hide elements after clicking Show Less based on min already set or the current number of selected opts.
-            //currentlyChecked = document.querySelectorAll("#index__" + index + ' input[type="checkbox"]:checked').length;
+            currentlyChecked = document.querySelectorAll("#index__" + index + ' input[type="checkbox"]:checked').length;
             currentlyChecked = currentlyChecked > this.minToShow ? currentlyChecked : this.minToShow;
             jCurrentList.map((item, index) => {
                 if (index >= currentlyChecked) {
@@ -124,11 +124,6 @@ class AggregationList extends React.Component {
             }
         }
         this.onOutput(desiredFacets, this.props.selectedFacets);
-    }
-
-    hideZero(arr, selectedCategory) {
-        console.log("Hide!");
-        console.log(arr);
     }
 
     sorting(arr, order="asc", type="alpha", index){
@@ -299,8 +294,6 @@ class AggregationList extends React.Component {
                                     <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
                                 <li title="Numeric descending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
-                                <li title="Hide/Unhide empty filters" onClick={this.hideZero.bind(this, this.props.aggregations[key['field']], key['field'])}>
-                                    <i className="fa fa-times-circle-o" aria-hidden="true"> </i> </li>
                                 <li title="Download as CSV" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <CSVLink filename={facetName} headers={headers} data={this.props.aggregations[key['field']]} >
                                         <i className="fa fa-download" aria-hidden="true"></i>
