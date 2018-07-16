@@ -4,7 +4,6 @@ import SearchAPI from '../../api/SearchAPI';
 
 //data utilities
 import CollectionUtil from '../../util/CollectionUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import IDUtil from '../../util/IDUtil';
 import TimeUtil from '../../util/TimeUtil';
 
@@ -14,7 +13,6 @@ import DateRangeSelector from './DateRangeSelector';
 import AggregationBox from './AggregationBox';
 import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
-import CollectionConfig from '../../collection/mappings/CollectionConfig';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
 
@@ -484,10 +482,14 @@ class QueryBuilder extends React.Component {
 	                                        </button>
 	                                        <Histogram
 	                                            queryId={this.state.query.id}
+                                                query={this.state.query}
+                                                comparisonId={this.state.searchId}
 	                                            dateRange={this.state.query.dateRange}
 	                                            data={this.state.aggregations[this.state.query.dateRange.field]}
 	                                            title={this.props.collectionConfig.toPrettyFieldName(this.state.query.dateRange.field)}
-	                                            searchId={this.state.searchId}/>
+	                                            searchId={this.state.searchId}
+                                                collectionConfig={this.props.collectionConfig}
+                                            />
 	                                    </div>
 	                                );
 	                            }
