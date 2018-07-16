@@ -72,7 +72,7 @@ class AggregationCreator extends React.Component {
 
 		if(fieldList) {
             stringSelect = (
-                    <div className="col-md-12">
+                    <div className="form-group">
                         <form className="form-horizontal">
                             <label className="col-sm-3 modal-aggregation-label">Fields to create facets</label>
                             <div className="col-sm-9">
