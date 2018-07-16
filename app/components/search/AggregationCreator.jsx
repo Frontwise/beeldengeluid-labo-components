@@ -1,6 +1,6 @@
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import IDUtil from '../../util/IDUtil';
-
+import { PowerSelect } from 'react-power-select';
 /*
 	INPUT:
 		- an instance of CollectionConfig.jsx (for determining the available fields)
@@ -60,35 +60,34 @@ class AggregationCreator extends React.Component {
 	}
 
 	selectField(e) {
-		this.setState({selectedField : e.target.value});
+		let option = document.getElementsByClassName('PowerSelect__TriggerLabel');
+		option[0].innerHTML = e.option.value;
+		this.setState({selectedField : e.option.value});
 	}
 
 	//TODO do something in case no fields could be retrieved in the config
 	render() {
 		let stringSelect = null;
-		let stringOptions = [];
 		const fieldList = this.getFieldList();
 
 		if(fieldList) {
-			stringOptions = fieldList.map((sf, index) => {
-				return (
-					<option key={'sf__' + index} value={sf.value}>{sf.label}</option>
-				)
-			});
-
-			if(stringOptions.length > 0) {
-
-				stringSelect = (
-					<div className="form-group">
-						<label className="col-sm-3">Fields to create facets</label>
-						<div className="col-sm-9">
-							<select className="form-control" onChange={this.selectField.bind(this)} value={this.state.selectedField}>
-								{stringOptions}
-							</select>
-						</div>
-					</div>
-				)
-			}
+            stringSelect = (
+                    <div className="col-md-12">
+                        <form className="form-horizontal">
+                            <label className="col-sm-3 modal-aggregation-label">Fields to create facets</label>
+                            <div className="col-sm-9">
+                                <PowerSelect
+                                    key="project_powerselect"
+                                    options={fieldList}
+                                    selected={null}
+                                    searchIndices={['label']}
+                                    onChange={this.selectField.bind(this)}
+                                    optionLabelPath="label"
+                                    placeholder="-- Select a field -- "/>
+                            </div>
+                        </form>
+                    </div>
+            );
 		}
 
 		return (

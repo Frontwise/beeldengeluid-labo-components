@@ -169,6 +169,7 @@ class AggregationList extends React.Component {
         if (this.state.showModal) {
             aggregationCreatorModal = (
                 <FlexModal
+                    size="large"
                     elementId="field_select__modal"
                     stateVariable="showModal"
                     owner={this}
