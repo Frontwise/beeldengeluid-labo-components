@@ -11,10 +11,12 @@ class AggregationList extends React.Component {
         super(props);
         this.state = {
             showModal: false,
+            showModalWarning: false,
             facetItems: this.props.aggregations || null
         };
         this.CLASS_PREFIX = 'agl';
         this.minToShow = 5;
+        this.currentFacet = null;
     }
 
     //communicates the selected facets back to the parent component
@@ -115,15 +117,12 @@ class AggregationList extends React.Component {
         }
     }
 
-    toggleDesiredFacet(key) {
-        const desiredFacets = this.props.desiredFacets;
-        for (let i = desiredFacets.length - 1; i >= 0; i--) {
-            if (desiredFacets[i].field === key) {
-                desiredFacets.splice(i, 1);
-                break;
-            }
-        }
-        this.onOutput(desiredFacets, this.props.selectedFacets);
+    toggleDesiredFacet(key, index) {
+        this.currentFacet = key;
+        document.querySelector("#facets__"+ index).addEventListener("click", function(event) {
+            event.preventDefault();
+        }, {once:true});
+        ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
     }
 
     sorting(arr, order="asc", type="alpha", index){
@@ -154,11 +153,22 @@ class AggregationList extends React.Component {
                 }
             });
     }
-
+    hideFacet(){
+        const desiredFacets = this.props.desiredFacets;
+        for (let i = desiredFacets.length - 1; i >= 0; i--) {
+            if (desiredFacets[i].field === this.currentFacet) {
+                desiredFacets.splice(i, 1);
+                break;
+            }
+        }
+        this.onOutput(desiredFacets, this.props.selectedFacets);
+        ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
+    }
     render() {
         const facets = [],
             nonDateAggregations = this.props.desiredFacets.filter(aggr => aggr.type !== 'date_histogram');
         let aggregationCreatorModal = null,
+            aggregationModalWarning = null,
             selectedOpts = [],
             nrCheckedOpts = 0,
             opts = [],
@@ -179,7 +189,21 @@ class AggregationList extends React.Component {
                 </FlexModal>
             )
         }
-
+        //Hide facet modal
+        if (this.state.showModalWarning) {
+            aggregationModalWarning = (
+                <FlexModal
+                    elementId="field_select_facet__modal"
+                    stateVariable="showModalWarning"
+                    owner={this}
+                    title="Hide current facet">
+                 <div><p>This hides the current facet for {this.currentFacet}.</p>
+                     <p>You can bring it back by adding it using the “New” facet option searching for that label</p>
+                     <button type="button" onClick={this.hideFacet.bind(this)} className="btn btn-default">Hide</button>
+                 </div>
+                </FlexModal>
+            )
+        }
         nonDateAggregations.forEach((key, index) => {
             let sortedOpts = [],
                 options = null;
@@ -234,14 +258,16 @@ class AggregationList extends React.Component {
             }
 
             if(emptyAggregations.length > 0) {
+                let tip = null;
                 emptyAggregations.map((key, value) => {
+                    tip = 'tooltip__' + value;
                     emptyAggrBlock.push((
                         <div className="checkboxGroup aggregation-no-results" key={'facet__' + index} id={'index__' + index}>
                             <h4>{key.formattedAggregationName} (0)
-                                <span data-for={'tooltip__' + value} data-tip={key.aggregationField} data-html={true}>
+                                <span data-for={tip} data-tip={key.aggregationField} data-html={true}>
 							    <i className="fa fa-info-circle"/>
 						    </span>
-                                <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key.aggregationField)}/>
+                                <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key.aggregationField, tip)}/>
                             </h4>
                             <ReactTooltip id={'tooltip__' + value}/>
                         </div>
@@ -281,7 +307,7 @@ class AggregationList extends React.Component {
                                    <i className="fa fa-info-circle"/> {facetName}
 
 						    </span>
-                                <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key['field'])}/>
+                                <span className="fa fa-remove" onClick={this.toggleDesiredFacet.bind(this, key['field'], index)}/>
                                 <div className="hb">
                                     <div className="hb-line hb-line-top"></div>
                                     <div className="hb-line hb-line-center"></div>
@@ -328,6 +354,7 @@ class AggregationList extends React.Component {
         return (
             <div className={IDUtil.cssClassName('aggregation-list checkboxes')}>
                 {aggregationCreatorModal}
+                {aggregationModalWarning}
                 <li key={'new__tab'} className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
                     <a href="javascript:void(0);" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
                         NEW&nbsp;<i className="fa fa-plus"/>
