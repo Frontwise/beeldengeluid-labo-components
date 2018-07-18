@@ -60,7 +60,8 @@ class AggregationCreator extends React.Component {
 	}
 
 	selectField(e) {
-		let option = document.getElementsByClassName('PowerSelect__TriggerLabel');
+		const option = document.getElementsByClassName('PowerSelect__TriggerLabel');
+		document.getElementById('label').value =  e.option.label;
 		option[0].innerHTML = e.option.label;
 		this.setState({selectedField : e.option.value});
 	}
