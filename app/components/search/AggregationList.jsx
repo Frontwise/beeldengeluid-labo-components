@@ -197,8 +197,8 @@ class AggregationList extends React.Component {
                     stateVariable="showModalWarning"
                     owner={this}
                     title="Hide current facet">
-                 <div><h5>This hides the current facet for "<u>{this.currentFacet}</u>".</h5>
-                     <h5>You can bring it back by using the “New” facet option and searching for the same field name</h5>
+                 <div><h5>You are closing (hiding) the current facet for "<u>{this.currentFacet}</u>".</h5>
+                     <h5>You can bring it back by using the “New” facet option and searching for the same field name again”</h5>
                      <br/>
                      <button type="button" onClick={this.hideFacet.bind(this)} className="btn btn-default">Hide</button>
 
