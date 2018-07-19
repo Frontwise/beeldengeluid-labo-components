@@ -1,10 +1,13 @@
 import AggregationCreator from './AggregationCreator';
 import FlexModal from '../FlexModal';
+import FancyButton from '../fancy-button';
+import FancyField from '../fancy-field';
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import ComponentUtil from "../../util/ComponentUtil";
 import ReactTooltip from 'react-tooltip';
 import {CSVLink, CSVDownload} from 'react-csv';
+import _ from 'underscore';
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationList extends React.Component {
     constructor(props) {
@@ -18,11 +21,12 @@ class AggregationList extends React.Component {
     }
 
     //communicates the selected facets back to the parent component
-    onOutput(desiredFacets, selectedFacets) {
+    onOutput(desiredFacets, selectedFacets, excludedFacets) {
         if (this.props.onOutput) {
             this.props.onOutput(this.constructor.name, {
                 desiredFacets: desiredFacets,
-                selectedFacets: selectedFacets
+                selectedFacets: selectedFacets,
+                excludedFacets: excludedFacets
             })
         }
     }
@@ -53,7 +57,7 @@ class AggregationList extends React.Component {
                 facets[key] = [value]
             }
             //output to the parent component
-            this.onOutput(this.props.desiredFacets, facets);
+            this.onOutput(this.props.desiredFacets, facets,this.props.excludedFacets);
         }
     }
 
@@ -123,7 +127,24 @@ class AggregationList extends React.Component {
                 break;
             }
         }
-        this.onOutput(desiredFacets, this.props.selectedFacets);
+        this.onOutput(desiredFacets, this.props.selectedFacets, this.props.excludedFacets);
+    }
+
+    toggleExcludeFacets(key) {
+        if(_.isString(key)) {
+            if (key in this.props.excludedFacets) {
+                this.props.excludedFacets[key] =
+                !this.props.excludedFacets[key];
+                //this.onOutput(
+                //    this.props.desiredFacets, this.props.selectedFacets,
+                //    this.props.excludedFacets);
+            } else {
+                this.props.excludedFacets[key] = true;
+                //this.onOutput(
+                //    this.props.desiredFacets, this.props.selectedFacets,
+                //    this.props.excludedFacets);
+            }
+        }
     }
 
     sorting(arr, order="asc", type="alpha", index){
@@ -165,6 +186,8 @@ class AggregationList extends React.Component {
             emptyAggregations = [],
             emptyAggrBlock = [];
 
+
+
         //collection modal
         if (this.state.showModal) {
             aggregationCreatorModal = (
@@ -181,6 +204,9 @@ class AggregationList extends React.Component {
         }
 
         nonDateAggregations.forEach((key, index) => {
+            if (!(key['field'] in this.props.excludedFacets)) {
+                this.props.excludedFacets[key['field']] = false;
+            }
             let sortedOpts = [],
                 options = null;
             if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
@@ -270,7 +296,6 @@ class AggregationList extends React.Component {
                         {label: 'Value', key: 'key'},
                         {label: 'Count', key: 'doc_count'}
                     ];
-
                 facets.push((
                     <div className="checkboxGroup" key={'facet__' + index} id={'index__' + index}>
                         <div className="bg__hamburger-facets-container">
@@ -297,6 +322,12 @@ class AggregationList extends React.Component {
                                     <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
                                 <li title="Numeric descending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
+                                <li><FancyButton
+                labelOne='Incl.'
+                labelTwo='Excl.'
+                switch={true}
+                property={this.props.excludedFacets[key['field']]}
+                handleChange={ this.toggleExcludeFacets.bind(this, key['field']) } /></li>
                                 <li title="Download as CSV" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <CSVLink filename={facetName} headers={headers} data={this.props.aggregations[key['field']]} >
                                         <i className="fa fa-download" aria-hidden="true"></i>

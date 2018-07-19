@@ -29,6 +29,9 @@ const QueryModel = {
 			//filters selected by the user (by selecting certain values from the desiredFacets)
 			selectedFacets: obj.selectedFacets || {},
 
+			//Filters for which the setting has been changed to exclude
+			excludedFacets: obj.excludedFacets || {},
+
 			//which aggregations should be included next to the search results
 			desiredFacets: obj.desiredFacets || QueryModel.getInitialDesiredFacets(obj, collectionConfig),
 
@@ -164,6 +167,16 @@ const QueryModel = {
 			params['sf'] = sf.join(',');
 		}
 
+		if(query.excludedFacets) {
+			var tmp = []
+			for (var ef in Object.keys(query.excludedFacets)) {
+				if (query.excludedFacets[ef] === true){
+					tmp.push(ef);
+				}
+			}
+			params['ef'] = tmp.join(',');
+		}
+
 		if(query.sort) {
 			let s = query.sort.field + '__';
 			s += query.sort.order;
@@ -189,6 +202,7 @@ const QueryModel = {
 		const fr = urlParams.fr ? urlParams.fr : 0;
 		const size = urlParams.sz ? urlParams.sz : 10;
 		const sf = urlParams.sf;
+		const ef = urlParams.ef;
 		const sl = urlParams.sl;
 		const dr = urlParams.dr;
 		const s = urlParams.s;
@@ -229,6 +243,15 @@ const QueryModel = {
 				} else {
 					selectedFacets[key] = [value];
 				}
+			});
+		}
+
+		//Excluded option for facets
+	  const excludedFacets = {};
+		if(ef) {
+			const tmp = ef.split(',');
+			tmp.forEach((aggr) => {
+				excludedFacets[aggr] = true;
 			});
 		}
 
@@ -273,6 +296,7 @@ const QueryModel = {
 				dateRange : dateRange,
 				fieldCategory : fieldCategory,
 				selectedFacets : selectedFacets,
+				excludeFacets : excludedFacets,
 				sortParams : sortParams,
 				offset : parseInt(fr),
 				size : parseInt(size)

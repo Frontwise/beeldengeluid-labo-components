@@ -27,6 +27,15 @@
 /* React custom stylings for power select */
 @import './powerSelect';
 
+/* Fancy switch button css */
+@import './fancy-styles.scss';
+
+/* Fancy switch button css */
+@import './fancy-variables.scss';
+
+/* Fancy switch button css */
+@import './fancy-mixins.scss';
+
 
 /* Disables bootstrap styling; only works with custom styles */
 .bg__no-bootstrap-custom-styling {
