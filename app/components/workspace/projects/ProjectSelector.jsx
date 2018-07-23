@@ -60,7 +60,8 @@ class ProjectSelector extends React.Component {
                 return {
                     key: project.id,
                     title: project.name,
-                    index: project.id //what is this for again?
+                    index: project.id, //what is this for again?
+                    numQueries : project.queries ? project.queries.length : 0
                 }
             }).sort((a,b) => {
                 return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1;
@@ -80,6 +81,7 @@ class ProjectSelector extends React.Component {
                                     searchIndices={['title']}
                                     onChange={this.selectProject.bind(this)}
                                     optionLabelPath="title"
+                                    optionComponent={<ProjectOption />}
                                     placeholder="-- Select a project -- "/>
                             </div>
                         </form>
@@ -101,6 +103,15 @@ class ProjectSelector extends React.Component {
         )
     }
 }
+
+const ProjectOption = ({ option }) => (
+  <div>
+    {option.title}
+    <span style={{float : 'right'}}>
+        ({option.numQueries}&nbsp;{option.numQueries > 1 ? 'queries' : 'query'})
+    </span>
+  </div>
+);
 
 ProjectSelector.propTypes = {
     user: PropTypes.object.isRequired,
