@@ -85,8 +85,8 @@ class AggregationList extends React.Component {
     }
 
     switchListView(index) {
-        const btnText = document.querySelectorAll("#index__" + index + " .switchViewText")[0].textContent,
-            jCurrentList = Array.from(document.querySelectorAll("#index__" + index + " ul > li[class='bg__agl__facet-item']"));
+        const btnText = document.querySelectorAll("#index__" + index + " .switchViewText")[0].textContent
+        const jCurrentList = Array.from(document.querySelectorAll("#index__" + index + " ul > li[class='bg__agl__facet-item']"));
         let currentlyChecked = 0;
 
         if (btnText === "Show More") {
@@ -169,7 +169,8 @@ class AggregationList extends React.Component {
             nonDateAggregations = this.props.desiredFacets.filter(aggr => aggr.type !== 'date_histogram');
         let aggregationCreatorModal = null,
             aggregationModalWarning = null,
-            selectedOpts = [],
+            selectedOpts = {},
+
             nrCheckedOpts = 0,
             opts = [],
             emptyAggregations = [],
@@ -217,10 +218,7 @@ class AggregationList extends React.Component {
 
                     if (this.props.selectedFacets[key['field']]) {
                         if (checkedOpt = this.props.selectedFacets[key['field']].indexOf(value) > -1) {
-                            selectedOpts.push({
-                                'name': facet.key,
-                                'hits': facet.doc_count
-                            });
+                            selectedOpts[facet.key] = facet.doc_count;
                             nrCheckedOpts++;
                         }
                     }
@@ -339,14 +337,23 @@ class AggregationList extends React.Component {
                         <ReactTooltip id={'tooltip__' + index}/>
                     </div>
                 ))
-                selectedOpts.forEach((facet, index) => {
-                    opts.push(
+
+                //List of selected facets on top
+                if (this.props.selectedFacets.hasOwnProperty(key['field'])) {
+                    for (var entry in this.props.selectedFacets[key['field']]) {
+                        var facetName = this.props.selectedFacets[key['field']][entry];
+                        var hits = 0
+                        if (selectedOpts.hasOwnProperty(facetName)) {
+                            var hits = selectedOpts[facetName];
+                        }
+                        opts.push(
                         <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                            {facet.name.toUpperCase()} ({facet.hits})
-                            <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, key['field'], facet.name)}/>
+                            {facetName.toUpperCase()} ({hits})
+                            <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, key['field'], facetName)}/>
                         </div>
-                    )
-                });
+                        )
+                    }
+                }
             }
             nrCheckedOpts = 0;
             selectedOpts = [];
