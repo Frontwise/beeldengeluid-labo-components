@@ -62,6 +62,8 @@ class ProjectSelector extends React.Component {
                     title: project.name,
                     index: project.id //what is this for again?
                 }
+            }).sort((a,b) => {
+                return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1;
             });
 
         if (options.length > 0) {
