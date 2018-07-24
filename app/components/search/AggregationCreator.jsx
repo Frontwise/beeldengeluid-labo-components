@@ -13,31 +13,30 @@ import { PowerSelect } from 'react-power-select';
 		- regular div ==> .bg__aggregation-creator
 */
 class AggregationCreator extends React.Component {
+
 	constructor(props) {
 		super(props);
 		const fieldList = this.getFieldList();
 		this.state = {
-			selectedField : fieldList && fieldList.length > 0 ? fieldList[0].value : null
+			selectedField : fieldList && fieldList.length > 0 ? fieldList[0] : null
 		}
 	}
 
-	onOutput(selectedField, label) {
-		const aggregation = {
-			field: selectedField,
-			title : label,
-			id : selectedField,
-			type : 'string'
-		}
-
-		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, aggregation);
-		}
-	}
-
-	save(e) {
-		e.preventDefault();
+	componentDidMount() {
 		if(this.state.selectedField) {
-			this.onOutput(this.state.selectedField, this.refs.label.value);
+			this.refs.label.value = this.state.selectedField.label;
+		}
+	}
+
+	onOutput(e) {
+		e.preventDefault();
+		if(this.state.selectedField && this.props.onOutput) {
+			this.props.onOutput(this.constructor.name, {
+				field: this.state.selectedField.value,
+				title : this.refs.label.value,
+				id : this.state.selectedField.value,
+				type : 'string'
+			});
 		}
 	}
 
@@ -47,7 +46,7 @@ class AggregationCreator extends React.Component {
 			fields = this.props.collectionConfig.getNonAnalyzedFields();
 		}
 		if(fields) {
-			return fields.map((f) => {
+			return fields.map(f => {
 				return {
 					value : f,
 					label : this.props.collectionConfig.toPrettyFieldName(f)
@@ -60,10 +59,8 @@ class AggregationCreator extends React.Component {
 	}
 
 	selectField(e) {
-		const option = document.getElementsByClassName('PowerSelect__TriggerLabel');
-		document.getElementById('label').value =  e.option.label;
-		option[0].innerHTML = e.option.label;
-		this.setState({selectedField : e.option.value});
+		this.refs.label.value =  e.option.label;
+		this.setState({selectedField : e.option});
 	}
 
 	//TODO do something in case no fields could be retrieved in the config
@@ -73,27 +70,28 @@ class AggregationCreator extends React.Component {
 
 		if(fieldList) {
             stringSelect = (
-                    <div className="form-group">
-                        <form className="form-horizontal">
-                            <label className="col-sm-3 modal-aggregation-label">Fields to create facets</label>
-                            <div className="col-sm-9">
-                                <PowerSelect
-                                    key="project_powerselect"
-                                    options={fieldList}
-                                    selected={null}
-                                    searchIndices={['label']}
-                                    onChange={this.selectField.bind(this)}
-                                    optionLabelPath="label"
-                                    placeholder="-- Select a field -- "/>
-                            </div>
-                        </form>
-                    </div>
+                <div className="form-group">
+                    <form className="form-horizontal">
+                        <label className="col-sm-3 modal-aggregation-label">Fields to create facets</label>
+                        <div className="col-sm-9">
+                            <PowerSelect
+                                key="project_powerselect"
+                                options={fieldList}
+                                optionLabelPath="label"
+                                selected={this.state.selectedField ? this.state.selectedField.label : null}
+                                searchIndices={['label']}
+                                onChange={this.selectField.bind(this)}
+                                placeholder="-- Select a field -- "
+							/>
+                        </div>
+                    </form>
+                </div>
             );
 		}
 
 		return (
 			<div className={IDUtil.cssClassName('aggregation-creator')}>
-				<form className="form-horizontal" onSubmit={this.save.bind(this)}>
+				<form className="form-horizontal" onSubmit={this.onOutput.bind(this)}>
 					{stringSelect}
 					<div className="form-group">
     					<label className="col-sm-3" htmlFor="label">Label</label>

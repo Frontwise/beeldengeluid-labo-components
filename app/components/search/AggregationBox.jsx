@@ -15,6 +15,8 @@ OUTPUT:
 
 */
 
+//TODO this component is a couple of features behind the AggregationList
+
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationBox extends React.Component {
 	constructor(props) {
