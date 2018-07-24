@@ -417,7 +417,6 @@ class QueryBuilder extends React.Component {
 								searchId={this.state.searchId} //for determining when the component should rerender
 								queryId={this.state.query.id} //TODO implement in the list component
 								aggregations={this.state.aggregations} //part of the search results
-								facets={this.state.query.desiredFacets} //as obtained from the collection config
 								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
                                 desiredFacets={this.state.query.desiredFacets}
                                 collectionConfig={this.props.collectionConfig} //for the aggregation creator only
