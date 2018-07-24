@@ -113,7 +113,6 @@ class QueryComparisonLineChart extends React.Component {
             ...that.props.data[key].query,
                 term: '',
                 selectedFacets: {},
-                fieldCategory: [],
                 dateRange: {
                     ...that.props.data[key].query.dateRange,
                     end:null,
