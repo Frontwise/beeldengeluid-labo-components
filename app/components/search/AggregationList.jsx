@@ -8,6 +8,7 @@ import {CSVLink, CSVDownload} from 'react-csv';
 
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationList extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -186,6 +187,7 @@ class AggregationList extends React.Component {
         if (this.state.showModal) {
             aggregationCreatorModal = (
                 <FlexModal
+                    size="large"
                     elementId="field_select__modal"
                     stateVariable="showModal"
                     owner={this}
@@ -279,10 +281,8 @@ class AggregationList extends React.Component {
                 //if the desired aggregation is empty, add it to the list of empty aggregations
                 emptyAggregations.push(
                     {
-                        "aggregationField": key['field'],
-                        "formattedAggregationName": ElasticsearchDataUtil.getAggregationTitle(
-                            key['field'], this.props.desiredFacets
-                        )
+                        aggregationField: key['field'],
+                        formattedAggregationName: key['title']
                     }
                 )
             }
@@ -326,9 +326,6 @@ class AggregationList extends React.Component {
                     changeViewItems = this.__setViewItems(index, 'more');
                 }
                 const facetId = "facets__" + index,
-                    facetName = ElasticsearchDataUtil.getAggregationTitle(
-                        key['field'], this.props.desiredFacets
-                    ),
                     headers = [
                         {label: 'Value', key: 'key'},
                         {label: 'Count', key: 'doc_count'}
@@ -341,7 +338,7 @@ class AggregationList extends React.Component {
                             <label htmlFor={facetId}>
                                 <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={key['field']}
                                       data-html={true}>
-                                   <i className="fa fa-info-circle"/> {facetName}
+                                   <i className="fa fa-info-circle"/> {key['title']}
 
 						    </span>
                                 <span className="fa fa-remove" onClick={
@@ -373,7 +370,10 @@ class AggregationList extends React.Component {
                                 <li title="Download as CSV" onClick={
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])
                                 }>
-                                    <CSVLink filename={facetName} headers={headers} data={this.props.aggregations[key['field']]} >
+                                    <CSVLink
+                                        filename={key['title']}
+                                        headers={headers}
+                                        data={this.props.aggregations[key['field']]} >
                                         <i className="fa fa-download" aria-hidden="true"></i>
                                     </CSVLink>
                                 </li>
