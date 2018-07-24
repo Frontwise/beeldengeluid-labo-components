@@ -204,7 +204,7 @@ class AggregationList extends React.Component {
                     elementId="field_select_facet__modal"
                     stateVariable="showModalWarning"
                     owner={this}
-                    title="Hide current facet">
+                    title="Hide current facet?">
                     <div>
                         <p>
                             You are closing (hiding) the current facet for "<u>{this.currentFacet}</u>".
