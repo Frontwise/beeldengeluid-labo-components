@@ -32,7 +32,9 @@ const IconUtil = {
 				iconClass = 'fa fa-photo';
 			} else if(mimeType.indexOf('fragment') != -1) {
 				iconClass = 'fa fa-puzzle-piece';
-			}
+			} else if(mimeType.indexOf('text') != -1) {
+				iconClass = 'fa fa-file-text-o';
+ 			}
 		}
 		return IconUtil.__addExtraStyling(iconClass, border, muted, interactive);
 	},
