@@ -238,10 +238,7 @@ class AggregationList extends React.Component {
 
                     if (this.props.selectedFacets[key['field']]) {
                         if (checkedOpt = this.props.selectedFacets[key['field']].indexOf(value) > -1) {
-                            selectedOpts.push({
-                                'name': facet.key,
-                                'hits': facet.doc_count
-                            });
+                            selectedOpts[facet.key] = facet.doc_count;
                             nrCheckedOpts++;
                         }
                     }
@@ -390,14 +387,23 @@ class AggregationList extends React.Component {
                     </div>
                 ))
 
-                selectedOpts.forEach((facet, index) => {
-                    opts.push(
+
+                //List of selected facets on top
+                if (this.props.selectedFacets.hasOwnProperty(key['field'])) {
+                    for (var entry in this.props.selectedFacets[key['field']]) {
+                        var facetName = this.props.selectedFacets[key['field']][entry];
+                        var hits = 0
+                        if (selectedOpts.hasOwnProperty(facetName)) {
+                            var hits = selectedOpts[facetName];
+                        }
+                        opts.push(
                         <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                            {facet.name.toUpperCase()} ({facet.hits})
-                            <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, key['field'], facet.name)}/>
+                            {facetName.toUpperCase()} ({hits})
+                            <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, key['field'], facetName)}/>
                         </div>
-                    )
-                });
+                        )
+                    }
+                }
             }
             nrCheckedOpts = 0;
             selectedOpts = [];

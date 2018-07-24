@@ -161,7 +161,7 @@ const QueryModel = {
 					return key + '|' + value;
 				})
 			});
-			params['sf'] = sf.join(',');
+			params['sf'] = encodeURIComponent(sf.join(','));
 		}
 
 		if(query.sort) {
