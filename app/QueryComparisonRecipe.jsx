@@ -1,15 +1,7 @@
 import QueryModel from './model/QueryModel';
-
 import QueryFactory from './components/search/QueryFactory';
-
 import SearchAPI from './api/SearchAPI';
-
-import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
-
-import SearchHit from './components/search/SearchHit';
-import Paging from './components/search/Paging';
-import Sorting from './components/search/Sorting';
 
 import IDUtil from './util/IDUtil';
 import ElasticsearchDataUtil from './util/ElasticsearchDataUtil';
@@ -154,7 +146,7 @@ class QueryComparisonRecipe extends React.Component {
                     false
                 )
             })
-        }).catch(err => console.log('No data returned from query'));
+        }).catch(err => console.log('No data returned from query', err));
     }
 
     async processData(queries) {
@@ -175,7 +167,7 @@ class QueryComparisonRecipe extends React.Component {
                         queryObj.collectionConfig = data.collectionConfig;
                         queriesData[data.query.id] = queryObj;
                     } else {
-                        console.debug('no dice', data)
+                        console.debug('no data', data)
                     }
                 });
                 this.setState({
@@ -236,7 +228,6 @@ class QueryComparisonRecipe extends React.Component {
 
     goToSingleSearch() {
         let url = this.__getBaseUrl() + '/tool/single-search';
-        console.log(url)
         document.location.href = url;
     }
 
