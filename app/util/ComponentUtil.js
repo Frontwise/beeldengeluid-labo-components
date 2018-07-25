@@ -47,6 +47,18 @@ const ComponentUtil = {
         return false
     },
 
+    removeJSONByKeyInLocalStorage(key) {
+        if (ComponentUtil.supportsHTML5Storage()) {
+            try {
+                localStorage.removeItem(key);
+                return true
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        return false
+    },
+
 	getJSONFromLocalStorage(key) {
 		if(ComponentUtil.supportsHTML5Storage() && localStorage[key]) {
 			try {

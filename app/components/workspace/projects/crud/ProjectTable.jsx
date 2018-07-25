@@ -243,7 +243,12 @@ class ProjectTable extends React.PureComponent {
             // after each return calls is decreased
             // when calls is 0, data is reloaded
             // this is async safe
+            // check if project to be deleted is 'activeProject'. If so,
+            // remove it from localStorage.
             projects.forEach((project, index) => {
+                if (project.id === ComponentUtil.getJSONFromLocalStorage('activeProject').id) {
+                    ComponentUtil.removeJSONByKeyInLocalStorage('activeProject');
+                }
                 this.props.api.delete(this.props.user.id, project.id, status => {
                     calls--;
                     if (calls == 0) {
