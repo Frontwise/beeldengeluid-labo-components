@@ -63,6 +63,7 @@ class ProjectForm extends React.PureComponent {
                         <input
                             type="text"
                             name="name"
+                            required="true"
                             className="project-modal-right"
                             defaultValue={this.props.project.name}
                             ref={elem => (this.name = elem)}/>
