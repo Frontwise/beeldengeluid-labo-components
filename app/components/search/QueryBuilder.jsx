@@ -110,13 +110,15 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 
 		//reset certain query properties
-		//q.fieldCategory = null;
 		q.selectedFacets = {};
-		//q.dateRange = null;
 		q.offset = 0;
 		q.term = this.refs.searchTerm.value;
 
         this.doSearch(q, true);
+	}
+
+	clearSearch() {
+		this.onOutput(null);
 	}
 
 	//this resets the paging
@@ -689,6 +691,14 @@ class QueryBuilder extends React.Component {
 									</div>
 								</div>
 							</form>
+							<a onClick={this.clearSearch.bind(this)}>
+								Clear search&nbsp;<span data-for={'__clear-search-tt'}
+                                  data-tip="Clear all query parameters, but keeps the collection selected"
+                                  data-html={false}>
+                                  	<i className="fa fa-info-circle"/>
+								</span>
+							</a>
+							<ReactTooltip id={'__clear-search-tt'}/>
 						</div>
 					</div>
 					{layerOptions}

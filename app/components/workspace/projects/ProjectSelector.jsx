@@ -64,7 +64,9 @@ class ProjectSelector extends React.Component {
                     numQueries : project.queries ? project.queries.length : 0
                 }
             }).sort((a,b) => {
-                return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1;
+                let at = a.title ? a.title.toLowerCase() : '';
+                let bt = b.title ? b.title.toLowerCase() : '';
+                return at < bt ? -1 : 1;
             });
 
         if (options.length > 0) {

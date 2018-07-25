@@ -119,15 +119,19 @@ class AggregationList extends React.Component {
         }
     }
 
+    //FIXME this does not work yet for removing empty aggregations!
     showRemoveDialog(key, index) {
         this.currentFacet = key;
-        document.querySelector("#facets__"+ index).addEventListener("click", function(event) {
-            event.preventDefault();
-        }, {once:true});
-        ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
+        if(document.querySelector("#facets__"+ index)) {
+           document.querySelector("#facets__"+ index).addEventListener("click", function(event) {
+                event.preventDefault();
+            }, {once:true});
+            ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
+        }
     }
 
     removeAggregation() {
+        //first remove the entry from the desiredFacets
         const desiredFacets = this.props.desiredFacets;
         for (let i = desiredFacets.length - 1; i >= 0; i--) {
             if (desiredFacets[i].field === this.currentFacet) {
@@ -135,6 +139,12 @@ class AggregationList extends React.Component {
                 break;
             }
         }
+
+        //then throw away any selected value from the selectedFacets
+        if(this.props.selectedFacets) {
+            delete this.props.selectedFacets[this.currentFacet]
+        }
+
         this.onOutput(desiredFacets, this.props.selectedFacets);
         ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
     }
@@ -160,13 +170,13 @@ class AggregationList extends React.Component {
             return (facetA < facetB ? -1 : 1);
         });
 
-        const iets = {
+        //FIXME this is not a nice way to update the properties!
+        const aggregationsFromProps = {
             ...this.state.facetItems,
             index: currentFacets
         }
-        console.debug(iets);
 
-        this.setState({facetItems: iets});
+        this.setState({facetItems: aggregationsFromProps});
     }
 
     render() {
@@ -273,8 +283,6 @@ class AggregationList extends React.Component {
                         sortedOpts.push(item);
                     }
                 });
-
-                console.debug(sortedOpts);
 
             } else if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length === 0) {
 

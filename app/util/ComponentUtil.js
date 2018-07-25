@@ -32,9 +32,13 @@ const ComponentUtil = {
 	},
 
 	storeJSONInLocalStorage(key, data) {
-		if(ComponentUtil.supportsHTML5Storage() && data) {
+		if(ComponentUtil.supportsHTML5Storage()) {
 			try {
-				localStorage[key] = JSON.stringify(data);
+				if(data == null) {
+					localStorage.removeItem(key);
+				} else {
+					localStorage[key] = JSON.stringify(data);
+				}
 				return true
 			} catch (e) {
 				console.error(e);
