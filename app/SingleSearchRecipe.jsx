@@ -486,7 +486,7 @@ class SingleSearchRecipe extends React.Component {
 						<input type="checkbox" checked={
 							this.state.allRowsSelected ? 'checked' : ''
 						} id={'cb__select-all'}/>
-						<label for={'cb__select-all'}><span></span></label>
+						<label htmlFor={'cb__select-all'}><span></span></label>
 					</div>
 				)
 
@@ -501,7 +501,7 @@ class SingleSearchRecipe extends React.Component {
 						onClick={this.saveQuery.bind(this)}
 						title="Save current query to project">
 						&nbsp;
-						<i className="fa fa-save" style={{color: 'white'}}></i>
+						<i className="fa fa-save" style={{color: 'white'}}/>
 						&nbsp;
 					</button>
 				);
@@ -513,7 +513,7 @@ class SingleSearchRecipe extends React.Component {
 							onClick={this.bookmark.bind(this)}
 							title="Bookmark selection to project">
 							&nbsp;
-							<i className="fa fa-star" style={{color: 'white'}}></i>
+							<i className="fa fa-star" style={{color: 'white'}}/>
 							&nbsp;
 						</button>
 					);
@@ -610,7 +610,7 @@ SingleSearchRecipe.propTypes = {
 	clientId : PropTypes.string,
 
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })
 
 };

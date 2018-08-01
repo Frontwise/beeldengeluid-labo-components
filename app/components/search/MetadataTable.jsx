@@ -89,7 +89,7 @@ class MetadataTable extends React.Component {
                         <td><label>Date <span data-for={'__ci_tooltip'}
                                               data-tip={this.props.data.dateField}
                                               data-html={false}>
-							<i className="fa fa-info-circle"></i>
+							<i className="fa fa-info-circle"/>
 						</span>
                         </label></td>
                         <td>{this.props.data.date}</td>

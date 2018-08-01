@@ -1,5 +1,4 @@
 import IDUtil from '../../util/IDUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import FlexModal from '../FlexModal';
 
@@ -16,12 +15,12 @@ class FieldCategorySelector extends React.Component {
 
 		this.state = {
 			showModal : false
-		}
+		};
 		this.CLASS_PREFIX = 'fcs';
 	}
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'FieldCategoryCreator') {
+		if(componentClass === 'FieldCategoryCreator') {
 			this.onFieldsSelected(data);
 		}
 	}
@@ -38,9 +37,9 @@ class FieldCategorySelector extends React.Component {
 
     handleChange ({ options }) {
     	let found = false;
-    	let tmp = {}
+    	let tmp = {};
     	for(let i=0;i<options.length;i++) {
-    		let fc = options[i]
+    		let fc = options[i];
     		if(tmp[fc.id]) {
     			found = true;
     			break;
@@ -55,7 +54,7 @@ class FieldCategorySelector extends React.Component {
     isSelected(selection, selectedFields) {
     	let selected = false;
     	for(let i=0;i<selectedFields.length;i++) {
-    		if(selectedFields[i].id == selection.id){
+    		if(selectedFields[i].id === selection.id){
     			selected = true;
     			break;
     		}
@@ -65,7 +64,7 @@ class FieldCategorySelector extends React.Component {
 
     onFieldsSelected(data) {
     	ComponentUtil.hideModal(this, 'showBookmarkModal', 'fields__modal', true, () => {
-    		const fields = this.props.fieldCategory || []
+    		const fields = this.props.fieldCategory || [];
     		if(data) { //when nothing was selected, it is no use to update the owner
 	    		fields.push(data)
 	    		this.onOutput(fields)
@@ -103,7 +102,7 @@ class FieldCategorySelector extends React.Component {
 			const optionsToSelect = this.props.collectionConfig.getMetadataFieldCategories().filter((fc)=> {
 				return !this.isSelected(fc, selectedFields);
 			});
-			//console.debug(selectedFields);
+
 			fieldCategorySelector = (
 				<div className={IDUtil.cssClassName('field-category-selector')}>
 					<PowerSelectMultiple

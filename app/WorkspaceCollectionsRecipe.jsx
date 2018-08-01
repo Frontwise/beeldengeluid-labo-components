@@ -1,6 +1,3 @@
-import classNames from 'classnames';
-import IDUtil from './util/IDUtil';
-
 import PersonalCollectionAPI from './api/PersonalCollectionAPI';
 import CollectionListView from './components/workspace/personalcollections/CollectionListView';
 import CollectionCreateView from './components/workspace/personalcollections/CollectionCreateView';
@@ -14,15 +11,12 @@ import React, { Component } from 'react';
 import {
     Switch,
     BrowserRouter as Router,
-    Route,
-    Link,
-    Redirect
+    Route
 } from 'react-router-dom'
 
 class WorkspaceCollections extends Component {
     constructor(props){
         super(props);
-
         this.state={}
     }
 
@@ -63,8 +57,8 @@ api: PropTypes.shape({
 
 // current user object used for defining access roles per project
 user: PropTypes.shape({
-    id: PropTypes.number.isRequired
+    id: PropTypes.string.isRequired
 }).isRequired,
-}
+};
 
 export default WorkspaceCollections;

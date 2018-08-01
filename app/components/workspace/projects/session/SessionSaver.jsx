@@ -37,7 +37,7 @@ class SessionSaver extends React.Component {
     annotation.body = [{
       "annotationType": "classification",
       "vocabulary": "clariahwp5-bookmark-group",
-      "label": this.refs.bookmarkCategory.value,
+      "label": this.bookmarkCategory.value,
       "user": this.props.user.id
     }]
     this.onOutput(annotation);
@@ -79,7 +79,7 @@ class SessionSaver extends React.Component {
               <div className="form-group">
                 <h4>Bookmark category</h4>
                 <input
-                  ref="bookmarkCategory"
+                    ref={input => (this.bookmarkCategory = input)}
                   type="text"
                   className="form-control"
                 />

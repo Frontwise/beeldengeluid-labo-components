@@ -176,7 +176,7 @@ class QueryComparisonLineChart extends React.Component {
                     onClick={this.showMeTheMoney.bind(this)}
                     dataKey={k} //is equal to the queryId
                     stroke={this.COLORS[index]}
-                    strokeOpacity={this.state.opacity[k] != undefined ? this.state.opacity[k] : 1}
+                    strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 2}}
                     //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
                 />);
@@ -226,7 +226,6 @@ class QueryComparisonLineChart extends React.Component {
         });
         //TODO fix the stupid manual multiple lines
         return (
-
             <div className={IDUtil.cssClassName('query-line-chart')}>
 				<span className="ms_toggle_btn">
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox"
@@ -267,7 +266,7 @@ class QueryComparisonLineChart extends React.Component {
 export default QueryComparisonLineChart;
 
 //custom legend
-const CustomLegend = React.createClass({
+class CustomLegend extends React.Component{
 
     stylings(p){
         return {
@@ -275,7 +274,7 @@ const CustomLegend = React.createClass({
             listStyle: 'none',
             padding: '10px 20px'
         }
-    },
+    }
 
     getCollectionTitle(collectionId) {
         if(collectionId ) {
@@ -287,7 +286,7 @@ const CustomLegend = React.createClass({
                 return;
             });
         }
-    },
+    }
 
     render() {
         const selectedQueries = this.props.selectedQueries,
@@ -315,7 +314,6 @@ const CustomLegend = React.createClass({
                                     "dateRange": query.query.dateRange,
                                     "selectedFacets": query.query.selectedFacets,
                                     "fieldCategory": query.query.fieldCategory,
-                                    "dateRange": query.query.dateRange,
                                     "lineColour": that.props.lineColour[index]
                                 })
                             }
@@ -394,11 +392,11 @@ const CustomLegend = React.createClass({
         }
         return null;
     }
-});
+}
 
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
 
     stylings(p){
         return {
@@ -408,7 +406,7 @@ const CustomTooltip = React.createClass({
             margin: '0',
             padding: '0'
         }
-    },
+    }
 
     render() {
         const {active} = this.props;
@@ -435,9 +433,9 @@ const CustomTooltip = React.createClass({
                 } else if (dataType === 'inspector') {
                     const point = payload.map((p, i) => {
                             return (
-                                <p>
-                                    {this.props.payload[i].name}: <span className="rightAlign"><p style={this.stylings(p)}>{p.value ? p.value : 0}</p></span>
-                                </p>
+                                <span>
+                                    {this.props.payload[i].name}: <span className="rightAlign"><span style={this.stylings(p)}>{p.value ? p.value : 0}</span></span>
+                                </span>
                             )
                         });
                     return (
@@ -449,7 +447,7 @@ const CustomTooltip = React.createClass({
                 } else {
                     const point = payload.map(p => {
                             return (
-                                <p style={this.stylings(p)}>{p.value ? p.value : 0}</p>
+                                <span style={this.stylings(p)}>{p.value ? p.value : 0}</span>
                             )
                         }),
                         labelTotals = payload.length > 1 ? 'Totals' : 'Total',
@@ -467,7 +465,7 @@ const CustomTooltip = React.createClass({
         }
         return null;
     }
-});
+}
 CustomTooltip.propTypes = {
     dataType: PropTypes.string,
     payload: PropTypes.array,

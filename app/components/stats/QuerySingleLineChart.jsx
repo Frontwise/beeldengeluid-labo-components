@@ -133,7 +133,7 @@ class QuerySingleLineChart extends React.Component {
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
                         <Tooltip content={<CustomTooltip/>}/>
-                        <Line type="monotone" isAnimationActive={true} dataKey="count"
+                        <Line isAnimationActive={true} dataKey="count"
                               stroke={dataPrettyfied[0].strokeColor} activeDot={{r: 8}} name={graphTitle}/>
                     </LineChart>
                 </ResponsiveContainer>
@@ -144,7 +144,7 @@ class QuerySingleLineChart extends React.Component {
 
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
@@ -173,10 +173,10 @@ const CustomTooltip = React.createClass({
 
         return null;
     }
-});
+}
 CustomTooltip.propTypes = {
     dataType: PropTypes.string,
     payload: PropTypes.array,
-    label: PropTypes.string
+    label: PropTypes.number
 };
 export default QuerySingleLineChart;

@@ -24,7 +24,7 @@ class AggregationCreator extends React.Component {
 
 	componentDidMount() {
 		if(this.state.selectedField) {
-			this.refs.label.value = this.state.selectedField.label;
+            this.labelRef.value = this.state.selectedField.label;
 		}
 	}
 
@@ -33,7 +33,7 @@ class AggregationCreator extends React.Component {
 		if(this.state.selectedField && this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				field: this.state.selectedField.value,
-				title : this.refs.label.value,
+				title : this.labelRef.label.value,
 				id : this.state.selectedField.value,
 				type : 'string'
 			});
@@ -59,7 +59,7 @@ class AggregationCreator extends React.Component {
 	}
 
 	selectField(e) {
-		this.refs.label.value =  e.option.label;
+        this.labelRef.value =  e.option.label;
 		this.setState({selectedField : e.option});
 	}
 
@@ -96,7 +96,7 @@ class AggregationCreator extends React.Component {
 					<div className="form-group">
     					<label className="col-sm-3" htmlFor="label">Label</label>
     					<div className="col-sm-9">
-    						<input ref="label" type="text" className="form-control" id="label"/>
+    						<input ref={input => (this.labelRef = input)} type="text" className="form-control" id="label"/>
     					</div>
   					</div>
   					<button type="submit" className="btn btn-default">Add</button>

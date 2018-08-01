@@ -155,7 +155,7 @@ class ProjectViewWrapper extends React.PureComponent {
                             </div>
                         </div>
 
-                        <div class="component">
+                        <div className="component">
                             <RenderComponent {...this.props} 
                                             project={this.state.project} 
                                             loadBookmarkCount={this.loadBookmarkCount}
@@ -175,5 +175,7 @@ class ProjectViewWrapper extends React.PureComponent {
         );
     }
 }
-
+ProjectViewWrapper.propTypes = {
+    RenderComponent: PropTypes.func.isRequired
+};
 export default ProjectViewWrapper;

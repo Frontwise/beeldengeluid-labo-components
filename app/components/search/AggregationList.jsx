@@ -262,7 +262,7 @@ class AggregationList extends React.Component {
                                 <input id={facetId}
                                        type="checkbox"
                                        checked={checkedOpt}
-                                       onClick={this.toggleSelectedFacet.bind(this, key['field'], facet.key)}/>
+                                       onChange={this.toggleSelectedFacet.bind(this, key['field'], facet.key)}/>
                                 <label>
                                     <span> </span>
                                     {facet.key}&nbsp;({facet.doc_count})
