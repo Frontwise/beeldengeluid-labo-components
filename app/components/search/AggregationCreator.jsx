@@ -30,7 +30,6 @@ class AggregationCreator extends React.Component {
 
 	onOutput(e) {
 		e.preventDefault();
-		console.log(this)
 		if(this.state.selectedField && this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				field: this.state.selectedField.value,
