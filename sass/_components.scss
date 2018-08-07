@@ -316,6 +316,11 @@
 			background-color: $fill-color;
 			color: white;
 			border: 1px solid $border-color;
+			.bg__ul-selectedOption {
+				list-style-type: none;
+				-moz-padding-start: 0;
+				-webkit-padding-start: 0;
+			}
 		}
 		.PowerSelectMultiple__SelectedOption__Close {
 			&:hover {
@@ -1490,14 +1495,6 @@ $backColorBtnInactive :#7aabd6;
 		}
 	}
 }
-
-// end of collection recipe
-
-/*.PowerSelect__Option {
-	.alignRight {
-		float: right;
-	}
-}*/
 
 // histogram styles
 .bg__histogram {

@@ -150,11 +150,12 @@ export const ListOption = ({ option, collectionConfig }) => (
 );
 
 export const SelectedOption = ({option, queryId, collectionConfig}) => (
-	<li className="PowerSelectMultiple__SelectedOption">
+    <ul className="bg__ul-selectedOption">
+        <li className="PowerSelectMultiple__SelectedOption">
 		<span className="PowerSelectMultiple__SelectedOption__Label"
-			title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
+              title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
 			{option.label}
 		</span>
-
-	</li>
+        </li>
+    </ul>
 );
