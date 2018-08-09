@@ -164,7 +164,7 @@ class Histogram extends React.Component {
     }
 }
 
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
@@ -194,5 +194,5 @@ const CustomTooltip = React.createClass({
 
         return null;
     }
-});
+}
 export default Histogram;

@@ -40,7 +40,7 @@ class AutoQueue extends React.Component {
 	render() {
 		let currentAnnotation = this.determineCurrentAnnotation();
 		//this depends on the format of the annotation and should be harmonized in the back-end
-		if(currentAnnotation && currentAnnotation.length && currentAnnotation.length == 1) {
+		if(currentAnnotation && currentAnnotation.length && currentAnnotation.length === 1) {
 			currentAnnotation = currentAnnotation[0].words;
 		}
 		return (
@@ -52,7 +52,7 @@ class AutoQueue extends React.Component {
 							Previous
 						</button>
 					</span>
-					<textarea ref="annotation" type="text" className="form-control" readOnly
+					<textarea ref={input => (this.annotation = input)} type="text" className="form-control" readOnly
 						value={currentAnnotation}></textarea>
 
 					<span className="input-group-btn">

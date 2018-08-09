@@ -8,7 +8,6 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import SortTable from '../../SortTable';
 
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
@@ -63,11 +62,9 @@ class ProjectTable extends React.PureComponent {
         this.getProjectRow = this.getProjectRow.bind(this);
     }
 
-
     componentDidMount() {
         this.loadData();
     }
-
 
     componentDidUpdate() {
         if (this.lastFilter !== this.state.filter) {
@@ -251,7 +248,7 @@ class ProjectTable extends React.PureComponent {
                 }
                 this.props.api.delete(this.props.user.id, project.id, status => {
                     calls--;
-                    if (calls == 0) {
+                    if (calls === 0) {
                         // after the last delete just retrieve the latest data
                         this.loadData();
                     }
@@ -401,7 +398,7 @@ ProjectTable.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

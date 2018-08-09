@@ -1,4 +1,3 @@
-import ElasticsearchDataUtil from '../util/ElasticsearchDataUtil';
 import IDUtil from '../util/IDUtil';
 import QueryModel from '../model/QueryModel';
 
@@ -9,12 +8,12 @@ const SearchAPI = {
 	//TODO query should become a list of queries for each selected index
 	search(query, collectionConfig, callback, updateUrl = false) {
 		if(query.offset + query.size <= 10000) {
-			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId
+			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId;
 			const xhr = new XMLHttpRequest();
 			const searchId = IDUtil.guid();
 			xhr.onreadystatechange = function() {
-				if (xhr.readyState == XMLHttpRequest.DONE) {
-					if(xhr.status == 200) {
+				if (xhr.readyState === XMLHttpRequest.DONE) {
+					if(xhr.status === 200) {
 						const data = JSON.parse(xhr.responseText);
 						if(data && data.params) {
 							//always add a fresh search ID, so the UI knows when to refresh certain components
@@ -33,7 +32,7 @@ const SearchAPI = {
 							//make sure the query returned by the server is compatible with the client side model
 							//TODO some validation!
 							data.query = QueryModel.ensureQuery(data.params, collectionConfig);
-							delete data.params
+							delete data.params;
 
 							callback(data);
 						} else {
@@ -53,7 +52,6 @@ const SearchAPI = {
 			callback({pagingOutOfBounds : true})
 		}
 	}
-
-}
+};
 
 export default SearchAPI;

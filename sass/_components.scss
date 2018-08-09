@@ -316,6 +316,11 @@
 			background-color: $fill-color;
 			color: white;
 			border: 1px solid $border-color;
+			.bg__ul-selectedOption {
+				list-style-type: none;
+				-moz-padding-start: 0;
+				-webkit-padding-start: 0;
+			}
 		}
 		.PowerSelectMultiple__SelectedOption__Close {
 			&:hover {

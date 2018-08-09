@@ -36,9 +36,9 @@ class CommentingForm extends React.Component {
 		e.preventDefault();
 		const cs = this.state.data;
 		if(cs) {
-			cs.push({text : this.refs.comment.value});
+			cs.push({text : this.comment.value});
 			this.setState({data : cs}, this.onOutput.bind(this));
-			this.refs.comment.value = '';
+            this.comment.value = '';
 		}
 	}
 
@@ -61,7 +61,7 @@ class CommentingForm extends React.Component {
 		const comments = this.state.data.map((c, index) => {
 			return (
 				<li key={'com__' + index} className="list-group-item">
-					<i className="fa fa-close interactive" onClick={this.removeComment.bind(this, index)}></i>
+					<i className="fa fa-close interactive" onClick={this.removeComment.bind(this, index)}/>
 					&nbsp;
 					{c.text}
 				</li>
@@ -92,7 +92,7 @@ class CommentingForm extends React.Component {
 							<div className="form-group">
 								<h4>Comment</h4>
 								<input
-									ref="comment"
+									ref={input => (this.comment = input)}
 									type="text"
 									className="form-control"
 									placeholder="Add one or more comments or notes"

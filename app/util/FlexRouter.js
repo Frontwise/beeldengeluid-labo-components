@@ -5,15 +5,9 @@ import QueryModel from '../model/QueryModel';
 
 const FlexRouter = {
 
-	routeQueryToSingleSearch : function(query) {
-		const paramList = FlexRouter.__toUrlParamList(
-			QueryModel.toUrlParams(query)
-		)
-		let url = FlexRouter.__getBaseUrl() + '/tool/single-search';
-		if(paramList) {
-			url += '?' + paramList.join('&');
-		}
-		document.location.href =  url;
+	gotoSingleSearch : function(queryId) {
+		let url = FlexRouter.__getBaseUrl() + '/tool/single-search?queryId=' + queryId;
+		document.location.href = url;
 	},
 
 	//this is typically called from a search recipe after clicking a search result
