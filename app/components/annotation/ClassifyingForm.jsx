@@ -248,7 +248,7 @@ class ClassifyingForm extends React.Component {
 								</div>
 								<br/>
 								<Autosuggest
-									ref="classifications"
+									ref={input => (this.classifications = input)}
 									suggestions={this.state.suggestions}
 									onSuggestionsFetchRequested={this.onSuggestionsFetchRequested.bind(this)}
 									onSuggestionsClearRequested={this.onSuggestionsClearRequested.bind(this)}

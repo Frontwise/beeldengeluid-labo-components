@@ -10,21 +10,21 @@ class SegmentationControls extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		if(nextProps.start != this.props.start || nextProps.end != this.props.end) {
+		if(nextProps.start !== this.props.start || nextProps.end !== this.props.end) {
 			return true;
 		}
-		if(this.props.annotation == null && (nextProps.annotation && nextProps.annotation.id)) {
+		if(this.props.annotation === null && (nextProps.annotation && nextProps.annotation.id)) {
 			return true;
 		}
-		if(nextProps.annotation == null && (this.props.annotation && this.props.annotation.id)) {
+		if(nextProps.annotation === null && (this.props.annotation && this.props.annotation.id)) {
 			return true;
 		}
 		return false;
 	}
 
 	componentDidUpdate() {
-		this.refs.startTime.value = TimeUtil.formatTime(this.props.start);
-		this.refs.endTime.value = TimeUtil.formatTime(this.props.end);
+		this.startTime.value = TimeUtil.formatTime(this.props.start);
+		this.endTime.value = TimeUtil.formatTime(this.props.end);
 	}
 
 	/* ---------------------- FUNCTION CONTROLS ------------------- */
@@ -32,7 +32,7 @@ class SegmentationControls extends React.Component {
 	setManualStart(e) {
 		e.preventDefault();
 		this.props.controls.setManualStart(
-			moment.duration(this.refs.startTime.value).asSeconds()
+			moment.duration(this.startTime.value).asSeconds()
 		);
 		return false;
 	}
@@ -40,7 +40,7 @@ class SegmentationControls extends React.Component {
 	setManualEnd(e) {
 		e.preventDefault();
 		this.props.controls.setManualEnd(
-			moment.duration(this.refs.endTime.value).asSeconds()
+			moment.duration(this.endTime.value).asSeconds()
 		);
 		return false;
 	}
@@ -119,7 +119,7 @@ class SegmentationControls extends React.Component {
 										<span className="input-group-addon start-group">
 											Start
 										</span>
-										<input ref="startTime" type="text" className="form-control" defaultValue="00:00:00"/>
+										<input ref={input => (this.startTime = input)} type="text" className="form-control" defaultValue="00:00:00"/>
 										<span className="input-group-btn">
 											<button className="btn btn-default" type="submit"
 												title="When you press this the start time will be set to the time you entered in the input field">
@@ -136,7 +136,7 @@ class SegmentationControls extends React.Component {
 								<form onSubmit={this.setManualEnd.bind(this)}>
 									<div className="input-group">
 										<span className="input-group-addon end-group">&nbsp;End&nbsp;</span>
-										<input ref="endTime" type="text" className="form-control" defaultValue="00:00:00"/>
+										<input ref={input => (this.endTime = input)} type="text" className="form-control" defaultValue="00:00:00"/>
 										<span className="input-group-btn">
 											<button className="btn btn-default" type="submit"
 												title="When you press this the end time will be set to the time you entered in the input field">
@@ -154,7 +154,6 @@ class SegmentationControls extends React.Component {
 			</div>
 		)
 	}
-
 };
 
 export default SegmentationControls;

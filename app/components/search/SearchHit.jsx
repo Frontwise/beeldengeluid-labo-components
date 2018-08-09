@@ -80,12 +80,12 @@ class SearchHit extends React.Component {
 				<input type="checkbox" checked={
 					this.props.isSelected ? 'checked' : ''
 				} id={'cb__' + modalID}/>
-				<label for={'cb__' + modalID}><span></span></label>
+				<label htmlFor={'cb__' + modalID}><span></span></label>
 			</div>
 		)
 
 		const classNames = [IDUtil.cssClassName('search-hit')];
-		if(snippet.type == 'media_fragment') {
+		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
 		return (

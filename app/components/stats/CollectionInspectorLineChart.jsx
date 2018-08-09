@@ -44,8 +44,8 @@ class CollectionInspectorLineChart extends React.Component {
     }
 
     showMeTheMoney(event, index) {
-        console.debug(event)
-        console.debug(index)
+        console.debug(event);
+        console.debug(index);
         console.debug('Dikke scheet');
     }
 
@@ -60,11 +60,10 @@ class CollectionInspectorLineChart extends React.Component {
                     label={ <LabelAsPoint /> } //the LabelAsPoint class handles the onclick of a dot
                     activeDot={false}
                     name={this.props.data[k].label}
-                    type="lineal"
                     onClick={this.showMeTheMoney.bind(this)}
                     dataKey={k} //is equal to the queryId
                     stroke={this.COLORS[index]}
-                    strokeOpacity={this.state.opacity[k] != undefined ? this.state.opacity[k] : 1}
+                    strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 1}}
                     //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
                 />);
@@ -77,7 +76,7 @@ class CollectionInspectorLineChart extends React.Component {
                 if(temp[d.year]) {
                     temp[d.year][k] = d[k];
                 } else {
-                    let t = {}
+                    let t = {};
                     t[k] = d[k];
                     temp[d.year] = t;
                 }
@@ -116,7 +115,7 @@ class CollectionInspectorLineChart extends React.Component {
 }
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
@@ -145,11 +144,10 @@ const CustomTooltip = React.createClass({
         }
         return null;
     }
-});
+}
 
 export class LabelAsPoint extends React.Component {
     constructor(props) {
-        //console.debug(props);
         super(props);
     }
 

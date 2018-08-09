@@ -5,12 +5,7 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 import IDUtil from '../../../../util/IDUtil';
 import FlexRouter from '../../../../util/FlexRouter';
 
-import { exportDataAsJSON } from '../../helpers/Export';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
 import SortTable from '../../SortTable';
-
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 class ProjectQueriesTable extends React.PureComponent {
@@ -88,7 +83,7 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     viewQuery(query) {
-        const selectedQuery = this.state.queries.filter(q => q.name == query.name);
+        const selectedQuery = this.state.queries.filter(q => q.name === query.name);
         if(selectedQuery.length > 0) {
             FlexRouter.gotoSingleSearch(this.props.project.id + '__' + selectedQuery[0].query.id);
         }
@@ -99,7 +94,7 @@ class ProjectQueriesTable extends React.PureComponent {
             const project = this.props.project;
 
             // delete queries from project
-            project.queries = project.queries.filter(s => s != query);
+            project.queries = project.queries.filter(s => s !== query);
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
@@ -113,14 +108,6 @@ class ProjectQueriesTable extends React.PureComponent {
         }
     }
 
-    compareQueries(queries) {
-        const project = this.props.project;
-        project.queries = project.queries.filter(q => queries.includes(q));
-        // update state
-        this.setState({
-            selectedQueries: project.queries
-        });
-    }
     //deletes multiple queries
     deleteQueries(queries) {
         if (window.confirm('Are you sure you want to delete ' + queries.length + ' queries?')) {
@@ -227,7 +214,7 @@ ProjectQueriesTable.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

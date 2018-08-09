@@ -1,7 +1,5 @@
 import ProjectAPI from './api/ProjectAPI';
 
-import IDUtil from './util/IDUtil';
-
 //bookmark and annotation view
 import ProjectBookmarkView from './components/workspace/projects/bookmark/ProjectBookmarkView';
 import ProjectAnnotationView from './components/workspace/projects/annotation/ProjectAnnotationView';
@@ -19,21 +17,18 @@ import ProjectSessionCreateView from './components/workspace/projects/session/Pr
 //queries view
 import ProjectQueriesView from './components/workspace/projects/query/ProjectQueriesView';
 
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import {
     Switch,
     BrowserRouter as Router,
     Route,
-    Link,
     Redirect
 } from 'react-router-dom'
 
 class WorkspaceProjects extends Component {
     constructor(props){
         super(props);
-
         this.state={}
     }
 
@@ -78,7 +73,6 @@ class WorkspaceProjects extends Component {
 }
 
 WorkspaceProjects.propTypes = {
-
     // project api
     api: PropTypes.shape({
         list: PropTypes.func.isRequired
@@ -86,8 +80,8 @@ WorkspaceProjects.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired,
-}
+};
 
 export default WorkspaceProjects;

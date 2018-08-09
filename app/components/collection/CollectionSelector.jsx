@@ -23,7 +23,7 @@ class CollectionSelector extends React.Component {
 		this.state = {
 			activeCollection: '',
 			collectionList : null
-		}
+		};
 		this.CLASS_PREFIX = 'cls';
 	}
 
@@ -34,7 +34,6 @@ class CollectionSelector extends React.Component {
 		});
 		//TODO add collections to the list!!
 		CollectionAPI.listCollections('personalcollection__clariah_test', (collections) => {
-			//console.debug('got my personal collections back!')
 			//console.debug(collections);
 		})
 	}
@@ -57,9 +56,9 @@ class CollectionSelector extends React.Component {
 	getCollectionInfo(collectionId) {
 		if(this.state.collectionList) {
 			const tmp = this.state.collectionList.filter((c) => {
-				return c.index == collectionId;
+				return c.index === collectionId;
 			});
-			if(tmp.length == 1) {
+			if(tmp.length === 1) {
 				return tmp[0];
 			}
 		}
@@ -71,9 +70,6 @@ class CollectionSelector extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	onOutput(collectionId, collectionStats, collectionInfo) {
-		// console.debug(collectionId)
-		// console.debug(collectionStats)
-		// console.debug(collectionInfo)
 		const collectionConfig = CollectionUtil.createCollectionConfig(
 			this.props.clientId,
 			this.props.user,
@@ -123,7 +119,6 @@ class CollectionSelector extends React.Component {
 			}
 
 			if(this.props.showBrowser) {
-
 				//the collections visualized as blocks
 				const collectionBlocks = this.state.collectionList.map((collection) => {
 					let organisationImage = null;
@@ -175,7 +170,7 @@ CollectionSelector.propTypes = {
 	clientId : PropTypes.string,
 
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })
 
 };

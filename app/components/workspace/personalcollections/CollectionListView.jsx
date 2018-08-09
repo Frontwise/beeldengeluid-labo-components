@@ -47,7 +47,7 @@ CollectionListView.propTypes = {
 
     // current user object used for defining access roles per collection
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

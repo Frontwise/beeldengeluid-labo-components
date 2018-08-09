@@ -122,8 +122,8 @@ class AggregationList extends React.Component {
     //FIXME this does not work yet for removing empty aggregations!
     showRemoveDialog(key, index) {
         this.currentFacet = key;
-        if(document.querySelector("#facets__"+ index)) {
-           document.querySelector("#facets__"+ index).addEventListener("click", function(event) {
+        if(document.querySelector("#index__"+ index)) {
+           document.querySelector("#index__"+ index).addEventListener("click", function(event) {
                 event.preventDefault();
             }, {once:true});
             ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
@@ -262,7 +262,7 @@ class AggregationList extends React.Component {
                                 <input id={facetId}
                                        type="checkbox"
                                        checked={checkedOpt}
-                                       onClick={this.toggleSelectedFacet.bind(this, key['field'], facet.key)}/>
+                                       onChange={this.toggleSelectedFacet.bind(this, key['field'], facet.key)}/>
                                 <label>
                                     <span> </span>
                                     {facet.key}&nbsp;({facet.doc_count})
@@ -308,10 +308,10 @@ class AggregationList extends React.Component {
                                     <i className="fa fa-info-circle"/>
                                 </span>
                                 <span className="fa fa-remove" onClick={
-                                    this.showRemoveDialog.bind(this, key.aggregationField, tip)
+                                    this.showRemoveDialog.bind(this, key.aggregationField, (index-1))
                                 }/>
                             </h4>
-                            <ReactTooltip id={'tooltip__' + value}/>
+                            <ReactTooltip id={'tooltip__' + index}/>
                         </div>
                     ))
                 })
