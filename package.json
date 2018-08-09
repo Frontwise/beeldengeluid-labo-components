@@ -1,13 +1,15 @@
 {
   "name": "labo-components",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "description": "B&G UI components",
   "main": "webpack.config.js",
   "scripts": {
     "dev": "webpack --mode development",
     "start": "webpack --mode development",
     "build": "webpack --mode production",
-    "prod": "webpack --mode production"
+    "prod": "webpack --mode production",
+    "bundle:scss": "scss-bundle -e ./sass/labo-components.scss -d ./dist/labo-components.scss",
+    "prepublish" : "npm run bundle:scss"
   },
   "repository": {
     "type": "git",
@@ -39,7 +41,8 @@
     "react-power-select": "^1.0.0-beta.14",
     "react-router-dom": "^4.3.1",
     "react-tooltip": "^3.6.1",
-    "recharts": "^1.1.0"
+    "recharts": "^1.1.0",
+    "scss-bundle": "^2.3.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
