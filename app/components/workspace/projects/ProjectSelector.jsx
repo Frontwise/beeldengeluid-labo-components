@@ -1,10 +1,10 @@
 import ProjectAPI from '../../../api/ProjectAPI';
 
 import IDUtil from '../../../util/IDUtil';
-
+import ComponentUtil from '../../../util/ComponentUtil';
 import PropTypes from 'prop-types';
 import { PowerSelect } from 'react-power-select';
-
+import ProjectForm from './crud/ProjectForm'
 /**
 * Select a project from a list and send it to the output callback
 */
@@ -14,7 +14,8 @@ class ProjectSelector extends React.Component {
         super(props);
         this.state = {
             activeProject: '',
-            projectList: []
+            projectList: [],
+            showModal: false
         };
         this.CLASS_PREFIX = 'prjs';
     }
@@ -50,10 +51,45 @@ class ProjectSelector extends React.Component {
             }
         }
     }
+    addCustomFields(selectComponent) {
+        selectComponent.actions.close();
+        this.setState({
+            showModal : true
+        })
+    }
 
     render() {
-        let projectSelector = null;
+        let projectSelector = null,
+            newProject = null;
 
+        //Add new project modal modal
+        if (this.state.showModal) {
+            newProject = (
+                <ProjectForm
+                    id="bg__project-selector"
+                    submitButton="save"
+                    cancelLink={
+                        ''
+                    }
+                    project={{
+                        name: '',
+                        description: '',
+                        isPrivate: false,
+                        user: this.props.user.id
+                    }}
+                    projectDidSave={projectId => {
+                        ProjectAPI.get(this.props.user.id, projectId, project => {
+                                if (project && project.id) {
+                                    this.onOutput(project)
+                                }
+                            }
+                        );
+                        ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true);
+                    }}
+                    user={this.props.user}
+                    api={ProjectAPI}/>
+            );
+        }
         if (this.state.projectList.length > 0) {
             //the project selection part
             const options = this.state.projectList.map((project, index) => {
@@ -71,7 +107,7 @@ class ProjectSelector extends React.Component {
 
         if (options.length > 0) {
             projectSelector = (
-                <div className="row">
+                <div className="row bg__select-project">
                     <div className="col-md-12">
                         <form className="form-horizontal">
                             <label className="col-sm-2">Project</label>
@@ -84,7 +120,18 @@ class ProjectSelector extends React.Component {
                                     onChange={this.selectProject.bind(this)}
                                     optionLabelPath="title"
                                     optionComponent={<ProjectOption />}
-                                    placeholder="-- Select a project -- "/>
+                                    placeholder="-- Select a project -- "
+                                    afterOptionsComponent={({ select }) => (
+                                        <div className={IDUtil.cssClassName('ws__createProject', this.CLASS_PREFIX)}>
+                                            <button className="btn btn-sm btn-primary"
+                                                    onClick={() => {
+                                                        this.addCustomFields(select);
+                                                    }}>
+                                                + New Project
+                                            </button>
+                                        </div>
+                                    )}
+                                />
                             </div>
                         </form>
                     </div>
@@ -101,6 +148,7 @@ class ProjectSelector extends React.Component {
         return (
             <div className={IDUtil.cssClassName('project-selector')}>
                 {projectSelector}
+                {newProject}
             </div>
         )
     }

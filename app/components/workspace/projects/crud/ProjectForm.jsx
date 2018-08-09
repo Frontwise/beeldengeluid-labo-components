@@ -1,4 +1,5 @@
 import IDUtil from '../../../../util/IDUtil';
+import ComponentUtil from '../../../../util/ComponentUtil';
 
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -33,44 +34,65 @@ class ProjectForm extends React.PureComponent {
 
                 this.props.projectDidSave(projectId);
             } else {
-                alert('An error occured while saving this project');
+                alert('An error occurred while saving this project');
             }
         })
     }
 
     render() {
-        return (
-            <form className={IDUtil.cssClassName('project-form')} onSubmit={this.handleSubmit.bind(this)}>
-                <div>
-                    <label className="label">Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        defaultValue={this.props.project.name}
-                        ref={elem => (this.name = elem)}/>
+        let linkToCancel = null;
+        if(this.props.cancelLink !== '') {
+            linkToCancel = (
+                <Link to={this.props.cancelLink} className="btn">
+                    Cancel
+                </Link>
+            )
+        }else {
+            linkToCancel = (
+                <button className="btn" type="button"
+                        onClick={ComponentUtil.hideModal.bind(this, this, 'showModal', 'project__modal')}>
+                    Cancel
+                </button>);
+        }
 
-                    <label className="label">Description</label>
+        return (
+            <form id="bg_new-project" className={IDUtil.cssClassName('project-form')} onSubmit={this.handleSubmit.bind(this)}>
+                <div className="new-project-container">
+                    <span className="bg__new-project-wrapper">
+                        <label className="label project-modal-left">Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required="true"
+                            className="project-modal-right"
+                            defaultValue={this.props.project.name}
+                            ref={elem => (this.name = elem)}/>
+                    </span>
+                    <span className="bg__new-project-wrapper">
+                    <label className="label project-modal-left">Description</label>
                     <textarea
                         name="description"
+                        className="project-modal-right"
                         defaultValue={this.props.project.description}
                         ref={elem => (this.description = elem)}/>
-
+                    </span>
+                    <span className="bg__new-project-wrapper">
                     <input
                         type="checkbox"
                         name="private"
+                        className="project-modal-left"
                         defaultChecked={this.props.project.isPrivate}
                         id="project-private"
                         ref={elem => (this.isPrivate = elem)}/>
 
-                    <label htmlFor="project-private">
+                    <label htmlFor="project-private" className="project-modal-right">
                         This is a private project that is only visible to you and your collaborators
                     </label>
+                    </span>
                 </div>
 
                 <div className="actions">
-                    <Link to={this.props.cancelLink} className="btn">
-                        Cancel
-                    </Link>
+                    {linkToCancel}
                     <input
                         type="submit"
                         className="btn primary add"
