@@ -1,5 +1,39 @@
-@mixin checkbox() {
+@mixin spinner() {
+	@keyframes spinner {
+		to {transform: rotate(360deg);}
+	}
 
+	.spinner {
+		position: fixed; /* Sit on top of the page content */
+		width: 100%; /* Full width (cover the whole page) */
+		height: 100%; /* Full height (cover the whole page) */
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 22334; /* Specify a stack order in case you're using a different order for other elements */
+		cursor: pointer; /* Add a pointer on hover */
+		opacity: .6;
+
+		&::after {
+			content: '';
+			box-sizing: border-box;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			width: 45px;
+			height: 45px;
+			margin-top: -10px;
+			margin-left: -10px;
+			border-radius: 50%;
+			border: 8px solid #ccc;
+			border-top-color: #333;
+			animation: spinner .6s linear infinite;
+		}
+	}
+}
+
+@mixin checkbox() {
 	font-family: "Verdana", sans-serif;
 	padding: 0px 15px;
 	font-size: 22px;
@@ -160,37 +194,22 @@
 	}
 }
 
-@mixin spinner() {
-	@keyframes spinner {
-		to {transform: rotate(360deg);}
+@mixin chartBase() {
+	.ms_toggle_btn {
+		@include switchButton();
 	}
 
-	.spinner {
-		position: fixed; /* Sit on top of the page content */
-		width: 100%; /* Full width (cover the whole page) */
-		height: 100%; /* Full height (cover the whole page) */
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 22334; /* Specify a stack order in case you're using a different order for other elements */
-		cursor: pointer; /* Add a pointer on hover */
-		opacity: .6;
-
-		&::after {
-			content: '';
-			box-sizing: border-box;
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			width: 45px;
-			height: 45px;
-			margin-top: -10px;
-			margin-left: -10px;
-			border-radius: 50%;
-			border: 8px solid #ccc;
-			border-top-color: #333;
-			animation: spinner .6s linear infinite;
+	.ms__custom-tooltip {
+		background-color: rgba(0, 0, 0, 0.6);
+		border-radius: 8px;
+		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
+		color: #f3f3f3;
+		padding: 1rem 3rem;
+		text-transform: capitalize;
+		.rightAlign {
+			float: right;
+			margin-left: 10px;
+			right: 0;
 		}
 	}
 }
@@ -210,41 +229,5 @@
 		text-align: center;
 	}
 
-	.ms_toggle_btn {
-		@include switchButton();
-	}
-
-	.ms__custom-tooltip {
-		background-color: rgba(0, 0, 0, 0.6);
-		border-radius: 8px;
-		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
-		color: #f3f3f3;
-		padding: 1rem 3rem;
-		text-transform: capitalize;
-		.rightAlign {
-			float: right;
-			margin-left: 10px;
-			right: 0;
-		}
-	}
-}
-
-@mixin histogramBase() {
-	.ms_toggle_btn {
-		@include switchButton();
-	}
-
-	.ms__custom-tooltip {
-		background-color: rgba(0, 0, 0, 0.6);
-		border-radius: 8px;
-		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
-		color: #f3f3f3;
-		padding: 1rem 3rem;
-		text-transform: capitalize;
-		.rightAlign {
-			float: right;
-			margin-left: 10px;
-			right: 0;
-		}
-	}
+	@include chartBase();
 }

@@ -228,13 +228,20 @@ class QueryComparisonLineChart extends React.Component {
         return (
             <div className={IDUtil.cssClassName('query-comparison-line-chart')}>
 				<span className="ms_toggle_btn">
-                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox"
-                           onClick={this.getRelativeValues.bind(this)}/>
+                    <input
+                        id="toggle-1"
+                        className="checkbox-toggle checkbox-toggle-round"
+                        type="checkbox"
+                        onClick={this.getRelativeValues.bind(this)}
+                    />
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
                 </span>
                 <ResponsiveContainer width="100%" height="50%">
-                    <LineChart width={1200} height={200} data={timelineData}
-                               margin={{top: 5, right: 20, bottom: 5, left: 0}}>
+                    <LineChart
+                        width={1200}
+                        height={200}
+                        data={timelineData}
+                        margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines[0]}
                         {lines[1]}
                         {lines[2]}
@@ -246,15 +253,27 @@ class QueryComparisonLineChart extends React.Component {
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
                         <YAxis width={100} >
-                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
-                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                            <Label
+                                value="Number of records"
+                                offset={10}
+                                position="insideLeft"
+                                angle={-90}
+                                style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
+                            />
                         </YAxis>
                         <Tooltip content={<CustomTooltip  viewMode={this.state.viewMode}/>}/>
                         <Legend
                             verticalAlign="bottom"
                             wrapperStyle={{ position: null }}
                             height={39}
-                        content={<CustomLegend selectedQueries={this.props.selectedQueries} lineColour={this.COLORS} labelData={this.state.collectionList} external={external}/>}
+                            content={
+                                <CustomLegend
+                                    selectedQueries={this.props.selectedQueries}
+                                    lineColour={this.COLORS}
+                                    labelData={this.state.collectionList}
+                                    external={external}
+                                />
+                            }
                         />
                     </LineChart>
                 </ResponsiveContainer>
@@ -411,8 +430,8 @@ class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
-            const {payload, label} = this.props,
-                dataType = this.props.viewMode;
+            const {payload, label} = this.props;
+            const dataType = this.props.viewMode;
 
             if(payload && label) {
                 if (dataType === 'relative') {
@@ -466,6 +485,7 @@ class CustomTooltip extends React.Component{
         return null;
     }
 }
+
 CustomTooltip.propTypes = {
     dataType: PropTypes.string,
     payload: PropTypes.array,
