@@ -1,0 +1,6 @@
+.bg__histogram {
+	margin-bottom: 2rem;
+	.ms_toggle_btn {
+		@include switchButton();
+	}
+}

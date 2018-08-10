@@ -1,0 +1,22 @@
+.bg__information-card-form { /* MetadataForm.jsx */
+	.bg__icf__card-table {
+		margin-bottom: $default-margin;
+		width: 100%;
+	}
+
+	.bg__icf__card-table-row {
+		border-bottom:5px solid transparent;
+		vertical-align: top;
+		.bg__icf__key {
+			padding-right:1%;
+			width:25%;
+		}
+		.bg__icf__value {
+			padding-right:1%;
+			width:65%;
+		}
+		.bg__icf__icon {
+			width:6%;
+		}
+	}
+}

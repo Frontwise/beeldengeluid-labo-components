@@ -1,0 +1,231 @@
+.bg__aggregation-list {
+	.bg__agl__tab-new {
+		list-style: none;
+		margin-bottom: 1rem;
+	}
+
+	.bg__agl__selected-facets {
+		.bg__agl__selected-item {
+			border: 1px solid #f3f3f3;
+			border-radius: 6px;
+			box-shadow: 0 5px 3px -5px black;
+			margin-bottom: 3px;
+			padding: 6px 5px 6px 1rem;
+
+			.fa-remove {
+				cursor: pointer;
+				float: right;
+				padding-top: 2px;
+			}
+		}
+	}
+
+	.bg__agl__facet-group {
+		margin:0;
+		max-height: 400px;
+		overflow: auto;
+
+		.bg__agl__facet-item {
+			color: $list-item-color;
+			.checkbox {
+				margin: 0;
+				//Customs styling for checkboxes in facet's view.
+				input[type=checkbox] {
+					height: 100%;
+					opacity: 0;
+					width: 100%;
+					z-index: 10;
+				}
+				input[type=checkbox] + label {
+					padding-left: 10px;
+				}
+				input[type=checkbox] + label span {
+					border: 1px solid #ccc;
+					border-radius: 4px;
+					display: inline-block;
+					font-style: normal;
+					height: 18px;
+					margin-right: 10px;
+					width: 18px;
+				}
+
+				input[type=checkbox]:checked + label span {
+					position:relative;
+				}
+				input[type=checkbox]:checked + label span:after {
+					color: #468dcb;
+					content: "\2713";
+					font-size: 18px;
+					font-weight: bold;
+					margin-top:-4px;
+					position: absolute;
+				}
+			}
+			&:hover {
+				color:#ccc;
+			}
+		}
+	}
+
+	.checkboxGroup {
+		background-color: #ebebeb;
+		border-radius: 6px;
+		box-shadow: 0 6px 4px -6px black;
+		margin-bottom: 12px;
+
+		h4 {
+			padding: 10px 0 8px 0;
+		}
+
+		&.aggregation-no-results {
+			background-color: #d9534f;
+			color: #fff;
+		}
+		.fa-remove {
+			cursor: pointer;
+			float: right;
+			margin-right: 1rem;
+		}
+
+		.fa-info-circle {
+			float: left;
+			margin-left: 1.4rem;
+			margin-right: 1rem;
+			padding-top: 4px;
+		}
+		ul {
+			padding-left: 0;
+			li {
+				background-color: #efefef;
+				word-wrap: break-word;
+				font-size: 1.3rem;
+				list-style-type: none;
+				margin-bottom: 1px;
+				padding: 8px 6px;
+				position: relative;
+				text-transform: uppercase;
+			}
+		}
+		.switchView {
+			background-color: #efefef;
+			border-radius: 0 0 6px 6px;
+			color: #666;
+			display: block;
+			padding: 6px;
+			&:hover {
+				color: red;
+			}
+
+			.switchViewText {
+				font-size: 1.1rem;
+				padding-left: 1rem;
+			}
+			.switchIcon {
+				font-size: 1rem;
+				margin-left: .5rem;
+			}
+		}
+	}
+
+	// hamburger menu
+	.bg__hamburger-facets-container {
+		background-color: #468dcb;
+		border-radius: 3px 3px 0 0;
+		position: relative;
+		.hb {
+			cursor: pointer;
+			height: 25px;
+			padding: 4px 0 26px 10px;
+			position: relative;
+		}
+		.hb-line {
+			background-color: #fff;
+			border-radius: 10px;
+			height: 3px;
+			position: absolute;
+			width: 18px;
+		}
+		.hb-line-top {
+			top: 6px;
+		}
+		.hb-line-center {
+			position: absolute;
+			top: 12px;
+		}
+		.hb-line-center::after {
+			background-color: #fff;
+			border-radius: 10px;
+			content: '';
+			height: 3px;
+			position: absolute;
+			top: 6px;
+			width: 18px;
+		}
+		input, ul {
+			display: none;
+		}
+		input:checked ~ ul {
+			border-top: 1px solid #d3d3d3;
+			display: flex;
+			width: 100%;
+		}
+		ul {
+			color: #fff;
+			font-family: sans-serif;
+			list-style-type: none;
+			margin-top: 1em;
+			padding: 0;
+			text-align: center;
+			margin-bottom: 0;
+			li {
+				background-color: transparent !important;
+				flex-grow: 1;
+				cursor: pointer;
+
+				a {
+					color: white;
+					font-size: 2rem;
+				}
+			}
+		}
+		label {
+			display: inline;
+		}
+		.rightAlign {
+			float: right;
+			margin-left: 10px;
+			right: 0;
+		}
+		.fa-remove {
+			color: white;
+			font-size: 20px;
+			position: absolute;
+			right: 0;
+			top: 5px;
+			z-index: 12;
+		}
+		span {
+			&.bg__facet-title {
+				color: #fff;
+				font-size: 18px;
+				font-weight: normal;
+				left: 18%;
+				position: absolute;
+				top: 2px;
+				z-index: 10;
+
+				.fa-info-circle {
+					float: left;
+					font-size: 13px;
+					margin-right: 4px;
+				}
+			}
+		}
+	}
+}
+
+//FIXME this should be removed
+.aggregation-list {
+	padding-left: 0;
+	padding-right: 0;
+}
