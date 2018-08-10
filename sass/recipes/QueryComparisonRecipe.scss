@@ -1,0 +1,17 @@
+@include spinner();
+
+.bg__comparative-search-recipe {
+	.bg__project-queries-view {
+		@import '../workspace/index';
+		.tools {
+			width: 100%;
+		}
+	}
+	.combineSavedQueries {
+		position: relative;
+	}
+
+	.recharts-legend-wrapper {
+		position: relative;
+	}
+}

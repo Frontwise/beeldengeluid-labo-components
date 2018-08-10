@@ -1,0 +1,26 @@
+.bg__classify-form {
+
+    .react-autosuggest__suggestion {
+        >  * .label {
+            color: #fff;
+            display: inline;
+            float: right;
+            margin-bottom: 0;
+            padding:  2px 8px 3px;
+
+            &.label-info {
+                background-color: #5bc0de;
+            }
+            &.label-warning {
+                background-color: #f0ad4e;
+            }
+            &.label-success {
+                background-color: #5cb85c;
+            }
+            &.label-danger {
+                background-color: #d9534f;
+            }
+        }
+    }
+
+}

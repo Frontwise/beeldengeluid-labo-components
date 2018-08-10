@@ -1,0 +1,34 @@
+.bg__search-hit {
+	border-bottom: 1px solid $border-color;
+	margin: 5px;
+	padding: 10px;
+	.bg__sh__quickview {
+		float:left;
+		margin-right: $default-margin;
+	}
+	.bg__sh__select {
+		@include checkbox();
+	}
+	.bg__search-snippet {
+		margin: 5px;
+		.bg__ss__fragment {
+			color: dimgray;
+			font-style:italic;
+			margin-top:5px;
+		}
+
+		.highLightText {
+			color: #f26c50;
+			font-weight: bold;
+			font-size: 97%;
+		}
+		.snippet_description:hover {
+			cursor: pointer;
+		}
+	}
+	&.fragment { /* possibly change this into .bg__search-hit--fragment (BEM style) */
+		border-right: 1px solid $highlight-color;
+		margin: 5px;
+		padding: $default-margin;
+	}
+}

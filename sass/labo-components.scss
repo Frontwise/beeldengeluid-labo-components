@@ -1,34 +1,26 @@
-/* then import the default bootstrap overrides made for this component library */
-@import "./_bootstrap-overrides.scss";
+//vendor imports first
+@import './vendor/index.scss';
 
-/* import bootstrap SASS first, since some variables are reused in _component-variables.scss */
-@import "../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
-
-/* then import the component variables */
+//then import the component variables that are exposed for clients importing the scss version of this library
 @import "./_variables.scss";
 
-/* Mixins contain generic, useful CSS components, which are used in the _components.scss */
+//import mixins, containing generic all purpose small elements
 @import "./_mixins.scss";
 
-/* finally import the actual component styles that use the component variables, you can change the variables at the top */
-@import "./_components.scss";
+//imports from our very own component library (clients can override the exposed variables)
+@import 'annotation/index.scss';
+@import 'collection/index.scss';
+@import 'flex/index.scss';
+@import 'linkeddata/index.scss';
+@import 'player/index.scss';
+@import 'project/index.scss';
+@import 'search/index.scss';
+@import 'stats/index.scss';
 
+//import the "recipes": apps (top level components) that use the component library
+@import 'recipes/index.scss';
 
-/* React date picker styling */
-@import './_react-datepicker.scss';
-
-
-/* React autosuggest styling */
-@import './_react-autosuggest.scss';
-
-/* React multi selection drop down component stylings */
-@import '../node_modules/react-power-select/dist/react-power-select.css';
-
-/* React custom stylings for power select */
-@import './powerSelect';
-
-
-/* Disables bootstrap styling; only works with custom styles */
+//import the workspace, which overrides the bootstrap styling
 .bg__no-bootstrap-custom-styling {
   @import './workspace/index.scss';
 }

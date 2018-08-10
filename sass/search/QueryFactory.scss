@@ -1,0 +1,25 @@
+.bg__query-factory {
+	padding: 0px 20px;
+	.bg__qf__scrollwindow {
+		margin-top:10px;
+		overflow-x: auto;
+		.bg__qf__grid {
+			width: max-content;
+			.bg__qf__cell {
+				background-color: $subdued-bg;
+				border-radius: $border-radius;
+				display:inline-block;
+				float:left;
+				overflow-y: auto;
+				overflow-x: hidden;
+				margin-right: 20px;
+				padding: 3px 8px;
+				width:600px;
+
+				.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+					background-color: $subdued-bg;
+				}
+			}
+		}
+	}
+}

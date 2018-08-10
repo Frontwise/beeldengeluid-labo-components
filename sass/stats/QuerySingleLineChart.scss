@@ -1,0 +1,5 @@
+.bg__query-line-chart {
+	.ms_toggle_btn {
+		@include switchButton();
+	}
+}
