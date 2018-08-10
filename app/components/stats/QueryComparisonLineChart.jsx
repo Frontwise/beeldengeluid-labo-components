@@ -226,7 +226,7 @@ class QueryComparisonLineChart extends React.Component {
         });
         //TODO fix the stupid manual multiple lines
         return (
-            <div className={IDUtil.cssClassName('query-line-chart')}>
+            <div className={IDUtil.cssClassName('query-comparison-line-chart')}>
 				<span className="ms_toggle_btn">
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox"
                            onClick={this.getRelativeValues.bind(this)}/>

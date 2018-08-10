@@ -447,11 +447,11 @@ class QueryBuilder extends React.Component {
 	                            // Display graph based on its type. Defaults to bar chart.
 	                            if (this.state.graphType === 'lineChart') {
 	                                graph = (
-	                                    <div className="cl_graphWrapper">
+	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
 	                                        <button
 	                                        	onClick={this.switchGraphType.bind(this, 'histogram')}
 	                                        	type="button"
-	                                        	className="cl_switchBtnCharts btn btn-primary btn-xs">
+	                                        	className="btn btn-primary btn-xs">
 	                                        	Histogram
 	                                        </button>
 
@@ -466,11 +466,11 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            } else {
 	                                graph = (
-	                                    <div className="cl_graphWrapper">
+	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
 	                                        <button
 	                                        	onClick={this.switchGraphType.bind(this, 'lineChart')}
 	                                        	type="button"
-	                                        	className="cl_switchBtnCharts btn btn-primary btn-xs">
+	                                        	className="btn btn-primary btn-xs">
 	                                        	Line chart
 	                                        </button>
 	                                        <Histogram
