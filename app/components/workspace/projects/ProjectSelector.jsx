@@ -122,11 +122,11 @@ class ProjectSelector extends React.Component {
                                     optionComponent={<ProjectOption />}
                                     placeholder="-- Select a project -- "
                                     afterOptionsComponent={({ select }) => (
-                                        <div className={IDUtil.cssClassName('ws__createProject', this.CLASS_PREFIX)}>
+                                        <div style={{margin:'15px'}}>
                                             <button className="btn btn-sm btn-primary"
-                                                    onClick={() => {
-                                                        this.addCustomFields(select);
-                                                    }}>
+                                                onClick={() => {
+                                                    this.addCustomFields(select);
+                                                }}>
                                                 + New Project
                                             </button>
                                         </div>

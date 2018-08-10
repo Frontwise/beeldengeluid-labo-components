@@ -47,7 +47,7 @@ class ProjectForm extends React.PureComponent {
                     Cancel
                 </Link>
             )
-        }else {
+        } else {
             linkToCancel = (
                 <button className="btn" type="button"
                         onClick={ComponentUtil.hideModal.bind(this, this, 'showModal', 'project__modal')}>
@@ -56,7 +56,7 @@ class ProjectForm extends React.PureComponent {
         }
 
         return (
-            <form id="bg_new-project" className={IDUtil.cssClassName('project-form')} onSubmit={this.handleSubmit.bind(this)}>
+            <form className={IDUtil.cssClassName('project-form')} onSubmit={this.handleSubmit.bind(this)}>
                 <div className="new-project-container">
                     <span className="bg__new-project-wrapper">
                         <label className="label project-modal-left">Name</label>

@@ -3,7 +3,8 @@
 		border-bottom: 1px solid #e5e5e5;
 		padding-bottom: 15px;
 	}
-	#bg_new-project  {
+
+	.bg__project-form  {
 		margin-top: 4rem;
 		padding-bottom: 3rem;
 		&::before {
@@ -39,7 +40,5 @@
 			margin-top: 3rem;
 		}
 	}
-}
-.bg__prjs__ws__createProject {
-	margin:15px;
+
 }
