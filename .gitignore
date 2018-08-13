@@ -9,3 +9,4 @@ app/collection/mappings
 !app/collection/mappings/CollectionConfig.js
 .idea
 transcript.json
+stats.json
