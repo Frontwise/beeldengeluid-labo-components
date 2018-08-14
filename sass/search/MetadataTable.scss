@@ -1,27 +1,29 @@
-.bg__metadata-table { /* MetadataTable.jsx */
-	table-layout:fixed;
-	word-wrap: break-word;
-	tr {
-		td {
-			white-space:pre-wrap;
-			&:first-child {
-				width: $metadata-table-first-column-width;
+.bg__metadata-table {
+	.table {
+		table-layout:fixed;
+		word-wrap: break-word;
+		tr {
+			td {
+				white-space:pre-wrap;
+				&:first-child {
+					width: $metadata-table-first-column-width;
+				}
 			}
 		}
-	}
-	label {
-		color: $metadata-table-label-color;
-	}
-	.bg__mdt__id {}
-	.bg__mdt__index {}
-	.bg__mdt__title {}
-	.bg__mdt__date {}
-	.bg__mdt__description {}
-	.bg__mdt__source {}
-	.bg__mdt__poster {}
-	.bg__mdt__special-props {}
-	.bg__mdt__raw-data {
-		height: 400px;
-		overflow:auto;
+		label {
+			color: $metadata-table-label-color;
+		}
+		.bg__mdt__id {}
+		.bg__mdt__index {}
+		.bg__mdt__title {}
+		.bg__mdt__date {}
+		.bg__mdt__description {}
+		.bg__mdt__source {}
+		.bg__mdt__poster {}
+		.bg__mdt__special-props {}
+		.bg__mdt__raw-data {
+			height: 400px;
+			overflow:auto;
+		}
 	}
 }
