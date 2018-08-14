@@ -7,6 +7,7 @@ app/collection/mappings
 !app/collection/mappings/ExampleCollectionMapping.js
 !app/collection/mappings/GenericPersonalCollectionConfig.js
 !app/collection/mappings/CollectionConfig.js
+!app/collection/mappings/CollectionConfigProxy.js
 .idea
 transcript.json
 stats.json
