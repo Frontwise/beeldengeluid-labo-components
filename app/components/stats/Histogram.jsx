@@ -38,11 +38,11 @@ class Histogram extends React.Component {
 	getGraphData() {
 		let startMillis = null;
 		let endMillis = null;
-		if(this.state.query.dateRange) {
-			startMillis = this.state.query.dateRange.start
-			endMillis = this.state.query.dateRange.end
+		if(this.props.query.dateRange) {
+			startMillis = this.props.query.dateRange.start
+			endMillis = this.props.query.dateRange.end
 		}
-		return this.state.data.map(aggr => {
+		return this.props.data.map(aggr => {
 			let inRange = true;
 			if ((startMillis != null && aggr.date_millis < startMillis) ||
 				endMillis != null && aggr.date_millis > endMillis) {
