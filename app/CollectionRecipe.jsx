@@ -99,9 +99,8 @@ class CollectionRecipe extends React.Component {
 	}
 
 	setActiveCollection(e) {
-		const collectionId = e.target.id;
 		this.setState({
-			activeCollection : collectionId,
+			activeCollection : e.target.id,
 			fieldAnalysisStats : null, //reset the field stats
 			fieldAnalysisTimeline : null, //reset the analysis timeline
             field: null,
@@ -127,9 +126,6 @@ class CollectionRecipe extends React.Component {
 		return null;
 	}
 
-    /**
-     * Data  Analysis
-     */
     analyseField(analysisField) {
         this.loadAnalysis(analysisField, (data, timelineData) => {
             this.setState({
@@ -337,17 +333,17 @@ class CollectionRecipe extends React.Component {
 				);
 			}
 			if(this.state.fieldAnalysisTimeline && this.state.field && this.state.dateField) {
-				const selectedCollection = Object.keys(this.state.selectedCollections)[0];
-				const fields = this.state.selectedCollections[selectedCollection].getAllFields();
-                const prettyfiedDateField = this.state.selectedCollections[selectedCollection].toPrettyFieldName(this.state.dateField)
-				const analysisField = this.getCurrentField(fields, this.state.field) || null;
-
                 fieldAnalysisTimeline = (
 					<CollectionInspectorLineChart
 						data={this.state.fieldAnalysisTimeline}
 						comparisonId={IDUtil.guid()}
-						dateField={prettyfiedDateField}
-                        analysisField={analysisField}
+						dateField={this.state.selectedCollections[this.state.activeCollection].toPrettyFieldName(
+							this.state.dateField
+						)}
+                        analysisField={this.getCurrentField(
+                        	this.state.selectedCollections[this.state.activeCollection].getAllFields(),
+                        	this.state.field
+                        ) || null}
 					/>
 				);
 			} else{

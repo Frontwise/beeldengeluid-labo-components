@@ -89,11 +89,13 @@ class CollectionInspectorLineChart extends React.Component {
             return d;
         });
 
+        const fieldLabel = this.props.analysisField ? this.props.analysisField.title : '';
+
         //TODO fix the stupid manual multiple lines
         return (
             <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
                 <h4>
-                    Completeness of metadata field "{this.props.analysisField.title}" over time for the selected date field
+                    Completeness of metadata field "{fieldLabel}" over time for the selected date field
                 </h4>
                 <ResponsiveContainer width="100%" height="50%">
                     <LineChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
