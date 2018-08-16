@@ -198,7 +198,7 @@
 		}
 		.fa-remove {
 			color: white;
-			font-size: 20px;
+			font-size: 18px;
 			position: absolute;
 			right: 0;
 			top: 5px;
@@ -207,17 +207,22 @@
 		span {
 			&.bg__facet-title {
 				color: #fff;
-				font-size: 18px;
+				font-size: 16px;
 				font-weight: normal;
-				left: 18%;
+				left: 10%;
+				overflow: hidden;
 				position: absolute;
-				top: 2px;
+				text-overflow: ellipsis;
+				top: 4px;
+				white-space: nowrap;
+				width: 225px;
 				z-index: 10;
 
 				.fa-info-circle {
 					float: left;
 					font-size: 13px;
 					margin-right: 4px;
+					padding-top: 5px;
 				}
 			}
 		}
