@@ -28,14 +28,8 @@ class SearchHit extends React.Component {
 	}
 
 	quickView(e) {
-		const title = e.currentTarget.getAttribute("title");
 		e.stopPropagation();
-
-		if(title === 'Quick view'){
-      this.setState({showModal: true, previewMode: true});
-		} else {
-      this.setState({showModal: true});
-    }
+		this.setState({showModal: true, previewMode: true});
 	}
 
 	safeModalId(resourceId) {
@@ -77,7 +71,11 @@ class SearchHit extends React.Component {
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
 		const checkBox = (
 			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
-				<input  type="checkbox" onClick={this.select.bind(this)} defaultChecked={this.props.isSelected || false} id={'cb__' + modalID}/>
+				<input
+					type="checkbox" onClick={this.select.bind(this)}
+					defaultChecked={this.props.isSelected || false}
+					id={'cb__' + modalID}
+				/>
 				<label htmlFor={'cb__' + modalID}><span/></label>
 			</div>
 		);
@@ -88,17 +86,19 @@ class SearchHit extends React.Component {
 		}
 		return (
 			<div id={result.resourceId} className={classNames.join(' ')}>
-					{checkBox}
-					<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
-						<button className="btn btn-default fa fa-file-text"
-							onClick={this.quickView.bind(this)} title="Quick view">
-						</button>
-					</div>
+				{checkBox}
+				<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
+					<button className="btn btn-default fa fa-file-text"
+						onClick={this.quickView.bind(this)} title="Quick view">
+					</button>
+				</div>
+				<div onClick={this.gotoItemDetails.bind(this, result)}>
 					<SearchSnippet
-                        onClick={this.gotoItemDetails.bind(this, result)}
 						data={snippet}
 						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
-						searchTerm={this.props.searchTerm}/>
+						searchTerm={this.props.searchTerm}
+					/>
+				</div>
 				{modal}
 			</div>
 		);
