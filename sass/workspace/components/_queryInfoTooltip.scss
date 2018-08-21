@@ -1,0 +1,31 @@
+// Nasty use of !important but necessary to customize the tooltip
+// https://www.npmjs.com/package/react-tooltip
+.bg__custom-queryTooltip {
+  z-index: 9999 !important;
+
+  h3 {
+    font-size: 20px !important;
+    padding-bottom: 10px !important;
+  }
+  padding: 30px !important;
+  background-color: rgba(0,0,0, .7) !important;
+
+  ul {
+    li {
+      padding-left: 20px !important;
+    }
+  }
+  .bg__selectedFacet-list {
+    padding-left: 10px;
+  }
+  .bg_queryDetails-wrapper {
+    padding: 10px 0;
+  }
+}
+
+.fa-info-query {
+  content: $iconAnnotateAltUrl !important;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
