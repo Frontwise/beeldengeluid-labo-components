@@ -58,9 +58,9 @@ class QueryComparisonRecipe extends React.Component {
     //to pass it to based on the ingredients of the recipe
     //TODO change this, so it knows what to do based on the recipe
     onComponentOutput(componentClass, data) {
-        if(componentClass == 'QueryFactory') {
+        if(componentClass === 'QueryFactory') {
             this.onSearched(data);
-        } else if(componentClass == 'ProjectSelector') {
+        } else if(componentClass === 'ProjectSelector') {
             this.setState(
                 {
                     activeProject: data,
@@ -123,7 +123,7 @@ class QueryComparisonRecipe extends React.Component {
                         that.state.selectedQueries[key].query.dateRange.end : currentTime,
                     start: that.state.selectedQueries[key].query.dateRange ?
                         that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
-                }
+                };
                 query.fragmentFields = null;
                 query.fragmentPath = null;
                 query.desiredFacets = desiredFacets;
@@ -157,11 +157,10 @@ class QueryComparisonRecipe extends React.Component {
                 dataPerQuery.map(data => {
                     if(data && data.query) {
                         let queryObj = {};
-                        const objData = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                        queryObj.data = ElasticsearchDataUtil.searchResultsToTimeLineData(
                             data.query,
                             data.aggregations,
                         );
-                        queryObj.data = objData;
                         queryObj.comparisonId = data.query.id;
                         queryObj.query = data.query;
                         queryObj.collectionConfig = data.collectionConfig;
@@ -238,13 +237,13 @@ class QueryComparisonRecipe extends React.Component {
             <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
                 Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
             </button>
-        )
+        );
 
                 //generates a tabbed pane with a search component for each collection + a collection browser
         const searchComponent = (
-            <button className="btn btn-primary" onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i
-                className="fa fa-plus"></i></button>
-        )
+            <button className="btn btn-primary"
+                    onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i className="fa fa-plus"/></button>
+        );
 
         let lineChart = null;
         let aggregatedHits = null;
@@ -303,7 +302,7 @@ class QueryComparisonRecipe extends React.Component {
 
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
-                <div className="overlay"></div>
+                <div className="overlay"/>
                 <div className="row">
                     <div className="bg__queryComparisonRecipe-header-btns">
                         {searchComponent}&nbsp;{chooseProjectBtn}
