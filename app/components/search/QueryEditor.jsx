@@ -38,7 +38,7 @@ class QueryEditor extends React.PureComponent {
 
 			 // store project
             ProjectAPI.save(this.props.user.id, project, resp => {
-                if (resp && resp.success) {
+                if (resp) {
                 	this.onOutput(project);
                 } else {
                     alert('An error occured while saving this project');

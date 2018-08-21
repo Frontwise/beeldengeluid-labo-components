@@ -26,14 +26,9 @@ class DataEntryForm extends React.PureComponent {
 
     //Save the data entry using the Collection API
     save(dataEntry, collectionId, callback) {
-        this.props.api.saveEntry(this.props.user.id, this.props.collectionId, dataEntry, msg => {
-            if (msg && msg.success) {
-                if (!collectionId) {
-                    // get collection id from message in case this is a new collection
-                    // todo: ask api guys to return the id as a seperate field
-                    collectionId = msg.success.substring(msg.success.lastIndexOf(' ') + 1);
-                }
-                this.props.dataEntryDidSave(msg);
+        this.props.api.saveEntry(this.props.user.id, this.props.collectionId, dataEntry, entry => {
+            if (entry && entry.id) {
+                this.props.dataEntryDidSave(entry);
             } else {
                 alert('An error occured while saving this entry');
             }

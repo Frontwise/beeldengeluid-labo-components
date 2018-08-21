@@ -98,7 +98,7 @@ class ProjectQueriesTable extends React.PureComponent {
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {
@@ -118,7 +118,7 @@ class ProjectQueriesTable extends React.PureComponent {
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {

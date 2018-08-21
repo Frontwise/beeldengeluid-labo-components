@@ -22,17 +22,9 @@ class ProjectForm extends React.PureComponent {
     }
 
     save(project, callback) {
-        this.props.api.save(this.props.user.id, project, msg => {
-            if (msg && msg.success) {
-                let projectId = project.id;
-
-                if (!projectId) {
-                    // get project id from message in case this is a new project
-                    // todo: ask api guys to return the id as a seperate field
-                    projectId = msg.success.substring(msg.success.lastIndexOf(' ') + 1);
-                }
-
-                this.props.projectDidSave(projectId);
+        this.props.api.save(this.props.user.id, project, proj => {
+            if (proj && proj.id) {
+                this.props.projectDidSave(proj.id);
             } else {
                 alert('An error occurred while saving this project');
             }
