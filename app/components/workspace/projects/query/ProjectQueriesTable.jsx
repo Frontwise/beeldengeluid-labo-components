@@ -138,14 +138,6 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     render() {
-        let combineQueriesLink = null;
-        if(this.props.compareQueryLink) {
-            combineQueriesLink = (
-                <button className="btn btn-primary combineSavedQueries" onClick={this.props.handleCompareLink.bind(this)}>
-                    {this.props.compareQueryLink.label}
-                </button>
-            )
-        }
         return (
             <div className={IDUtil.cssClassName('project-queries-table')}>
                 <div className="tools">
@@ -158,7 +150,6 @@ class ProjectQueriesTable extends React.PureComponent {
                             placeholder="Search"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
-                          {combineQueriesLink}
                       </div>
                     </div>
                 </div>
@@ -195,7 +186,8 @@ class ProjectQueriesTable extends React.PureComponent {
                 onSort={this.sortQueries.bind(this)}
                 loading={this.state.loading}
                 bulkActions={[
-                    { title: 'Delete', onApply: this.deleteQueries.bind(this) }
+                    { title: 'Delete', onApply: this.deleteQueries.bind(this) },
+                    { title: 'Combine', onApply: this.props.handleCompareLink.bind(this) }
                 ]}
                 defaultSort={{
                     field: 'name',
