@@ -140,7 +140,7 @@ class ProjectQueriesTable extends React.PureComponent {
     render() {
         const bulkActions = this.props.handleCompareLink
             ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
-            { title: 'Combine', onApply: this.props.handleCompareLink.bind(this)}]
+            { title: 'Compare', onApply: this.props.handleCompareLink.bind(this)}]
             : [{ title: 'Delete', onApply: this.deleteQueries.bind(this) }];
 
         return (
