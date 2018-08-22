@@ -138,6 +138,11 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     render() {
+        const bulkActions = this.props.handleCompareLink
+            ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
+            { title: 'Combine', onApply: this.props.handleCompareLink.bind(this)}]
+            : [{ title: 'Delete', onApply: this.deleteQueries.bind(this) }];
+
         return (
             <div className={IDUtil.cssClassName('project-queries-table')}>
                 <div className="tools">
@@ -185,10 +190,7 @@ class ProjectQueriesTable extends React.PureComponent {
                 ]}
                 onSort={this.sortQueries.bind(this)}
                 loading={this.state.loading}
-                bulkActions={[
-                    { title: 'Delete', onApply: this.deleteQueries.bind(this) },
-                    { title: 'Combine', onApply: this.props.handleCompareLink.bind(this) }
-                ]}
+                bulkActions={bulkActions}
                 defaultSort={{
                     field: 'name',
                     order: 'asc'
