@@ -112,7 +112,7 @@ class QuerySingleLineChart extends React.Component {
         }
         let totalHitsPerQuery = 0;
         this.props.data.map(item => totalHitsPerQuery += item.doc_count);
-        const graphTitle = totalHitsPerQuery + " records for query",
+        const graphTitle = "Number of records for query: (n=" + totalHitsPerQuery + ")",
             prettySelectedFieldName = this.props.collectionConfig.toPrettyFieldName(this.props.query.dateRange.field);
         return (
             <div className={IDUtil.cssClassName('query-line-chart')}>
