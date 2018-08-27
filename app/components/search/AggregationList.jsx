@@ -322,12 +322,12 @@ class AggregationList extends React.Component {
                                     <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"></i> </li>
                                 <li title="Numeric descending" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
-                                <li><FancyButton
-                labelOne='Incl.'
-                labelTwo='Excl.'
-                switch={true}
-                property={this.props.excludedFacets[key['field']]}
-                handleChange={ this.toggleExcludeFacets.bind(this, key['field']) } /></li>
+                                <li><div style="width:'100px'"><form><input
+                                    type="checkbox"
+                                    checked={this.props.excludedFacets[key['field']]}
+                                    onChange={this.toggleExcludeFacets.bind(this, key['field']) }
+                                    /><label>Excl.</label></form></div>
+                                </li>
                                 <li title="Download as CSV" onClick={this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])}>
                                     <CSVLink filename={facetName} headers={headers} data={this.props.aggregations[key['field']]} >
                                         <i className="fa fa-download" aria-hidden="true"></i>
