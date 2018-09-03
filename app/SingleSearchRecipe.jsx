@@ -147,6 +147,7 @@ class SingleSearchRecipe extends React.Component {
 		);
 		} else if(componentClass == 'SearchHit') {
 			if(data) {
+				console.debug('getting search hit info...')
 				const selectedRows = this.state.selectedRows;
 				if(data.selected) {
 					selectedRows[data.resourceId] = true;
@@ -175,6 +176,7 @@ class SingleSearchRecipe extends React.Component {
 	//this is updated via the query builder, but it does not update the state.query...
 	//TODO figure out if it's bad to update the state
 	onSearched(data) {
+		console.debug('searched...?')
 		this.setState({
 			currentOutput: data,
 			allRowsSelected : false,
@@ -224,12 +226,14 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-	toggleRows() {
+	toggleRows(e) {
+		e.preventDefault();
 		let rows = this.state.selectedRows;
 		if(this.state.allRowsSelected) {
 			rows = {};
 		} else {
 			this.state.currentOutput.results.forEach((result) => {
+				console.debug(result._id)
 				rows[result._id] = !this.state.allRowsSelected;
 			});
 		}
@@ -522,7 +526,6 @@ class SingleSearchRecipe extends React.Component {
 						{actions}
 					</div>
 				)
-
 				//populate the list of search results
 				const items = this.state.currentOutput.results.map((result, index) => {
 					return (
@@ -536,7 +539,7 @@ class SingleSearchRecipe extends React.Component {
 							} //for displaying the right date field in the hits
 							collectionConfig={this.state.collectionConfig}
 							itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-							isSelected={this.state.selectedRows[result._id]} //is the result selected
+							isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
 							onOutput={this.onComponentOutput.bind(this)}/>
 					)
 				}, this);

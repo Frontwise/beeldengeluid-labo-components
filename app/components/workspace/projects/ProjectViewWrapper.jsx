@@ -26,11 +26,8 @@ class ProjectViewWrapper extends React.PureComponent {
             annotationCount: 'bg__project-annotation-count',
         };
 
-        const bookmarkCount =
-        window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
-
-        const annotationCount =
-        window.sessionStorage.getItem(this.keys.annotationCount) || 0;
+        const bookmarkCount = window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
+        const annotationCount = window.sessionStorage.getItem(this.keys.annotationCount) || 0;
 
         this.state = {
             loading: true,
@@ -157,9 +154,9 @@ class ProjectViewWrapper extends React.PureComponent {
 
                         <div className="component">
                             <RenderComponent {...this.props}
-                                            project={this.state.project}
-                                            loadBookmarkCount={this.loadBookmarkCount}
-                                            />
+                                project={this.state.project}
+                                loadBookmarkCount={this.loadBookmarkCount}
+                            />
                         </div>
                     </div>
                 )

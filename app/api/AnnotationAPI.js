@@ -47,6 +47,10 @@ const AnnotationAPI = {
 
 	deleteAnnotation : function (annotation, callback) {
 		if(annotation.id) {
+			if(annotation.motivation == 'bookmarking') {
+				alert('will not delete a bookmark group annotation!')
+				return;
+			}
 			const url = _config.ANNOTATION_API_BASE + '/annotation/' + annotation.id;
 			const xhr = new XMLHttpRequest();
 			xhr.onreadystatechange = function() {
