@@ -76,7 +76,6 @@ class SingleSearchRecipe extends React.Component {
 				if(tmp.length == 2) {
 					let projectId = tmp[0];
 					let queryId = tmp[1];
-					//TODO add the project ID to the URL as well
 					//if the user supplied a query ID, look for it in the workspace API
 					ProjectAPI.get(this.props.user.id, projectId, project => {
 						if(project.queries) {
