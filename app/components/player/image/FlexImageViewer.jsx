@@ -215,12 +215,12 @@ class FlexImageViewer extends React.Component {
 	}
 
 	//FIXME make sure this works again for the new annotations
-	onLoadAnnotations(annotationData) {
+	onLoadAnnotations(annotationList) {
 		this.setState(
 			(previousState, currentProps) => {
 				return { //before setting the new annotations, delete the old overlays
 					annotations : this.deleteOldOverlays.call(
-						this, previousState.annotations, annotationData.annotations
+						this, previousState.annotations, annotationList
 					)
 				};
 			},

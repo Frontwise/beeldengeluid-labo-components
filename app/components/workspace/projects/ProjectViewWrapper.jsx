@@ -28,7 +28,7 @@ class ProjectViewWrapper extends React.PureComponent {
 
         const bookmarkCount =
         window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
-        
+
         const annotationCount =
         window.sessionStorage.getItem(this.keys.annotationCount) || 0;
 
@@ -86,9 +86,9 @@ class ProjectViewWrapper extends React.PureComponent {
     }
 
     //Set bookmark count to state
-    setBookmarkCount(data) {
+    setBookmarkCount(annotationList) {
         const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            data.annotations || [], (bookmarks) =>{
+            annotationList || [], (bookmarks) =>{
                 const bookmarkCount = bookmarks ? bookmarks.length : 0;
                 window.sessionStorage.setItem(this.keys.bookmarkCount, bookmarkCount);
 
@@ -96,12 +96,12 @@ class ProjectViewWrapper extends React.PureComponent {
                 window.sessionStorage.setItem(this.keys.annotationCount, annotationCount);
 
                 this.setState({
-                    bookmarkCount, 
+                    bookmarkCount,
                     annotationCount,
-                });        
+                });
             }
         );
-        
+
     }
 
     render() {
@@ -132,7 +132,7 @@ class ProjectViewWrapper extends React.PureComponent {
                                     encodeURIComponent(project.id) +
                                     '/bookmarks'}>
                                     Bookmarks<span className="count">{this.state.bookmarkCount}</span>
-                                </NavLink>                                
+                                </NavLink>
                                 <NavLink activeClassName="active" to={
                                     '/workspace/projects/' +
                                     encodeURIComponent(project.id) +
@@ -151,13 +151,13 @@ class ProjectViewWrapper extends React.PureComponent {
                                     '/queries'}>
                                     Queries<span className="count">{project.queries ? project.queries.length : 0}</span>
                                 </NavLink>
-                                
+
                             </div>
                         </div>
 
                         <div className="component">
-                            <RenderComponent {...this.props} 
-                                            project={this.state.project} 
+                            <RenderComponent {...this.props}
+                                            project={this.state.project}
                                             loadBookmarkCount={this.loadBookmarkCount}
                                             />
                         </div>
