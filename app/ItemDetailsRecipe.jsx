@@ -328,9 +328,9 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//TODO loaded all bookmarks associated with this resource (e.g. program, newspaper)
-	onLoadResourceAnnotations(data) {
+	onLoadResourceAnnotations(annotationList) {
 		this.setState({
-			resourceAnnotations : data.annotations || []
+			resourceAnnotations : annotationList || []
 		})
 	}
 

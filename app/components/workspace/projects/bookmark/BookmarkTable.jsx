@@ -94,14 +94,14 @@ class BookmarkTable extends React.PureComponent {
         );
     }
     //Annotation load callback: set data to state
-    onLoadBookmarks(data) {
+    onLoadBookmarks(annotationList) {
 
         // create bookmark lists
-        if (data && data.annotations && data.annotations.length){
+        if (annotationList && annotationList.length){
             // store annotation data
-            this.setState({annotations:data.annotations});
+            this.setState({annotations : annotationList});
             AnnotationUtil.generateBookmarkCentricList(
-                data.annotations,
+                annotationList,
                 this.onLoadResourceList.bind(this)
             );
         } else{

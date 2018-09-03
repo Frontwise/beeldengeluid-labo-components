@@ -61,8 +61,8 @@ class AnnotationList extends React.Component {
 	}
 
 	//this sets the annotations in the state object
-	onLoadAnnotations(annotationData) {
-		this.setState(annotationData);
+	onLoadAnnotations(annotationList) {
+		this.setState({annotations : annotationList});
 	}
 
 	toggleAnnotations(event) {

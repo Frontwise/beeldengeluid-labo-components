@@ -79,12 +79,12 @@ class AnnotationTable extends React.PureComponent {
     }
 
 
-    onLoadAnnotations(data) {
-        const parentAnnotations = data.annotations || [];
+    onLoadAnnotations(annotationList) {
+        const parentAnnotations = annotationList || [];
         const annotations = AnnotationUtil.generateAnnotationCentricList(
             parentAnnotations, this.props.type, (annotations)=>{
                 this.setState({
-                    parentAnnotations: data.annotations,
+                    parentAnnotations: annotationList,
                     annotations: annotations,
                     loading: false,
                     filters: this.getFilters(annotations)
@@ -95,7 +95,7 @@ class AnnotationTable extends React.PureComponent {
             )
         }
         );
-      
+
     }
 
     //Get sort orders
@@ -113,7 +113,7 @@ class AnnotationTable extends React.PureComponent {
             'template': 'Template',
         };
 
-        return this.props.sort.map((sort)=>({ 
+        return this.props.sort.map((sort)=>({
                 value: sort,
                 name: (sort in sortNames) ? sortNames[sort] : '!! ' + sort
             })
@@ -125,13 +125,13 @@ class AnnotationTable extends React.PureComponent {
             s && typeof s === 'string' ? s.toLowerCase() : ''
         )
         switch (field) {
-            case 'created': return annotations.sort((a, b) => a.created < b.created ? 1 : -1); 
-            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label) ? 1 : -1); 
-            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label) ? 1 : -1); 
-            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text) ? 1 : -1); 
-            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text) ? 1 : -1); 
-            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary) ? 1 : -1); 
-            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template) ? 1 : -1); 
+            case 'created': return annotations.sort((a, b) => a.created < b.created ? 1 : -1);
+            case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label) ? 1 : -1);
+            case 'z-a-label': return annotations.sort((a, b) => safeToLowerCase(a.label) < safeToLowerCase(b.label) ? 1 : -1);
+            case 'a-z-text': return annotations.sort((a, b) => safeToLowerCase(a.text) > safeToLowerCase(b.text) ? 1 : -1);
+            case 'z-a-text': return annotations.sort((a, b) => safeToLowerCase(a.text) < safeToLowerCase(b.text) ? 1 : -1);
+            case 'vocabulary': return annotations.sort((a, b) => safeToLowerCase(a.vocabulary) > safeToLowerCase(b.vocabulary) ? 1 : -1);
+            case 'template': return annotations.sort((a, b) => safeToLowerCase(a.template)> safeToLowerCase(b.template) ? 1 : -1);
             default: return annotations;
         }
     }
@@ -148,7 +148,7 @@ class AnnotationTable extends React.PureComponent {
                         key: 'keywords',
                         type: 'search',
                         placeholder: 'Search Annotations'
-                    }                    
+                    }
                 break;
                 case 'vocabulary':
                     return {
@@ -159,12 +159,12 @@ class AnnotationTable extends React.PureComponent {
                     }
                 break;
                 case 'bookmarkGroup':
-                    
+
                     return {
                         title:'☆ Group',
                         titleAttr: 'Bookmark group',
                         key: 'bookmarkGroup',
-                        type: 'select',                         
+                        type: 'select',
                         options: createAnnotationClassificationOptionList(items, 'groups'),
                     }
                 break;
@@ -199,12 +199,12 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-        
+
         // check the annotation vocabulary
         if (filter.vocabulary){
             annotations = annotations.filter((a)=>(a.vocabulary === filter.vocabulary));
         }
-        
+
         // check the groups for each bookmark of each annotation
         if (filter.bookmarkGroup){
             annotations = annotations.filter((a)=>(
@@ -244,7 +244,7 @@ class AnnotationTable extends React.PureComponent {
                     (Object.keys(annotation).some((key)=>(
                         typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k))
                         ))
-                    || 
+                    ||
                     // bookmarks
                     (annotation.bookmarks && annotation.bookmarks.some((bookmark)=>(
                         // bookmark
@@ -285,7 +285,7 @@ class AnnotationTable extends React.PureComponent {
 
                         // update bookmark count in project menu
                         this.props.loadBookmarkCount();
-                    }, 500);                    
+                    }, 500);
                 }
             )
         }
@@ -402,7 +402,7 @@ class AnnotationTable extends React.PureComponent {
         const showSub = {};
         this.state.annotations.forEach((b)=>{
             if (b.bookmarks && b.bookmarks.length > 0){
-                showSub[b.annotationId] = true;    
+                showSub[b.annotationId] = true;
             }
         });
         this.setState({showSub});
@@ -412,7 +412,7 @@ class AnnotationTable extends React.PureComponent {
         this.setState({showSub:{}});
     }
 
-    renderResults(renderState) {        
+    renderResults(renderState) {
         return (
             <div>
                 <h2>
@@ -434,7 +434,7 @@ class AnnotationTable extends React.PureComponent {
                     </div>
                 </h2>
                 <div className="bookmark-table">
-                    {renderState.visibleItems.length ? 
+                    {renderState.visibleItems.length ?
                         renderState.visibleItems.map((annotation, index) => (
                         <AnnotationRow
                             key={annotation.annotationId}
@@ -452,7 +452,7 @@ class AnnotationTable extends React.PureComponent {
                     }
                 </div>
 
-               
+
             </div>
         )
     }

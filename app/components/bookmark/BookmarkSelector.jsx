@@ -18,13 +18,14 @@ class BookmarkSelector extends React.Component {
 			'motivation' : 'bookmarking'
 		}
 		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id,
 			filter,
 			this.onLoadBookmarkAnnotations.bind(this)
 		);
 	}
 
 	onLoadBookmarkAnnotations(data) {
-		this.setState({bookmarks : data.annotations || []});
+		this.setState({bookmarks : data || []});
 	}
 
 	submitNewBookmark(e) {

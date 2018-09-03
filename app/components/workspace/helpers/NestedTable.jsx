@@ -4,8 +4,6 @@ import AnnotationUtil from '../../../util/AnnotationUtil';
 import ComponentUtil from '../../../util/ComponentUtil';
 import IDUtil from '../../../util/IDUtil';
 
-import AnnotationStore from '../../../flux/AnnotationStore';
-
 import ItemDetailsRecipe from '../../../ItemDetailsRecipe';
 
 import PropTypes from 'prop-types';
@@ -140,7 +138,7 @@ class NestedTable extends React.PureComponent {
                         </span>
                     </div>)
                 break;
-                default: 
+                default:
                     console.error("Unknown filter type", filter);
 
             }
