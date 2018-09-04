@@ -1,0 +1,95 @@
+.bg__transcriber {
+	@import url("https://fonts.googleapis.com/css?family=BenchNine");
+	background-color: $timeline-bg;
+	border: 1px solid $subdued-hover-color;
+	color: #9493a1;
+	font-family: "BenchNine";
+	font-size: 1.5rem;
+	letter-spacing: .3px;
+	margin-bottom: 2rem;
+	margin-top: 10px;
+	padding: 1rem 0;
+	position: relative;
+
+	.currentLine {
+		color: white;
+
+		&:hover {
+			color: white;
+		}
+	}
+
+	.line-start-time {
+		background-color: $fill-color;
+		border-radius: 4px;
+		color: white;
+		display: inline-block;
+		font-family: Curier;
+		font-size: 1rem;
+		margin: 0 10px 0 0;
+		min-width: 40px;
+		padding: 1px 6px;
+	}
+
+	.sub {
+		position: relative;
+		padding: .5rem;
+		&:hover {
+			color: white;
+		}
+	}
+
+	.transcript_search_box {
+		position: absolute;
+		top:0;
+		z-index: 10;
+		background-color: white;
+		width: 100%;
+	}
+	.transcriptsList {
+		overflow-y: scroll;
+		height: 200px;
+		margin-top:20px;
+		.highLightText {
+			color:#e02717;
+		}
+	}
+
+	//search box filter for transcriber
+
+	input[type=text][name='search-transcriptLine'] {
+		width: 92%;
+		box-sizing: border-box;
+		border: none;
+		font-size: 1rem;
+		background-color: white;
+		background-position: 10px 10px;
+		background-repeat: no-repeat;
+		padding: 6px 10px 6px 30px;
+		margin-bottom: 0;
+	}
+	.glyphicon.glyphicon-search {
+		position: absolute;
+		top: 7px;
+		left: 7px;
+		font-size: 12px;
+	}
+
+	.numberOfMatches {
+		background-color: #eee;
+		border: 1px solid #e3e3e3;
+		border-radius: 4px;
+		bottom: 2px;
+		display: inline-block;
+		float: right;
+		font-size: 12px;
+		padding: 2px 4px;
+		position: absolute;
+		right: 0;
+		text-align: center;
+		.glyphicon {
+			border: none;
+			background-color: inherit;
+		}
+	}
+}

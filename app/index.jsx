@@ -4,7 +4,6 @@ import {render} from 'react-dom';
 // tools
 import CollectionRecipe from './CollectionRecipe';
 import SingleSearchRecipe from './SingleSearchRecipe';
-import ComparativeSearchRecipe from './ComparativeSearchRecipe';
 import QueryComparisonRecipe from './QueryComparisonRecipe';
 import ItemDetailsRecipe from './ItemDetailsRecipe';
 
@@ -38,15 +37,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 		break;
 		case 'single-search':
 			component = <SingleSearchRecipe
-				recipe={recipe}
-				params={params}
-				user={user}
-				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
-			/>;
-		break;
-		case 'comparative-search':
-			component = <ComparativeSearchRecipe
 				recipe={recipe}
 				params={params}
 				user={user}

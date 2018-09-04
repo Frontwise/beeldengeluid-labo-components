@@ -113,7 +113,6 @@ class QueryComparisonLineChart extends React.Component {
             ...that.props.data[key].query,
                 term: '',
                 selectedFacets: {},
-                fieldCategory: [],
                 dateRange: {
                     ...that.props.data[key].query.dateRange,
                     end:null,
@@ -177,7 +176,7 @@ class QueryComparisonLineChart extends React.Component {
                     onClick={this.showMeTheMoney.bind(this)}
                     dataKey={k} //is equal to the queryId
                     stroke={this.COLORS[index]}
-                    strokeOpacity={this.state.opacity[k] != undefined ? this.state.opacity[k] : 1}
+                    strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 2}}
                     //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
                 />);
@@ -227,16 +226,22 @@ class QueryComparisonLineChart extends React.Component {
         });
         //TODO fix the stupid manual multiple lines
         return (
-
-            <div className={IDUtil.cssClassName('query-line-chart')}>
+            <div className={IDUtil.cssClassName('query-comparison-line-chart')}>
 				<span className="ms_toggle_btn">
-                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox"
-                           onClick={this.getRelativeValues.bind(this)}/>
+                    <input
+                        id="toggle-1"
+                        className="checkbox-toggle checkbox-toggle-round"
+                        type="checkbox"
+                        onClick={this.getRelativeValues.bind(this)}
+                    />
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
                 </span>
                 <ResponsiveContainer width="100%" height="50%">
-                    <LineChart width={1200} height={200} data={timelineData}
-                               margin={{top: 5, right: 20, bottom: 5, left: 0}}>
+                    <LineChart
+                        width={1200}
+                        height={200}
+                        data={timelineData}
+                        margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines[0]}
                         {lines[1]}
                         {lines[2]}
@@ -248,15 +253,27 @@ class QueryComparisonLineChart extends React.Component {
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
                         <YAxis width={100} >
-                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
-                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                            <Label
+                                value="Number of records"
+                                offset={10}
+                                position="insideLeft"
+                                angle={-90}
+                                style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
+                            />
                         </YAxis>
                         <Tooltip content={<CustomTooltip  viewMode={this.state.viewMode}/>}/>
                         <Legend
                             verticalAlign="bottom"
                             wrapperStyle={{ position: null }}
                             height={39}
-                        content={<CustomLegend selectedQueries={this.props.selectedQueries} lineColour={this.COLORS} labelData={this.state.collectionList} external={external}/>}
+                            content={
+                                <CustomLegend
+                                    selectedQueries={this.props.selectedQueries}
+                                    lineColour={this.COLORS}
+                                    labelData={this.state.collectionList}
+                                    external={external}
+                                />
+                            }
                         />
                     </LineChart>
                 </ResponsiveContainer>
@@ -268,7 +285,7 @@ class QueryComparisonLineChart extends React.Component {
 export default QueryComparisonLineChart;
 
 //custom legend
-const CustomLegend = React.createClass({
+class CustomLegend extends React.Component{
 
     stylings(p){
         return {
@@ -276,7 +293,7 @@ const CustomLegend = React.createClass({
             listStyle: 'none',
             padding: '10px 20px'
         }
-    },
+    }
 
     getCollectionTitle(collectionId) {
         if(collectionId ) {
@@ -288,7 +305,7 @@ const CustomLegend = React.createClass({
                 return;
             });
         }
-    },
+    }
 
     render() {
         const selectedQueries = this.props.selectedQueries,
@@ -316,7 +333,6 @@ const CustomLegend = React.createClass({
                                     "dateRange": query.query.dateRange,
                                     "selectedFacets": query.query.selectedFacets,
                                     "fieldCategory": query.query.fieldCategory,
-                                    "dateRange": query.query.dateRange,
                                     "lineColour": that.props.lineColour[index]
                                 })
                             }
@@ -395,11 +411,11 @@ const CustomLegend = React.createClass({
         }
         return null;
     }
-});
+}
 
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
 
     stylings(p){
         return {
@@ -409,13 +425,13 @@ const CustomTooltip = React.createClass({
             margin: '0',
             padding: '0'
         }
-    },
+    }
 
     render() {
         const {active} = this.props;
         if (active) {
-            const {payload, label} = this.props,
-                dataType = this.props.viewMode;
+            const {payload, label} = this.props;
+            const dataType = this.props.viewMode;
 
             if(payload && label) {
                 if (dataType === 'relative') {
@@ -436,9 +452,9 @@ const CustomTooltip = React.createClass({
                 } else if (dataType === 'inspector') {
                     const point = payload.map((p, i) => {
                             return (
-                                <p>
-                                    {this.props.payload[i].name}: <span className="rightAlign"><p style={this.stylings(p)}>{p.value ? p.value : 0}</p></span>
-                                </p>
+                                <span>
+                                    {this.props.payload[i].name}: <span className="rightAlign"><span style={this.stylings(p)}>{p.value ? p.value : 0}</span></span>
+                                </span>
                             )
                         });
                     return (
@@ -450,7 +466,7 @@ const CustomTooltip = React.createClass({
                 } else {
                     const point = payload.map(p => {
                             return (
-                                <p style={this.stylings(p)}>{p.value ? p.value : 0}</p>
+                                <span style={this.stylings(p)}>{p.value ? p.value : 0}</span>
                             )
                         }),
                         labelTotals = payload.length > 1 ? 'Totals' : 'Total',
@@ -468,7 +484,8 @@ const CustomTooltip = React.createClass({
         }
         return null;
     }
-});
+}
+
 CustomTooltip.propTypes = {
     dataType: PropTypes.string,
     payload: PropTypes.array,

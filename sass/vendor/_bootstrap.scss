@@ -8,7 +8,7 @@ $border-radius-small: 2px;
 
 /* This is needed for the glyphicons to work */
 
-$icon-font-path: "../node_modules/bootstrap-sass/assets/fonts/bootstrap/" !default;
+$icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/" !default;
 
 /* This is for enhancing the refresh glyph with animation */
 
@@ -37,4 +37,11 @@ $icon-font-path: "../node_modules/bootstrap-sass/assets/fonts/bootstrap/" !defau
 /* custom class to modify cursor on hover event */
 .custom-pointer {
     cursor: pointer;
+}
+
+.input-group-addon {
+    &.btn-effect:hover {
+        background-color: #ddd;
+        cursor: pointer;
+    }
 }

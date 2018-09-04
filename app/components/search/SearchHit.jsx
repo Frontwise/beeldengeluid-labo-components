@@ -28,18 +28,12 @@ class SearchHit extends React.Component {
 	}
 
 	quickView(e) {
-		const title = e.currentTarget.getAttribute("title");
 		e.stopPropagation();
-
-		if(title === 'Quick view'){
-      this.setState({showModal: true, previewMode: true});
-		} else {
-      this.setState({showModal: true});
-    }
+		this.setState({showModal: true, previewMode: true});
 	}
 
 	safeModalId(resourceId) {
-		return resourceId.replace(/@/g, '').replace(/:/g, '').replace(/./g, '') + '__modal'
+		return resourceId.substr(0, resourceId.indexOf('@')) + '__modal';
 	}
 
 	select(e) {
@@ -75,36 +69,38 @@ class SearchHit extends React.Component {
 		}
 
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
-		let checkBox = (
-			<div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} onClick={this.select.bind(this)}>
-				<input type="checkbox" checked={
-					this.props.isSelected ? 'checked' : ''
-				} id={'cb__' + modalID}/>
-				<label for={'cb__' + modalID}><span></span></label>
+		const checkBox = (
+			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
+				<input
+					type="checkbox" onClick={this.select.bind(this)}
+					defaultChecked={this.props.isSelected || false}
+					id={'cb__' + modalID}
+				/>
+				<label htmlFor={'cb__' + modalID}><span/></label>
 			</div>
-		)
+		);
 
 		const classNames = [IDUtil.cssClassName('search-hit')];
-		if(snippet.type == 'media_fragment') {
+		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
 		return (
 			<div id={result.resourceId} className={classNames.join(' ')}>
+				{checkBox}
+				<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
+					<button className="btn btn-default fa fa-file-text"
+						onClick={this.quickView.bind(this)} title="Quick view">
+					</button>
+				</div>
 				<div onClick={this.gotoItemDetails.bind(this, result)}>
-					{checkBox}
-					<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
-						<button className="btn btn-default fa fa-file-text"
-							onClick={this.quickView.bind(this)} title="Quick view">
-						</button>
-					</div>
 					<SearchSnippet
 						data={snippet}
 						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
-						searchTerm={this.props.searchTerm}/>
+						searchTerm={this.props.searchTerm}
+					/>
 				</div>
 				{modal}
 			</div>
-
 		);
 	}
 }

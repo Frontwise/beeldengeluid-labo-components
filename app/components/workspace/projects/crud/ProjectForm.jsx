@@ -1,4 +1,5 @@
 import IDUtil from '../../../../util/IDUtil';
+import ComponentUtil from '../../../../util/ComponentUtil';
 
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -21,56 +22,69 @@ class ProjectForm extends React.PureComponent {
     }
 
     save(project, callback) {
-        this.props.api.save(this.props.user.id, project, msg => {
-            if (msg && msg.success) {
-                let projectId = project.id;
-
-                if (!projectId) {
-                    // get project id from message in case this is a new project
-                    // todo: ask api guys to return the id as a seperate field
-                    projectId = msg.success.substring(msg.success.lastIndexOf(' ') + 1);
-                }
-
-                this.props.projectDidSave(projectId);
+        this.props.api.save(this.props.user.id, project, proj => {
+            if (proj && proj.id) {
+                this.props.projectDidSave(proj.id);
             } else {
-                alert('An error occured while saving this project');
+                alert('An error occurred while saving this project');
             }
         })
     }
 
     render() {
+        let linkToCancel = null;
+        if(this.props.cancelLink !== '') {
+            linkToCancel = (
+                <Link to={this.props.cancelLink} className="btn">
+                    Cancel
+                </Link>
+            )
+        } else {
+            linkToCancel = (
+                <button className="btn" type="button"
+                        onClick={ComponentUtil.hideModal.bind(this, this, 'showModal', 'project__modal')}>
+                    Cancel
+                </button>);
+        }
+
         return (
             <form className={IDUtil.cssClassName('project-form')} onSubmit={this.handleSubmit.bind(this)}>
-                <div>
-                    <label className="label">Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        defaultValue={this.props.project.name}
-                        ref={elem => (this.name = elem)}/>
-
-                    <label className="label">Description</label>
+                <div className="new-project-container">
+                    <span className="bg__new-project-wrapper">
+                        <label className="label project-modal-left">Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required="true"
+                            className="project-modal-right"
+                            defaultValue={this.props.project.name}
+                            ref={elem => (this.name = elem)}/>
+                    </span>
+                    <span className="bg__new-project-wrapper">
+                    <label className="label project-modal-left">Description</label>
                     <textarea
                         name="description"
+                        className="project-modal-right"
                         defaultValue={this.props.project.description}
                         ref={elem => (this.description = elem)}/>
-
+                    </span>
+                    <span className="bg__new-project-wrapper">
                     <input
                         type="checkbox"
                         name="private"
+                        className="project-modal-left"
                         defaultChecked={this.props.project.isPrivate}
                         id="project-private"
                         ref={elem => (this.isPrivate = elem)}/>
 
-                    <label htmlFor="project-private">
+                    <label htmlFor="project-private" className="project-modal-right">
                         This is a private project that is only visible to you and your collaborators
                     </label>
+                    </span>
                 </div>
 
                 <div className="actions">
-                    <Link to={this.props.cancelLink} className="btn">
-                        Cancel
-                    </Link>
+                    {linkToCancel}
                     <input
                         type="submit"
                         className="btn primary add"

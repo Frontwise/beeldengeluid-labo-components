@@ -1,6 +1,7 @@
 import ProjectModel from '../model/ProjectModel';
 
 //TODO make sure *all* calls make use of the ObjectModelUtil to ensure proper project objects!
+//TODO check to see if the response contains the 'error' key/value
 const ProjectAPI = {
 
 	save : function (userId, project, callback) {

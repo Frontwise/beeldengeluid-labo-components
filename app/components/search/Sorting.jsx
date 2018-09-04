@@ -23,14 +23,14 @@ class Sorting extends React.Component {
 	}
 
 	render() {
-		let relClass = null;
+		let dateSortBtn = null;
 		let dateClass = null;
-
-		let relOrderIcon = null;
 		let dateOrderIcon = null;
-
-		let relOrder = null;
 		let dateOrder = null;
+
+		let relClass = null;
+		let relOrderIcon = null;
+		let relOrder = null;
 
 		//first see what order icon (asc, desc) to draw
 		let tempOrderIcon = null;
@@ -58,20 +58,35 @@ class Sorting extends React.Component {
 		//define css class names
 		const classNames = ['btn-group', IDUtil.cssClassName('sorting')]
 
-		return (
-			<div className={classNames.join(' ')} role="group" aria-label="...">
-				<button className={relClass} title="Sort by relevance"
-					onClick={this.sortResults.bind(this, '_score', relOrder)}>
-					<i className="fa fa-cogs"></i>
-					&nbsp;
-					{relOrderIcon}
-				</button>
-				<button className={dateClass} title={'Sort by: ' + this.props.collectionConfig.toPrettyFieldName(this.props.dateField)}
+
+		const relSortBtn = (
+			<button
+				className={relClass}
+				title="Sort by relevance"
+				onClick={this.sortResults.bind(this, '_score', relOrder)}>
+				<i className="fa fa-cogs"></i>
+				&nbsp;
+				{relOrderIcon}
+			</button>
+		)
+
+		if(this.props.dateField) {
+			dateSortBtn = (
+				<button
+					className={dateClass}
+					title={'Sort by: ' + this.props.collectionConfig.toPrettyFieldName(this.props.dateField)}
 					onClick={this.sortResults.bind(this, this.props.dateField, dateOrder)}>
 					<i className="fa fa-calendar"></i>
 					&nbsp;
 					{dateOrderIcon}
 				</button>
+			);
+		}
+
+		return (
+			<div className={classNames.join(' ')} role="group" aria-label="...">
+				{relSortBtn}
+				{dateSortBtn}
 			</div>
 		)
 	}

@@ -1,0 +1,20 @@
+.bg__ld-resource-viewer {
+	overflow-x : auto;
+	max-height: 620px;
+	.bg__ldrv__property-list {
+		list-style : none;
+		.property {
+			margin-top:5px;
+			.predicate {
+
+			}
+			.value {
+				font-weight: bold;
+				margin-left: 20px;
+			}
+		}
+	}
+	.bg__ldrv__info {
+		margin:10px 0px;
+	}
+}

@@ -1,0 +1,15 @@
+.bg__annotation { /* Annotation.jsx */
+	span {
+		padding-right: 5px;
+	}
+	.bg__an__label {
+		color: $annotation-label-color;
+	}
+	.bg__an__fragment-info {
+		color: $annotation-frag-info-color;
+	}
+	.bg__an__prov-info {
+		color: $annotation-prov-info-color;
+		font-weight: bold;
+	}
+}

@@ -11,7 +11,7 @@ class QueryEditor extends React.PureComponent {
 		super(props);
 		this.state = {
 			project : null
-		}
+		};
 		this.CLASS_PREFIX = 'qed'
 	}
 
@@ -32,13 +32,13 @@ class QueryEditor extends React.PureComponent {
 		if(this.state.project && this.props.query) {
 			const project = this.state.project;
 			project.queries.push({
-				name : this.refs.queryName.value,
+				name : this.queryName.value,
 				query : this.props.query
-			})
+			});
 
 			 // store project
             ProjectAPI.save(this.props.user.id, project, resp => {
-                if (resp && resp.success) {
+                if (resp) {
                 	this.onOutput(project);
                 } else {
                     alert('An error occured while saving this project');
@@ -66,19 +66,19 @@ class QueryEditor extends React.PureComponent {
                     <div className="col-md-12">
                         <form className="form-horizontal" onSubmit={this.save.bind(this)}>
                             <div class="form-group">
-    							<label for="queryName">Name</label>
+    							<label htmlFor="queryName">Name</label>
     							<input
     								type="text"
     								className="form-control"
     								id="queryName"
-    								ref="queryName"
+                                    ref={input => (this.queryName = input)}
     								placeholder="Name your query"/>
   							</div>
   							<button type="submit" className="btn btn-default">Save</button>
                         </form>
                     </div>
                 </div>
-			)
+			);
 			queryTable = (
 				<div className="row">
 	                <div className={[
@@ -104,11 +104,11 @@ class QueryEditor extends React.PureComponent {
 QueryEditor.propTypes = {
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired,
 
     project: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired,
 
     query: PropTypes.object.isRequired

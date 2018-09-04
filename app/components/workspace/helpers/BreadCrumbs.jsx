@@ -6,7 +6,7 @@
  */
 export const setBreadCrumbs = (path, titles = {}) => {
   if (path && path.length) {
-    let result = '<li><a href="/" class="home"> </a> /</li>';
+    let result = '<li><a href="/" className="home"> </a> /</li>';
     let url = '';
     let title = '';
     path.forEach(p => {

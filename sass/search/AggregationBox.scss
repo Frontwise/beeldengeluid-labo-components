@@ -1,0 +1,42 @@
+.bg__aggregation-box { /* AggregationBox.jsx */
+	.bg__agb__tab-new {
+		a {
+			color: $fill-color !important;
+			&:hover {
+				text-decoration:underline;
+			}
+		}
+	}
+	.bg__agb__tag-cloud {
+		padding: $default-margin;
+
+		.bg__agb__tag-cloud-item {
+			color: $fill-color;
+			cursor: pointer;
+			display:inline-block;
+			margin: 0px 5px 5px 0px;
+			&:hover {
+				text-decoration:underline;
+			}
+		}
+
+		.active.bg__agb__tag-cloud-item {
+			font-weight: bold;
+		}
+	}
+	.bg__agb__breadcrumbs {
+		.bg__agb__crumb {
+			background-color: $fill-color;
+	    	color: white;
+	    	display: inline-block;
+	    	margin: 0px 5px 5px 0px;
+	    	padding: 0px 5px;
+	    	i {
+	    		cursor: pointer;
+		    	&:hover {
+		    		color: $highlight-color;
+		    	}
+		    }
+		}
+	}
+}

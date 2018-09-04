@@ -1,10 +1,7 @@
-import QueryModel from '../../model/QueryModel';
-
 import SearchAPI from '../../api/SearchAPI';
 
 //data utilities
 import CollectionUtil from '../../util/CollectionUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import IDUtil from '../../util/IDUtil';
 import TimeUtil from '../../util/TimeUtil';
 
@@ -14,7 +11,6 @@ import DateRangeSelector from './DateRangeSelector';
 import AggregationBox from './AggregationBox';
 import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
-import CollectionConfig from '../../collection/mappings/CollectionConfig';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
 
@@ -34,15 +30,14 @@ class QueryBuilder extends React.Component {
 			displayFacets : this.props.collectionConfig.facets ? true : false,
 			graphType : null,
 			isSearching : false,
-
 			query : this.props.query, //this is only set by the owner after choosing a collection or loading the page
-
 			//query OUTPUT
             currentCollectionHits: this.getCollectionHits(this.props.collectionConfig),
             aggregations : {}
 
-        }
+        };
         this.CLASS_PREFIX = 'qb';
+		this.setSearchTerm = this.props.query.term || null;
 	}
 
 	/*---------------------------------- COMPONENT INIT --------------------------------------*/
@@ -51,10 +46,9 @@ class QueryBuilder extends React.Component {
 	componentDidMount() {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
-			this.refs.searchTerm.value = this.props.query.term;
-
+            this.setSearchTerm = this.props.query.term;
 			//never search with an empty search term on init (FIXME not always desirable)
-			if(this.props.query.term && this.props.query.term.trim() != '') {
+			if(this.props.query.term && this.props.query.term.trim() !== '') {
 				this.doSearch(this.props.query);
 			}
 		}
@@ -103,7 +97,7 @@ class QueryBuilder extends React.Component {
 	}
 
 	searchFormKeyPressed(target) {
-		if(target.charCode==13) {
+		if(target.charCode===13) {
 			this.newSearch();
 		}
 	}
@@ -112,14 +106,17 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 
 		//reset certain query properties
-		//q.fieldCategory = null;
 		q.selectedFacets = {};
 		q.excludedFacets = {};
 		//q.dateRange = null;
 		q.offset = 0;
-		q.term = this.refs.searchTerm.value;
+		q.term = this.setSearchTerm.value;
 
         this.doSearch(q, true);
+	}
+
+	clearSearch() {
+		this.onOutput(null);
 	}
 
 	//this resets the paging
@@ -131,7 +128,7 @@ class QueryBuilder extends React.Component {
 		//reset certain query properties
 		q.searchLayers = searchLayers;
 		q.offset = 0;
-		q.term = this.refs.searchTerm.value;
+		q.term = this.setSearchTerm.value;
 
 		this.doSearch(q, true);
 	}
@@ -139,7 +136,7 @@ class QueryBuilder extends React.Component {
 	/*---------------------------------- FUNCTION THAT RECEIVES DATA FROM CHILD COMPONENTS --------------------------------------*/
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'AggregationList' || componentClass == 'AggregationBox') {
+		if(componentClass === 'AggregationList' || componentClass === 'AggregationBox') {
 			let q = this.state.query;
 
 			//reset the following query params
@@ -147,24 +144,24 @@ class QueryBuilder extends React.Component {
 			q.selectedFacets = data.selectedFacets;
 			q.excludedFacets = data.excludedFacets;
 			q.offset = 0;
-			q.term = this.refs.searchTerm.value;
+			q.term = this.setSearchTerm.value;
 			this.doSearch(q, true);
-		} else if(componentClass == 'DateRangeSelector') {
+		} else if(componentClass === 'DateRangeSelector') {
 			//first delete the old selection from the desired facets
 			const df = this.state.query.desiredFacets;
 			let index = -1;
 			for(let i=0;i<df.length;i++) {
-				if(df[i].type == 'date_histogram') {
+				if(df[i].type === 'date_histogram') {
 					index = i;
 					break;
 				}
 			}
-			if(index != -1) {
+			if(index !== -1) {
 				df.splice(index,1);
 			}
 
 			//add the new selection
-			if(data != null) {
+			if(data !== null) {
 				//add the desired date aggregation (of the type date_histogram)
 				df.push({
 					field: data.field,
@@ -180,14 +177,14 @@ class QueryBuilder extends React.Component {
 			q.dateRange = data;
 			q.desiredFacets = df;
 			q.offset = 0;
-			q.term = this.refs.searchTerm.value;
+			q.term = this.setSearchTerm.value;
 
 			this.doSearch(q, true)
-		} else if(componentClass == 'FieldCategorySelector') {
+		} else if(componentClass === 'FieldCategorySelector') {
 			let q = this.state.query;
 			q.fieldCategory = data;
 			q.offset = 0;
-			q.term = this.refs.searchTerm.value;
+			q.term = this.setSearchTerm.value;
 
 			this.doSearch(q, true)
 		}
@@ -199,7 +196,7 @@ class QueryBuilder extends React.Component {
 	gotoPage(pageNumber) {
 		let q = this.state.query;
 		q.offset = (pageNumber-1) * this.props.pageSize;
-		q.term = this.refs.searchTerm.value;
+		q.term = this.setSearchTerm.value;
 
 		this.doSearch(q, true);
 	}
@@ -209,7 +206,7 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 		q.sort = sortParams;
 		q.offset = 0;
-		q.term = this.refs.searchTerm.value;
+		q.term = this.setSearchTerm.value;
 
 		this.doSearch(q, true);
 	}
@@ -218,7 +215,7 @@ class QueryBuilder extends React.Component {
 		let q = this.state.query;
 		q.dateRange = null;
 		q.offset = 0;
-		q.term = this.refs.searchTerm.value;
+		q.term = this.setSearchTerm.value;
 
 		this.doSearch(q, true);
 	}
@@ -226,18 +223,15 @@ class QueryBuilder extends React.Component {
     totalDatesOutsideOfRange() {
     	if(this.state.aggregations && this.state.query.dateRange &&
     		this.state.aggregations[this.state.query.dateRange.field]) {
-    		const startMillis = this.state.query.dateRange.start
-    		const endMillis = this.state.query.dateRange.end
-    		const outOfRangeBuckets = this.state.aggregations[this.state.query.dateRange.field].filter(x => {
+    		const startMillis = this.state.query.dateRange.start;
+    		const endMillis = this.state.query.dateRange.end;
+    		return this.state.aggregations[this.state.query.dateRange.field].filter(x => {
     			if(startMillis != null && x.date_millis < startMillis) {
     				return true;
     			}
-    			if(endMillis != null && x.date_millis > endMillis) {
-    				return true;
-    			}
-    			return false;
+    			return endMillis !== null && x.date_millis > endMillis;
+
     		});
-    		return outOfRangeBuckets;
     	}
     	return null;
     }
@@ -277,7 +271,6 @@ class QueryBuilder extends React.Component {
             this.setState(
             	{
             		searchId: null,
-
 	            	query : q,
 
 	                //query OUTPUT is all empty
@@ -292,7 +285,7 @@ class QueryBuilder extends React.Component {
             );
         }
 
-        if(data && data.error == 'access denied') {
+        if(data && data.error === 'access denied') {
         	alert('The system is not allowed to search through this collection');
         }
     }
@@ -305,7 +298,7 @@ class QueryBuilder extends React.Component {
 	            const desiredMaxYear = this.props.collectionConfig.getMaximumYear();
 
                 let maxDate = null;
-                if(desiredMaxYear != -1) {
+                if(desiredMaxYear !== -1) {
                 	maxDate = moment().set({'year': desiredMaxYear, 'month': 0, 'date': 1})
                 } else {
                 	maxDate = moment()
@@ -314,14 +307,14 @@ class QueryBuilder extends React.Component {
                 let i = buckets.findIndex(d => {
                 	return desiredMinYear == moment(d.date_millis, 'x').year()
                 })
-                i = i == -1 ? 0 : i;
+                i = i === -1 ? 0 : i;
 
                 let j = buckets.findIndex(d => {
                 	return maxDate.isBefore(moment(d.date_millis, 'x'))
                 })
-				j = j == -1 ? buckets.length -1 : j;
+				j = j === -1 ? buckets.length -1 : j;
 
-                if(!(i == 0 && j == (buckets.length -1))) {
+                if(!(i === 0 && j === (buckets.length -1))) {
                 	aggregations[dateRange.field] = aggregations[dateRange.field].splice(i, j - i);
                 }
 	        }
@@ -359,10 +352,10 @@ class QueryBuilder extends React.Component {
 					collectionConfig={this.props.collectionConfig}
 					onOutput={this.onComponentOutput.bind(this)}
 				/>
-			)
+			);
 
 			//draw the checkboxes for selecting layers
-			if(this.state.query.searchLayers && 1==2) {
+			if(this.state.query.searchLayers && 1===2) {
 				const layers = Object.keys(this.state.query.searchLayers).map((layer, index) => {
 					return (
 						<label key={'layer__' + index} className="checkbox-inline">
@@ -371,7 +364,7 @@ class QueryBuilder extends React.Component {
 								{CollectionUtil.getSearchLayerName(this.props.collectionConfig.getSearchIndex(), layer)}
 						</label>
 					)
-				})
+				});
 				// Hide collection metada tickbox from current search interface.
 				//https://github.com/CLARIAH/wp5_mediasuite/issues/130
 				// it could be enabled once we have more options to provide.
@@ -398,11 +391,11 @@ class QueryBuilder extends React.Component {
 				let outOfRangeCount = 0;
 
                 //let countsBasedOnDateRange = null;
-                let currentSearchTerm = this.refs.searchTerm.value || null;
+                let currentSearchTerm = (this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
-					if(this.props.aggregationView == 'box') {
+					if(this.props.aggregationView === 'box') {
 						aggrView = (
 							<AggregationBox
 								searchId={this.state.searchId} //for determining when the component should rerender
@@ -420,11 +413,12 @@ class QueryBuilder extends React.Component {
 								searchId={this.state.searchId} //for determining when the component should rerender
 								queryId={this.state.query.id} //TODO implement in the list component
 								aggregations={this.state.aggregations} //part of the search results
-								facets={this.state.query.desiredFacets} //as obtained from the collection config
-								excludedFacets={this.state.query.excludedFacets}
+
+                desiredFacets={this.state.query.desiredFacets}
 								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-                                desiredFacets={this.state.query.desiredFacets}
-                                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
+								excludedFacets={this.state.query.excludedFacets}
+
+                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
 								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
 							/>
 						)
@@ -460,11 +454,11 @@ class QueryBuilder extends React.Component {
 	                            // Display graph based on its type. Defaults to bar chart.
 	                            if (this.state.graphType === 'lineChart') {
 	                                graph = (
-	                                    <div className="cl_graphWrapper">
+	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
 	                                        <button
 	                                        	onClick={this.switchGraphType.bind(this, 'histogram')}
 	                                        	type="button"
-	                                        	className="cl_switchBtnCharts btn btn-primary btn-xs">
+	                                        	className="btn btn-primary btn-xs">
 	                                        	Histogram
 	                                        </button>
 
@@ -479,19 +473,23 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            } else {
 	                                graph = (
-	                                    <div className="cl_graphWrapper">
+	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
 	                                        <button
 	                                        	onClick={this.switchGraphType.bind(this, 'lineChart')}
 	                                        	type="button"
-	                                        	className="cl_switchBtnCharts btn btn-primary btn-xs">
+	                                        	className="btn btn-primary btn-xs">
 	                                        	Line chart
 	                                        </button>
 	                                        <Histogram
 	                                            queryId={this.state.query.id}
+                                                query={this.state.query}
+                                                comparisonId={this.state.searchId}
 	                                            dateRange={this.state.query.dateRange}
 	                                            data={this.state.aggregations[this.state.query.dateRange.field]}
 	                                            title={this.props.collectionConfig.toPrettyFieldName(this.state.query.dateRange.field)}
-	                                            searchId={this.state.searchId}/>
+	                                            searchId={this.state.searchId}
+                                                collectionConfig={this.props.collectionConfig}
+                                            />
 	                                    </div>
 	                                );
 	                            }
@@ -506,7 +504,7 @@ class QueryBuilder extends React.Component {
 						}
 
 						//draw the summary stuff
-						if(this.state.aggregations && this.state.query.dateRange.field != 'null_option') {
+						if(this.state.aggregations && this.state.query.dateRange.field !== 'null_option') {
                         	if(this.state.aggregations[this.state.query.dateRange.field].length > 0) {
 		            			dateCounts = this.state.aggregations[this.state.query.dateRange.field].map(
 		            				(x => x.doc_count)).reduce(function(accumulator, currentValue) {
@@ -525,7 +523,7 @@ class QueryBuilder extends React.Component {
 			                    }
 
 		                    	let info = '';
-		                    	let tmp = []
+		                    	let tmp = [];
 		                        if(this.state.query.dateRange.start) {
 		                        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.start));
 		                        } else {
@@ -537,7 +535,7 @@ class QueryBuilder extends React.Component {
 		                        	tmp.push('up until now');
 		                        }
 		                        if(tmp.length > 0) {
-		                        	info = tmp.join(tmp.length == 2 ? ' till ' : '');
+		                        	info = tmp.join(tmp.length === 2 ? ' till ' : '');
 		                        	info += ' (using: '+this.state.query.dateRange.field+')';
 		                        }
 		                    	dateRangeCrumb = (
@@ -547,7 +545,7 @@ class QueryBuilder extends React.Component {
 											<em>Selected date range:&nbsp;</em>
 											{info}
 											&nbsp;
-											<i className="fa fa-close" onClick={this.resetDateRange.bind(this)}></i>
+											<i className="fa fa-close" onClick={this.resetDateRange.bind(this)}/>
 										</div>
 									</div>
 		                    	)
@@ -570,7 +568,7 @@ class QueryBuilder extends React.Component {
 
 	                    //populate the date related stats
 			            if(dateCounts != null) {
-			            	let info = 'Please note that each record possibly can have multiple occurances of the selected date field,';
+			            	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
 			            	info += '<br/>making it possible that there are more dates found than the number of search results';
 			            	dateStats = (
 			            		<div>
@@ -579,7 +577,7 @@ class QueryBuilder extends React.Component {
 			            			<span data-for={'__qb__tt' + this.state.query.id}
 			            				data-tip={info}
 			            				data-html={true}>
-										<i className="fa fa-info-circle"></i>
+										<i className="fa fa-info-circle"/>
 									</span>
 			            			<ul>
 				            			<li>Dates within the selected date range: {dateCounts - outOfRangeCount}</li>
@@ -597,7 +595,7 @@ class QueryBuilder extends React.Component {
                 resultStats = (
                     <div>
                         <div>
-                            Total number of results based on <em>&quot;{currentSearchTerm}&quot;</em>
+                            Total number of results based on <em>&quot;{currentSearchTerm}&quot; </em>
                             and selected filters: <b>{this.state.totalHits}</b>
                             {dateStats}
                         </div>
@@ -608,7 +606,7 @@ class QueryBuilder extends React.Component {
                     resultBlock = (
                         <div>
                             {resultStats}
-                            <div className="separator"></div>
+                            <div className="separator"/>
                             {dateRangeCrumb}
                             <div className="row">
                                 <div className="col-md-12">
@@ -616,7 +614,7 @@ class QueryBuilder extends React.Component {
                                     {graph}
                                 </div>
                             </div>
-                            <div className="separator"></div>
+                            <div className="separator"/>
                             <div>
                                 <div className="col-md-12">
                                     {aggregationBox}
@@ -629,7 +627,7 @@ class QueryBuilder extends React.Component {
                     resultBlock = (
                         <div>
                             {resultStats}
-                            <div className="separator"></div>
+                            <div className="separator"/>
                             {dateRangeCrumb}
                             <div className="row">
                                 <div className="col-md-12">
@@ -637,7 +635,7 @@ class QueryBuilder extends React.Component {
                                     {graph}
                                 </div>
                             </div>
-                            <div className="separator"></div>
+                            <div className="separator"/>
                             {aggregationBox}
                         </div>
                     )
@@ -655,7 +653,7 @@ class QueryBuilder extends React.Component {
 				}
 				resultBlock = (
 					<div className="alert alert-danger">
-						No results found for search term <b>{this.refs.searchTerm.value.toUpperCase()}</b>
+						No results found for search term <b>{this.setSearchTerm.value.toUpperCase()}</b>
 						<br />
 						{dateRangeMessage}
 					</div>
@@ -664,16 +662,15 @@ class QueryBuilder extends React.Component {
 
 			//determine which icon to show after the search input
 			if(this.state.isSearching === true) {
-				searchIcon = (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>)
+				searchIcon = (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"/>)
 			} else {
-				searchIcon = (<i className="fa fa-search"></i>)
+				searchIcon = (<i className="fa fa-search"/>)
 			}
-
 			//render the stuff on screen
 			return (
 				<div className={IDUtil.cssClassName('query-builder')}>
 					{heading}
-					<div className="separator"></div>
+					<div className="separator"/>
 					<div className="row">
 						<div className="col-md-12">
 							<form className="form-horizontal" onSubmit={this.blockSearch.bind(this)}>
@@ -681,7 +678,7 @@ class QueryBuilder extends React.Component {
 									<div className="col-sm-6">
 										<div className="input-group">
 											<input type="text" className="form-control" onKeyPress={this.searchFormKeyPressed.bind(this)}
-												id="search_term" ref="searchTerm" placeholder="Search"/>
+                                                   id="search_term" defaultValue={typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''} ref={input => (this.setSearchTerm = input)} placeholder="Search"/>
 											<span className="input-group-addon btn-effect" onClick={this.newSearch.bind(this)}>
 												{searchIcon}
 											</span>
@@ -692,10 +689,18 @@ class QueryBuilder extends React.Component {
 									</div>
 								</div>
 							</form>
+							<a onClick={this.clearSearch.bind(this)}>
+								Clear search&nbsp;<span data-for={'__clear-search-tt'}
+                                  data-tip="Clear all query parameters, but keeps the collection selected"
+                                  data-html={false}>
+                                  	<i className="fa fa-info-circle"/>
+								</span>
+							</a>
+							<ReactTooltip id={'__clear-search-tt'}/>
 						</div>
 					</div>
 					{layerOptions}
-					<div className="separator"></div>
+					<div className="separator"/>
 					{resultBlock}
 				</div>
 			)

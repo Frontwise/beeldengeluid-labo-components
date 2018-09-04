@@ -1,7 +1,6 @@
 import CollectionAPI from '../../api/CollectionAPI';
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
-import Autosuggest from 'react-autosuggest';
 import FieldSelector from './FieldSelector';
 
 //this component relies on the collection statistics as input
@@ -37,9 +36,9 @@ class CollectionAnalyser extends React.Component {
         if (this.state.field){
             this.props.onChange(this.state.field);
         }
-
-        this.previewCompleteness();
-
+        if(this.state.fields) {
+            this.previewCompleteness();
+        }
         this.props.collectionConfig.loadFieldDescriptions(this.setDescriptions.bind(this))
     }
 
@@ -179,9 +178,10 @@ class CollectionAnalyser extends React.Component {
 
 	render() {
 		let analysisBlock = null;
+        let fieldSelector = null;
 
 		//only draw the rest when a collection is selected (either using the selector or via the props)
-		if(this.props.collectionConfig) {
+		if(this.props.collectionConfig && this.state.fields) {
 
             // get current field data and completeness
             const field = this.getCurrentField();
@@ -227,6 +227,18 @@ class CollectionAnalyser extends React.Component {
                 </div>
             )
 
+            fieldSelector = (
+                <FieldSelector
+                    onSelect={this.onFieldSelected.bind(this)}
+                    onClose={this.onCloseFieldSelector.bind(this)}
+                    current={this.state.field}
+                    fields={this.state.fields}
+                    completeness={this.state.completeness}
+                    descriptions={this.state.descriptions}
+                    showLevelColumn={this.props.collectionConfig.usesLayeredModel()}
+                />
+            )
+
         } else { //if there are no stats available
             analysisBlock = (<h5>This collection is available in the registry, but is absent in the media suite index</h5>)
         }
@@ -242,15 +254,7 @@ class CollectionAnalyser extends React.Component {
 
                 {/* only toggle visibility to keep the component state */}
                 <div style={{display: this.state.showFieldSelector ? 'block' : 'none'}}>
-                    <FieldSelector
-                        onSelect={this.onFieldSelected.bind(this)}
-                        onClose={this.onCloseFieldSelector.bind(this)}
-                        current={this.state.field}
-                        fields={this.state.fields}
-                        completeness={this.state.completeness}
-                        descriptions={this.state.descriptions}
-                        showLevelColumn={this.props.collectionConfig.usesLayeredModel()}
-                    />
+                    {fieldSelector}
                 </div>
 
 			</div>

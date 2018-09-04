@@ -1,14 +1,3 @@
-// Stylings for autosuggest in the CollectionAnalyser.
-.collectionAnalyser-autosuggest {
-  .react-autosuggest__container {
-    input.react-autosuggest__input {
-      width:100%;
-      border: 1px solid #ccc;
-      height: 34px;
-    }
-  }
-}
-
 .react-autosuggest__suggestions-container {
   display: none;
 }

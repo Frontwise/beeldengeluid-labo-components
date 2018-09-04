@@ -1,0 +1,27 @@
+.bg__single-search-recipe {
+	.bg__rcp__ss__select {
+		@include checkbox();
+		margin-top: 6px;
+	}
+	.bg__rcp__ss__table-actions-header {
+		background-color: #2d343a;
+		border-radius: 6px;
+		margin: 5px;
+		min-height:53px;
+		min-width: 100%;
+		padding: 10px;
+		.bg__rcp__ss__table-actions {
+			float:left;
+			.btn {
+				margin-right:2px;
+			}
+		}
+	}
+	.bg__rcp__ss__table-actions-footer {
+		padding: 10px;
+		text-align: center;
+	}
+	.result-list {
+		margin-top: 25px;
+	}
+}

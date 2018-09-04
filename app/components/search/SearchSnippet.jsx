@@ -85,16 +85,12 @@ class SearchSnippet extends React.Component {
 					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"></span>);
 				} else if(mt == 'image') {
 					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"></span>);
-				}
-				return (<span className={IconUtil.getMimeTypeIcon(null, true, true, false)} title="Unknown content type"></span>);
+				} else if(mt == 'text') {
+					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"></span>);
+ 				}
 			});
 
-			if(mediaTypes.length == 0) {
-				mediaTypes.push(
-					<span className={IconUtil.getMimeTypeIcon(null, true, true, false)} title="Unknown content type"></span>
-				)
-			}
-
+			//Note: assigning a media type (to the result data) automatically means it's accessible in the media suite!
 			if(this.props.data.mediaTypes.length > 0) {
 				accessIcon = (
 					<span

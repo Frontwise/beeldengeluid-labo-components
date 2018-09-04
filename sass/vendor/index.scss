@@ -1,0 +1,9 @@
+/* import bootstrap SASS first, since some variables are reused in _component-variables.scss */
+@import './_bootstrap.scss';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+/* import React add-ons */
+@import '_react-datepicker.scss';
+@import '_react-autosuggest.scss';
+@import '~react-power-select/dist/react-power-select.css';
+@import '_react-power-select.scss';

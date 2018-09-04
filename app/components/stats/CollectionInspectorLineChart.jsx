@@ -44,8 +44,8 @@ class CollectionInspectorLineChart extends React.Component {
     }
 
     showMeTheMoney(event, index) {
-        console.debug(event)
-        console.debug(index)
+        console.debug(event);
+        console.debug(index);
         console.debug('Dikke scheet');
     }
 
@@ -60,11 +60,10 @@ class CollectionInspectorLineChart extends React.Component {
                     label={ <LabelAsPoint /> } //the LabelAsPoint class handles the onclick of a dot
                     activeDot={false}
                     name={this.props.data[k].label}
-                    type="lineal"
                     onClick={this.showMeTheMoney.bind(this)}
                     dataKey={k} //is equal to the queryId
                     stroke={this.COLORS[index]}
-                    strokeOpacity={this.state.opacity[k] != undefined ? this.state.opacity[k] : 1}
+                    strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 1}}
                     //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
                 />);
@@ -77,7 +76,7 @@ class CollectionInspectorLineChart extends React.Component {
                 if(temp[d.year]) {
                     temp[d.year][k] = d[k];
                 } else {
-                    let t = {}
+                    let t = {};
                     t[k] = d[k];
                     temp[d.year] = t;
                 }
@@ -90,10 +89,14 @@ class CollectionInspectorLineChart extends React.Component {
             return d;
         });
 
+        const fieldLabel = this.props.analysisField ? this.props.analysisField.title : '';
+
         //TODO fix the stupid manual multiple lines
         return (
-            <div className={IDUtil.cssClassName('query-line-chart')}>
-                <h4 className="bg__header-inspector-graph">Completeness of metadata field "{this.props.analysisField.title}" over time for the selected date field</h4>
+            <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
+                <h4>
+                    Completeness of metadata field "{fieldLabel}" over time for the selected date field
+                </h4>
                 <ResponsiveContainer width="100%" height="50%">
                     <LineChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines}
@@ -116,40 +119,41 @@ class CollectionInspectorLineChart extends React.Component {
 }
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
-const CustomTooltip = React.createClass({
+class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
-            const {payload, label} = this.props,
-                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
-                dataType = payload[0].payload.dataType;
-            if (dataType === 'relative') {
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>{dataType} Completeness</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
-                    </div>
-                );
-            } else {
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>Field Completeness</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                        <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
-                        <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
-                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
-                    </div>
-                );
+            const {payload, label} = this.props;
+            if(payload && payload.length > 0) {
+                const relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0;
+                const dataType = payload[0].payload.dataType;
+                if (dataType === 'relative') {
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>{dataType} Completeness</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                            <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>Field Completeness</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                            <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
+                            <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
+                            <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                        </div>
+                    );
+                }
             }
         }
         return null;
     }
-});
+}
 
 export class LabelAsPoint extends React.Component {
     constructor(props) {
-        //console.debug(props);
         super(props);
     }
 

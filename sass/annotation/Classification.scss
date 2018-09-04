@@ -1,0 +1,8 @@
+.bg__classification { /* Classification.jsx */
+	display: inline-block !important;
+	font-size: 100% !important;
+	margin: 0px 5px 5px 0px;
+	&.ms_custom {
+		color: $subdued-bg;
+	}
+}

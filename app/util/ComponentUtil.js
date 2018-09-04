@@ -31,17 +31,33 @@ const ComponentUtil = {
 		}
 	},
 
-	storeJSONInLocalStorage(key, data) {
-		if(ComponentUtil.supportsHTML5Storage() && data) {
-			try {
-				localStorage[key] = JSON.stringify(data);
-				return true
-			} catch (e) {
-				console.error(e);
-			}
-		}
-		return false
-	},
+    storeJSONInLocalStorage(key, data) {
+        if(ComponentUtil.supportsHTML5Storage()) {
+            try {
+                if(data === null) {
+                    localStorage.removeItem(key);
+                } else {
+                    localStorage[key] = JSON.stringify(data);
+                }
+                return true
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        return false
+    },
+
+    removeJSONByKeyInLocalStorage(key) {
+        if (ComponentUtil.supportsHTML5Storage()) {
+            try {
+                localStorage.removeItem(key);
+                return true
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        return false
+    },
 
 	getJSONFromLocalStorage(key) {
 		if(ComponentUtil.supportsHTML5Storage() && localStorage[key]) {

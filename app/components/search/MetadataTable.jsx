@@ -66,49 +66,48 @@ class MetadataTable extends React.Component {
 			}
 		}
 
-		//determine the component's main css classes
-		const classNames = ['table', IDUtil.cssClassName('metadata-table')];
-
 		return (
-			<table className={classNames.join(' ')}>
-				<tbody>
-					{poster}
-					<tr className={IDUtil.cssClassName('id', this.CLASS_PREFIX)}>
-						<td><label>ID</label></td>
-						<td>{this.props.data.resourceId}</td>
-					</tr>
-					<tr className={IDUtil.cssClassName('index', this.CLASS_PREFIX)}>
-						<td><label>Index</label></td>
-						<td>{this.props.data.index}&nbsp;(type: {this.props.data.docType})</td>
-					</tr>
-					<tr className={IDUtil.cssClassName('title', this.CLASS_PREFIX)}>
-						<td><label>Title</label></td>
-						<td>{this.props.data.title ? this.props.data.title : 'No title available'}</td>
-					</tr>
-                    <tr className={IDUtil.cssClassName('date', this.CLASS_PREFIX)}>
-                        <td><label>Date <span data-for={'__ci_tooltip'}
-                                              data-tip={this.props.data.dateField}
-                                              data-html={false}>
-							<i className="fa fa-info-circle"></i>
-						</span>
-                        </label></td>
-                        <td>{this.props.data.date}</td>
-                    </tr>
-					<tr className={IDUtil.cssClassName('description', this.CLASS_PREFIX)}>
-						<td><label>Description</label></td>
-						<td>{this.props.data.description ? this.props.data.description : 'No description available'}</td>
-					</tr>
-					{source}
-					{specialProperties}
-                    <ReactTooltip id={'__ci_tooltip'}/>
-					<tr>
-						<td><label>All data</label></td>
-						<td>
-							<div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)} id={'__rawdata_' + IDUtil.hashCode(this.props.data.resourceId)}></div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<div className={IDUtil.cssClassName('metadata-table')}>
+				<table className="table">
+					<tbody>
+						{poster}
+						<tr className={IDUtil.cssClassName('id', this.CLASS_PREFIX)}>
+							<td><label>ID</label></td>
+							<td>{this.props.data.resourceId}</td>
+						</tr>
+						<tr className={IDUtil.cssClassName('index', this.CLASS_PREFIX)}>
+							<td><label>Index</label></td>
+							<td>{this.props.data.index}&nbsp;(type: {this.props.data.docType})</td>
+						</tr>
+						<tr className={IDUtil.cssClassName('title', this.CLASS_PREFIX)}>
+							<td><label>Title</label></td>
+							<td>{this.props.data.title ? this.props.data.title : 'No title available'}</td>
+						</tr>
+	                    <tr className={IDUtil.cssClassName('date', this.CLASS_PREFIX)}>
+	                        <td><label>Date <span data-for={'__ci_tooltip'}
+	                                              data-tip={this.props.data.dateField}
+	                                              data-html={false}>
+								<i className="fa fa-info-circle"/>
+							</span>
+	                        </label></td>
+	                        <td>{this.props.data.date}</td>
+	                    </tr>
+						<tr className={IDUtil.cssClassName('description', this.CLASS_PREFIX)}>
+							<td><label>Description</label></td>
+							<td>{this.props.data.description ? this.props.data.description : 'No description available'}</td>
+						</tr>
+						{source}
+						{specialProperties}
+						<tr>
+							<td><label>All data</label></td>
+							<td>
+								<div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)} id={'__rawdata_' + IDUtil.hashCode(this.props.data.resourceId)}></div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<ReactTooltip id={'__ci_tooltip'}/>
+			</div>
 		);
 	}
 

@@ -1,6 +1,7 @@
 import QueryModel from './model/QueryModel';
 
 import SearchAPI from './api/SearchAPI';
+import ProjectAPI from './api/ProjectAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 
 import IDUtil from './util/IDUtil';
@@ -11,6 +12,7 @@ import AnnotationUtil from './util/AnnotationUtil';
 
 import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
+
 import FlexRouter from './util/FlexRouter';
 
 import CollectionSelector from './components/collection/CollectionSelector';
@@ -25,16 +27,10 @@ import Sorting from './components/search/Sorting';
 
 import PropTypes from 'prop-types';
 import { initHelp } from './components/workspace/helpers/helpDoc';
-    
+
 class SingleSearchRecipe extends React.Component {
 	constructor(props) {
 		super(props);
-		let collectionId = null;
-		if(this.props.params.cids) {
-			collectionId = this.props.params.cids.split(',')[0];
-		} else {
-			collectionId = this.props.recipe.ingredients.collection;
-		}
 		this.state = {
 			showModal : false, //for the collection selector
 			showProjectModal : false, //for the project selector
@@ -42,7 +38,7 @@ class SingleSearchRecipe extends React.Component {
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
 			awaitingProcess : null, //which process is awaiting the output of the project selector
 
-			collectionId : collectionId,
+			collectionId : null,
 
 			//influences the query
 			pageSize : 20,
@@ -59,51 +55,78 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	componentDidMount() {
-		if(this.state.collectionId) {
+		//init user docs (FIXME shouldn't this be part of the media suite code base?)
+		initHelp("Search", "/feature-doc/tools/single-search");
+
+		//either loads the collectionID + initial query from
+		//1) localStorage
+		//2) workspace API
+		//3) the recipe config
+		let collectionId = null;
+		let initialQuery = null;
+		let loadingFromWorkSpace = false;
+		if (this.props.params && this.props.params.queryId) {
+			if(this.props.params.queryId == 'cache') {
+				//if the query should be taken from cache, load from there
+				initialQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+				collectionId = initialQuery ? initialQuery.collectionId : null;
+			} else if (this.props.params.queryId.indexOf('__') != -1 && this.state.activeProject) {
+				loadingFromWorkSpace = true;
+				const tmp = this.props.params.queryId.split('__');
+				if(tmp.length == 2) {
+					let projectId = tmp[0];
+					let queryId = tmp[1];
+					//TODO add the project ID to the URL as well
+					//if the user supplied a query ID, look for it in the workspace API
+					ProjectAPI.get(this.props.user.id, projectId, project => {
+						if(project.queries) {
+							let tmp = project.queries.find(q => q.query.id == queryId);
+							if(tmp && tmp.query) {
+								this.onReloadQueryData(tmp.query.collectionId, tmp.query);
+							}
+						}
+					});
+				}
+			} else {
+				//look if there is a default collection id configured
+				collectionId = this.props.recipe.ingredients.collection;
+			}
+		}
+		if(!loadingFromWorkSpace) {
+			this.onReloadQueryData(collectionId, initialQuery);
+		}
+	}
+
+	onReloadQueryData(collectionId, initialQuery) {
+		//load the collection config and finally
+		if(collectionId) {
 			CollectionUtil.generateCollectionConfig(
 				this.props.clientId,
 				this.props.user,
-				this.state.collectionId,
-				this.onLoadCollectionConfig.bind(this),
+				collectionId,
+				config => {
+					if(!initialQuery) {
+						initialQuery = QueryModel.ensureQuery({size : this.state.pageSize}, config);
+					}
+					this.setState({
+						collectionId : config.collectionId,
+						collectionConfig : config,
+						initialQuery : initialQuery,
+						currentOutput : null,
+					});
+				},
 				true
 			);
 		}
-		//make sure the search is done again when flipping back through the history
-		//TODO fix this with nice routing/history stuff!
-		window.onpopstate = function(event) {
-  			document.location.href=document.location;
-		};
-
-		initHelp("Search", "/feature-doc/tools/single-search");
-	}
-
-	//whenever the collectionConfig is changed (via URL or collection selector)
-	onLoadCollectionConfig(config, fromUrl = true) {
-		let query = null;
-		if(fromUrl) {
-			query = QueryModel.urlParamsToQuery(this.props.params, config)
-		} else {
-			query = QueryModel.ensureQuery({size : this.state.pageSize}, config);
-		}
-		this.setState(
-			{
-				collectionId : config.collectionId,
-				collectionConfig : config,
-				initialQuery : query,
-				currentOutput : null,
-			},
-			fromUrl ? null : this.hideModalAndChangeHistory(config)
-		);
 	}
 
 	hideModalAndChangeHistory(collectionConfig) {
 		ComponentUtil.hideModal(this, 'showModal', 'collection__modal', true)
-		const params = QueryModel.toUrlParams(
+
+		//TODO maybe this is not necessary, since it is already set
+		ComponentUtil.storeJSONInLocalStorage(
+			'user-last-query',
 			QueryModel.ensureQuery({size : this.state.pageSize}, collectionConfig)
-		)
-		FlexRouter.setBrowserHistory(
-			params, //will also be stored in the browser state (cannot exceed 640k chars)
-			this.constructor.name //used as the title for the state
 		)
 	}
 
@@ -114,7 +137,15 @@ class SingleSearchRecipe extends React.Component {
 		if(componentClass == 'QueryBuilder') {
 			this.onSearched(data);
 		} else if(componentClass == 'CollectionSelector') {
-			this.onLoadCollectionConfig(data, false);
+			//set the default query for the selected collection; creates a new query builder
+			this.setState({
+				collectionId : data.collectionId,
+				collectionConfig : data,
+				initialQuery : QueryModel.ensureQuery({size : this.state.pageSize}, data),
+				currentOutput : null,
+			},
+			this.hideModalAndChangeHistory(data)
+		);
 		} else if(componentClass == 'SearchHit') {
 			if(data) {
 				const selectedRows = this.state.selectedRows;
@@ -151,11 +182,17 @@ class SingleSearchRecipe extends React.Component {
 			selectedRows : {}
 		});
 		if(data && data.query && data.updateUrl) {
-			const params = QueryModel.toUrlParams(data.query);
-			FlexRouter.setBrowserHistory(
-				params, //will also be stored in the browser state (cannot exceed 640k chars)
-				this.constructor.name //used as the title for the state
-			)
+			//if there was a valid query, set it in the cache for happy browsing
+			ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query)
+			FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
+		} else if(data == null) {
+			//the search was cleared in the query builder, so cache the default query for this collection
+			//and refresh the page so it all loads smoothly
+			ComponentUtil.storeJSONInLocalStorage(
+				'user-last-query',
+				QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
+			);
+			FlexRouter.gotoSingleSearch('cache')
 		}
 	}
 
@@ -449,7 +486,7 @@ class SingleSearchRecipe extends React.Component {
 						<input type="checkbox" checked={
 							this.state.allRowsSelected ? 'checked' : ''
 						} id={'cb__select-all'}/>
-						<label for={'cb__select-all'}><span></span></label>
+						<label htmlFor={'cb__select-all'}><span></span></label>
 					</div>
 				)
 
@@ -464,7 +501,7 @@ class SingleSearchRecipe extends React.Component {
 						onClick={this.saveQuery.bind(this)}
 						title="Save current query to project">
 						&nbsp;
-						<i className="fa fa-save" style={{color: 'white'}}></i>
+						<i className="fa fa-save" style={{color: 'white'}}/>
 						&nbsp;
 					</button>
 				);
@@ -476,7 +513,7 @@ class SingleSearchRecipe extends React.Component {
 							onClick={this.bookmark.bind(this)}
 							title="Bookmark selection to project">
 							&nbsp;
-							<i className="fa fa-star" style={{color: 'white'}}></i>
+							<i className="fa fa-star" style={{color: 'white'}}/>
 							&nbsp;
 						</button>
 					);
@@ -573,7 +610,7 @@ SingleSearchRecipe.propTypes = {
 	clientId : PropTypes.string,
 
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })
 
 };

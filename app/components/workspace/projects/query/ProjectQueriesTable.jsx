@@ -5,12 +5,7 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 import IDUtil from '../../../../util/IDUtil';
 import FlexRouter from '../../../../util/FlexRouter';
 
-import { exportDataAsJSON } from '../../helpers/Export';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
 import SortTable from '../../SortTable';
-
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 class ProjectQueriesTable extends React.PureComponent {
@@ -88,9 +83,9 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     viewQuery(query) {
-        const selectedQuery = this.state.queries.filter(q => q.name == query.name);
+        const selectedQuery = this.state.queries.filter(q => q.name === query.name);
         if(selectedQuery.length > 0) {
-            FlexRouter.routeQueryToSingleSearch(selectedQuery[0].query);
+            FlexRouter.gotoSingleSearch(this.props.project.id + '__' + selectedQuery[0].query.id);
         }
     }
 
@@ -99,11 +94,11 @@ class ProjectQueriesTable extends React.PureComponent {
             const project = this.props.project;
 
             // delete queries from project
-            project.queries = project.queries.filter(s => s != query);
+            project.queries = project.queries.filter(s => s !== query);
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {
@@ -113,15 +108,6 @@ class ProjectQueriesTable extends React.PureComponent {
         }
     }
 
-    compareQueries(queries) {
-        const project = this.props.project;
-        project.queries = project.queries.filter(q => queries.includes(q));
-        console.log(project.queries);
-        // update state
-        this.setState({
-            selectedQueries: project.queries
-        }, console.log(this.state));
-    }
     //deletes multiple queries
     deleteQueries(queries) {
         if (window.confirm('Are you sure you want to delete ' + queries.length + ' queries?')) {
@@ -132,7 +118,7 @@ class ProjectQueriesTable extends React.PureComponent {
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {
@@ -152,14 +138,11 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     render() {
-        let combineQueriesLink = null;
-        if(this.props.compareQueryLink) {
-            combineQueriesLink = (
-                <button className="btn btn-primary combineSavedQueries" onClick={this.props.handleCompareLink.bind(this)}>
-                    {this.props.compareQueryLink.label}
-                </button>
-            )
-        }
+        const bulkActions = this.props.handleCompareLink
+            ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
+            { title: 'Compare', onApply: this.props.handleCompareLink.bind(this)}]
+            : [{ title: 'Delete', onApply: this.deleteQueries.bind(this) }];
+
         return (
             <div className={IDUtil.cssClassName('project-queries-table')}>
                 <div className="tools">
@@ -172,7 +155,6 @@ class ProjectQueriesTable extends React.PureComponent {
                             placeholder="Search"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
-                          {combineQueriesLink}
                       </div>
                     </div>
                 </div>
@@ -208,9 +190,7 @@ class ProjectQueriesTable extends React.PureComponent {
                 ]}
                 onSort={this.sortQueries.bind(this)}
                 loading={this.state.loading}
-                bulkActions={[
-                    { title: 'Delete', onApply: this.deleteQueries.bind(this) }
-                ]}
+                bulkActions={bulkActions}
                 defaultSort={{
                     field: 'name',
                     order: 'asc'
@@ -228,7 +208,7 @@ ProjectQueriesTable.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

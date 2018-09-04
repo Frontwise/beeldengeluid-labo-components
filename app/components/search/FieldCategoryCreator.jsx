@@ -19,8 +19,8 @@ class FieldCategoryCreator extends React.PureComponent {
 			}
 			if(fields.length > 0) {
 				fieldCategory = {
-					id : this.refs.clusterName.value,
-					label : this.refs.clusterName.value,
+					id : this.clusterName.value,
+					label : this.clusterName.value,
 					fields : fields
 				}
 			}
@@ -38,15 +38,15 @@ class FieldCategoryCreator extends React.PureComponent {
 		return (
 			<div className={IDUtil.cssClassName('field-category-creator')}>
 				<form onSubmit={this.onOutput.bind(this)}>
-					<label for="field_selector">Select one or more fields to include</label>
+					<label htmlFor="field_selector">Select one or more fields to include</label>
 					<select className="form-control" multiple id="field_selector">
 						{options}
 					</select>
-					<label for="cluster_name">Cluster name</label>
+					<label htmlFor="cluster_name">Cluster name</label>
 					<input
 						className="form-control"
 						id="cluster_name"
-						ref="clusterName"
+                        ref={input => (this.clusterName = input)}
 						type="text"
 						placeholder="Cluster name"/>
 					<button className="btn btn-primary" type="submit">Choose</button>
