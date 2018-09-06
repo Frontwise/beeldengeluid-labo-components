@@ -25,8 +25,8 @@ const FlexRouter = {
 			*/
 
 			//TODO test this change to assetId thoroughly!
-			if(searchResult.mediaFragment.hasOwnProperty('url')) { url += '&fragmentUrl=' + searchResult.mediaFragment.url; }
-			//if(searchResult.mediaFragment.hasOwnProperty('assetId')) { url += '&assetId=' + searchResult.mediaFragment.assetId; }
+			//if(searchResult.mediaFragment.hasOwnProperty('url')) { url += '&fragmentUrl=' + searchResult.mediaFragment.url; }
+			if(searchResult.mediaFragment.hasOwnProperty('assetId')) { url += '&assetId=' + searchResult.mediaFragment.assetId; }
 
 			if(searchResult.mediaFragment.hasOwnProperty('start')) { url += '&s=' + searchResult.mediaFragment.start; }
 			if(searchResult.mediaFragment.hasOwnProperty('end')) { url += '&e=' + searchResult.mediaFragment.end; }

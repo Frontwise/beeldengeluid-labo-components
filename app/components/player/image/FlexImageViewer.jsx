@@ -234,6 +234,7 @@ class FlexImageViewer extends React.Component {
 	//the mediaObject with a width & height is the one selected via the URL and should be highlighted
 	//FIXME this is a quite ugly way to check this
 	getInitialPage() {
+		console.debug('getting initial page you stinkerd', this.props.mediaObjects)
 		let index = 0;
 		for(let i=0;i<this.props.mediaObjects.length;i++) {
 			if(this.props.mediaObjects[i].w && this.props.mediaObjects[i].h) {
@@ -241,6 +242,7 @@ class FlexImageViewer extends React.Component {
 				break;
 			}
 		}
+		console.debug('getting initial page you stinkerd(2) ' + index)
 		return index;
 	}
 
