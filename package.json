@@ -1,6 +1,6 @@
 {
   "name": "labo-components",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "B&G UI components",
   "main": "webpack.config.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "mousetrap": "^1.6.2",
     "openseadragon": "^2.4.0",
     "react-autosuggest": "^9.3.4",
-    "react-csv": "^1.0.14",
+    "react-csv": "^1.0.15",
     "react-datepicker": "^1.5.0",
     "react-power-select": "^1.0.0-beta.14",
     "react-router-dom": "^4.3.1",
