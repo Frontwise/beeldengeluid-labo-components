@@ -55,9 +55,15 @@ class SingleSearchRecipe extends React.Component {
 		this.CLASS_PREFIX = 'rcp__ss'
 	}
 
+	componentWillUnmount() {
+		window.onscroll = null;
+	}
+
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
+
+		window.onscroll = () => {this.afterRenderingHits()};
 
 		//either loads the collectionID + initial query from
 		//1) localStorage
@@ -148,7 +154,6 @@ class SingleSearchRecipe extends React.Component {
 		);
 		} else if(componentClass == 'SearchHit') {
 			if(data) {
-				console.debug('getting search hit info...')
 				const selectedRows = this.state.selectedRows;
 				if(data.selected) {
 					selectedRows[data.resourceId] = true;
@@ -198,19 +203,39 @@ class SingleSearchRecipe extends React.Component {
 
 	onLoadPlayoutAccess(accessApproved, desiredState) {
 		console.debug('I can view thumbnails now: ' + accessApproved);
-		this.setState(desiredState);
-		if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
-			//if there was a valid query, set it in the cache for happy browsing
-			ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
-			FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
-		} else if(desiredState.currentOutput == null) {
-			//the search was cleared in the query builder, so cache the default query for this collection
-			//and refresh the page so it all loads smoothly
-			ComponentUtil.storeJSONInLocalStorage(
-				'user-last-query',
-				QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
-			);
-			FlexRouter.gotoSingleSearch('cache')
+		this.setState(
+			desiredState, () => {
+				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
+					//if there was a valid query, set it in the cache for happy browsing
+					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
+					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
+				} else if(desiredState.currentOutput == null) {
+					//the search was cleared in the query builder, so cache the default query for this collection
+					//and refresh the page so it all loads smoothly
+					ComponentUtil.storeJSONInLocalStorage(
+						'user-last-query',
+						QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
+					);
+					FlexRouter.gotoSingleSearch('cache')
+				}
+				//this.afterRenderingHits();
+			}
+		);
+	}
+
+	elementInViewport(el) {
+    	const rect = el.getBoundingClientRect();
+    	return (
+			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
+		)
+	}
+
+	afterRenderingHits() {
+		const imgDefer = document.getElementsByTagName('img');
+		for (var i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src') && this.elementInViewport(imgDefer[i])) {
+				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
+			}
 		}
 	}
 
