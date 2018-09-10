@@ -24,10 +24,12 @@ class FlexImageViewer extends React.Component {
 
 		this.viewer = null;
 		this.annotationIdCount = 0;//TODO do this differently later on
+		const initialPage = this.getInitialPage();
 		this.state = {
 			annotations : [],
 			viewerLoaded : false,
-			currentPage : this.getInitialPage()
+			currentPage : initialPage,
+			initialPage : initialPage,
 		}
 		this.CLASS_PREFIX = 'fiv';
 	}
@@ -46,7 +48,7 @@ class FlexImageViewer extends React.Component {
 				);
 			})
 		}
-		this.initViewer(this.onViewerInitialized.bind(this));
+		this.initViewer();
 	}
 
 	//TODO make sure everything is updated properly
@@ -71,15 +73,48 @@ class FlexImageViewer extends React.Component {
 	-------------------------- VIEWER INITIALIZATION ----------------
 	---------------------------------------------------------------*/
 
-	//first load the viewer using the provided this.props.mediaObjects
-	initViewer(callback) {
-		//const i = this.props.mediaObject.url.indexOf('.tif');
-        //const infoUrl = this.props.mediaObject.url.substring(0, i + 4) + '/info.json'
-		//setup the basic viewer
+	//the mediaObject with a width & height is the one selected via the URL and should be highlighted
+	//FIXME this is a quite ugly way to check this
+	getInitialPage() {
+		let index = 0;
+		for(let i=0;i<this.props.mediaObjects.length;i++) {
+			if(this.props.mediaObjects[i].w && this.props.mediaObjects[i].h) {
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
 
+	__toOSDUrl(mediaObject) {
+		const index = mediaObject.url.indexOf('.tif'); //FIXME very weak way to check if it's IIIF!
+		let moClone = JSON.parse(JSON.stringify(mediaObject));
+		if(index == -1) {
+			moClone.infoUrl = mediaObject.url;
+		} else {
+			moClone.infoUrl = mediaObject.url.substring(0, index + 4) + '/info.json';
+    	}
+    	return moClone;
+	}
+
+	__showSearchHighlight() {
+		const r = this.viewer.viewport.imageToViewportRectangle(
+            parseInt(this.props.selectedMediaObject.x),
+            parseInt(this.props.selectedMediaObject.y),
+            parseInt(this.props.selectedMediaObject.w),
+            parseInt(this.props.selectedMediaObject.h)
+        );
+        const elt = document.createElement("div");
+        elt.id = 'runtime-overlay';
+        elt.className = IDUtil.cssClassName('highlight', this.CLASS_PREFIX);
+        this.viewer.addOverlay(elt, r);
+	}
+
+	//first load the viewer using the provided this.props.mediaObjects
+	initViewer() {
 		//map the media objects to sources OpenSeaDragon likes
 		const sources = this.props.mediaObjects.map(mo => {
-			return this.toOSDUrl(mo);
+			return this.__toOSDUrl(mo);
 		});
 		this.viewer = OpenSeadragon({
 			id: 'img_viewer' ,
@@ -108,22 +143,6 @@ class FlexImageViewer extends React.Component {
 	        // Show the results.
 	        console.log(webPoint.toString(), viewportPoint.toString(), imagePoint.toString());
 	    }.bind(this));
-
-		//create an overlay of the selected region on the selected page (using this.props.selectedMediaObject)
-		//TEST THIS CHANGE LATER
-		if(this.props.selectedMediaObject) {
-		    this.viewer.addHandler('open', function(target, info) {
-		        const r = this.viewer.viewport.imageToViewportRectangle(
-		            parseInt(this.props.selectedMediaObject.x),
-		            parseInt(this.props.selectedMediaObject.y),
-		            parseInt(this.props.selectedMediaObject.w),
-		            parseInt(this.props.selectedMediaObject.h)
-		        );
-		        const elt = document.createElement("div");
-		        elt.className = IDUtil.cssClassName('highlight', this.CLASS_PREFIX);
-		        this.viewer.addOverlay(elt, r);
-		    }.bind(this));
-		}
 
 		//add the selection (rectangle) support (Picturae plugin)
 		if(this.props.annotationSupport) {
@@ -184,7 +203,7 @@ class FlexImageViewer extends React.Component {
 			});
 
 			this.viewer.addHandler('open', function(target, info) {
-				callback();
+				this.onViewerInitialized()
 			}.bind(this));
 
 			//make sure the annotations are updated per page/image
@@ -228,33 +247,6 @@ class FlexImageViewer extends React.Component {
 				this.renderOverlays();
 			}
 		);
-	}
-
-
-	//the mediaObject with a width & height is the one selected via the URL and should be highlighted
-	//FIXME this is a quite ugly way to check this
-	getInitialPage() {
-		console.debug('getting initial page you stinkerd', this.props.mediaObjects)
-		let index = 0;
-		for(let i=0;i<this.props.mediaObjects.length;i++) {
-			if(this.props.mediaObjects[i].w && this.props.mediaObjects[i].h) {
-				index = i;
-				break;
-			}
-		}
-		console.debug('getting initial page you stinkerd(2) ' + index)
-		return index;
-	}
-
-	toOSDUrl(mediaObject) {
-		const index = mediaObject.url.indexOf('.tif'); //FIXME very weak way to check if it's IIIF!
-		let moClone = JSON.parse(JSON.stringify(mediaObject));
-		if(index == -1) {
-			moClone.infoUrl = mediaObject.url;
-		} else {
-			moClone.infoUrl = mediaObject.url.substring(0, index + 4) + '/info.json';
-    	}
-    	return moClone;
 	}
 
 	deleteAnnotation(annotation, event) {
@@ -377,6 +369,12 @@ class FlexImageViewer extends React.Component {
 	}
 
 	render() {
+		if(this.props.selectedMediaObject && this.viewer) {
+    		this.viewer.removeOverlay('runtime-overlay');
+    		if(this.state.currentPage == this.state.initialPage) {
+    	 		this.__showSearchHighlight();
+    		}
+    	}
 		return (
 			<div id="img_viewer" className={IDUtil.cssClassName('flex-image-viewer')}></div>
 		)

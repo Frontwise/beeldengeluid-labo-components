@@ -426,7 +426,6 @@ class ItemDetailsRecipe extends React.Component {
 	checkMediaObjectIsSelected(mediaObject) {
 		//console.debug(mediaObject, this.props.params.assetId)
 		if(mediaObject.assetId == this.props.params.assetId) {
-			console.debug('SELECTED THIS ONE!!!');
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
 			mediaObject.x = this.props.params.x;

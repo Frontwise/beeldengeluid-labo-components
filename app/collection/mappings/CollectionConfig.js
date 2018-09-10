@@ -125,6 +125,10 @@ class CollectionConfig {
 		return false;
 	}
 
+	getThumbnailContentServerId() {
+		return null;
+	}
+
 	//should always be overloaded
 	loadFieldDescriptions(callback) {
 		callback([])

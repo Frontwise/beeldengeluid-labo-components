@@ -1,6 +1,7 @@
 import QueryModel from './model/QueryModel';
 
 import SearchAPI from './api/SearchAPI';
+import PlayoutAPI from './api/PlayoutAPI';
 import ProjectAPI from './api/ProjectAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 
@@ -176,17 +177,33 @@ class SingleSearchRecipe extends React.Component {
 	//this is updated via the query builder, but it does not update the state.query...
 	//TODO figure out if it's bad to update the state
 	onSearched(data) {
-		console.debug('searched...?')
-		this.setState({
+		let desiredState = {
 			currentOutput: data,
 			allRowsSelected : false,
 			selectedRows : {}
-		});
-		if(data && data.query && data.updateUrl) {
+		}
+
+		//request access for the thumbnails if needed
+		if (this.state.collectionConfig.requiresPlayoutAccess() && this.state.collectionConfig.getThumbnailContentServerId()) {
+			PlayoutAPI.requestAccess(
+				this.state.collectionConfig.getThumbnailContentServerId(),
+				'thumbnails',
+				desiredState,
+				this.onLoadPlayoutAccess.bind(this)
+			)
+		} else {
+			this.onLoadPlayoutAccess(true, desiredState);
+		}
+	}
+
+	onLoadPlayoutAccess(accessApproved, desiredState) {
+		console.debug('I can view thumbnails now: ' + accessApproved);
+		this.setState(desiredState);
+		if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
 			//if there was a valid query, set it in the cache for happy browsing
-			ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query)
+			ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
 			FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
-		} else if(data == null) {
+		} else if(desiredState.currentOutput == null) {
 			//the search was cleared in the query builder, so cache the default query for this collection
 			//and refresh the page so it all loads smoothly
 			ComponentUtil.storeJSONInLocalStorage(
