@@ -188,6 +188,14 @@ class SingleSearchRecipe extends React.Component {
 			selectedRows : {}
 		}
 
+		//reset the poster images to the placeholder
+		const imgDefer = document.getElementsByTagName('img');
+		for (var i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src')) {
+				imgDefer[i].setAttribute('src', '/static/images/placeholder.2b77091b.svg');
+			}
+		}
+
 		//request access for the thumbnails if needed
 		if (this.state.collectionConfig.requiresPlayoutAccess() && this.state.collectionConfig.getThumbnailContentServerId()) {
 			PlayoutAPI.requestAccess(
