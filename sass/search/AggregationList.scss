@@ -1,4 +1,12 @@
 .bg__aggregation-list {
+    .aggregationSwitchBtn {
+        @include switchBtn();
+
+        .ms_toggle_btn {
+            text-transform: capitalize;
+        }
+    }
+
 	.bg__agl__tab-new {
 		list-style: none;
 		margin-bottom: 1rem;
@@ -162,11 +170,9 @@
 			width: 18px;
 		}
 		input, ul {
-			//display: none;
+			display: none;
 		}
-		.hamburger-check {
-            padding-left: 10px;
-		}
+
 		input:checked ~ ul {
 			border-top: 1px solid #d3d3d3;
 			display: flex;

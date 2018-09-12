@@ -380,9 +380,11 @@ class AggregationList extends React.Component {
                                 </div>
                             </label>
                             <ul className={facetId}>
-                                <li><div className="hamburger-check"><input type="checkbox" id={key['field']} checked={this.props.excludedFacets[key['field']]}
+
+                                <li className="aggregationSwitchBtn"><span className="ms_toggle_btn"><input type="checkbox" id="toggle-1" className="checkbox-toggle checkbox-toggle-round"
+                                    checked={this.props.excludedFacets[key['field']]}
                                     onChange={this.toggleExcludeFacets.bind(this, key['field'])}/>
-                                    <label>NOT</label></div>
+                                    <label htmlFor="toggle-1" data-on="Excl" data-off="Incl"></label></span>
                                 </li>
                                 <li title="Alphanumeric descending" onClick={
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "alpha", key['field'])
