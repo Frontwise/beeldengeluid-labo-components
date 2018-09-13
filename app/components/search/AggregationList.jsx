@@ -255,7 +255,7 @@ class AggregationList extends React.Component {
 
         //only display aggregation blocks for non histogram facets
         nonDateAggregations.forEach((key, index) => {
-
+            
             if (!(key['field'] in this.props.excludedFacets)) {
                 this.props.excludedFacets[key['field']] = false;
             }
@@ -369,8 +369,7 @@ class AggregationList extends React.Component {
                                 <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={key['field']}
                                       data-html={true}>
                                    <i className="fa fa-info-circle"/> {key['title']}
-
-						    </span>
+						                    </span>
                                 <span className="fa fa-remove" onClick={
                                     this.showRemoveDialog.bind(this, key['field'], index)
                                 }/>
@@ -381,10 +380,10 @@ class AggregationList extends React.Component {
                             </label>
                             <ul className={facetId}>
 
-                                <li className="aggregationSwitchBtn"><span className="ms_toggle_btn"><input type="checkbox" id="toggle-1" className="checkbox-toggle checkbox-toggle-round"
+                                <li className="aggregationSwitchBtn"><span className="ms_toggle_btn"><input type="checkbox" id={key['field']} className="checkbox-toggle checkbox-toggle-round"
                                     checked={this.props.excludedFacets[key['field']]}
                                     onChange={this.toggleExcludeFacets.bind(this, key['field'])}/>
-                                    <label htmlFor="toggle-1" data-on="Excl" data-off="Incl"></label></span>
+                                    <label htmlFor={key['field']} data-on="Excl" data-off="Incl"></label></span>
                                 </li>
                                 <li title="Alphanumeric descending" onClick={
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "alpha", key['field'])
