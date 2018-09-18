@@ -688,9 +688,13 @@ class ItemDetailsRecipe extends React.Component {
 	--------------------------------------------------------------------- */
 
 	render() {
-        const currentQueryId = ComponentUtil.getJSONFromLocalStorage('user-last-query').id,
+        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
+              currentQueryId = userLastQuery.id,
               currentIdsFromLocalStorage = ComponentUtil.getJSONFromLocalStorage(currentQueryId),
-              indexOfCurrentResource = currentIdsFromLocalStorage.indexOf(this.props.params.id);
+              indexOfCurrentResource = currentIdsFromLocalStorage.indexOf(this.props.params.id),
+              offset = userLastQuery.offset,
+              resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
+              indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
 
 		if(!this.state.itemData) {
 			return (<h4>Loading item</h4>);
@@ -751,14 +755,23 @@ class ItemDetailsRecipe extends React.Component {
 
                 const prevResource = indexOfCurrentResource ? currentIdsFromLocalStorage[indexOfCurrentResource-1] : 'null';
 				const nextResource = indexOfCurrentResource <  currentIdsFromLocalStorage.length -1 ? currentIdsFromLocalStorage[indexOfCurrentResource+1] : 'non';
-                previousResourceBtn = (
-                    <button className="btn btn-primary"
+				// checking if this is the 1st result in the resultset
+				const isFirstResource = (offset === 0 && indexCurrentResource === 0) ? true : false;
+                const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+
+                let isLastHit = false;
+                if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
+                    isLastHit = resultDetailsData[resultDetailsData.length-1].resourceId === this.state.itemData.resourceId ? true : false;
+                }
+				previousResourceBtn = (
+                    <button className="btn btn-primary" disabled={isFirstResource}
                             onClick={this.gotoItemDetails.bind(this, prevResource)}>
                         <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
                     </button>
                 )
                 nextResourceBtn = (
-                    <button className="btn btn-primary" onClick={this.gotoItemDetails.bind(this, nextResource)}>
+                    <button className="btn btn-primary" disabled={isLastHit}
+                            onClick={this.gotoItemDetails.bind(this, nextResource)}>
                         Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
                     </button>
                 )
