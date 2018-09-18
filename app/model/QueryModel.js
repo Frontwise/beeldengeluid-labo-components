@@ -1,4 +1,5 @@
 import IDUtil from '../util/IDUtil';
+import TimeUtil from "../util/TimeUtil";
 
 const QueryModel = {
 
@@ -61,7 +62,7 @@ const QueryModel = {
 
 			//remove certain fields from the returned data
 			exclude: obj.exclude || collectionConfig ? collectionConfig.getFieldsToExclude() : null
-		}
+		};
 	},
 
 	determineSearchLayers(query, config) {
@@ -86,7 +87,7 @@ const QueryModel = {
 		//if for some shitty reason the search layer (entered in the URL) does not match the collection ID
 		//just set it manually (maybe this is being too nice)
 		if(!foundLayer) {
-			searchLayers = {}
+			searchLayers = {};
 			searchLayers[config.getCollectionId()] = true;
 		}
 		return searchLayers;
@@ -102,12 +103,12 @@ const QueryModel = {
 				type : 'date_histogram'
 			});
 		}
-		return df
+		return df;
 	},
 
 	toHumanReadableString(query) {
 		if(query) {
-			const strList = []
+			const strList = [];
 			if(query.term) {
 				strList.push('Search term: ' + query.term);
 			} else {
@@ -116,49 +117,105 @@ const QueryModel = {
 			if(query.selectedFacets && Object.keys(query.selectedFacets).length > 0) {
 				strList.push('# filters: ' + Object.keys(query.selectedFacets).length);
 			}
-			return strList.join('; ')
+			return strList.join('; ');
 		}
 		return null;
 	},
+
+    __getFieldsCategory(fieldCategories) {
+        const header = "<p><u>Fields category</u></p>";
+        let fieldsCategory = null;
+        if (fieldCategories) {
+            fieldsCategory = header + "<ul>";
+            fieldCategories.map(item => fieldsCategory += "<li>" + item.label + "</li>")
+            fieldsCategory += "</ul>";
+            return fieldsCategory;
+        }
+        return null;
+    },
+    __getSelectedFacets(selectedFacets) {
+        const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
+        let fieldsCategory = null;
+
+        if (selectedFacets) {
+            if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
+                fieldsCategory = header;
+                const keys = Object.keys(selectedFacets);
+                keys.map(k => {
+                    fieldsCategory += "<p>Facet name: " + k + " </p><ul>";
+                    selectedFacets[k].map(facet => {
+                        fieldsCategory += "<li>" + facet + "</li>";
+                    });
+                    fieldsCategory += "</ul>";
+                });
+                fieldsCategory += "</div></div>";
+                return fieldsCategory;
+            }
+            return "";
+        }
+    },
+    queryDetailsTooltip(query) {
+        if (query) {
+            const queryDetailsHeader = "<h3>Query details</h3>",
+                queryName = "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>",
+                dateFieldName = query.query.dateRange && query.query.dateRange.field
+                    ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
+                startDate = query.query.dateRange && query.query.dateRange.start
+                    ? "<li>Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "</li>" : "",
+                endDate = query.query.dateRange && query.query.dateRange.end
+                    ? "<li>End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "</li>" : "",
+                date = dateFieldName || startDate || endDate
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Date Field: </u></p><ul>" + dateFieldName + startDate + endDate + "</ul></div>"
+                    : "",
+                searchTerm = query.query.term
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
+                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
+                fieldCategory = query.query.fieldCategory
+                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "";
+            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets;
+        } else {
+            return null;
+        }
+    }
 
 	/*----------------------------------------------------------------------
 	*---------------------------- NOT USED YET ------------------------------
 	----------------------------------------------------------------------*/
 
 	//e.g. { "nisv-catalogue-aggr": true}
-	validateSearchLayers : function(obj) {
+	// validateSearchLayers : function(obj) {
+    //
+	// },
 
-	},
+	// validateDateRange : function(obj) {
+	// 	return {
+	// 		field : obj.field || null,
+	// 		start : obj.start || -1,
+	// 		end : obj.end || -1
+	// 	};
+	// },
 
-	validateDateRange : function(obj) {
-		return {
-			field : obj.field || null,
-			start : obj.start || -1,
-			end : obj.end || -1
-		}
-	},
-
-	validateFieldCategories : function(list) {
-		return {
-			id : obj.id,
-			label : obj.label,
-			fields : obj.fields || []
-		}
-	},
+	// validateFieldCategories : function(list) {
+	// 	return {
+	// 		id : obj.id,
+	// 		label : obj.label,
+	// 		fields : obj.fields || []
+	// 	};
+	// },
 
 	//e.g. {bg:publications.bg:publication.bg:broadcasters.bg:broadcaster: ["VARA"]}
-	validateSelectedFacets : function(obj) {
+	// validateSelectedFacets : function(obj) {
+    //
+	// },
 
-	},
-
-	validateDesiredFacets : function(list) {
-		return {
-			id : obj.id || null, //"broadcaster",
-			title : obj.title || null, //"Broadcaster",
-			field : obj.field || null, //"bg:publications.bg:publication.bg:broadcasters.bg:broadcaster",
-			type : obj.type || null, // "string" | "date_histogram"
-		}
-	}
-}
+	// validateDesiredFacets : function(list) {
+	// 	return {
+	// 		id : obj.id || null, //"broadcaster",
+	// 		title : obj.title || null, //"Broadcaster",
+	// 		field : obj.field || null, //"bg:publications.bg:publication.bg:broadcasters.bg:broadcaster",
+	// 		type : obj.type || null, // "string" | "date_histogram"
+	// 	};
+	// }
+};
 
 export default QueryModel;

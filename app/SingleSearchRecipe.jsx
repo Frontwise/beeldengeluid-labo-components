@@ -1,6 +1,7 @@
 import QueryModel from './model/QueryModel';
 
 import SearchAPI from './api/SearchAPI';
+import PlayoutAPI from './api/PlayoutAPI';
 import ProjectAPI from './api/ProjectAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 
@@ -54,9 +55,15 @@ class SingleSearchRecipe extends React.Component {
 		this.CLASS_PREFIX = 'rcp__ss'
 	}
 
+	componentWillUnmount() {
+		window.onscroll = null;
+	}
+
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
+
+		window.onscroll = () => {this.afterRenderingHits()};
 
 		//either loads the collectionID + initial query from
 		//1) localStorage
@@ -76,7 +83,6 @@ class SingleSearchRecipe extends React.Component {
 				if(tmp.length == 2) {
 					let projectId = tmp[0];
 					let queryId = tmp[1];
-					//TODO add the project ID to the URL as well
 					//if the user supplied a query ID, look for it in the workspace API
 					ProjectAPI.get(this.props.user.id, projectId, project => {
 						if(project.queries) {
@@ -176,23 +182,68 @@ class SingleSearchRecipe extends React.Component {
 	//this is updated via the query builder, but it does not update the state.query...
 	//TODO figure out if it's bad to update the state
 	onSearched(data) {
-		this.setState({
+		let desiredState = {
 			currentOutput: data,
 			allRowsSelected : false,
 			selectedRows : {}
-		});
-		if(data && data.query && data.updateUrl) {
-			//if there was a valid query, set it in the cache for happy browsing
-			ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query)
-			FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
-		} else if(data == null) {
-			//the search was cleared in the query builder, so cache the default query for this collection
-			//and refresh the page so it all loads smoothly
-			ComponentUtil.storeJSONInLocalStorage(
-				'user-last-query',
-				QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
-			);
-			FlexRouter.gotoSingleSearch('cache')
+		}
+
+		//reset the poster images to the placeholder
+		const imgDefer = document.getElementsByTagName('img');
+		for (var i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src')) {
+				imgDefer[i].setAttribute('src', '/static/images/placeholder.2b77091b.svg');
+			}
+		}
+
+		//request access for the thumbnails if needed
+		if (this.state.collectionConfig.requiresPlayoutAccess() && this.state.collectionConfig.getThumbnailContentServerId()) {
+			PlayoutAPI.requestAccess(
+				this.state.collectionConfig.getThumbnailContentServerId(),
+				'thumbnails',
+				desiredState,
+				this.onLoadPlayoutAccess.bind(this)
+			)
+		} else {
+			this.onLoadPlayoutAccess(true, desiredState);
+		}
+	}
+
+	onLoadPlayoutAccess(accessApproved, desiredState) {
+		console.debug('I can view thumbnails now: ' + accessApproved);
+		this.setState(
+			desiredState, () => {
+				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
+					//if there was a valid query, set it in the cache for happy browsing
+					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
+					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
+				} else if(desiredState.currentOutput == null) {
+					//the search was cleared in the query builder, so cache the default query for this collection
+					//and refresh the page so it all loads smoothly
+					ComponentUtil.storeJSONInLocalStorage(
+						'user-last-query',
+						QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
+					);
+					FlexRouter.gotoSingleSearch('cache')
+				}
+				//this.afterRenderingHits();
+			}
+		);
+	}
+
+	elementInViewport(el) {
+    	const rect = el.getBoundingClientRect();
+    	return (
+			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
+		)
+	}
+
+	afterRenderingHits() {
+		const imgDefer = document.getElementsByTagName('img');
+		for (var i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src') && this.elementInViewport(imgDefer[i])) {
+				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
+			}
 		}
 	}
 
@@ -225,12 +276,14 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-	toggleRows() {
+	toggleRows(e) {
+		e.preventDefault();
 		let rows = this.state.selectedRows;
 		if(this.state.allRowsSelected) {
 			rows = {};
 		} else {
 			this.state.currentOutput.results.forEach((result) => {
+				console.debug(result._id)
 				rows[result._id] = !this.state.allRowsSelected;
 			});
 		}
@@ -523,7 +576,6 @@ class SingleSearchRecipe extends React.Component {
 						{actions}
 					</div>
 				)
-
 				//populate the list of search results
 				const items = this.state.currentOutput.results.map((result, index) => {
 					return (
@@ -537,7 +589,7 @@ class SingleSearchRecipe extends React.Component {
 							} //for displaying the right date field in the hits
 							collectionConfig={this.state.collectionConfig}
 							itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-							isSelected={this.state.selectedRows[result._id]} //is the result selected
+							isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
 							onOutput={this.onComponentOutput.bind(this)}/>
 					)
 				}, this);

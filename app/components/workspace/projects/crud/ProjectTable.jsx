@@ -18,7 +18,7 @@ class ProjectTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
-        
+
         this.head = [
             { field: 'name', content: 'Name', sortable: true },
             { field: 'description', content: 'Description', sortable: true },
@@ -134,9 +134,9 @@ class ProjectTable extends React.PureComponent {
     }
 
     //set bookmark count to state
-    setBookmarkCount(project, annotationData) {
+    setBookmarkCount(project, annotationList) {
         const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            annotationData.annotations || []
+            annotationList || []
         );
         const bookmarkCount = bookmarks ? bookmarks.length : 0;
         const newCount = {};
@@ -318,7 +318,7 @@ class ProjectTable extends React.PureComponent {
                 </span>
             )
         },
-        {            
+        {
             content: (project.isPrivate ? "✔" : null)
         },
         {

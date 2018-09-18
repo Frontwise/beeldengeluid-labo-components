@@ -75,7 +75,7 @@
 		}
 	}
 
-	.checkboxGroup {
+	.bg__agl__hamburger-header {
 		background-color: #ebebeb;
 		border-radius: 6px;
 		box-shadow: 0 6px 4px -6px black;
@@ -89,6 +89,7 @@
 			background-color: #d9534f;
 			color: #fff;
 		}
+
 		.fa-remove {
 			cursor: pointer;
 			float: right;
@@ -136,7 +137,7 @@
 	}
 
 	// hamburger menu
-	.bg__hamburger-facets-container {
+	.bg__agl__hamburger-menu {
 		background-color: #468dcb;
 		border-radius: 3px 3px 0 0;
 		position: relative;
@@ -169,7 +170,7 @@
 			top: 6px;
 			width: 18px;
 		}
-		input, ul {
+		.hamburger-toggle, ul {
 			display: none;
 		}
 

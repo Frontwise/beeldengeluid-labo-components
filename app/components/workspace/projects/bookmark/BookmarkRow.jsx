@@ -2,7 +2,6 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
 
-import AnnotationStore from '../../../../flux/AnnotationStore';
 import {secToTime} from '../../helpers/time';
 import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
 import classNames from 'classnames';
@@ -56,14 +55,14 @@ class BookmarkRow extends React.PureComponent {
         // sort annotations by type
         annotations.sort((a,b)=>(a.annotationType > b.annotationType ? 1 : -1));
 
-        return !annotations || annotations.length === 0 ? 
+        return !annotations || annotations.length === 0 ?
             (<p>
                 This {bookmark.object.type.toLowerCase() || 'object'} has no annotations yet
             </p>)
             :
-        
+
             (<table>
-                { showHeader ? 
+                { showHeader ?
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -81,7 +80,7 @@ class BookmarkRow extends React.PureComponent {
                             <td className="content">
                                 {annotation.text ? annotation.text.substring(0, 200) : null}
                                 {annotation.label ? annotation.label : null}
-                            </td>                            
+                            </td>
                             <td className="details">
                                 {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
                                 {annotation.annotationType === 'comment' ? annotation.created : null}
@@ -96,12 +95,12 @@ class BookmarkRow extends React.PureComponent {
     }
 
     renderSubSegment(bookmark, segments){
-        return !segments || segments.length === 0 ? 
+        return !segments || segments.length === 0 ?
             (<p>
                 This {bookmark.object.type.toLowerCase() || 'object'} has no fragments yet
             </p>)
             :
-        
+
             (<table>
                 <thead>
                     <tr>
@@ -114,21 +113,21 @@ class BookmarkRow extends React.PureComponent {
                                     <th className="details">Details</th>
                                 </thead>
                             </table>
-                        </th>                       
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {segments.map(segment => (
                         <tr>
-                            <td className="time">{ segment.selector && segment.selector.refinedBy ? 
-                                secToTime(Math.round(segment.selector.refinedBy.start || 0)) 
+                            <td className="time">{ segment.selector && segment.selector.refinedBy ?
+                                secToTime(Math.round(segment.selector.refinedBy.start || 0))
                                 + " - " +
                                 secToTime(Math.round(segment.selector.refinedBy.end || 0))
                                 : '-'
                             }</td>
                             <td>
                                 {this.renderSubMediaObject(segment, segment.annotations, false)}
-                            </td>                            
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -147,7 +146,7 @@ class BookmarkRow extends React.PureComponent {
             annotations = annotations.filter((a)=>(a.annotationType === this.props.annotationTypeFilter));
         }
         const hasAnnotations = annotations.length > 0;
-        
+
         // prepare segments
         const segments = bookmark.segments || [];
         const hasSegments = segments.length > 0;
@@ -157,7 +156,7 @@ class BookmarkRow extends React.PureComponent {
 
         //populate the foldable annotation block
         let foldableBlock = null;
-        
+
         // render correct foldable block, if visible
         switch(true){
             case this.props.showSubMediaObject:
@@ -205,7 +204,7 @@ class BookmarkRow extends React.PureComponent {
                         </li>
                         <li className="content-date">
                             <h4 className="label">Date</h4>
-                            <p title={bookmark.object.dateField}>{resourceDate}</p>                            
+                            <p title={bookmark.object.dateField}>{resourceDate}</p>
                         </li>
                         <li className="content-media">
                             <h4 className="label">Media</h4>
@@ -218,14 +217,14 @@ class BookmarkRow extends React.PureComponent {
                         <li>
                             <h4 className="label">Groups</h4>
                             <p className="groups">
-                                {bookmark.groups ? 
+                                {bookmark.groups ?
                                 bookmark.groups.map((g)=>(<span>{g.label}</span>))
                                 : null}
                             </p>
                         </li>
                     </ul>
 
-                    <div className="actions">                       
+                    <div className="actions">
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
@@ -245,7 +244,7 @@ class BookmarkRow extends React.PureComponent {
                                     zero: !hasSegments,
                                     lowered: this.props.showSubMediaObject
                                 })} onClick={this.toggleSubSegment}>
-                                <span className="icon segment"/>                            
+                                <span className="icon segment"/>
                                 <span className="count">{segments.length}</span>
                             </div>
 
@@ -257,7 +256,7 @@ class BookmarkRow extends React.PureComponent {
                                 <span className="icon annotation"/>
                                 <span className="count">{annotations.length}</span>
                             </div>
-                          
+
                         </div>
                     </div>
                 </div>

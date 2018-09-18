@@ -328,9 +328,9 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//TODO loaded all bookmarks associated with this resource (e.g. program, newspaper)
-	onLoadResourceAnnotations(data) {
+	onLoadResourceAnnotations(annotationList) {
 		this.setState({
-			resourceAnnotations : data.annotations || []
+			resourceAnnotations : annotationList || []
 		})
 	}
 
@@ -424,7 +424,8 @@ class ItemDetailsRecipe extends React.Component {
 	*************************************************************************/
 
 	checkMediaObjectIsSelected(mediaObject) {
-		if(mediaObject.url == this.props.params.fragmentUrl) {
+		//console.debug(mediaObject, this.props.params.assetId)
+		if(mediaObject.assetId == this.props.params.assetId) {
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
 			mediaObject.x = this.props.params.x;
@@ -440,8 +441,8 @@ class ItemDetailsRecipe extends React.Component {
 	//TODO this function is almost the same as checkMediaObjectIsSelected, remove the latter
 	getSelectedMediaObject() {
 		let mediaObject = null;
-		if(this.props.params.fragmentUrl) {
-			mediaObject = {url : this.props.params.fragmentUrl};
+		if(this.props.params.assetId) {
+			mediaObject = {assetId : this.props.params.assetId};
 			if(this.props.params.s) {
 				mediaObject.start = this.props.params.s;
 			}
@@ -623,7 +624,7 @@ class ItemDetailsRecipe extends React.Component {
 
 						useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 
-						mediaObjects={images}//TODO make this plural for playlist support
+						mediaObjects={images}
 						selectedMediaObject={this.getSelectedMediaObject()}
 
 						annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide

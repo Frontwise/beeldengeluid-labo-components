@@ -19,7 +19,7 @@ class AnnotationStore {
 		if(project && project.id) {
 			filter['project'] = project.id
 		}
-		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
+		AnnotationAPI.getFilteredAnnotations(user.id, filter, callback, offset, size, sort, dateRange);
 	}
 
 	getAllAnnotationsOfResource(resourceId, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
@@ -30,7 +30,7 @@ class AnnotationStore {
 		if(project && project.id) {
 			filter['project'] = project.id
 		}
-		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
+		AnnotationAPI.getFilteredAnnotations(user.id, filter, callback, offset, size, sort, dateRange);
 	}
 
 	//TODO rename later getDirectMediaObjectAnnotations
@@ -42,7 +42,7 @@ class AnnotationStore {
 		if(project && project.id) {
 			filter['project'] = project.id
 		}
-		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
+		AnnotationAPI.getFilteredAnnotations(user.id, filter, callback, offset, size, sort, dateRange);
 	}
 
 	getUserProjectAnnotations(user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
@@ -50,7 +50,7 @@ class AnnotationStore {
 			'user.keyword' : user.id,
 			'project' : project.id
 		}
-		AnnotationAPI.getFilteredAnnotations(filter, callback, offset, size, sort, dateRange);
+		AnnotationAPI.getFilteredAnnotations(user.id, filter, callback, offset, size, sort, dateRange);
 	}
 
 	/* --------------- FOR TRIGGERS LISTENERS ------------------- */
