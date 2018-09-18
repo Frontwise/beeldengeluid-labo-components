@@ -31,6 +31,7 @@ import BookmarkSelector from './components/bookmark/BookmarkSelector';
 import PropTypes from 'prop-types';
 
 import { initHelp } from './components/workspace/helpers/helpDoc';
+import FlexRouter from "./util/FlexRouter";
 
 //import TranscriptExample from './components/transcript.json';
 
@@ -671,11 +672,26 @@ class ItemDetailsRecipe extends React.Component {
 		return null;
 	}
 
+    gotoItemDetails(resourceId) {
+        if(this.props.recipe.url && resourceId) {
+            const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
+                  result = resultDetailsData.find(elem => elem.resourceId === resourceId );
+
+            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result, this.props.params.st);
+        } else {
+            this.setState({showModal: true})
+        }
+    }
+
 	/* ------------------------------------------------------------------
 	----------------------- RENDER --------------------------------------
 	--------------------------------------------------------------------- */
 
 	render() {
+        const currentQueryId = ComponentUtil.getJSONFromLocalStorage('user-last-query').id,
+              currentIdsFromLocalStorage = ComponentUtil.getJSONFromLocalStorage(currentQueryId),
+              indexOfCurrentResource = currentIdsFromLocalStorage.indexOf(this.props.params.id);
+
 		if(!this.state.itemData) {
 			return (<h4>Loading item</h4>);
 		} else if(this.state.found === false) {
@@ -694,8 +710,8 @@ class ItemDetailsRecipe extends React.Component {
 			let projectSelectorBtn = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
-
-
+            let previousResourceBtn = null;
+            let nextResourceBtn = null;
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
 				if(this.state.showModal) {
@@ -732,6 +748,20 @@ class ItemDetailsRecipe extends React.Component {
 						Annotate resource
 					</button>
 				)
+
+                const prevResource = indexOfCurrentResource ? currentIdsFromLocalStorage[indexOfCurrentResource-1] : 'null';
+				const nextResource = indexOfCurrentResource <  currentIdsFromLocalStorage.length -1 ? currentIdsFromLocalStorage[indexOfCurrentResource+1] : 'non';
+                previousResourceBtn = (
+                    <button className="btn btn-primary"
+                            onClick={this.gotoItemDetails.bind(this, prevResource)}>
+                        <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
+                    </button>
+                )
+                nextResourceBtn = (
+                    <button className="btn btn-primary" onClick={this.gotoItemDetails.bind(this, nextResource)}>
+                        Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
+                    </button>
+                )
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
@@ -827,6 +857,12 @@ class ItemDetailsRecipe extends React.Component {
 							{bookmarkBtn}
 							&nbsp;
 							{resourceAnnotationBtn}
+                            &nbsp;
+                            <span className="br__resource-paging">
+                                {previousResourceBtn}
+                                &nbsp;
+                                {nextResourceBtn}
+                            </span>
 							<br/>
 							{mediaPanel}
 							<div className="row">

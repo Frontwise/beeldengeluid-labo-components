@@ -6,12 +6,10 @@ import ProjectAPI from './api/ProjectAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 
 import IDUtil from './util/IDUtil';
-import ElasticsearchDataUtil from './util/ElasticsearchDataUtil';
 import CollectionUtil from './util/CollectionUtil';
 import ComponentUtil from './util/ComponentUtil';
 import AnnotationUtil from './util/AnnotationUtil';
 
-import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
 
 import FlexRouter from './util/FlexRouter';
@@ -215,11 +213,15 @@ class SingleSearchRecipe extends React.Component {
 			desiredState, () => {
 				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
 					//if there was a valid query, set it in the cache for happy browsing
+                    const prevItems = desiredState.currentOutput.results.map(result => result._id);
+                    ComponentUtil.storeJSONInLocalStorage(desiredState.currentOutput.query.id, prevItems)
+                    ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', desiredState.currentOutput)
 					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
 					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
 				} else if(desiredState.currentOutput == null) {
 					//the search was cleared in the query builder, so cache the default query for this collection
 					//and refresh the page so it all loads smoothly
+                    // What about removing the saved data when clearing the cache ?
 					ComponentUtil.storeJSONInLocalStorage(
 						'user-last-query',
 						QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
@@ -575,10 +577,19 @@ class SingleSearchRecipe extends React.Component {
 					<div className={IDUtil.cssClassName('table-actions', this.CLASS_PREFIX)}>
 						{actions}
 					</div>
-				)
-				//populate the list of search results
+				);
+
+                const prevItems = this.state.currentOutput.results.map(result => result._id);
+                const detailResults = this.state.currentOutput.results.map( (result, index) => {
+                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
+                            ? this.state.initialQuery.dateRange.dateField : null);
+                });
+
+                ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
+
 				const items = this.state.currentOutput.results.map((result, index) => {
-					return (
+                    return (
 						<SearchHit
 							key={'__' + index}
 							result={result}
