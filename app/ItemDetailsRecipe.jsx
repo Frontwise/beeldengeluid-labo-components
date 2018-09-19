@@ -808,12 +808,15 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with awesome LD later on
-			if(1 == 2) {
-				ldResourceViewer = (
-					<LDResourceViewer resourceId={this.state.itemData.resourceId}
-						graphId={this.state.itemData.collectionId}/>
-				)
-			}
+			//if(1 == 2) {
+			ldResourceViewer = (
+				<LDResourceViewer
+					resourceId={this.state.itemData.resourceId}
+					collectionConfig={this.state.collectionConfig}
+					searchTerm={this.props.params.st}
+				/>
+			)
+			//}
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>

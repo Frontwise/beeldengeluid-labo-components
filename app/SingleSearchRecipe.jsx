@@ -76,6 +76,7 @@ class SingleSearchRecipe extends React.Component {
 			if(this.props.params.queryId == 'cache') {
 				//if the query should be taken from cache, load from there
 				initialQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+				console.debug(initialQuery)
 				collectionId = initialQuery ? initialQuery.collectionId : null;
 			} else if (this.props.params.queryId.indexOf('__') != -1 && this.state.activeProject) {
 				loadingFromWorkSpace = true;
