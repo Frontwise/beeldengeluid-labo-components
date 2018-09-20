@@ -34,24 +34,19 @@ class LDResourceViewer extends React.PureComponent {
 	}
 
 	queryEntity(property) {
-		console.debug(property);
+		const selectedFacets = {}
+		selectedFacets[this.props.collectionConfig.predicateToIndexField(property.p)] = [property.o];
 		const query = QueryModel.ensureQuery({
 			id : this.props.collectionConfig.getCollectionId(),
 			term : this.props.searchTerm,
 			desiredFacets : [{
-				field: "@graph.dcterms:contributor.keyword",
-				id: "contributor",
-				title: "Contributor",
-				type: "string"
+				field: this.props.collectionConfig.predicateToIndexField(property.p),
+				type: "string",
+				exclude : false
 			}],
-			selectedFacets : {
-				"@graph.dcterms:contributor.keyword": [
-					property.o
-				]
-			}
+			selectedFacets : selectedFacets
 		}, this.props.collectionConfig)
 
-		console.debug(query)
 		ComponentUtil.storeJSONInLocalStorage(
 			'user-last-query',
 			query

@@ -429,6 +429,11 @@ class CollectionConfig {
         return esFieldName;
     }
 
+    //maps a LD predicate to an ES field name
+    predicateToIndexField(p) {
+    	return p
+    }
+
 	//used to prevent graphs to blow up in case the minimum date is really low (because of incorrect data)
 	getMinimunYear() {
 		return 1600
