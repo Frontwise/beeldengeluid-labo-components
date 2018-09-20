@@ -14,7 +14,7 @@ import LDResourceViewer from './components/linkeddata/LDResourceViewer';
 
 import DocumentAPI from './api/DocumentAPI';
 import PlayoutAPI from './api/PlayoutAPI';
-
+import SearchAPI from './api/SearchAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 import AnnotationUtil from './util/AnnotationUtil'
 import AnnotationBox from './components/annotation/AnnotationBox';
@@ -119,9 +119,9 @@ class ItemDetailsRecipe extends React.Component {
 		//(for now we have to wait until the jquery is available... )
 		if(!this.tabListeners) {
 			$('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-				const target = $(e.target).attr("href") // activated tab
+				const target = $(e.target).attr("href"); // activated tab
 				const index = target.substring('#mo__'.length);
-				const annotationTarget = this.getAnnotationTarget(this.state.itemData, index)
+				const annotationTarget = this.getAnnotationTarget(this.state.itemData, index);
 				if(annotationTarget) {
 					this.setActiveAnnotationTarget.call(this, annotationTarget);
 				} else {
@@ -134,20 +134,20 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'ProjectSelector') {
+		if(componentClass === 'ProjectSelector') {
 			this.setState(
 				{activeProject : data},
 				() => {
 					this.onProjectChanged.call(this, data)
 				}
 			);
-		} else if(componentClass == 'BookmarkSelector') {
+		} else if(componentClass === 'BookmarkSelector') {
 			this.bookmarkToGroupInProject(data);
 		} else if(componentClass == 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
-		} else if(componentClass == 'FlexPlayer') {
+		} else if(componentClass === 'FlexPlayer') {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
@@ -159,27 +159,27 @@ class ItemDetailsRecipe extends React.Component {
 		if(data && data.error) {
 			found = false; //e.g. in case of access denied
 		}
-		if(collectionId && found != false) {
+		if(collectionId && found !== false) {
 			CollectionUtil.generateCollectionConfig(
 				this.props.clientId,
 				this.props.user,
 				collectionId,
 				function(config) {
 					const itemDetailData = config.getItemDetailData(data);
-					found = itemDetailData == null ? false : true;
+					found = itemDetailData != null;
 					if(found) {
 						//determine which media contant tab should be active
 						let activeMediaTab = 0;
 						if(itemDetailData.playableContent && this.props.params.fragmentUrl) {
 							for(let i = 0;i<itemDetailData.playableContent.length;i++) {
 								const mediaObject = itemDetailData.playableContent[i];
-								if(mediaObject.url == this.props.params.fragmentUrl) {
+								if(mediaObject.url === this.props.params.fragmentUrl) {
 									activeMediaTab = i;
 									break;
 								}
 							}
 						}
-						let desiredState = {
+						const desiredState = {
 							itemData : itemDetailData,
 							annotationTarget : this.getAnnotationTarget.call(this, itemDetailData), //for the list
 							found : true,
@@ -208,7 +208,7 @@ class ItemDetailsRecipe extends React.Component {
 					}
 				}.bind(this));
 		}
-		if(found == false) {
+		if(found === false) {
 			this.setState({
 				itemData : data,
 				annotationTarget : null,
@@ -248,7 +248,7 @@ class ItemDetailsRecipe extends React.Component {
 	onSaveAnnotation(annotation) {
 		ComponentUtil.hideModal(this, 'showModal' , 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type == 'Resource') {
+		if(annotation && annotation.target && annotation.target.type === 'Resource') {
 			this.refreshResourceAnnotations();
 		}
 	}
@@ -256,7 +256,7 @@ class ItemDetailsRecipe extends React.Component {
 	onDeleteAnnotation(annotation) {
 		ComponentUtil.hideModal(this, 'showModal', 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type == 'Resource') {
+		if(annotation && annotation.target && annotation.target.type === 'Resource') {
 			this.refreshResourceAnnotations();
 		}
 	}
@@ -298,7 +298,7 @@ class ItemDetailsRecipe extends React.Component {
 	getResourceAnnotation() {
 		let annotation = null;
 		if(this.state.resourceAnnotations) {
-			let temp = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking')
+			const temp = this.state.resourceAnnotations.filter(a => a.motivation !== 'bookmarking')
 			annotation = temp.length > 0 ? temp[0] : null;
 		}
 		return annotation
@@ -340,7 +340,7 @@ class ItemDetailsRecipe extends React.Component {
 	--------------------------------------------------------------------- */
 
 	triggerProjectSelector() {
-		let showProjectModal = this.state.showProjectModal;
+		const showProjectModal = this.state.showProjectModal;
 		this.setState({
 			showProjectModal : !showProjectModal
 		});
@@ -348,11 +348,11 @@ class ItemDetailsRecipe extends React.Component {
 
 	//TODO test this
 	onProjectChanged(project) {
-		ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
 		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
 			AnnotationActions.changeProject(project);
-			this.refreshResourceAnnotations()
-			if(this.state.awaitingProcess == 'bookmark') {
+			this.refreshResourceAnnotations();
+			if(this.state.awaitingProcess === 'bookmark') {
 				this.selectBookmarkGroup();
 			}
 		});
@@ -400,7 +400,7 @@ class ItemDetailsRecipe extends React.Component {
 					temp[t.source] = true;
 					dedupedTargets.push(t);
 				}
-			})
+			});
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API
@@ -426,7 +426,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	checkMediaObjectIsSelected(mediaObject) {
 		//console.debug(mediaObject, this.props.params.assetId)
-		if(mediaObject.assetId == this.props.params.assetId) {
+		if(mediaObject.assetId === this.props.params.assetId) {
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
 			mediaObject.x = this.props.params.x;
@@ -468,7 +468,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	getRenderedMediaContent() {
 		//first get all of the media contents per media type
-		let tabs = [
+		const tabs = [
 			this.getVideoTabContents(),
 			this.getAudioTabContents(),
 			this.getImageTabContents(),
@@ -478,12 +478,12 @@ class ItemDetailsRecipe extends React.Component {
 		//generate the tabs
 		const mediaTabs = tabs.map((tab, index) => {
 			const iconClass = IconUtil.getMimeTypeIcon(tab.type);
-			const active = this.props.params.fragmentUrl ? tab.active : index == 0;
+			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
 			return (
 				<li key={tab.type + '__tab'}
 					className={active ? 'active' : ''}>
 					<a data-toggle="tab" href={'#' + tab.type + '__content'}>
-						<span className={iconClass}></span>&nbsp;{tab.type}
+						<span className={iconClass}/>&nbsp;{tab.type}
 					</a>
 				</li>
 			)
@@ -491,7 +491,7 @@ class ItemDetailsRecipe extends React.Component {
 
 		//then the contents of the tabs
 		const mediaTabContents = tabs.map((tab, index) => {
-			const active = this.props.params.fragmentUrl ? tab.active : index == 0;
+			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
 			return (
 				<div key={tab.type + '__content'}
 					id={tab.type + '__content'}
@@ -520,7 +520,7 @@ class ItemDetailsRecipe extends React.Component {
 	getVideoTabContents() {
 		const mediaObjects = this.state.itemData.playableContent.filter(content => {
 			return content.mimeType.indexOf('video') !== -1;
-		})
+		});
 		if(mediaObjects.length > 0) {
 			const content = (
 				<FlexPlayer
@@ -555,8 +555,8 @@ class ItemDetailsRecipe extends React.Component {
 
 	getAudioTabContents() {
 		const mediaObjects = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('audio') != -1;
-		})
+			return content.mimeType.indexOf('audio') !== -1;
+		});
 		if(mediaObjects.length > 0) {
 			const content = (
 				<FlexPlayer
@@ -595,7 +595,7 @@ class ItemDetailsRecipe extends React.Component {
 		let cors = true;
 		let content = null;
 		const images = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('image') != -1;
+			return content.mimeType.indexOf('image') !== -1;
 		});
 		if(images.length > 0) {
 			images.forEach((mediaObject, index) => {
@@ -645,15 +645,15 @@ class ItemDetailsRecipe extends React.Component {
 	getApplicationTabContents() {
 		let isActive = false;
 		const applications = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('application') != -1;
-		})
+			return content.mimeType.indexOf('application') !== -1;
+		});
 		if(applications.length > 0) {
 			const content = applications.map((mediaObject, index) => {
 				mediaObject.id = 'application__' + index;
 				if(!isActive) {
 					isActive = this.checkMediaObjectIsSelected.call(this, mediaObject);
 				}
-				if(mediaObject.mimeType == 'application/javascript') {
+				if(mediaObject.mimeType === 'application/javascript') {
 					return (
 						<div style={{margin : '10px'}}>
 							Deze media kan i.v.m. beperkingen m.b.t. auteursrecht of het type content niet binnen de media suite worden afgespeeld
@@ -672,11 +672,48 @@ class ItemDetailsRecipe extends React.Component {
 		return null;
 	}
 
-    gotoItemDetails(resourceId) {
-        if(this.props.recipe.url && resourceId) {
-            const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
-                  result = resultDetailsData.find(elem => elem.resourceId === resourceId );
+    saveResultsDetailsData(data, sr, nextResultSet) {
+        ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', data);
+        ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query);
+        const detailResults = data.results.map((result, index) => {
+            return this.state.collectionConfig.getItemDetailData(data.results[index],
+                sr.dateRange && sr.dateField
+                    ? sr.dateRange.dateField : null);
+        });
+        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
+        const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        if(nextResultSet) {
+            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[0], this.props.params.st);
+        } else {
+            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[19], this.props.params.st);
+        }
+    }
 
+    getNextPage(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
+        if(currentQueryOutput) {
+            const sr = lastQuery;
+            sr.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
+            SearchAPI.search(sr, this.state.collectionConfig, data => this.saveResultsDetailsData(data, sr, nextResourceSet), true)
+        }
+    }
+
+    gotoItemDetails(resourceId) {
+        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
+            userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
+            currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput'),
+            pageNumber = currentQueryOutput.currentPage,
+            result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+        if (!resourceId) {
+            const indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
+            if (indexCurrentResource === resultDetailsData.length - 1) {
+                this.getNextPage(userLastQuery, pageNumber,currentQueryOutput, true);
+                return;
+            } else if (indexCurrentResource === 0) {
+                this.getNextPage(userLastQuery, pageNumber-1,currentQueryOutput, false);
+                return;
+            }
+        }
+        if (this.props.recipe.url && resourceId) {
             FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result, this.props.params.st);
         } else {
             this.setState({showModal: true})
@@ -751,24 +788,24 @@ class ItemDetailsRecipe extends React.Component {
 					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
 						Annotate resource
 					</button>
-				)
+				);
+                const prevResource = indexOfCurrentResource ? currentIdsFromLocalStorage[indexOfCurrentResource-1] : false;
+                const currentIndexInStorage = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
+				const nextResource = (resultDetailsData.length - 1) > currentIndexInStorage ? resultDetailsData[currentIndexInStorage+1].resourceId : false;
 
-                const prevResource = indexOfCurrentResource ? currentIdsFromLocalStorage[indexOfCurrentResource-1] : 'null';
-				const nextResource = indexOfCurrentResource <  currentIdsFromLocalStorage.length -1 ? currentIdsFromLocalStorage[indexOfCurrentResource+1] : 'non';
-				// checking if this is the 1st result in the resultset
-				const isFirstResource = (offset === 0 && indexCurrentResource === 0) ? true : false;
+				const isFirstResource = (offset === 0 && indexCurrentResource === 0);
                 const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
 
                 let isLastHit = false;
                 if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
-                    isLastHit = resultDetailsData[resultDetailsData.length-1].resourceId === this.state.itemData.resourceId ? true : false;
+                    isLastHit = resultDetailsData[resultDetailsData.length - 1].resourceId === this.state.itemData.resourceId;
                 }
 				previousResourceBtn = (
                     <button className="btn btn-primary" disabled={isFirstResource}
                             onClick={this.gotoItemDetails.bind(this, prevResource)}>
                         <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
                     </button>
-                )
+                );
                 nextResourceBtn = (
                     <button className="btn btn-primary" disabled={isLastHit}
                             onClick={this.gotoItemDetails.bind(this, nextResource)}>
@@ -817,12 +854,12 @@ class ItemDetailsRecipe extends React.Component {
 					<button className="btn btn-primary" onClick={this.triggerProjectSelector.bind(this)}>
 						Projects ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
 					</button>
-				)
+				);
 
 				//let's determine whether the resource was added to a bookmark group
 				let partOfBookmarkGroup = false;
 				if(this.state.resourceAnnotations) {
-					let groups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
+					const groups = this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking');
 					partOfBookmarkGroup = groups.length > 0;
 				}
 
@@ -831,9 +868,7 @@ class ItemDetailsRecipe extends React.Component {
 					<button className="btn btn-primary" onClick={this.bookmark.bind(this)}>
 						Bookmark
 						&nbsp;
-						<i className="fa fa-star" style={
-							partOfBookmarkGroup ? {color: 'red'} : {color: 'white'}
-						}></i>
+						<i className="fa fa-star" style={ partOfBookmarkGroup ? {color: 'red'} : {color: 'white'} }/>
 					</button>
 				)
 			}
@@ -851,7 +886,7 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with awesome LD later on
-			if(1 == 2) {
+			if(1 === 2) {
 				ldResourceViewer = (
 					<LDResourceViewer resourceId={this.state.itemData.resourceId}
 						graphId={this.state.itemData.collectionId}/>
