@@ -97,7 +97,7 @@ const AnnotationUtil = {
 			b.annotations = b.annotations ?
 				// augment annotations
 				b.annotations.map((a)=>(Object.assign({},a,{
-					parentAnnotationId: b.annotationId
+					parentAnnotationId: b.annotationId //TODO this does not exist? BAD CODE
 				}))) :
 				// empty annotation, required for deleting
 				[{
@@ -105,58 +105,59 @@ const AnnotationUtil = {
 				}];
 
 
-		// prepare the bookmark object and add it to the uniquelist
-		if (b.resourceId in uniqueList){
-			// existing
+			// prepare the bookmark object and add it to the uniquelist
+			if (b.resourceId in uniqueList) {
+				// existing
 
-			// Add to unique list, based on type
-			switch(b.object.type){
-				case 'Segment':
-					// add to the segment list
-					uniqueList[b.resourceId].segments = uniqueList[b.resourceId].segments.concat(b);
-				break;
-				default:
-					// just combine the bookmarks
-					uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
-					uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
-					uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
+				// Add to unique list, based on type
+				switch(b.object.type){
+					case 'Segment':
+						// add to the segment list
+						uniqueList[b.resourceId].segments = uniqueList[b.resourceId].segments.concat(b);
+					break;
+					default:
+						// just combine the bookmarks
+						uniqueList[b.resourceId].groups = uniqueList[b.resourceId].groups.concat(b.groups);
+						uniqueList[b.resourceId].annotations = uniqueList[b.resourceId].annotations.concat(b.annotations);
+						uniqueList[b.resourceId].annotationIds = uniqueList[b.resourceId].annotationIds.concat(b.annotationIds);
+				}
+			} else {
+				// new
+
+				if (b.object.type === 'Segment'){
+
+						// Create a new resourceobject for the segment
+						const segment = Object.assign({},b,{
+							object: Object.assign({},b.object),
+							annotations: b.annotations.slice(),
+						})
+						// add the the segment to the resource
+						b.segments = [segment];
+
+						// clear the annotations
+						b.annotations = [];
+				} else{
+					// create the segments placeholder
+					b.segments = [];
+				}
+
+				// always make the main bookmark a resource
+				b.object.type = "Resource";
+				uniqueList[b.resourceId] = b;
 			}
-		} else{
-			// new
+		});
 
-			if (b.object.type === 'Segment'){
+		resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
 
-					// Create a new resourceobject for the segment
-					const segment = Object.assign({},b,{
-						object: Object.assign({},b.object),
-						annotations: b.annotations.slice(),
-					})
-					// add the the segment to the resource
-					b.segments = [segment];
-
-					// clear the annotations
-					b.annotations = [];
+		if(callback){
+			if (resourceList.length > 0) {
+				return AnnotationUtil.reconsileResourceList(resourceList, callback)
 			} else{
-				// create the segments placeholder
-				b.segments = [];
+				callback([]);
 			}
-
-			// always make the main bookmark a resource
-			b.object.type = "Resource";
-			uniqueList[b.resourceId] = b;
-		}
-	});
-	resourceList = Object.keys(uniqueList).map((key)=>(uniqueList[key]));
-
-	if(callback){
-		if (resourceList.length > 0) {
-			return AnnotationUtil.reconsileResourceList(resourceList, callback)
-		} else{
-			callback([]);
-		}
-		}
-	return resourceList;
-},
+			}
+		return resourceList;
+	},
 
 	//TODO do a mget to fetch all the resource data from the search API.
 	reconsileResourceList(resourceList, callback) {

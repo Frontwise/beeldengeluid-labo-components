@@ -131,19 +131,18 @@ class FlexPlayer extends React.Component {
 		)
 	}
 
-	onLoadAnnotations(data) {
+	onLoadAnnotations(annotationList) {
 		let annotations = null;
 		let mediaObjectAnnotation = null;
-		if(data) {
-			annotations = data.annotations;
+		if(annotationList) {
 			//get the annotation on the media object level (there should be only one per user!)
-			mediaObjectAnnotation = data.annotations.filter((a) => {
+			mediaObjectAnnotation = annotationList.filter((a) => {
 				return a.target.source === this.state.currentMediaObject.url && a.target.selector == null;
 			});
 			mediaObjectAnnotation = mediaObjectAnnotation.length > 0 ? mediaObjectAnnotation[0] : null;
 		}
 		this.setState({
-			annotations : annotations,
+			annotations : annotationList,
 			mediaObjectAnnotation : mediaObjectAnnotation
 		});
 	}

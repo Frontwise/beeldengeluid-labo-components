@@ -7,6 +7,7 @@ import FlexRouter from '../../../../util/FlexRouter';
 
 import SortTable from '../../SortTable';
 import PropTypes from 'prop-types';
+import ReactTooltip from 'react-tooltip';
 
 class ProjectQueriesTable extends React.PureComponent {
 
@@ -172,7 +173,16 @@ class ProjectQueriesTable extends React.PureComponent {
                         props: { className: 'primary' },
                         content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
                     },
-                    { content: QueryModel.toHumanReadableString(query.query)},
+                    { content:
+                            <div>
+                                <span data-for={'__ci_tooltip'}
+                                      data-class="bg__custom-queryTooltip"
+                                      data-tip={QueryModel.queryDetailsTooltip(query)}
+                                      data-html={true}>
+							    <i className="fa fa-info-query"/>
+                                <ReactTooltip id={'__ci_tooltip'}/>
+						    </span>{QueryModel.toHumanReadableString(query.query)}</div>
+                    },
                     {
                         content: (
                             <a className="btn blank warning" onClick={this.deleteQuery.bind(this, query)}>

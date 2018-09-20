@@ -61,7 +61,9 @@ class SearchSnippet extends React.Component {
 			poster = (
 				<div style={{width : '200px'}}>
 					<a href="#">
-						<img className="media-object" src={this.props.data.posterURL}
+						<img className="media-object"
+							src="/static/images/placeholder.2b77091b.svg"
+							data-src={this.props.data.posterURL}
 							style={{width:'100%'}}
 							alt="Could not find image"/>
 					</a>

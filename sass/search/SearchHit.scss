@@ -26,7 +26,7 @@
 			cursor: pointer;
 		}
 	}
-	&.fragment { /* possibly change this into .bg__search-hit--fragment (BEM style) */
+	&.fragment {
 		border-right: 1px solid $highlight-color;
 		margin: 5px;
 		padding: $default-margin;

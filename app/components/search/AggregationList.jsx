@@ -183,6 +183,10 @@ class AggregationList extends React.Component {
         this.setState({facetItems: aggregationsFromProps});
     }
 
+    toggleInclusion(e) {
+        alert(e.target.id)
+    }
+
     render() {
         const facets = [];
         const nonDateAggregations = this.props.desiredFacets.filter(
@@ -321,10 +325,14 @@ class AggregationList extends React.Component {
             //if there are empty aggregations
             if(emptyAggregations.length > 0) {
                 let tip = null;
+                const classNames = [
+                    IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX),
+                    'aggregation-no-results'
+                ]
                 emptyAggregations.map((key, value) => {
                     tip = 'tooltip__' + value;
                     emptyAggrBlock.push((
-                        <div className="checkboxGroup aggregation-no-results" key={'facet__' + index} id={'index__' + index}>
+                        <div className={classNames} key={'facet__' + index} id={'index__' + index}>
                             <h4>
                                 {key.formattedAggregationName} (0)
                                 <span data-for={tip} data-tip={key.aggregationField} data-html={true}>
@@ -362,14 +370,16 @@ class AggregationList extends React.Component {
                         {label: 'Count', key: 'doc_count'}
                     ];
                 facets.push((
-                    <div className="checkboxGroup" key={'facet__' + index} id={'index__' + index}>
-                        <div className="bg__hamburger-facets-container">
-                            <input type="checkbox" id={facetId}/>
+                    <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)}
+                        key={'facet__' + index} id={'index__' + index}>
+                        <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
+                            <input className="hamburger-toggle" type="checkbox" id={facetId}/>
                             <label htmlFor={facetId}>
                                 <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={key['field']}
                                       data-html={true}>
                                    <i className="fa fa-info-circle"/> {key['title']}
 						                    </span>
+
                                 <span className="fa fa-remove" onClick={
                                     this.showRemoveDialog.bind(this, key['field'], index)
                                 }/>

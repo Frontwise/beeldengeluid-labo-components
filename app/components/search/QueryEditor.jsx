@@ -31,9 +31,11 @@ class QueryEditor extends React.PureComponent {
 		e.preventDefault();
 		if(this.state.project && this.props.query) {
 			const project = this.state.project;
+			let query = this.props.query;
+			query.id = IDUtil.guid(); //always assign a new ID, since this component only supports saving new queries
 			project.queries.push({
 				name : this.queryName.value,
-				query : this.props.query
+				query : query
 			});
 
 			 // store project

@@ -73,10 +73,10 @@ class SearchHit extends React.Component {
 			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
 				<input
 					type="checkbox" onClick={this.select.bind(this)}
-					defaultChecked={this.props.isSelected || false}
+					checked={this.props.isSelected}
 					id={'cb__' + modalID}
 				/>
-				<label htmlFor={'cb__' + modalID}><span/></label>
+				<label htmlFor={'cb__' + modalID}><span></span></label>
 			</div>
 		);
 
