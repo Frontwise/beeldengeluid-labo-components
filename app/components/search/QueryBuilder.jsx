@@ -107,7 +107,6 @@ class QueryBuilder extends React.Component {
 
 		//reset certain query properties
 		q.selectedFacets = {};
-		q.excludedFacets = {};
 		//q.dateRange = null;
 		q.offset = 0;
 		q.term = this.setSearchTerm.value;
@@ -142,7 +141,6 @@ class QueryBuilder extends React.Component {
 			//reset the following query params
 			q.desiredFacets = data.desiredFacets;
 			q.selectedFacets = data.selectedFacets;
-			q.excludedFacets = data.excludedFacets;
 			q.offset = 0;
 			q.term = this.setSearchTerm.value;
 			this.doSearch(q, true);
@@ -265,7 +263,6 @@ class QueryBuilder extends React.Component {
         	let q = this.state.query;
         	//q.dateRange = null;
         	q.selectedFacets = {};
-        	q.excludedFacets = {};
         	//q.fieldCategory = null;
 
             this.setState(
@@ -416,7 +413,6 @@ class QueryBuilder extends React.Component {
 
                 desiredFacets={this.state.query.desiredFacets}
 								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-								excludedFacets={this.state.query.excludedFacets}
 
                 collectionConfig={this.props.collectionConfig} //for the aggregation creator only
 								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component

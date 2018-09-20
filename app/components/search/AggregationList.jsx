@@ -22,12 +22,11 @@ class AggregationList extends React.Component {
     }
 
     //communicates the selected facets back to the parent component
-    onOutput(desiredFacets, selectedFacets, excludedFacets) {
+    onOutput(desiredFacets, selectedFacets) {
         if (this.props.onOutput) {
             this.props.onOutput(this.constructor.name, {
                 desiredFacets: desiredFacets,
-                selectedFacets: selectedFacets,
-                excludedFacets: excludedFacets
+                selectedFacets: selectedFacets
             })
         }
     }
@@ -58,7 +57,7 @@ class AggregationList extends React.Component {
                 facets[key] = [value]
             }
             //output to the parent component
-            this.onOutput(this.props.desiredFacets, facets,this.props.excludedFacets);
+            this.onOutput(this.props.desiredFacets, facets);
         }
     }
 
@@ -146,24 +145,12 @@ class AggregationList extends React.Component {
         }
 
         ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
-        this.onOutput(desiredFacets, this.props.selectedFacets, this.props.excludedFacets);
+        this.onOutput(desiredFacets, this.props.selectedFacets);
     }
 
-    toggleExcludeFacets(key) {
-        if(typeof key === "string") {
-            if (key in this.props.excludedFacets) {
-                this.props.excludedFacets[key] =
-                !this.props.excludedFacets[key];
-                this.onOutput(
-                    this.props.desiredFacets, this.props.selectedFacets,
-                    this.props.excludedFacets);
-            } else {
-                this.props.excludedFacets[key] = true;
-                this.onOutput(
-                    this.props.desiredFacets, this.props.selectedFacets,
-                    this.props.excludedFacets);
-            }
-        }
+    toggleExcludeFacets(index) {
+        this.props.desiredFacets[index]['exclude'] = !this.props.desiredFacets[index]['exclude'];
+        this.onOutput(this.props.desiredFacets, this.props.selectedFacets);
     }
 
     sorting(arr, order="asc", type="alpha", index) {
@@ -255,17 +242,30 @@ class AggregationList extends React.Component {
 
         //only display aggregation blocks for non histogram facets
         nonDateAggregations.forEach((key, index) => {
-            
-            if (!(key['field'] in this.props.excludedFacets)) {
-                this.props.excludedFacets[key['field']] = false;
+            if (this.props.desiredFacets[index].exclude === undefined) {
+                this.props.desiredFacets[index]['exclude'] = false;
             }
-
             let sortedOpts = [],
             options = null;
 
             if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
 
-                //determine the options per aggregation (if not empty)
+                if (this.props.selectedFacets[key['field']]) {
+                    //Check if all selected facets are in the aggregations-list, if not, add doc_count 0
+                    this.props.selectedFacets[key['field']].forEach((selectedKey, sIndex) => {
+                        var found = false;
+                        this.props.aggregations[key['field']].forEach((searchKey, oIndex) => {
+                            if(searchKey['key'] == selectedKey){
+                                found = true;
+                            }
+                        });
+                        if(!found){
+                            this.props.aggregations[key['field']].push({'key':selectedKey, 'doc_count': 0});
+                        }
+                    });
+                }
+
+                //determine the selected options per aggregation (if not empty)
                 options = this.props.aggregations[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key
                     const facetId = key['field'] + '|' + value;
@@ -379,10 +379,9 @@ class AggregationList extends React.Component {
                                 </div>
                             </label>
                             <ul className={facetId}>
-
-                                <li className="aggregationSwitchBtn"><span className="ms_toggle_btn"><input type="checkbox" id={key['field']} className="checkbox-toggle checkbox-toggle-round"
-                                    checked={this.props.excludedFacets[key['field']]}
-                                    onChange={this.toggleExcludeFacets.bind(this, key['field'])}/>
+                                <li className={IDUtil.cssClassName('aggregationSwitchBtn', this.CLASS_PREFIX)}><span className="ms_toggle_btn"><input type="checkbox" id={key['field']} className="checkbox-toggle checkbox-toggle-round"
+                                    checked={this.props.desiredFacets[index]['exclude']}
+                                    onChange={this.toggleExcludeFacets.bind(this, index)}/>
                                     <label htmlFor={key['field']} data-on="Excl" data-off="Incl"></label></span>
                                 </li>
                                 <li title="Alphanumeric descending" onClick={
@@ -428,14 +427,17 @@ class AggregationList extends React.Component {
                     for (var entry in this.props.selectedFacets[key['field']]) {
                         var facetName = this.props.selectedFacets[key['field']][entry];
                         var label = facetName;
-                        if (this.props.excludedFacets[key['field']] == true){
-                            label = "NOT - "+label;
-                        }
 
                         var hits = 0
                         if (selectedOpts.hasOwnProperty(facetName)) {
                             var hits = selectedOpts[facetName];
                         }
+
+                        if (this.props.desiredFacets[index]['exclude'] == true){
+                            label = "NOT - "+label;
+                            hits = 0;
+                        }
+
                         opts.push(
                         <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
                             {label.toUpperCase()} ({hits})

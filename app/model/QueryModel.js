@@ -29,9 +29,6 @@ const QueryModel = {
 			//filters selected by the user (by selecting certain values from the desiredFacets)
 			selectedFacets: obj.selectedFacets || {},
 
-			//Filters for which the setting has been changed to exclude
-			excludedFacets: obj.excludedFacets || {},
-
 			//which aggregations should be included next to the search results
 			desiredFacets: obj.desiredFacets || QueryModel.getInitialDesiredFacets(obj, collectionConfig),
 
