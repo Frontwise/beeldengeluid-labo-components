@@ -685,7 +685,7 @@ class ItemDetailsRecipe extends React.Component {
         if(nextResultSet) {
             FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[0], this.props.params.st);
         } else {
-            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[19], this.props.params.st);
+            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[result.length-1], this.props.params.st);
         }
     }
 
