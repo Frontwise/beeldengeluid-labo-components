@@ -1,11 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import ComponentUtil from '../../util/ComponentUtil';
-import FlexRouter from '../../util/FlexRouter';
-
 import LinkedDataAPI from '../../api/LinkedDataAPI';
-
-import QueryModel from '../../model/QueryModel';
-
 import PropTypes from 'prop-types';
 
 class LDResourceViewer extends React.PureComponent {
@@ -34,25 +28,12 @@ class LDResourceViewer extends React.PureComponent {
 	}
 
 	queryEntity(property) {
-		const selectedFacets = {}
-		selectedFacets[this.props.collectionConfig.predicateToIndexField(property.p)] = [property.o];
-		const query = QueryModel.ensureQuery({
-			id : this.props.collectionConfig.getCollectionId(),
-			term : this.props.searchTerm,
-			desiredFacets : [{
-				field: this.props.collectionConfig.predicateToIndexField(property.p),
-				type: "string",
-				exclude : false
-			}],
-			selectedFacets : selectedFacets
-		}, this.props.collectionConfig)
-
-		ComponentUtil.storeJSONInLocalStorage(
-			'user-last-query',
-			query
-		);
-
-		FlexRouter.gotoSingleSearch('cache')
+		if(this.props.onOutput) {
+			this.props.onOutput(this.constructor.name, {
+				field : this.props.collectionConfig.predicateToIndexField(property.p),
+				value : property.o
+			})
+		}
 	}
 
 	render() {
@@ -62,8 +43,12 @@ class LDResourceViewer extends React.PureComponent {
 				contents = (
 					<ul className={IDUtil.cssClassName('property-list', this.CLASS_PREFIX)}>
 						{this.state.data.map(prop => {
+							const classNames = ['property'];
+							if(this.props.collectionConfig.predicateToIndexField(prop.p)) {
+								classNames.push('keyword')
+							}
 							return (
-								<li className="property" onClick={this.queryEntity.bind(this, prop)}>
+								<li className={classNames.join(' ')} onClick={this.queryEntity.bind(this, prop)}>
 									<div className="predicate">{prop.p}</div>
 									<div className="value">{prop.o}</div>
 								</li>

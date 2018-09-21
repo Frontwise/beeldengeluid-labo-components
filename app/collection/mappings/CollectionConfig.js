@@ -206,6 +206,16 @@ class CollectionConfig {
 		return this.keywordFields;
 	}
 
+	//checks if the field is a keyword field and makes sure to return the matched keyword field name
+	getMatchedKeywordField(fieldName) {
+		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) != -1);
+		console.debug(kwMatch)
+		if(kwMatch) {
+			return fieldName === kwMatch ? fieldName : fieldName + '.keyword';
+		}
+		return null;
+	}
+
 	//used by the collection analyzer (field analysis pull down)
 	getAllFields() {
 		let tmp = []

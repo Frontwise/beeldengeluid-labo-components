@@ -3,10 +3,13 @@ import IDUtil from './util/IDUtil';
 import IconUtil from './util/IconUtil';
 import ComponentUtil from './util/ComponentUtil';
 
+import QueryModel from './model/QueryModel';
+
 import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
 import FlexPlayer from './components/player/video/FlexPlayer';
 import FlexImageViewer from './components/player/image/FlexImageViewer';
+import FlexRouter from './util/FlexRouter';
 
 import MetadataTable from './components/search/MetadataTable';
 
@@ -150,6 +153,8 @@ class ItemDetailsRecipe extends React.Component {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
+		} else if(componentClass == 'LDResourceViewer') {
+			this.browseEntity(data);
 		}
 	}
 
@@ -417,11 +422,51 @@ class ItemDetailsRecipe extends React.Component {
 		})
 	}
 
+	/************************************************************************
+	************************ BROWSING FUNCTIONS *******************************
+	*************************************************************************/
+
+	browseEntity(entity) {
+		const selectedFacets = {}
+		selectedFacets[entity.field] = [entity.value];
+		const query = QueryModel.ensureQuery({
+			id : this.state.collectionConfig.getCollectionId(),
+			term : this.props.params.st,
+			desiredFacets : [{
+				field: entity.field,
+				type: "string",
+				exclude : false
+			}],
+			selectedFacets : selectedFacets
+		}, this.state.collectionConfig)
+
+		ComponentUtil.storeJSONInLocalStorage(
+			'user-last-query',
+			query
+		);
+
+		FlexRouter.gotoSingleSearch('cache')
+	}
+
+	getFieldValue(fieldName) {
+		console.debug(this.state.itemData.rawData)
+		console.debug('Getting value for field', fieldName)
+		let path = fieldName.split('.');
+		let curObj = this.state.itemData.rawData;
+		let i = 0;
+		while(i < path.length) {
+			curObj = curObj[path[i]]
+			i++;
+		}
+		console.debug(curObj);
+		return 'dummy';
+	}
 
 
 	/************************************************************************
 	************************ CALLED BY RENDER *******************************
 	*************************************************************************/
+
 
 	checkMediaObjectIsSelected(mediaObject) {
 		//console.debug(mediaObject, this.props.params.assetId)
@@ -810,13 +855,32 @@ class ItemDetailsRecipe extends React.Component {
 			//make this pretty & nice and work with awesome LD later on
 			//if(1 == 2) {
 			ldResourceViewer = (
-				<LDResourceViewer
-					resourceId={this.state.itemData.resourceId}
-					collectionConfig={this.state.collectionConfig}
-					searchTerm={this.props.params.st}
-				/>
+				<FlexBox title="Linked Data">
+					<LDResourceViewer
+						resourceId={this.state.itemData.resourceId}
+						collectionConfig={this.state.collectionConfig}
+						onOutput={this.onComponentOutput.bind(this)}
+					/>
+				</FlexBox>
 			)
 			//}
+
+
+			const exploreFields = this.state.collectionConfig.getKeywordFields().map((kw) => {
+				return (
+					<li onClick={this.getFieldValue.bind(this, kw)}>
+						{kw}
+						{/*this.state.collectionConfig.toPrettyFieldName(kw)*/}
+					</li>
+				)
+			})
+			const exploreBlock = (
+				<div className="row">
+					<ul>
+						{exploreFields}
+					</ul>
+				</div>
+			)
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -832,13 +896,19 @@ class ItemDetailsRecipe extends React.Component {
 							{resourceAnnotationBtn}
 							<br/>
 							{mediaPanel}
+							<br/>
 							<div className="row">
 								<div className="col-md-7">
-									{metadataPanel}
+									<div className="row">
+										{metadataPanel}
+									</div>
+									<div className="row">
+										{ldResourceViewer}
+									</div>
 								</div>
 								<div className="col-md-5">
 									{annotationList}
-									{ldResourceViewer}
+									{exploreBlock}
 								</div>
 								<br/>
 							</div>
