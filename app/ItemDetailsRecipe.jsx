@@ -185,7 +185,7 @@ class ItemDetailsRecipe extends React.Component {
 							found : true,
 							activeMediaTab : activeMediaTab,
 							collectionConfig : config
-						}
+						};
 						//TODO make sure this works for all carriers!!
 						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
 							PlayoutAPI.requestAccess(
@@ -687,7 +687,7 @@ class ItemDetailsRecipe extends React.Component {
         }
     }
 
-    getNextPage(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
+    getResource(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
         if(currentQueryOutput) {
             const sr = lastQuery;
             sr.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
@@ -704,10 +704,10 @@ class ItemDetailsRecipe extends React.Component {
         if (!resourceId) {
             const indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
             if (indexCurrentResource === resultDetailsData.length - 1) {
-                this.getNextPage(userLastQuery, pageNumber,currentQueryOutput, true);
+                this.getResource(userLastQuery, pageNumber,currentQueryOutput, true);
                 return;
             } else if (indexCurrentResource === 0) {
-                this.getNextPage(userLastQuery, pageNumber-1,currentQueryOutput, false);
+                this.getResource(userLastQuery, pageNumber-1,currentQueryOutput, false);
                 return;
             }
         }
@@ -716,6 +716,14 @@ class ItemDetailsRecipe extends React.Component {
         } else {
             this.setState({showModal: true})
         }
+    }
+
+    gotToSearchResults(userLastQuery){
+        if(userLastQuery && userLastQuery.id) {
+            FlexRouter.gotoSingleSearch('cache');
+        }
+        console.debug('There is no cached query');
+        return false;
     }
 
 	/* ------------------------------------------------------------------
@@ -748,6 +756,7 @@ class ItemDetailsRecipe extends React.Component {
 			let resourceAnnotationBtn = null;
             let previousResourceBtn = null;
             let nextResourceBtn = null;
+            let backToSearchBtn = null;
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
 				if(this.state.showModal) {
@@ -806,7 +815,13 @@ class ItemDetailsRecipe extends React.Component {
                             onClick={this.gotoItemDetails.bind(this, nextResource)}>
                         Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
                     </button>
-                )
+                );
+                backToSearchBtn = (
+                    <button className="btn btn-primary" disabled={isLastHit}
+                            onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
+                        Back to results
+                    </button>
+                );
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
@@ -905,6 +920,8 @@ class ItemDetailsRecipe extends React.Component {
                                 {previousResourceBtn}
                                 &nbsp;
                                 {nextResourceBtn}
+                                &nbsp;
+                                {backToSearchBtn}
                             </span>
 							<br/>
 							{mediaPanel}
