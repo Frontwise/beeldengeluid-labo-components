@@ -82,7 +82,7 @@ class ItemDetailsRecipe extends React.Component {
 			awaitingProcess : null,
 
 			collectionConfig : null
-		}
+		};
 		this.tabListeners = false;
 		this.CLASS_PREFIX = 'rcp__id'
 	}
@@ -143,7 +143,7 @@ class ItemDetailsRecipe extends React.Component {
 			);
 		} else if(componentClass === 'BookmarkSelector') {
 			this.bookmarkToGroupInProject(data);
-		} else if(componentClass == 'FlexImageViewer') {
+		} else if(componentClass === 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
@@ -418,8 +418,6 @@ class ItemDetailsRecipe extends React.Component {
 		})
 	}
 
-
-
 	/************************************************************************
 	************************ CALLED BY RENDER *******************************
 	*************************************************************************/
@@ -487,7 +485,7 @@ class ItemDetailsRecipe extends React.Component {
 					</a>
 				</li>
 			)
-		}, this)
+		}, this);
 
 		//then the contents of the tabs
 		const mediaTabContents = tabs.map((tab, index) => {
@@ -606,7 +604,7 @@ class ItemDetailsRecipe extends React.Component {
 				if(mediaObject.hasOwnProperty('cors') && mediaObject.cors === false) {
 					cors = false;
 				}
-			})
+			});
 			//CORS is required for OpenSeaDragon support!
 			if(cors === false) {
 				//for now simply draw a bunch of images on the screen (which means: no annotation support!)
@@ -726,9 +724,6 @@ class ItemDetailsRecipe extends React.Component {
 
 	render() {
         const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
-              currentQueryId = userLastQuery.id,
-              currentIdsFromLocalStorage = ComponentUtil.getJSONFromLocalStorage(currentQueryId),
-              indexOfCurrentResource = currentIdsFromLocalStorage.indexOf(this.props.params.id),
               offset = userLastQuery.offset,
               resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
               indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
@@ -789,12 +784,12 @@ class ItemDetailsRecipe extends React.Component {
 						Annotate resource
 					</button>
 				);
-                const prevResource = indexOfCurrentResource ? currentIdsFromLocalStorage[indexOfCurrentResource-1] : false;
-                const currentIndexInStorage = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
-				const nextResource = (resultDetailsData.length - 1) > currentIndexInStorage ? resultDetailsData[currentIndexInStorage+1].resourceId : false;
 
-				const isFirstResource = (offset === 0 && indexCurrentResource === 0);
-                const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+                const currentIndexInStorage = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id),
+                      prevResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id) ? resultDetailsData[currentIndexInStorage-1].resourceId : false,
+                      nextResource = (resultDetailsData.length - 1) > currentIndexInStorage ? resultDetailsData[currentIndexInStorage+1].resourceId : false,
+				      isFirstResource = (offset === 0 && indexCurrentResource === 0),
+                      queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
 
                 let isLastHit = false;
                 if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
@@ -878,7 +873,7 @@ class ItemDetailsRecipe extends React.Component {
 				<FlexBox title="Metadata">
 					<MetadataTable data={this.state.itemData}/>
 				</FlexBox>
-			)
+			);
 
 			//media objects
 			if(this.state.itemData.playableContent) {

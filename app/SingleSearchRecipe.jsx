@@ -71,20 +71,20 @@ class SingleSearchRecipe extends React.Component {
 		let initialQuery = null;
 		let loadingFromWorkSpace = false;
 		if (this.props.params && this.props.params.queryId) {
-			if(this.props.params.queryId == 'cache') {
+			if(this.props.params.queryId === 'cache') {
 				//if the query should be taken from cache, load from there
 				initialQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
 				collectionId = initialQuery ? initialQuery.collectionId : null;
-			} else if (this.props.params.queryId.indexOf('__') != -1 && this.state.activeProject) {
+			} else if (this.props.params.queryId.indexOf('__') !== -1 && this.state.activeProject) {
 				loadingFromWorkSpace = true;
 				const tmp = this.props.params.queryId.split('__');
-				if(tmp.length == 2) {
-					let projectId = tmp[0];
-					let queryId = tmp[1];
+				if(tmp.length === 2) {
+					const projectId = tmp[0];
+					const queryId = tmp[1];
 					//if the user supplied a query ID, look for it in the workspace API
 					ProjectAPI.get(this.props.user.id, projectId, project => {
 						if(project.queries) {
-							let tmp = project.queries.find(q => q.query.id == queryId);
+							const tmp = project.queries.find(q => q.query.id === queryId);
 							if(tmp && tmp.query) {
 								this.onReloadQueryData(tmp.query.collectionId, tmp.query);
 							}
@@ -138,9 +138,9 @@ class SingleSearchRecipe extends React.Component {
 	//to pass it to based on the ingredients of the recipe
 	//TODO change this, so it knows what to do based on the recipe
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'QueryBuilder') {
+		if(componentClass === 'QueryBuilder') {
 			this.onSearched(data);
-		} else if(componentClass == 'CollectionSelector') {
+		} else if(componentClass === 'CollectionSelector') {
 			//set the default query for the selected collection; creates a new query builder
 			this.setState({
 				collectionId : data.collectionId,
@@ -150,7 +150,7 @@ class SingleSearchRecipe extends React.Component {
 			},
 			this.hideModalAndChangeHistory(data)
 		);
-		} else if(componentClass == 'SearchHit') {
+		} else if(componentClass === 'SearchHit') {
 			if(data) {
 				const selectedRows = this.state.selectedRows;
 				if(data.selected) {
@@ -163,16 +163,16 @@ class SingleSearchRecipe extends React.Component {
 					allRowsSelected : data.selected ? this.state.allRowsSelected : false
 				})
 			}
-		} else if(componentClass == 'ProjectSelector') {
+		} else if(componentClass === 'ProjectSelector') {
 			this.setState(
 				{activeProject : data},
 				() => {
 					this.onProjectChanged.call(this, data)
 				}
 			);
-		} else if(componentClass == 'BookmarkSelector') {
+		} else if(componentClass === 'BookmarkSelector') {
 			this.bookmarkToGroupInProject(data);
-		} else if(componentClass == 'QueryEditor') {
+		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
 	}
@@ -180,7 +180,7 @@ class SingleSearchRecipe extends React.Component {
 	//this is updated via the query builder, but it does not update the state.query...
 	//TODO figure out if it's bad to update the state
 	onSearched(data) {
-		let desiredState = {
+		const desiredState = {
 			currentOutput: data,
 			allRowsSelected : false,
 			selectedRows : {}
@@ -188,7 +188,7 @@ class SingleSearchRecipe extends React.Component {
 
 		//reset the poster images to the placeholder
 		const imgDefer = document.getElementsByTagName('img');
-		for (var i=0; i<imgDefer.length; i++) {
+		for (let i=0; i<imgDefer.length; i++) {
 			if(imgDefer[i].getAttribute('data-src')) {
 				imgDefer[i].setAttribute('src', '/static/images/placeholder.2b77091b.svg');
 			}
@@ -213,11 +213,9 @@ class SingleSearchRecipe extends React.Component {
 			desiredState, () => {
 				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
 					//if there was a valid query, set it in the cache for happy browsing
-                    const prevItems = desiredState.currentOutput.results.map(result => result._id);
-                    ComponentUtil.storeJSONInLocalStorage(desiredState.currentOutput.query.id, prevItems)
-                    ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', desiredState.currentOutput)
-					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
-					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
+                    ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', desiredState.currentOutput);
+					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query);
+					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
 				} else if(desiredState.currentOutput == null) {
 					//the search was cleared in the query builder, so cache the default query for this collection
 					//and refresh the page so it all loads smoothly
@@ -242,7 +240,7 @@ class SingleSearchRecipe extends React.Component {
 
 	afterRenderingHits() {
 		const imgDefer = document.getElementsByTagName('img');
-		for (var i=0; i<imgDefer.length; i++) {
+		for (let i=0; i<imgDefer.length; i++) {
 			if(imgDefer[i].getAttribute('data-src') && this.elementInViewport(imgDefer[i])) {
 				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
 			}
@@ -285,7 +283,7 @@ class SingleSearchRecipe extends React.Component {
 			rows = {};
 		} else {
 			this.state.currentOutput.results.forEach((result) => {
-				console.debug(result._id)
+				console.debug(result._id);
 				rows[result._id] = !this.state.allRowsSelected;
 			});
 		}
@@ -296,7 +294,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	onProjectChanged(project) {
-		ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
 		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
 			if(this.state.awaitingProcess) {
 				switch(this.state.awaitingProcess) {
@@ -331,20 +329,20 @@ class SingleSearchRecipe extends React.Component {
 	bookmarkToGroupInProject(annotation) {
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
 			//concatenate the
-			let targets = annotation.target.concat(this.state.currentOutput.results
+			const targets = annotation.target.concat(this.state.currentOutput.results
 				.filter((result) => this.state.selectedRows[result._id]) //only include selected resources
 				.map((result) => AnnotationUtil.generateSimpleResourceTarget(
 					result._id, this.state.collectionConfig.collectionId
-				), this))
+				), this));
 
-			let temp = {};
-			let dedupedTargets = [];
+			const temp = {};
+			const dedupedTargets = [];
 			targets.forEach((t) => {
 				if(!temp[t.source]) {
 					temp[t.source] = true;
 					dedupedTargets.push(t);
 				}
-			})
+			});
 
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
@@ -389,7 +387,6 @@ class SingleSearchRecipe extends React.Component {
 
 	render() {
 		let chooseCollectionBtn = null; // for changing the collection
-		let chooseProjectBtn = null; // for changing the active project
 		let collectionModal = null; //modal that holds the collection selector
 		let projectModal = null;
 		let bookmarkModal = null;
@@ -413,7 +410,7 @@ class SingleSearchRecipe extends React.Component {
 							'none selected'
 					})
 				</button>
-			)
+			);
 
 			//collection modal
 			if(this.state.showModal) {
@@ -435,11 +432,12 @@ class SingleSearchRecipe extends React.Component {
 			}
 		}
 
-		chooseProjectBtn = (
+		// for changing the active project
+		const chooseProjectBtn = (
 			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
 				Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
 			</button>
-		)
+		);
 
 		//project modal
 		if(this.state.showProjectModal) {
@@ -541,9 +539,9 @@ class SingleSearchRecipe extends React.Component {
 						<input type="checkbox" checked={
 							this.state.allRowsSelected ? 'checked' : ''
 						} id={'cb__select-all'}/>
-						<label htmlFor={'cb__select-all'}><span></span></label>
+						<label htmlFor={'cb__select-all'}><span/></label>
 					</div>
-				)
+				);
 
 				//draw the action buttons
 				const actions = [];
@@ -579,7 +577,6 @@ class SingleSearchRecipe extends React.Component {
 					</div>
 				);
 
-                const prevItems = this.state.currentOutput.results.map(result => result._id);
                 const detailResults = this.state.currentOutput.results.map( (result, index) => {
                     return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
                         this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
