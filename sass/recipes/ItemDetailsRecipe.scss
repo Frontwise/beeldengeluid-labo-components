@@ -1,3 +1,24 @@
 .bg__item-details-recipe {
 	.bg__rcp__id__media-player {}
+
+	.bg__rcp__id__keyword-browser {
+		margin: 10px;
+		padding: 5px;
+		.property-list {
+			width: 400px;
+	    	height: 600px;
+	    	overflow-y: auto;
+			.keyword {
+				margin:0px 5px 5px 0px;
+				padding:5px;
+				border-radius:3px;
+				background-color: $clBlue;
+				color: white;
+				cursor:pointer;
+				&:hover {
+					background-color: $clGrey;
+				}
+			}
+		}
+	}
 }

@@ -1,6 +1,5 @@
 import IDUtil from '../../util/IDUtil';
 import LinkedDataAPI from '../../api/LinkedDataAPI';
-
 import PropTypes from 'prop-types';
 
 class LDResourceViewer extends React.PureComponent {
@@ -16,16 +15,24 @@ class LDResourceViewer extends React.PureComponent {
 	componentDidMount() {
 		LinkedDataAPI.describe(
 			this.props.resourceId,
-			this.props.graphId,
+			this.props.collectionConfig.getCollectionId(),
 			this.onLoadData.bind(this)
 		)
 	}
 
 	onLoadData(data) {
-		console.debug(data)
 		this.setState({
 			data : data
 		})
+	}
+
+	queryEntity(property) {
+		if(this.props.onOutput) {
+			this.props.onOutput(this.constructor.name, {
+				field : this.props.collectionConfig.predicateToIndexField(property.p),
+				value : property.o
+			})
+		}
 	}
 
 	render() {
@@ -35,8 +42,12 @@ class LDResourceViewer extends React.PureComponent {
 				contents = (
 					<ul className={IDUtil.cssClassName('property-list', this.CLASS_PREFIX)}>
 						{this.state.data.map(prop => {
+							const classNames = ['property'];
+							if(this.props.collectionConfig.predicateToIndexField(prop.p)) {
+								classNames.push('keyword')
+							}
 							return (
-								<li className="property">
+								<li className={classNames.join(' ')} onClick={this.queryEntity.bind(this, prop)}>
 									<div className="predicate">{prop.p}</div>
 									<div className="value">{prop.o}</div>
 								</li>
@@ -70,7 +81,9 @@ LDResourceViewer.PropTypes = {
 
 	resourceId: PropTypes.string.isRequired,
 
-	graphId: PropTypes.string.isRequired
+	searchTerm: PropTypes.string,
+
+	collectionConfig: PropTypes.object.isRequired
 }
 
 export default LDResourceViewer;

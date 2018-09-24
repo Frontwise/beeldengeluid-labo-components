@@ -4,7 +4,7 @@ const LinkedDataAPI = {
 	describe : function(resourceId, graphId, callback) {
 		let url = _config.SEARCH_API_BASE + '/sparql'
 		const params = {
-			endpoint : 'http://zorin:8892/sparql',
+			endpoint : graphId,
 			query : 'SELECT * WHERE {<'+resourceId+'> ?p ?o}'
 		}
 	    const xhr = new XMLHttpRequest();
