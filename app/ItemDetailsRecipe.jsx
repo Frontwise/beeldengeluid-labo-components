@@ -881,7 +881,7 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with LD & "keyword browsing" later on
-			if(1 == 1) {
+			if(1 == 2) {
 				ldResourceViewer = (
 					<FlexBox title="Linked Data">
 						<LDResourceViewer
