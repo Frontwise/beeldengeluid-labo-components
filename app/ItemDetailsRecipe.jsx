@@ -754,6 +754,7 @@ class ItemDetailsRecipe extends React.Component {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
 			let ldResourceViewer = null;
+			let exploreBlock = null;
 			let annotationList = null;
 
 			let metadataPanel = null;
@@ -879,54 +880,56 @@ class ItemDetailsRecipe extends React.Component {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
-			//make this pretty & nice and work with awesome LD later on
-			ldResourceViewer = (
-				<FlexBox title="Linked Data">
-					<LDResourceViewer
-						resourceId={this.state.itemData.resourceId}
-						collectionConfig={this.state.collectionConfig}
-						onOutput={this.onComponentOutput.bind(this)}
-					/>
-				</FlexBox>
-			)
+			//make this pretty & nice and work with LD & "keyword browsing" later on
+			if(1 == 1) {
+				ldResourceViewer = (
+					<FlexBox title="Linked Data">
+						<LDResourceViewer
+							resourceId={this.state.itemData.resourceId}
+							collectionConfig={this.state.collectionConfig}
+							onOutput={this.onComponentOutput.bind(this)}
+						/>
+					</FlexBox>
+				)
 
-			const exploreFields = {};
-			this.state.collectionConfig.getKeywordFields().forEach((kw) => {
-				const values = this.getFieldValues(kw);
-				if(values) {
-					exploreFields[kw] = values;
-				}
-			})
-			const exploreBlock = (
-				<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
-					<h3>Find related content based on these properties</h3>
-					<div className="property-list">
-						{
-							Object.keys(exploreFields).map(kw => {
+				const exploreFields = {};
+				this.state.collectionConfig.getKeywordFields().forEach((kw) => {
+					const values = this.getFieldValues(kw);
+					if(values) {
+						exploreFields[kw] = values;
+					}
+				})
+				exploreBlock = (
+					<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+						<h3>Find related content based on these properties</h3>
+						<div className="property-list">
+							{
+								Object.keys(exploreFields).map(kw => {
 
-								//make nice buttons for each available value for the current keyword
-								const fieldValues = exploreFields[kw].map(value => {
-									const entity = {field : kw, value : value}
+									//make nice buttons for each available value for the current keyword
+									const fieldValues = exploreFields[kw].map(value => {
+										const entity = {field : kw, value : value}
+										return (
+											<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+												{entity.value}
+											</div>
+										)
+									})
+
+									//then return a block with a pretty field title + a column of buttons for each value
 									return (
-										<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
-											{entity.value}
+										<div>
+											<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
+											{fieldValues}
 										</div>
 									)
+
 								})
-
-								//then return a block with a pretty field title + a column of buttons for each value
-								return (
-									<div>
-										<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
-										{fieldValues}
-									</div>
-								)
-
-							})
-						}
+							}
+						</div>
 					</div>
-				</div>
-			)
+				)
+			}
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
