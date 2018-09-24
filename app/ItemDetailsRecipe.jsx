@@ -448,18 +448,45 @@ class ItemDetailsRecipe extends React.Component {
 		FlexRouter.gotoSingleSearch('cache')
 	}
 
-	getFieldValue(fieldName) {
-		console.debug(this.state.itemData.rawData)
-		console.debug('Getting value for field', fieldName)
-		let path = fieldName.split('.');
-		let curObj = this.state.itemData.rawData;
-		let i = 0;
-		while(i < path.length) {
-			curObj = curObj[path[i]]
-			i++;
+	getFieldValues(fieldName) {
+		//filter out the uninteresting fields
+		if(fieldName.indexOf('@context') != -1 ||
+			fieldName.indexOf('hasFormat') != -1 ||
+			fieldName.indexOf('@language') != -1) {
+			return null
 		}
-		console.debug(curObj);
-		return 'dummy';
+		//make sure to remove the ES .keyword suffix, since the rawdata fieldnames don't have them
+		fieldName = fieldName.indexOf('.keyword') == -1 ?
+			fieldName :
+			fieldName.substring(0, fieldName.length - 8)
+
+		//this is the data to search for the values of the selected keyword field
+		let curObj = this.state.itemData.rawData;
+
+		//split the field name in path elements for lookup
+		let path = fieldName.split('.');
+		let i = 0;
+
+		//now look for the values of the selected field
+		while(i < path.length) {
+			if(curObj) {
+				//check if the current object is a list and the current path selects @value attributes from it
+				if(typeof(curObj) == "object" && curObj['@value'] == undefined && path[i] == '@value') {
+					curObj = curObj.map(obj => obj[path[i]])
+					break;
+				}
+				//otherwise continue down the path, until the end is reached
+				curObj = curObj[path[i]];
+				i++;
+			} else {
+				break;
+			}
+		}
+		//always wrap the end-result in a list
+		if(typeof(curObj) == 'string') {
+			return [curObj]
+		}
+		return curObj;
 	}
 
 
@@ -853,7 +880,6 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with awesome LD later on
-			//if(1 == 2) {
 			ldResourceViewer = (
 				<FlexBox title="Linked Data">
 					<LDResourceViewer
@@ -863,22 +889,42 @@ class ItemDetailsRecipe extends React.Component {
 					/>
 				</FlexBox>
 			)
-			//}
 
-
-			const exploreFields = this.state.collectionConfig.getKeywordFields().map((kw) => {
-				return (
-					<li onClick={this.getFieldValue.bind(this, kw)}>
-						{kw}
-						{/*this.state.collectionConfig.toPrettyFieldName(kw)*/}
-					</li>
-				)
+			const exploreFields = {};
+			this.state.collectionConfig.getKeywordFields().forEach((kw) => {
+				const values = this.getFieldValues(kw);
+				if(values) {
+					exploreFields[kw] = values;
+				}
 			})
 			const exploreBlock = (
-				<div className="row">
-					<ul>
-						{exploreFields}
-					</ul>
+				<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+					<h3>Find related content based on these properties</h3>
+					<div className="property-list">
+						{
+							Object.keys(exploreFields).map(kw => {
+
+								//make nice buttons for each available value for the current keyword
+								const fieldValues = exploreFields[kw].map(value => {
+									const entity = {field : kw, value : value}
+									return (
+										<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+											{entity.value}
+										</div>
+									)
+								})
+
+								//then return a block with a pretty field title + a column of buttons for each value
+								return (
+									<div>
+										<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
+										{fieldValues}
+									</div>
+								)
+
+							})
+						}
+					</div>
 				</div>
 			)
 
@@ -908,7 +954,9 @@ class ItemDetailsRecipe extends React.Component {
 								</div>
 								<div className="col-md-5">
 									{annotationList}
-									{exploreBlock}
+									<div className="row">
+										{exploreBlock}
+									</div>
 								</div>
 								<br/>
 							</div>

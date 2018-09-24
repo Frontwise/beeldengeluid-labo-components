@@ -209,7 +209,6 @@ class CollectionConfig {
 	//checks if the field is a keyword field and makes sure to return the matched keyword field name
 	getMatchedKeywordField(fieldName) {
 		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) != -1);
-		console.debug(kwMatch)
 		if(kwMatch) {
 			return fieldName === kwMatch ? fieldName : fieldName + '.keyword';
 		}
@@ -431,9 +430,15 @@ class CollectionConfig {
                 leaf = leaf.substring(1) + '@';
             }
             let origin = tmp.join(".");
-            if (origin){
-                origin = ' => ' + origin;
+            if (origin) {
+            	if(origin.indexOf('@graph') != -1) {
+            		origin = origin.substring('@graph.'.length);
+            	}
+            	if(origin.length > 0 && leaf !== 'value@') {
+                	origin = ' => ' + origin;
+                }
             }
+            leaf = leaf === 'value@' ? '' : leaf; //always remove value@, since it is not nice to show
             return leaf + origin + (isKeywordField ? ' *' : '');
         }
         return esFieldName;

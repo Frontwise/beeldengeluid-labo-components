@@ -21,7 +21,6 @@ class LDResourceViewer extends React.PureComponent {
 	}
 
 	onLoadData(data) {
-		console.debug(data)
 		this.setState({
 			data : data
 		})
