@@ -91,6 +91,23 @@ const AnnotationAPI = {
 		xhr.open("POST", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xhr.send(JSON.stringify(postData));
+	},
+
+	getBookmarks : function(userId, projectId, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/<userId>/project/<projectId>/bookmarks';
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback(null);
+				}
+			}
+		}
+		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
 	}
 }
 

@@ -77,7 +77,7 @@ const AnnotationUtil = {
 					}) : [],
 
 					// Selector details: required for segment information
-					selector: na.target.selector
+					selector: t.selector //USED TO BE: na.target.selector TEST THIS
 				}
 			}))
 		});
@@ -155,7 +155,7 @@ const AnnotationUtil = {
 			} else{
 				callback([]);
 			}
-			}
+		}
 		return resourceList;
 	},
 
@@ -299,23 +299,34 @@ const AnnotationUtil = {
 		// After filtering and merging the annotations, the data will be merged
 		annotations.forEach((a)=>{
 			if (a.annotationType === 'classification'){
-
-					a.bookmarks.forEach((b)=>{
-						const id = b.collectionId + b.resourceId;
-						if (!(id in objectAnnotations)){
-							objectAnnotations[id] = {
-								groups: [],
-								classifications: [],
-							}
+				a.bookmarks.forEach(b => {
+					const id = b.collectionId + b.resourceId;
+					if (!(id in objectAnnotations)){
+						objectAnnotations[id] = {
+							groups: [],
+							classifications: [],
 						}
-						switch(a.vocabulary){
+					}
+					switch(a.vocabulary) {
 						case 'clariahwp5-bookmark-group':
-							objectAnnotations[id].groups.push(a);
+							objectAnnotations[id].groups.push({
+								annotationId: a.annotationId,
+								annotationType: a.annotationType,
+								label: a.label,
+								parentAnnotationId: a.parentAnnotationId,
+								vocabulary: a.vocabulary
+							});
 						break;
 						default:
-							objectAnnotations[id].classifications.push(a);
-						}
-			});
+							objectAnnotations[id].classifications.push({
+								annotationId: a.annotationId,
+								annotationType: a.annotationType,
+								label: a.label,
+								parentAnnotationId: a.parentAnnotationId,
+								vocabulary: a.vocabulary
+							});
+					}
+				});
 			}
 		});
 
@@ -325,18 +336,16 @@ const AnnotationUtil = {
 
 		annotations = annotations.filter((a)=>(
 				a.annotationType === type
-				// and exclude bookmark groups
+				// and exclude bookmark groups in case the type is classification
 				&& (type !== 'classification' || a.vocabulary !== 'clariahwp5-bookmark-group')
 		));
-
-
-		const uniqAnnotations = {};
-		const newAnnotations = [];
-		let id;
 
 		// -----------------------------------------------
 		// Merge equal annotations (classifications, links)
 		// -----------------------------------------------
+		const uniqAnnotations = {};
+		const newAnnotations = [];
+
 		switch (type){
 			case 'classification':{
 					// merge classifications with same id
@@ -366,12 +375,11 @@ const AnnotationUtil = {
 			break;
 		}
 
-
 		// -----------------------------------------------
 		// Apply the groups/classifications data to the bookmarks in the annotations list
 		// -----------------------------------------------
-		annotations.forEach((a)=>{
-			a.bookmarks.forEach((b)=>{
+		annotations.forEach(a => {
+			a.bookmarks.forEach(b => {
 				const id = b.collectionId + b.resourceId;
 				if (id in objectAnnotations){
 					b.groups = objectAnnotations[id].groups;
@@ -380,14 +388,10 @@ const AnnotationUtil = {
 			});
 		});
 
-		const count = 0;
-		const bookmarkCount = 0;
-
-
 		// -----------------------------------------------
 		// Handle empty results
 		// -----------------------------------------------
-				// if no results are available, call the callback function
+
 		if (annotations.length === 0){
 			callback(annotations);
 			return;

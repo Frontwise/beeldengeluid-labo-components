@@ -93,9 +93,7 @@ class AnnotationTable extends React.PureComponent {
                     this.updateSelection(annotations)
                 }
             )
-        }
-        );
-
+        });
     }
 
     //Get sort orders
