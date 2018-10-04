@@ -4,7 +4,6 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 import IDUtil from '../../../../util/IDUtil';
 import BookmarkUtil from '../../../../util/BookmarkUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
-import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
@@ -71,29 +70,23 @@ class AnnotationTable extends React.PureComponent {
     }
 
     loadAnnotations() {
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            this.props.project,
-            this.onLoadAnnotations.bind(this)
-        );
-    }
-
-
-    onLoadAnnotations(annotationList) {
-        const parentAnnotations = annotationList || [];
-        const annotations = AnnotationUtil.generateAnnotationCentricList(
-            parentAnnotations, this.props.type, (annotations)=>{
-                this.setState({
-                    parentAnnotations: annotationList,
-                    annotations: annotations,
-                    loading: false,
-                    filters: this.getFilters(annotations)
-                },
-                () => {
-                    this.updateSelection(annotations)
+        AnnotationAPI.getAnnotationBodies(
+            this.props.user.id,
+            this.props.project.id,
+            this.props.type,
+            (annotations) => {
+                if(annotations) {
+                    this.setState({
+                        parentAnnotations: null, //do we still need this for deleting an annotation?
+                        annotations: annotations,
+                        loading: false,
+                        filters: this.getFilters(annotations)
+                    }, () => {
+                       this.updateSelection(annotations)
+                    })
                 }
-            )
-        });
+            }
+        )
     }
 
     //Get sort orders
@@ -197,7 +190,6 @@ class AnnotationTable extends React.PureComponent {
 
     //Filter annotation list by given filter
     filterAnnotations(annotations, filter) {
-
         // check the annotation vocabulary
         if (filter.vocabulary){
             annotations = annotations.filter((a)=>(a.vocabulary === filter.vocabulary));

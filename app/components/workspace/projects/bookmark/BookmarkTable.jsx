@@ -1,10 +1,8 @@
-import AnnotationAPI from '../../../../api/AnnotationAPI';
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
 import BookmarkUtil from '../../../../util/BookmarkUtil';
-import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
@@ -50,7 +48,7 @@ class BookmarkTable extends React.PureComponent {
         ];
 
         this.state = {
-            annotations: [],
+            annotations: [], //FIXME no longer filled with the new API call!!
             bookmarks: [],
             selection: [],
             subMediaObject: {},
@@ -87,32 +85,13 @@ class BookmarkTable extends React.PureComponent {
             loading:true
         });
 
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            this.props.project,
-            this.onLoadBookmarks.bind(this)
-        );
+        AnnotationStore.getUserProjectBookmarks(
+            this.props.user.id,
+            this.props.project.id,
+            this.onLoadResourceList.bind(this)
+        )
     }
-    //Annotation load callback: set data to state
-    onLoadBookmarks(annotationList) {
 
-        // create bookmark lists
-        if (annotationList && annotationList.length){
-            // store annotation data
-            this.setState({annotations : annotationList});
-            AnnotationUtil.generateBookmarkCentricList(
-                annotationList,
-                this.onLoadResourceList.bind(this)
-            );
-        } else{
-            this.setState({
-                annotations: [],
-                bookmarks: [],
-                selection: [],
-                filters: this.getFilters([])
-            });
-        }
-    }
     //The resource list now also contains the data of the resources
     onLoadResourceList(bookmarks) {
         this.setState({

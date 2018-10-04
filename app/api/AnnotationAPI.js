@@ -94,7 +94,7 @@ const AnnotationAPI = {
 	},
 
 	getBookmarks : function(userId, projectId, callback) {
-		let url = _config.ANNOTATION_API_BASE + '/user/<userId>/project/<projectId>/bookmarks';
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/bookmarks';
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -102,6 +102,40 @@ const AnnotationAPI = {
 					callback(JSON.parse(xhr.responseText));
 				} else {
 					callback(null);
+				}
+			}
+		}
+		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
+	},
+
+	getAnnotationCounts : function(userId, projectId, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/bookmarks?o=count';
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback(null);
+				}
+			}
+		}
+		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
+	},
+
+	getAnnotationBodies : function(userId, projectId, annotationType, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/' + annotationType;
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback([]);//return an empty list by default
 				}
 			}
 		}
