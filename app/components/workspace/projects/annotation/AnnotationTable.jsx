@@ -40,7 +40,7 @@ class AnnotationTable extends React.PureComponent {
 
         this.state = {
             parentAnnotations : null,
-            annotations: [],
+            annotations: [], //these are actually annotation bodies (so objects from annotation['body'])
             selection: [],
             loading: true,
             detailBookmark: null,
@@ -255,34 +255,38 @@ class AnnotationTable extends React.PureComponent {
     }
 
 
-    deleteAnnotations(annotationIds) {
-        if(annotationIds) {
+    deleteAnnotations(annotationBodies) {
+        if(annotationBodies) {
             // always ask before deleting
             let msg = 'Are you sure you want to remove the selected annotation';
-            msg += annotationIds.length == 1 ? '?' : 's?';
+            msg += annotationBodies.length == 1 ? '?' : 's?';
             if (!confirm(msg)) {
                 return;
             }
 
-            BookmarkUtil.deleteAnnotations(
-                this.state.parentAnnotations,
-                this.state.annotations,
-                annotationIds,
-                (success) => {
-                    setTimeout(()=>{
-                        // load new data
-                        this.loadAnnotations();
+            annotationBodies.forEach(body => {
+                AnnotationAPI.deleteUserAnnotation(
+                    this.props.user.id,
+                    body.parentAnnotationId,
+                    'body', // delete a body or a target,
+                    body.annotationId,
+                    (success) => {
+                        setTimeout(()=>{
+                            // load new data
+                            this.loadAnnotations();
 
-                        // update bookmark count in project menu
-                        this.props.loadBookmarkCount();
-                    }, 500);
-                }
-            )
+                            // update bookmark count in project menu
+                            this.props.loadBookmarkCount();
+                        }, 500);
+                    }
+                );
+            })
         }
     }
 
     deleteAnnotation(annotation){
-        this.deleteAnnotations([annotation.annotationId]);
+        //this.deleteAnnotations([annotation.annotationId]);
+        this.deleteAnnotations([annotation]);
     }
 
     exportAnnotationsByIds(annotationIds) {
@@ -335,46 +339,36 @@ class AnnotationTable extends React.PureComponent {
         this.setSort(e.target.value);
     }
 
-    selectAllChange(items, e) {
-        if (e.target.checked) {
-            const newSelection = this.state.selection.slice();
-            items.forEach(item => {
-                if (!newSelection.includes(item.annotationId)) {
-                    newSelection.push(item.annotationId);
-                }
-            });
-            // set
-            this.setState({
-                selection: newSelection
-            });
-        } else {
-            items = items.map(item => item.annotationId);
-            // unset
-            this.setState({
-                selection: this.state.selection.filter(item => !items.includes(item))
-            });
-        }
+    //TODO test this function
+    selectAllChange(selectedItems, e) {
+        let newSelection = this.state.selection.slice(); //copy the array
+        selectedItems.forEach(item => {
+            const found = newSelection.find(selected => selected.annotationId == item.annotationId)
+            if(!found && e.target.checked) { // add it to the selection
+                newSelection.push(item);
+            } else if (e.target.checked && found) { // remove the selected item
+                newSelection.splice(found, 1);
+            }
+        })
+        this.setState({
+            selection: newSelection
+        });
     }
 
+    //TODO test this function
     selectItem(item, select) {
-        if (select) {
-            if (!this.state.selection.includes(item.annotationId)) {
-                // add to selection
-                this.setState({
-                    selection: [...this.state.selection, item.annotationId]
-                });
-            }
-            return;
+        let newSelection = this.state.selection.slice(); //copy the array
+        const index = newSelection.findIndex(selected => {
+            return selected.annotationId == item.annotationId
+        })
+        if(index == -1 && select) { // add it to the selection
+            newSelection.push(item);
+        } else if (!select && index != -1) { // remove the selected item
+            newSelection.splice(index, 1);
         }
-
-        // remove from selection
-        if (!select) {
-            this.setState({
-                selection: this.state.selection.filter(
-                    selected => selected !== item.annotationId
-                )
-            });
-        }
+        this.setState({
+            selection: newSelection
+        });
     }
 
     // Toggle sublevel visibility
@@ -432,7 +426,11 @@ class AnnotationTable extends React.PureComponent {
                             onDelete={this.deleteAnnotation}
                             onExport={this.exportAnnotation}
                             onView={this.viewBookmark}
-                            selected={this.state.selection.includes(annotation.annotationId)}
+                            selected={
+                                this.state.selection.find(
+                                    item => item.annotationId == annotation.annotationId
+                                ) != undefined
+                            }
                             onSelect={this.selectItem}
                             showSub={annotation.annotationId in this.state.showSub}
                             toggleSub={this.toggleSub}

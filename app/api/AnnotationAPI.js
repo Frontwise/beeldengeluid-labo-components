@@ -133,13 +133,42 @@ const AnnotationAPI = {
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
 				if(xhr.status == 200) {
-					callback(JSON.parse(xhr.responseText));
+					const resp = JSON.parse(xhr.responseText)
+					//TODO the server should return the proper status code on error!!
+					if(resp.hasOwnProperty('error')) {
+						callback([]);//return an empty list by default
+					} else {
+						callback(JSON.parse(xhr.responseText));
+					}
 				} else {
 					callback([]);//return an empty list by default
 				}
 			}
 		}
 		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
+	},
+
+	//TODO test this and wire this up in the wp5-mediasuite
+	deleteUserAnnotation : function(userId, annotationId, bodyOrTarget=null, partId=null, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId;
+		url += '/annotation/'+annotationId;
+		if(bodyOrTarget && partId) {
+			url += '/'+bodyOrTarget+'/' + partId;
+		}
+		console.debug(url);
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback([]);//return an empty list by default
+				}
+			}
+		}
+		xhr.open("DELETE", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xhr.send();
 	}

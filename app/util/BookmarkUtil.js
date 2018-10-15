@@ -97,61 +97,6 @@ const BookmarkUtil = {
 			});
 		});
 
-	},
-
-	deleteAnnotations(parentAnnotations, annotationList, annotationIds, callback) {
-		//initialize the list of annotations
-		let count = 0;
-		const annotations = annotationList.filter(
-			item => annotationIds.includes(item.annotationId)
-		)
-
-		annotations.forEach(annotation => {
-
-			const childCount = annotationList.filter(
-				a => a.parentAnnotationId == annotation.parentAnnotationId
-			).length;
-
-			let parentAnnotation = parentAnnotations.filter(
-				pa => pa.id == annotation.parentAnnotationId
-			);
-			parentAnnotation = parentAnnotation.length == 1 ? parentAnnotation[0] : null;
-
-			if(parentAnnotation) {
-				if(childCount == 1) {
-					//delete the parent annotation entirely since the annotation was the last of its body
-					AnnotationAPI.deleteAnnotation(parentAnnotation, data => {
-						if (data.error) {
-							console.debug(data.error);
-						}
-						if(++count == annotations.length) {
-							console.debug('Delete annotation ready, calling callback');
-							callback(true)
-						}
-					});
-				} else {
-					//update the parent annotation, removing the annotation from its body
-					parentAnnotation.body =  parentAnnotation.body.filter(
-						a => a.annotationIds != annotation.annotationId
-					);
-
-					AnnotationAPI.saveAnnotation(parentAnnotation, data => {
-						if (data.error) {
-							console.debug(data.error);
-						}
-						if(++count == annotations.length) {
-							console.debug('Delete annotation ready, calling callback');
-							callback(true)
-						}
-					});
-				}
-			} else {
-				if(++count == annotations.length) {
-					console.debug('Delete annotation ready, calling callback');
-					callback(false)
-				}
-			}
-		});
 	}
 
 }
