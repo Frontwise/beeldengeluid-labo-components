@@ -99,7 +99,13 @@ const AnnotationAPI = {
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
 				if(xhr.status == 200) {
-					callback(JSON.parse(xhr.responseText));
+					const resp = JSON.parse(xhr.responseText)
+					//TODO the server should return the proper status code on error!!
+					if(resp.hasOwnProperty('error')) {
+						callback([]);//return an empty list by default
+					} else {
+						callback(JSON.parse(xhr.responseText));
+					}
 				} else {
 					callback(null);
 				}
@@ -157,7 +163,6 @@ const AnnotationAPI = {
 		if(bodyOrTarget && partId) {
 			url += '/'+bodyOrTarget+'/' + partId;
 		}
-		console.debug(url);
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {

@@ -293,36 +293,14 @@ class BookmarkTable extends React.PureComponent {
                 return;
             }
 
-            // delete each bookmark
-            /*
-            BookmarkUtil.deleteBookmarks(
-                this.state.annotations,
-                this.state.bookmarks,
-                bookmarkIds,
-                (success) => {
-                    // add a time out, because sometimes it may take a while for
-                    // the changes to be reflected in the data
-                    setTimeout(()=>{
-                            // load new data
-                            this.loadBookmarks();
-
-                            // update bookmark count in project menu
-                            this.props.loadBookmarkCount();
-                        }
-                        , 500);
-                }
-            )*/
-
-            console.debug('DELETING BOOKMARKS', bookmarks)
-
-            //loop through the bookmarks an each of their related parent annotations to delete all of the targets
+            //loop through the bookmarks an each of the targetObjects to make sure all annotations are deleted
             bookmarks.forEach(b => {
-                b.annotationIds.forEach(annotationId => {
+                b.targetObjects.forEach(targetObject => {
                     AnnotationAPI.deleteUserAnnotation(
                         this.props.user.id,
-                        annotationId,
+                        targetObject.parentAnnotationId,
                         'target', // delete a body or a target,
-                        b.resourceId, //the target source
+                        targetObject.assetId, //the target source
                         (success) => {
                             setTimeout(()=>{
                                 // load new data
@@ -363,7 +341,7 @@ class BookmarkTable extends React.PureComponent {
         });
     }
 
-    selectAllChange(items, e) {
+    selectAllChange(selectedItems, e) {
         let newSelection = this.state.selection.slice(); //copy the array
         selectedItems.forEach(item => {
             const found = newSelection.find(selected => selected.resourceId == item.resourceId)
@@ -376,25 +354,6 @@ class BookmarkTable extends React.PureComponent {
         this.setState({
             selection: newSelection
         });
-        /*
-        if (e.target.checked) {
-            const newSelection = this.state.selection.slice();
-            items.forEach(item => {
-                if (!newSelection.includes(item.resourceId)) {
-                    newSelection.push(item.resourceId);
-                }
-            });
-            // set
-            this.setState({
-                selection: newSelection
-            });
-        } else {
-            items = items.map(item => item.resourceId);
-            // unset
-            this.setState({
-                selection: this.state.selection.filter(item => !items.includes(item))
-            });
-        }*/
     }
 
     selectItem(item, select) {
@@ -410,23 +369,6 @@ class BookmarkTable extends React.PureComponent {
         this.setState({
             selection: newSelection
         });
-        /*
-        if (select) {
-            if (!this.state.selection.includes(item.resourceId)) {
-                // add to selection
-                this.setState({
-                    selection: [...this.state.selection, item.resourceId]
-                });
-            }
-            return;
-        }
-
-        // remove from selection
-        if (!select) {
-            this.setState({
-                selection: this.state.selection.filter(selected => selected !== item.resourceId)
-            });
-        }*/
     }
 
     //Close itemDetails view, and refresh the data (assuming changes have been made)

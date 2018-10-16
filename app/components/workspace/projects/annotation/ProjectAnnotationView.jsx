@@ -38,7 +38,7 @@ class ProjectAnnotationView extends React.PureComponent {
             case '#metadata-centric': return 'metadata-centric';
             default:
                 // get view from session storage (bookmark-centric OR annotation-centric)
-                return window.sessionStorage.getItem(this.keys.view) || 'classification-centric';            
+                return window.sessionStorage.getItem(this.keys.view) || 'classification-centric';
         }
     }
 
@@ -84,55 +84,55 @@ class ProjectAnnotationView extends React.PureComponent {
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
         switch (this.state.view) {
-            case 'classification-centric': 
+            case 'classification-centric':
                 viewComponent = (
                     <AnnotationTable {...defaultOptions}
-                        key="classification" 
-                        type="classification" 
-                        title="Codes" 
+                        key="classification"
+                        type="classification"
+                        title="Codes"
                         filters={["search","vocabulary","bookmarkGroup"]}
                         sort={["created","a-z-label","z-a-label","vocabulary"]}
                     />
                 );
                 break;
 
-            case 'comment-centric': 
+            case 'comment-centric':
                 viewComponent = (
                     <AnnotationTable {...defaultOptions}
-                        key="comments" 
-                        type="comment" 
-                        title="Comments" 
+                        key="comments"
+                        type="comment"
+                        title="Comments"
                         filters={["search","classification","bookmarkGroup"]}
                         sort={["created","a-z-text","z-a-text"]}
                     />
                 );
                 break;
 
-            case 'link-centric': 
+            case 'link-centric':
                 viewComponent = (
                     <AnnotationTable {...defaultOptions}
-                        key="links" 
-                        type="link" 
-                        title="Links"  
+                        key="links"
+                        type="link"
+                        title="Links"
                         filters={["search","classification","bookmarkGroup"]}
                         sort={["created","a-z-label","z-a-label"]}
                     />
                 );
                 break;
 
-            case 'metadata-centric': 
+            case 'metadata-centric':
                 viewComponent = (
                     <AnnotationTable {...defaultOptions}
-                        key="metadata" 
-                        type="metadata" 
-                        title="Metadata cards" 
+                        key="metadata"
+                        type="metadata"
+                        title="Metadata cards"
                         filters={["search","classification","bookmarkGroup"]}
                         sort={["created","template"]}
                     />
                 );
                 break;
         }
-        
+
     return (
         <div className={IDUtil.cssClassName('project-data-view')}>
             <div className="tools">
@@ -191,7 +191,7 @@ class ProjectAnnotationView extends React.PureComponent {
 ProjectAnnotationView.propTypes = {
     user: PropTypes.object.isRequired,
     project: PropTypes.object.isRequired,
-    loadBookmarkCount: PropTypes.func,
+    loadBookmarkCount: PropTypes.func
 };
 
 class WrappedProjectAnnotationView extends React.PureComponent {
@@ -202,6 +202,9 @@ class WrappedProjectAnnotationView extends React.PureComponent {
     }
 }
 
-WrappedProjectAnnotationView.propTypes = ProjectAnnotationView.propTypes;
+WrappedProjectAnnotationView.propTypes = {
+    user: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func
+};
 
 export default WrappedProjectAnnotationView;

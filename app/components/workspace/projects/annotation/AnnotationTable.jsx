@@ -2,7 +2,6 @@ import AnnotationAPI from '../../../../api/AnnotationAPI';
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
-import BookmarkUtil from '../../../../util/BookmarkUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';

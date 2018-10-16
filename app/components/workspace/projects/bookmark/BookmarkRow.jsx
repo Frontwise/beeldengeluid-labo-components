@@ -57,7 +57,7 @@ class BookmarkRow extends React.PureComponent {
 
         return !annotations || annotations.length === 0 ?
             (<p>
-                This {bookmark.object.type.toLowerCase() || 'object'} has no annotations yet
+                This segment has no annotations yet
             </p>)
             :
 
@@ -108,9 +108,11 @@ class BookmarkRow extends React.PureComponent {
                         <th>
                             <table>
                                 <thead>
-                                    <th className="type">Type</th>
-                                    <th className="content">Content</th>
-                                    <th className="details">Details</th>
+                                    <tr>
+                                        <th className="type">Type</th>
+                                        <th className="content">Content</th>
+                                        <th className="details">Details</th>
+                                    </tr>
                                 </thead>
                             </table>
                         </th>

@@ -191,7 +191,7 @@ class Transcriber extends React.PureComponent {
             <div className={IDUtil.cssClassName('transcriber')}>
                 <div className="transcript_search_box">
                     <span className="glyphicon glyphicon-search"></span>
-                    <input data-transcriberSearch="search-transcriptLine" type="text"
+                    <input data-transcribersearch="search-transcriptLine" type="text"
                            onChange={this.doFilter.bind(this)} name="search-transcriptLine"
                            placeholder="Zoek.."/>
                     <span className="numberOfMatches">
