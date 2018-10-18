@@ -157,15 +157,10 @@ const AnnotationAPI = {
 		xhr.send();
 	},
 
-	deleteUserAnnotation : function(userId, annotationId, bodyOrTarget=null, partId=null, callback) {
-		let url = _config.ANNOTATION_API_BASE + '/user/'+userId;
-		let params = null;
-		url += '/annotation/' + annotationId;
-		if(bodyOrTarget && partId) {
-			params = {
-				partId : partId,
-				partType : bodyOrTarget
-			}
+	deleteUserAnnotations : function(userId, deletionList, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId + '/annotations';
+		const params = {
+			toDelete : deletionList
 		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {

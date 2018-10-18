@@ -263,23 +263,30 @@ class AnnotationTable extends React.PureComponent {
                 return;
             }
 
+            //populate the deletion list required for the annotation API
+            const deletionList = []
             annotationBodies.forEach(body => {
-                AnnotationAPI.deleteUserAnnotation(
-                    this.props.user.id,
-                    body.parentAnnotationId,
-                    'body', // delete a body or a target,
-                    body.annotationId,
-                    (success) => {
-                        setTimeout(()=>{
-                            // load new data
-                            this.loadAnnotations();
-
-                            // update bookmark count in project menu
-                            this.props.loadBookmarkCount();
-                        }, 500);
-                    }
-                );
+                deletionList.push({
+                    annotationId : body.parentAnnotationId,
+                    type : 'body', // delete a body or a target,
+                    partId : body.annotationId,
+                })
             })
+
+            //now delete all the annotations with a single call to the annotation API
+            AnnotationAPI.deleteUserAnnotations(
+                this.props.user.id,
+                deletionList,
+                (success) => {
+                    setTimeout(()=>{
+                        // load new data
+                        this.loadAnnotations();
+
+                        // update bookmark count in project menu
+                        this.props.loadBookmarkCount();
+                    }, 500);
+                }
+            );
         }
     }
 

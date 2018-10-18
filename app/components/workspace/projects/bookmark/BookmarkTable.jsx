@@ -293,26 +293,33 @@ class BookmarkTable extends React.PureComponent {
                 return;
             }
 
-            //loop through the bookmarks an each of the targetObjects to make sure all annotations are deleted
+
+            //populate the deletion list required for the annotation API
+            const deletionList = [];
             bookmarks.forEach(b => {
                 b.targetObjects.forEach(targetObject => {
-                    AnnotationAPI.deleteUserAnnotation(
-                        this.props.user.id,
-                        targetObject.parentAnnotationId,
-                        'target', // delete a body or a target,
-                        targetObject.assetId, //the target source
-                        (success) => {
-                            setTimeout(()=>{
-                                // load new data
-                                this.loadBookmarks();
-
-                                // update bookmark count in project menu
-                                this.props.loadBookmarkCount();
-                            }, 500);
-                        }
-                    );
+                    deletionList.push({
+                        annotationId : targetObject.parentAnnotationId,
+                        type : 'target',
+                        partId : targetObject.assetId
+                    })
                 })
             })
+
+            //now delete the whole selection in a single call to the API
+            AnnotationAPI.deleteUserAnnotations(
+                this.props.user.id,
+                deletionList,
+                (success) => {
+                    setTimeout(()=>{
+                        // load new data
+                        this.loadBookmarks();
+
+                        // update bookmark count in project menu
+                        this.props.loadBookmarkCount();
+                    }, 500);
+                }
+            );
         }
     }
 

@@ -185,7 +185,6 @@ class BookmarkRow extends React.PureComponent {
                 resourceDate = bookmark.object.date
             }
         }
-
         return (
             <div className={classNames(IDUtil.cssClassName('bookmark-row'), 'item-row')}>
                 <div className="item">
@@ -202,7 +201,9 @@ class BookmarkRow extends React.PureComponent {
                     <ul className="info">
                         <li className="primary content-title">
                             <h4 className="label">Title</h4>
-                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>{bookmark.object.title}</p>
+                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>
+                                {bookmark.object.error ? 'error: source catalogue not available' : bookmark.object.title}
+                            </p>
                         </li>
                         <li className="content-date">
                             <h4 className="label">Date</h4>
@@ -210,7 +211,7 @@ class BookmarkRow extends React.PureComponent {
                         </li>
                         <li className="content-media">
                             <h4 className="label">Media</h4>
-                            <p>{bookmark.object.mediaTypes.join(",")}</p>
+                            <p>{bookmark.object.mediaTypes ? bookmark.object.mediaTypes.join(",") : 'Unknown'}</p>
                         </li>
                         <li className="content-dataset">
                             <h4 className="label">Dataset</h4>
