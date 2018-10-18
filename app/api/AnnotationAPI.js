@@ -45,6 +45,7 @@ const AnnotationAPI = {
 		}
 	},
 
+	//TODO remove and user deleteUserAnnotation instead
 	deleteAnnotation : function (annotation, callback) {
 		if(annotation.id) {
 			if(annotation.motivation == 'bookmarking') {
@@ -70,7 +71,7 @@ const AnnotationAPI = {
 
 	getFilteredAnnotations : function(userId, filters, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		let url = _config.ANNOTATION_API_BASE + '/annotations/filter';
-		const postData = {
+		const params = {
 			filters : filters,
 			offset : offset,
 			size : size,
@@ -90,7 +91,7 @@ const AnnotationAPI = {
 		}
 		xhr.open("POST", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(postData));
+		xhr.send(JSON.stringify(params));
 	},
 
 	getBookmarks : function(userId, projectId, callback) {
@@ -156,12 +157,15 @@ const AnnotationAPI = {
 		xhr.send();
 	},
 
-	//TODO test this and wire this up in the wp5-mediasuite
 	deleteUserAnnotation : function(userId, annotationId, bodyOrTarget=null, partId=null, callback) {
 		let url = _config.ANNOTATION_API_BASE + '/user/'+userId;
-		url += '/annotation/'+annotationId;
+		let params = null;
+		url += '/annotation/' + annotationId;
 		if(bodyOrTarget && partId) {
-			url += '/'+bodyOrTarget+'/' + partId;
+			params = {
+				partId : partId,
+				partType : bodyOrTarget
+			}
 		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
@@ -175,7 +179,11 @@ const AnnotationAPI = {
 		}
 		xhr.open("DELETE", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send();
+		if(params) {
+			xhr.send(JSON.stringify(params));
+		} else {
+			xhr.send();
+		}
 	}
 }
 

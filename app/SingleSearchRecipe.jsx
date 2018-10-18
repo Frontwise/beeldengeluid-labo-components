@@ -284,7 +284,6 @@ class SingleSearchRecipe extends React.Component {
 			rows = {};
 		} else {
 			this.state.currentOutput.results.forEach((result) => {
-				console.debug(result._id)
 				rows[result._id] = !this.state.allRowsSelected;
 			});
 		}
