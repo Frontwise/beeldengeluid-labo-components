@@ -1,11 +1,11 @@
 import ProjectAPI from '../../../api/ProjectAPI';
+import AnnotationAPI from '../../../api/AnnotationAPI';
 
 import IDUtil from '../../../util/IDUtil';
-import AnnotationUtil from '../../../util/AnnotationUtil';
 
 import { setBreadCrumbsFromMatch } from '../helpers/BreadCrumbs';
 
-import AnnotationStore from '../../../flux/AnnotationStore';
+//import AnnotationStore from '../../../flux/AnnotationStore';
 
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
@@ -75,30 +75,24 @@ class ProjectViewWrapper extends React.PureComponent {
         if (!project){
             project = this.state.project;
         }
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            project,
-            this.setBookmarkCount.bind(this)
-        );
-    }
-
-    //Set bookmark count to state
-    setBookmarkCount(annotationList) {
-        const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            annotationList || [], (bookmarks) =>{
-                const bookmarkCount = bookmarks ? bookmarks.length : 0;
-                window.sessionStorage.setItem(this.keys.bookmarkCount, bookmarkCount);
-
-                const annotationCount = bookmarks ? bookmarks.reduce((a,cur)=>(a + (cur.annotations ? cur.annotations.length : 0) ),0) : 0;
-                window.sessionStorage.setItem(this.keys.annotationCount, annotationCount);
-
-                this.setState({
-                    bookmarkCount,
-                    annotationCount,
-                });
+        AnnotationAPI.getAnnotationCounts(
+            this.props.user.id,
+            project.id,
+            (counts) => {
+                if(counts) {
+                    window.sessionStorage.setItem(this.keys.bookmarkCount, counts.bookmarkCount);
+                    window.sessionStorage.setItem(this.keys.annotationCount, counts.annotationCount);
+                    this.setState(counts);
+                } else {
+                    window.sessionStorage.setItem(this.keys.bookmarkCount, 0);
+                    window.sessionStorage.setItem(this.keys.annotationCount, 0);
+                    this.setState({
+                        bookmarkCount : 0,
+                        annotationCount : 0
+                    });
+                }
             }
-        );
-
+        )
     }
 
     render() {

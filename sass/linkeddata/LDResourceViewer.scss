@@ -7,15 +7,17 @@
 		.property {
 			margin-top:5px;
 			.predicate {
-
+				font-weight: bold;
 			}
 			.value {
-				font-weight: bold;
 				margin-left: 20px;
 			}
 		}
 		.keyword {
 			.predicate {
+				font-weight:bold;
+			}
+			.value {
 				color: blue;
 				cursor:pointer;
 				text-decoration:underline;
