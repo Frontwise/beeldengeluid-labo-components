@@ -1,3 +1,12 @@
+@keyframes slideInFromLeft {
+	0% {
+		transform: translateY(100%);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+
 .bg__single-search-recipe {
 	.bg__rcp__ss__select {
 		@include checkbox();
@@ -26,6 +35,20 @@
 			background-color: transparent;
 			margin: 0 0 0 6px;
 			padding: 0;
+			animation: .6s ease-in 0s 1 slideInFromLeft;
+			.bg__rcp__ss__header-selected-items {
+				background-color: #468dcb;
+				color: white;
+				margin: 0;
+				padding: 7px 7px 7px 25px;
+				.fa-remove {
+					float: right;
+					padding: 0 10px;
+				}
+				.fa-remove:hover {
+					cursor: pointer;
+				}
+			}
 		}
 	}
 
@@ -38,6 +61,7 @@
 	}
 	.bg__rcp__ss__table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
+		margin-right: 5px;
 		button {
 			background-color: #468dcb;
 			color: white;
@@ -64,5 +88,15 @@
 		border-radius: 6px;
 		box-shadow: 0 6px 4px -6px #000;
 		margin-bottom: 12px;
+		max-height: 380px;
+		position: relative;
+		overflow: scroll;
+
+		h4 {
+			font-size: 14px;
+		}
+		.snippet_description {
+			display: none;
+		}
 	}
 }
