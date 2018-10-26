@@ -393,9 +393,9 @@ class ItemDetailsRecipe extends React.Component {
 			//concatenate this resource to the existing "bookmark annotation"
 			const targets = annotation.target;
 			targets.push(
-				AnnotationUtil.generateSimpleResourceTarget(
-					this.state.itemData.resourceId,
-					this.state.itemData.index //collectionId
+				AnnotationUtil.generateResourceLevelTarget(
+					this.state.itemData.index, //collectionId
+					this.state.itemData.resourceId
 				)
 			);
 			const temp = {};

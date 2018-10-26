@@ -361,8 +361,9 @@ class SingleSearchRecipe extends React.Component {
             const targets = annotation.target.concat(selectedRows
 
 				.filter((result) => this.state.selectedRows[result._id]) //only include selected resources
-				.map((result) => AnnotationUtil.generateSimpleResourceTarget(
-					result._id, this.state.collectionConfig.collectionId
+				.map((result) => AnnotationUtil.generateResourceLevelTarget(
+					this.state.collectionConfig.collectionId,
+					result._id
 				), this));
 
 			const temp = {};

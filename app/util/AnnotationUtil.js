@@ -72,7 +72,7 @@ const AnnotationUtil = {
 	//called from components that want to create a new annotation with a proper target
 	generateW3CEmptyAnnotation : function(user, project, collectionId, resourceId, mediaObject = null, segmentParams = null) {
 		//Resource or MediaObject annotations ALL start with this as part of the target
-		let resourceTarget = AnnotationUtil.__generateResourceLevelTarget(collectionId, resourceId);
+		let resourceTarget = AnnotationUtil.generateResourceLevelTarget(collectionId, resourceId);
 		let refinedTarget = null;
 		//ALL THESE ARE MANDATORY TO BE ABLE TO PROPERLY ANNOTATE A MEDIA OBJECT!
 		//TODO DELETE/UPDATE NON-COMPATIBLE ANNOTATIONS
@@ -115,13 +115,13 @@ const AnnotationUtil = {
 			user : user.id,
 			project : project ? project.id : null, //no suitable field found in W3C so far
 			motivation : motivation,
-			target : resourceIds.map((rid) => AnnotationUtil.__generateResourceLevelTarget(collectionId, rid)),
+			target : resourceIds.map((rid) => AnnotationUtil.generateResourceLevelTarget(collectionId, rid)),
 			body : null
 		}
 		return annotation
 	},
 
-	__generateResourceLevelTarget(collectionId, resourceId) {
+	generateResourceLevelTarget(collectionId, resourceId) {
 		return {
 			type : 'Resource',
 			source : resourceId,
@@ -203,14 +203,14 @@ const AnnotationUtil = {
 		//check if there is a temporal fragment in the annotation target
 		let frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation.target);
 		if(frag) {
-			return { type : 'temporal', frag : frag, assetId : annotation.target.source }
+			return { type : 'temporal', frag : frag, source : annotation.target.source }
 		} else { //then see if there is a spatial fragment
 			frag = AnnotationUtil.extractSpatialFragmentFromAnnotation(annotation);
 			if(frag) {
-				return { type : 'spatial', frag : frag, assetId : annotation.target.source}
+				return { type : 'spatial', frag : frag, source : annotation.target.source}
 			}
 		}
-		return {type : 'object', frag : null, assetId : annotation.target.source}
+		return {type : 'object', frag : null, source : annotation.target.source}
 	},
 
 	extractTemporalFragmentFromAnnotation : function(target) {
