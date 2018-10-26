@@ -34,7 +34,6 @@ import BookmarkSelector from './components/bookmark/BookmarkSelector';
 import PropTypes from 'prop-types';
 
 import { initHelp } from './components/workspace/helpers/helpDoc';
-import FlexRouter from "./util/FlexRouter";
 
 //import TranscriptExample from './components/transcript.json';
 
@@ -891,7 +890,7 @@ class ItemDetailsRecipe extends React.Component {
                     </button>
                 );
                 backToSearchBtn = (
-                    <button className="btn btn-primary" disabled={isLastHit}
+                    <button className="btn btn-primary"
                             onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
                         Back to results
                     </button>
