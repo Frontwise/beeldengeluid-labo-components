@@ -225,11 +225,13 @@ class SingleSearchRecipe extends React.Component {
 			desiredState, () => {
 				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
 					//if there was a valid query, set it in the cache for happy browsing
-					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query)
-					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history')
+                    ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', desiredState.currentOutput);
+					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query);
+					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
 				} else if(desiredState.currentOutput == null) {
 					//the search was cleared in the query builder, so cache the default query for this collection
 					//and refresh the page so it all loads smoothly
+                    // What about removing the saved data when clearing the cache ?
 					ComponentUtil.storeJSONInLocalStorage(
 						'user-last-query',
 						QueryModel.ensureQuery({size : this.state.pageSize}, this.state.collectionConfig)
@@ -354,11 +356,15 @@ class SingleSearchRecipe extends React.Component {
 	bookmarkToGroupInProject(annotation) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
+			//concatenate the
+			//const targets = annotation.target.concat(this.state.currentOutput.results
             const targets = annotation.target.concat(selectedRows
+
 				.filter((result) => this.state.selectedRows[result._id]) //only include selected resources
 				.map((result) => AnnotationUtil.generateSimpleResourceTarget(
 					result._id, this.state.collectionConfig.collectionId
 				), this));
+
 			const temp = {};
 			const dedupedTargets = [];
 			targets.forEach((t) => {
@@ -367,6 +373,7 @@ class SingleSearchRecipe extends React.Component {
 					dedupedTargets.push(t);
 				}
 			});
+
 			//set the deduped targets as the annotation target
 			annotation.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API
@@ -427,7 +434,6 @@ class SingleSearchRecipe extends React.Component {
 
 	render() {
 		let chooseCollectionBtn = null; // for changing the collection
-		let chooseProjectBtn = null; // for changing the active project
 		let collectionModal = null; //modal that holds the collection selector
 		let projectModal = null;
 		let bookmarkModal = null;
@@ -476,7 +482,8 @@ class SingleSearchRecipe extends React.Component {
 			}
 		}
 
-		chooseProjectBtn = (
+		// for changing the active project
+		const chooseProjectBtn = (
 			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
 				Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
 			</button>
@@ -564,7 +571,29 @@ class SingleSearchRecipe extends React.Component {
 						gotoPage={this.gotoPage.bind(this)}/>
 				}
 
-                if (this.state.currentOutput.query.sort) {
+				if(this.state.currentOutput.query.sort) {
+					//draw the sorting buttons
+					sortButtons = <Sorting
+						sortResults={this.sortResults.bind(this)}
+						sortParams={this.state.currentOutput.query.sort}
+						collectionConfig={this.state.collectionConfig}
+						dateField={
+							this.state.currentOutput.query.dateRange ?
+								this.state.currentOutput.query.dateRange.field : null
+						}/>
+				}
+
+				tableActionControls = (
+					<div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
+						onClick={this.toggleRows.bind(this)}>
+						<input type="checkbox" checked={
+							this.state.allRowsSelected ? 'checked' : ''
+						} id={'cb__select-all'}/>
+						<label htmlFor={'cb__select-all'}><span/></label>
+					</div>
+				);
+
+                /*if (this.state.currentOutput.query.sort) {
                     //draw the sorting buttons
                     sortButtons = <Sorting
                         sortResults={this.sortResults.bind(this)}
@@ -574,7 +603,8 @@ class SingleSearchRecipe extends React.Component {
                             this.state.currentOutput.query.dateRange ?
                                 this.state.currentOutput.query.dateRange.field : null
                         }/>
-                }
+                }*/
+
 
 				//draw the action buttons
 				const actions = [],
@@ -660,9 +690,20 @@ class SingleSearchRecipe extends React.Component {
 						{actions}
 					</div>
 				);
+
+                const detailResults = this.state.currentOutput.results.map( (result, index) => {
+                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
+                            ? this.state.initialQuery.dateRange.dateField : null);
+                });
+
+                ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
+
+
 				//populate the list of search results
 				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
 					return (
+
 						<SearchHit
 							key={'__' + index}
 							result={result}
