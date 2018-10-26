@@ -189,7 +189,7 @@ class AggregationList extends React.Component {
 
     render() {
         const facets = [];
-        const nonDateAggregations = this.props.desiredFacets.filter(
+        const nonDateAggregations = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
             aggr => aggr.type !== 'date_histogram'
         );
 
