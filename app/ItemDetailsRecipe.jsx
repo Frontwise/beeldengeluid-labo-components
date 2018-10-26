@@ -147,11 +147,11 @@ class ItemDetailsRecipe extends React.Component {
 			this.bookmarkToGroupInProject(data);
 		} else if(componentClass === 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
-				source : data.url //data => mediaObject
+				source : data.assetId //data => mediaObject
 			})
 		} else if(componentClass === 'FlexPlayer') {
 			this.setActiveAnnotationTarget({
-				source : data.url //data => mediaObject
+				source : data.assetId //data => mediaObject
 			})
 		} else if(componentClass == 'LDResourceViewer') {
 			this.browseEntity(data);
@@ -236,6 +236,7 @@ class ItemDetailsRecipe extends React.Component {
 		if(itemDetailData && itemDetailData.playableContent) {
 			const mediaObject = itemDetailData.playableContent[index];
 			if(mediaObject) {
+				console.debug('generating annotation target for: ', mediaObject)
 				const annotation = AnnotationUtil.generateW3CEmptyAnnotation(
 					this.props.user,
 					this.state.activeProject,
@@ -832,16 +833,13 @@ class ItemDetailsRecipe extends React.Component {
             let backToSearchBtn = null;
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
-				if(this.state.showModal) {
+				if(this.state.showModal && this.state.activeAnnotation && this.state.activeAnnotation.target) {
 					annotationModal = (
-						<FlexModal
-							elementId="annotation__modal"
+						<FlexModal elementId="annotation__modal"
 							stateVariable="showModal"
 							float="right"
 							owner={this}
-							title={'Annotate: ' + AnnotationUtil.extractAssetIdFromTargetSource(
-								this.state.activeAnnotation)
-							}>
+							title={'Annotate: ' + this.state.activeAnnotation.target.source}>
 							<AnnotationBox
 								user={this.props.user} //current user
 								project={this.state.activeProject} //selected via ProjectSelector

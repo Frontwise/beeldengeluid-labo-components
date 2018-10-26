@@ -43,7 +43,7 @@ class FlexImageViewer extends React.Component {
 			//listen to any changes made on the media objects
 			this.props.mediaObjects.forEach((mo) => {
 				AppAnnotationStore.bind(
-					AnnotationUtil.removeSourceUrlParams(mo.url),
+					mo.assetId,
 					this.onMediaObjectChange.bind(this)
 				);
 			})
@@ -226,7 +226,7 @@ class FlexImageViewer extends React.Component {
 
 	loadAnnotations() {
 		AppAnnotationStore.getMediaObjectAnnotations(
-			this.props.mediaObjects[this.state.currentPage].url,
+			this.props.mediaObjects[this.state.currentPage].assetId,
 			this.props.user,
 			this.props.project,
 			this.onLoadAnnotations.bind(this)
@@ -304,46 +304,49 @@ class FlexImageViewer extends React.Component {
 	}
 
 	renderAnnotation(annotation) {
-		const selectedArea = annotation.target.selector.refinedBy.rect;
-		const translatedArea = this.viewer.viewport.imageToViewportRectangle(
-			parseInt(selectedArea.x),
-			parseInt(selectedArea.y),
-			parseInt(selectedArea.w),
-			parseInt(selectedArea.h)
-		);
-		const elt = document.createElement('div');
-		elt.className = IDUtil.cssClassName('overlay', this.CLASS_PREFIX);
-		elt.onclick= this.setActiveAnnotation.bind(this, annotation.id);
-		elt.id = annotation.id;
+		//make sure the annotation is a segment annotation
+		if(annotation.target.selector && annotation.target.selector.refinedBy) {
+			const selectedArea = annotation.target.selector.refinedBy.rect;
+			const translatedArea = this.viewer.viewport.imageToViewportRectangle(
+				parseInt(selectedArea.x),
+				parseInt(selectedArea.y),
+				parseInt(selectedArea.w),
+				parseInt(selectedArea.h)
+			);
+			const elt = document.createElement('div');
+			elt.className = IDUtil.cssClassName('overlay', this.CLASS_PREFIX);
+			elt.onclick= this.setActiveAnnotation.bind(this, annotation.id);
+			elt.id = annotation.id;
 
-		const buttonDiv = document.createElement('div');
-		buttonDiv.className = 'text-center';
+			const buttonDiv = document.createElement('div');
+			buttonDiv.className = 'text-center';
 
-		//add the remove button
-		const addBtn = document.createElement('button');
-		addBtn.className = 'btn btn-default';
-		addBtn.onclick = this.openAnnotationForm.bind(this, annotation);
-		const addGlyph = document.createElement('span');
-		addGlyph.className = IconUtil.getUserActionIcon('annotate');
-		addBtn.appendChild(addGlyph);
+			//add the remove button
+			const addBtn = document.createElement('button');
+			addBtn.className = 'btn btn-default';
+			addBtn.onclick = this.openAnnotationForm.bind(this, annotation);
+			const addGlyph = document.createElement('span');
+			addGlyph.className = IconUtil.getUserActionIcon('annotate');
+			addBtn.appendChild(addGlyph);
 
-		//add the remove button
-		const removeBtn = document.createElement('button');
-		removeBtn.className = 'btn btn-default';
-		removeBtn.onclick = this.deleteAnnotation.bind(this, annotation);
-		const removeGlyph = document.createElement('span');
-		removeGlyph.className = IconUtil.getUserActionIcon('remove');
-		removeBtn.appendChild(removeGlyph);
+			//add the remove button
+			const removeBtn = document.createElement('button');
+			removeBtn.className = 'btn btn-default';
+			removeBtn.onclick = this.deleteAnnotation.bind(this, annotation);
+			const removeGlyph = document.createElement('span');
+			removeGlyph.className = IconUtil.getUserActionIcon('remove');
+			removeBtn.appendChild(removeGlyph);
 
-		buttonDiv.appendChild(addBtn);
-		buttonDiv.appendChild(removeBtn);
+			buttonDiv.appendChild(addBtn);
+			buttonDiv.appendChild(removeBtn);
 
-		elt.appendChild(buttonDiv);
+			elt.appendChild(buttonDiv);
 
-		this.viewer.addOverlay({
-			element: elt,
-			location: translatedArea
-		});
+			this.viewer.addOverlay({
+				element: elt,
+				location: translatedArea
+			});
+		}
 	}
 
 	openAnnotationForm(annotation, event) {

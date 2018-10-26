@@ -53,7 +53,7 @@ class Annotation extends React.Component {
 		//determine the label of the annotation
 		let label = AnnotationUtil.extractAnnotationCardTitle(this.props.annotation);
 		if(!label) {
-			label = ad.assetId ? ad.assetId : this.props.annotation.id
+			label = ad.source ? ad.source : this.props.annotation.id
 		}
 
 		//determine the css classes for the component
@@ -64,8 +64,7 @@ class Annotation extends React.Component {
 		classNames.push(IDUtil.cssClassName('annotation'))
 
 		return (
-			<li
-				className={classNames.join(' ')}
+			<li className={classNames.join(' ')}
 				onClick={() => {AnnotationActions.set(this.props.annotation)}}
 				onDoubleClick={() => {AnnotationActions.edit(this.props.annotation)}}
 				title={this.props.annotation.id}
