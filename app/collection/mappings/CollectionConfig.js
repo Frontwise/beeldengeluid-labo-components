@@ -206,6 +206,15 @@ class CollectionConfig {
 		return this.keywordFields;
 	}
 
+	//checks if the field is a keyword field and makes sure to return the matched keyword field name
+	getMatchedKeywordField(fieldName) {
+		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) != -1);
+		if(kwMatch) {
+			return fieldName === kwMatch ? fieldName : fieldName + '.keyword';
+		}
+		return null;
+	}
+
 	//used by the collection analyzer (field analysis pull down)
 	getAllFields() {
 		let tmp = []
@@ -421,12 +430,23 @@ class CollectionConfig {
                 leaf = leaf.substring(1) + '@';
             }
             let origin = tmp.join(".");
-            if (origin){
-                origin = ' => ' + origin;
+            if (origin) {
+            	if(origin.indexOf('@graph') != -1) {
+            		origin = origin.substring('@graph.'.length);
+            	}
+            	if(origin.length > 0 && leaf !== 'value@') {
+                	origin = ' => ' + origin;
+                }
             }
+            leaf = leaf === 'value@' ? '' : leaf; //always remove value@, since it is not nice to show
             return leaf + origin + (isKeywordField ? ' *' : '');
         }
         return esFieldName;
+    }
+
+    //maps a LD predicate to an ES field name
+    predicateToIndexField(p) {
+    	return p
     }
 
 	//used to prevent graphs to blow up in case the minimum date is really low (because of incorrect data)

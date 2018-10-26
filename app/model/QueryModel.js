@@ -6,7 +6,6 @@ const QueryModel = {
 	//when a collectionConfig is provided, it means that defaults from this should be used to populate the query object
 	ensureQuery : function(obj, collectionConfig) {
 		obj = obj || {};
-		//console.debug(obj.sort)
 		return {
 			//give the query an ID for internal reference (e.g. for components that can handle multiple queries)
 			id : obj.id || IDUtil.guid(),

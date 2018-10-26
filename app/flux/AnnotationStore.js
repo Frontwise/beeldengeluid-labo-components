@@ -53,6 +53,10 @@ class AnnotationStore {
 		AnnotationAPI.getFilteredAnnotations(user.id, filter, callback, offset, size, sort, dateRange);
 	}
 
+	getUserProjectBookmarks(userId, projectId, callback) {
+		AnnotationAPI.getBookmarks(userId, projectId, callback);
+	}
+
 	/* --------------- FOR TRIGGERS LISTENERS ------------------- */
 
 	changeTarget(annotationTarget) {

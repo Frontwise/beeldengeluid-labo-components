@@ -139,14 +139,18 @@ class AggregationList extends React.Component {
                 break;
             }
         }
-
         //then throw away any selected value from the selectedFacets
         if(this.props.selectedFacets) {
             delete this.props.selectedFacets[this.currentFacet]
         }
 
-        this.onOutput(desiredFacets, this.props.selectedFacets);
         ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
+        this.onOutput(desiredFacets, this.props.selectedFacets);
+    }
+
+    toggleExcludeFacets(index) {
+        this.props.desiredFacets[index]['exclude'] = !this.props.desiredFacets[index]['exclude'];
+        this.onOutput(this.props.desiredFacets, this.props.selectedFacets);
     }
 
     sorting(arr, order="asc", type="alpha", index) {
@@ -185,7 +189,7 @@ class AggregationList extends React.Component {
 
     render() {
         const facets = [];
-        const nonDateAggregations = this.props.desiredFacets.filter(
+        const nonDateAggregations = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
             aggr => aggr.type !== 'date_histogram'
         );
 
@@ -242,11 +246,30 @@ class AggregationList extends React.Component {
 
         //only display aggregation blocks for non histogram facets
         nonDateAggregations.forEach((key, index) => {
-            let sortedOpts = [];
-            let options = null;
+            if (this.props.desiredFacets[index].exclude === undefined) {
+                this.props.desiredFacets[index]['exclude'] = false;
+            }
+            let sortedOpts = [],
+            options = null;
+
             if (this.props.aggregations[key['field']] && this.props.aggregations[key['field']].length > 0) {
 
-                //determine the options per aggregation (if not empty)
+                if (this.props.selectedFacets[key['field']]) {
+                    //Check if all selected facets are in the aggregations-list, if not, add doc_count 0
+                    this.props.selectedFacets[key['field']].forEach((selectedKey, sIndex) => {
+                        var found = false;
+                        this.props.aggregations[key['field']].forEach((searchKey, oIndex) => {
+                            if(searchKey['key'] == selectedKey){
+                                found = true;
+                            }
+                        });
+                        if(!found){
+                            this.props.aggregations[key['field']].push({'key':selectedKey, 'doc_count': 0});
+                        }
+                    });
+                }
+
+                //determine the selected options per aggregation (if not empty)
                 options = this.props.aggregations[key['field']].map((facet, fIndex) => {
                     const value = facet.date_millis ? facet.date_millis : facet.key
                     const facetId = key['field'] + '|' + value;
@@ -346,25 +369,17 @@ class AggregationList extends React.Component {
                         {label: 'Value', key: 'key'},
                         {label: 'Count', key: 'doc_count'}
                     ];
-
                 facets.push((
                     <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)}
                         key={'facet__' + index} id={'index__' + index}>
                         <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
                             <input className="hamburger-toggle" type="checkbox" id={facetId}/>
                             <label htmlFor={facetId}>
-                                <span className="bg__facet-title"
-                                    data-for={'tooltip__' + index}
-                                    data-tip={key['field']}
-                                    data-html={true}>
-                                    &nbsp;
-                                    <input
-                                        type="checkbox" id={'__excl__' + facetId}
-                                        onClick={this.toggleInclusion.bind(this)}
-                                    />
-                                    &nbsp;
-                                    {key['title']}
-                                </span>
+                                <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={key['field']}
+                                      data-html={true}>
+                                   <i className="fa fa-info-circle"/> {key['title']}
+						                    </span>
+
                                 <span className="fa fa-remove" onClick={
                                     this.showRemoveDialog.bind(this, key['field'], index)
                                 }/>
@@ -374,6 +389,11 @@ class AggregationList extends React.Component {
                                 </div>
                             </label>
                             <ul className={facetId}>
+                                <li className={IDUtil.cssClassName('aggregationSwitchBtn', this.CLASS_PREFIX)}><span className="ms_toggle_btn"><input type="checkbox" id={key['field']} className="checkbox-toggle checkbox-toggle-round"
+                                    checked={this.props.desiredFacets[index]['exclude']}
+                                    onChange={this.toggleExcludeFacets.bind(this, index)}/>
+                                    <label htmlFor={key['field']} data-on="Excl" data-off="Incl"></label></span>
+                                </li>
                                 <li title="Alphanumeric descending" onClick={
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "alpha", key['field'])
                                 }>
@@ -391,6 +411,7 @@ class AggregationList extends React.Component {
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])
                                 }>
                                     <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"></i> </li>
+
                                 <li title="Download as CSV" onClick={
                                     this.sorting.bind(this, this.props.aggregations[key['field']], 'desc', "non-alpha", key['field'])
                                 }>
@@ -411,18 +432,25 @@ class AggregationList extends React.Component {
                     </div>
                 ))
 
-
                 //List of selected facets on top
                 if (this.props.selectedFacets.hasOwnProperty(key['field'])) {
                     for (var entry in this.props.selectedFacets[key['field']]) {
                         var facetName = this.props.selectedFacets[key['field']][entry];
+                        var label = facetName;
+
                         var hits = 0
                         if (selectedOpts.hasOwnProperty(facetName)) {
                             var hits = selectedOpts[facetName];
                         }
+
+                        if (this.props.desiredFacets[index]['exclude'] == true){
+                            label = "NOT - "+label;
+                            hits = 0;
+                        }
+
                         opts.push(
                         <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                            {facetName.toUpperCase()} ({hits})
+                            {label.toUpperCase()} ({hits})
                             <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, key['field'], facetName)}/>
                         </div>
                         )

@@ -1,6 +1,6 @@
 import FlexRouter from '../../util/FlexRouter';
 import IDUtil from '../../util/IDUtil';
-
+import ComponentUtil from '../../util/ComponentUtil';
 import SearchSnippet from './SearchSnippet';
 import ItemDetails from './ItemDetails';
 import FlexModal from '../FlexModal';
@@ -33,7 +33,7 @@ class SearchHit extends React.Component {
 	}
 
 	safeModalId(resourceId) {
-		return resourceId.substr(0, resourceId.indexOf('@')) + '__modal';
+		return resourceId.substr(0, resourceId.indexOf('@')) || resourceId + '__modal';
 	}
 
 	select(e) {
@@ -48,10 +48,10 @@ class SearchHit extends React.Component {
 
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
+		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
 		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
 		const modalID = this.safeModalId(result.resourceId);
-
 		let modal = null;
 
 		if(this.state.showModal && this.state.previewMode) {
@@ -68,15 +68,23 @@ class SearchHit extends React.Component {
 			)
 		}
 
+        let selectedCheckbox = false;
+        if(selectedRows !== null) {
+            selectedCheckbox = this.props.result._id in selectedRows;
+        } else {
+            selectedCheckbox = false;
+        }
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
 		const checkBox = (
 			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
 				<input
-					type="checkbox" onClick={this.select.bind(this)}
-					checked={this.props.isSelected}
+					type="checkbox"
+                    onChange={this.select.bind(this)}
+                    checked={this.props.isSelected}
 					id={'cb__' + modalID}
+                    key={modalID + '__"' + selectedCheckbox + '"'}
 				/>
-				<label htmlFor={'cb__' + modalID}><span></span></label>
+				<label htmlFor={'cb__' + modalID}><span/></label>
 			</div>
 		);
 
@@ -85,7 +93,7 @@ class SearchHit extends React.Component {
 			classNames.push('fragment')
 		}
 		return (
-			<div id={result.resourceId} className={classNames.join(' ')}>
+			<div className={classNames.join(' ')}>
 				{checkBox}
 				<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
 					<button className="btn btn-default fa fa-file-text"

@@ -107,6 +107,7 @@ class QueryBuilder extends React.Component {
 
 		//reset certain query properties
 		q.selectedFacets = {};
+		//q.dateRange = null;
 		q.offset = 0;
 		q.term = this.setSearchTerm.value;
 
@@ -409,9 +410,11 @@ class QueryBuilder extends React.Component {
 								searchId={this.state.searchId} //for determining when the component should rerender
 								queryId={this.state.query.id} //TODO implement in the list component
 								aggregations={this.state.aggregations} //part of the search results
+
+                desiredFacets={this.state.query.desiredFacets}
 								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-                                desiredFacets={this.state.query.desiredFacets}
-                                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
+
+                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
 								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
 							/>
 						)

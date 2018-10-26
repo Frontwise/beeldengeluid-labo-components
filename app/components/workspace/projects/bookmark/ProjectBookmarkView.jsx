@@ -20,7 +20,7 @@ class ProjectBookmarkView extends React.PureComponent {
         };
 
         // In case you want to get the view from session storage, use:
-        // window.sessionStorage.getItem(this.keys.view) ||          
+        // window.sessionStorage.getItem(this.keys.view) ||
         const view = 'bookmark-centric';
         this.state = {
             annotations: [],
@@ -71,15 +71,15 @@ class ProjectBookmarkView extends React.PureComponent {
         // set viewComponent, based on the current state.view
         // key is required to force the component to update on changes
         switch (this.state.view) {
-            case 'bookmark-centric': 
+            case 'bookmark-centric':
                 viewComponent = (
-                    <BookmarkTable 
+                    <BookmarkTable
                        {...defaultOptions}
                     />
                 );
             break;
         }
-        
+
     return (
         <div className={IDUtil.cssClassName('project-data-view')}>
             <div className="tools"></div>
@@ -103,6 +103,9 @@ class WrappedProjectBookmarkView extends React.PureComponent {
     }
 }
 
-WrappedProjectBookmarkView.propTypes = ProjectBookmarkView.propTypes;
+WrappedProjectBookmarkView.propTypes =  {
+    user: PropTypes.object.isRequired,
+    loadBookmarkCount: PropTypes.func
+}
 
 export default WrappedProjectBookmarkView;

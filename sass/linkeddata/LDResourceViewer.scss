@@ -2,15 +2,28 @@
 	overflow-x : auto;
 	max-height: 620px;
 	.bg__ldrv__property-list {
+		font-family: monospace;
 		list-style : none;
 		.property {
 			margin-top:5px;
 			.predicate {
-
+				font-weight: bold;
 			}
 			.value {
-				font-weight: bold;
 				margin-left: 20px;
+			}
+		}
+		.keyword {
+			.predicate {
+				font-weight:bold;
+			}
+			.value {
+				color: blue;
+				cursor:pointer;
+				text-decoration:underline;
+				&:hover {
+					text-decoration:none;
+				}
 			}
 		}
 	}

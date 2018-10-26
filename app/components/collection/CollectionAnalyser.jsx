@@ -70,23 +70,25 @@ class CollectionAnalyser extends React.Component {
                 });
             } else {
                 this.previewAnalysis(field, (data)=>{
-                    const completeness = {
-                        value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
-                        total: data.doc_stats.total,
-                        withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
-                    }
-
-                    // store to sessionStorage
-                    window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
-
-                    // update state
-                    this.setState((state, props)=>{
-                        const fieldData = {};
-                        fieldData[data.analysis_field] = completeness;
-                        return {
-                            completeness: Object.assign({},state.completeness,fieldData),
+                    if(data && data.doc_stats) {
+                        const completeness = {
+                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
+                            total: data.doc_stats.total,
+                            withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
                         }
-                    });
+
+                        // store to sessionStorage
+                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
+
+                        // update state
+                        this.setState((state, props)=>{
+                            const fieldData = {};
+                            fieldData[data.analysis_field] = completeness;
+                            return {
+                                completeness: Object.assign({},state.completeness,fieldData),
+                            }
+                        });
+                    }
                 });
             }
         });

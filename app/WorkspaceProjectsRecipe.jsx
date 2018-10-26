@@ -55,9 +55,9 @@ class WorkspaceProjects extends Component {
                     )} />
 
                     <Route path="/workspace/projects/:id/bookmarks"
-                        render={this.getPropsRenderer(ProjectBookmarkView, this.props, {api: ProjectAPI})} />                    
+                        render={this.getPropsRenderer(ProjectBookmarkView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/annotations"
-                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />    
+                        render={this.getPropsRenderer(ProjectAnnotationView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/sessions"
                         render={this.getPropsRenderer(ProjectSessionView, this.props, {api: ProjectAPI})} />
                     <Route path="/workspace/projects/:id/queries"

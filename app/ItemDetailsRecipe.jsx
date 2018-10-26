@@ -3,10 +3,13 @@ import IDUtil from './util/IDUtil';
 import IconUtil from './util/IconUtil';
 import ComponentUtil from './util/ComponentUtil';
 
+import QueryModel from './model/QueryModel';
+
 import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
 import FlexPlayer from './components/player/video/FlexPlayer';
 import FlexImageViewer from './components/player/image/FlexImageViewer';
+import FlexRouter from './util/FlexRouter';
 
 import MetadataTable from './components/search/MetadataTable';
 
@@ -151,6 +154,8 @@ class ItemDetailsRecipe extends React.Component {
 			this.setActiveAnnotationTarget({
 				source : data.url //data => mediaObject
 			})
+		} else if(componentClass == 'LDResourceViewer') {
+			this.browseEntity(data);
 		}
 	}
 
@@ -419,8 +424,76 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	/************************************************************************
+	************************ BROWSING FUNCTIONS *******************************
+	*************************************************************************/
+
+	browseEntity(entity) {
+		const selectedFacets = {}
+		selectedFacets[entity.field] = [entity.value];
+		const query = QueryModel.ensureQuery({
+			id : this.state.collectionConfig.getCollectionId(),
+			term : this.props.params.st,
+			desiredFacets : [{
+				field: entity.field,
+				type: "string",
+				exclude : false
+			}],
+			selectedFacets : selectedFacets
+		}, this.state.collectionConfig)
+
+		ComponentUtil.storeJSONInLocalStorage(
+			'user-last-query',
+			query
+		);
+
+		FlexRouter.gotoSingleSearch('cache')
+	}
+
+	getFieldValues(fieldName) {
+		//filter out the uninteresting fields
+		if(fieldName.indexOf('@context') != -1 ||
+			fieldName.indexOf('hasFormat') != -1 ||
+			fieldName.indexOf('@language') != -1) {
+			return null
+		}
+		//make sure to remove the ES .keyword suffix, since the rawdata fieldnames don't have them
+		fieldName = fieldName.indexOf('.keyword') == -1 ?
+			fieldName :
+			fieldName.substring(0, fieldName.length - 8)
+
+		//this is the data to search for the values of the selected keyword field
+		let curObj = this.state.itemData.rawData;
+
+		//split the field name in path elements for lookup
+		let path = fieldName.split('.');
+		let i = 0;
+
+		//now look for the values of the selected field
+		while(i < path.length) {
+			if(curObj) {
+				//check if the current object is a list and the current path selects @value attributes from it
+				if(typeof(curObj) == "object" && curObj['@value'] == undefined && path[i] == '@value') {
+					curObj = curObj.map(obj => obj[path[i]])
+					break;
+				}
+				//otherwise continue down the path, until the end is reached
+				curObj = curObj[path[i]];
+				i++;
+			} else {
+				break;
+			}
+		}
+		//always wrap the end-result in a list
+		if(typeof(curObj) == 'string') {
+			return [curObj]
+		}
+		return curObj;
+	}
+
+	/************************************************************************
 	************************ CALLED BY RENDER *******************************
 	*************************************************************************/
+
 
 	checkMediaObjectIsSelected(mediaObject) {
 		//console.debug(mediaObject, this.props.params.assetId)
@@ -742,6 +815,7 @@ class ItemDetailsRecipe extends React.Component {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
 			let ldResourceViewer = null;
+			let exploreBlock = null;
 			let annotationList = null;
 
 			let metadataPanel = null;
@@ -896,10 +970,53 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with awesome LD later on
-			if(1 === 2) {
+			if(1 === 1) {
 				ldResourceViewer = (
-					<LDResourceViewer resourceId={this.state.itemData.resourceId}
-						graphId={this.state.itemData.collectionId}/>
+					<FlexBox title="Linked Data">
+						<LDResourceViewer
+							resourceId={this.state.itemData.resourceId}
+							collectionConfig={this.state.collectionConfig}
+							onOutput={this.onComponentOutput.bind(this)}
+						/>
+					</FlexBox>
+				)
+
+				const exploreFields = {};
+				this.state.collectionConfig.getKeywordFields().forEach((kw) => {
+					const values = this.getFieldValues(kw);
+					if(values) {
+						exploreFields[kw] = values;
+					}
+				})
+				exploreBlock = (
+					<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+						<h3>Find related content based on these properties</h3>
+						<div className="property-list">
+							{
+								Object.keys(exploreFields).map(kw => {
+
+									//make nice buttons for each available value for the current keyword
+									const fieldValues = exploreFields[kw].map(value => {
+										const entity = {field : kw, value : value}
+										return (
+											<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+												{entity.value}
+											</div>
+										)
+									})
+
+									//then return a block with a pretty field title + a column of buttons for each value
+									return (
+										<div>
+											<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
+											{fieldValues}
+										</div>
+									)
+
+								})
+							}
+						</div>
+					</div>
 				)
 			}
 
@@ -925,13 +1042,21 @@ class ItemDetailsRecipe extends React.Component {
                             </span>
 							<br/>
 							{mediaPanel}
+							<br/>
 							<div className="row">
 								<div className="col-md-7">
-									{metadataPanel}
+									<div className="row">
+										{metadataPanel}
+									</div>
+									<div className="row">
+										{ldResourceViewer}
+									</div>
 								</div>
 								<div className="col-md-5">
 									{annotationList}
-									{ldResourceViewer}
+									<div className="row">
+										{exploreBlock}
+									</div>
 								</div>
 								<br/>
 							</div>

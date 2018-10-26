@@ -136,7 +136,7 @@ class Histogram extends React.Component {
 
         let totalHitsPerQuery = 0;
         data.map(item => totalHitsPerQuery += item.count);
-        const graphTitle = totalHitsPerQuery + " records for query";
+        const graphTitle = "Timeline chart of query results (" + totalHitsPerQuery + ")";
         return (
         	<div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >

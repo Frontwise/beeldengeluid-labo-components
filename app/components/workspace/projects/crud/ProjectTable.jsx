@@ -1,6 +1,5 @@
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
-import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 
@@ -126,24 +125,17 @@ class ProjectTable extends React.PureComponent {
 
     //Load bookmark count from annotation store (TODO: This can be optimized by storing the counts in the SessionStorage)
     loadBookmarkCount(project) {
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            project,
-            this.setBookmarkCount.bind(this, project)
-        );
-    }
-
-    //set bookmark count to state
-    setBookmarkCount(project, annotationList) {
-        const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            annotationList || []
-        );
-        const bookmarkCount = bookmarks ? bookmarks.length : 0;
-        const newCount = {};
-        newCount[project.id] = bookmarkCount;
-        this.setState({
-            bookmarkCount: Object.assign({}, this.state.bookmarkCount, newCount)
-        });
+        AnnotationStore.getUserProjectBookmarks(
+            this.props.user.id,
+            project.id,
+            (bookmarks) => {
+                const newCount = {}
+                newCount[project.id] = bookmarks ? bookmarks.length : 0
+                this.setState({
+                    bookmarkCount: Object.assign({}, this.state.bookmarkCount, newCount)
+                });
+            }
+        )
     }
 
     //filter projects (client side) TODO: server side filtering
