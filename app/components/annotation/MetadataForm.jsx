@@ -83,7 +83,6 @@ class MetadataForm extends React.Component {
 
 	determinePossibleTemplates() {
 		let templates = null;
-		console.debug(this.props.annotationTarget)
 		if(this.props.annotationTarget) {
 			if(this.props.annotationTarget.selector.refinedBy && this.props.config.mediaSegment) {
 				//return the first template defined for media segments

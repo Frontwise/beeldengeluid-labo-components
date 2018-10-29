@@ -63,7 +63,7 @@ class AnnotationTimeline extends React.Component {
 		if(this.props.annotations) {
 			const pos = this.props.curPosition;
 			currentAnnotation = this.props.annotations.filter((a, index)=> {
-				if(a.target.selector.refinedBy) {
+				if(a.target.selector && a.target.selector.refinedBy) {
 					if(a.target.selector.refinedBy.start < pos && a.target.selector.refinedBy.end > pos) {
 						return true;
 					}
@@ -77,7 +77,7 @@ class AnnotationTimeline extends React.Component {
 	activateAnnotation(e) {
 		const activePos = parseFloat(this.hoverPos);
 		const currentAnnotation = this.props.annotations.filter((a, index)=> {
-			if(a.target.selector.refinedBy) {
+			if(a.target.selector && a.target.selector.refinedBy) {
 				if(a.target.selector.refinedBy.start < activePos && a.target.selector.refinedBy.end > activePos) {
 					return true;
 				}
@@ -90,7 +90,7 @@ class AnnotationTimeline extends React.Component {
 
 	editAnnotation() {
 		const currentAnnotation = this.props.annotations.filter((a, index)=> {
-			if(a.target.selector.refinedBy) {
+			if(a.target.selector && a.target.selector.refinedBy) {
 				if(a.target.selector.refinedBy.start < this.hoverPos && a.target.selector.refinedBy.end > this.hoverPos) {
 					return true;
 				}
@@ -133,23 +133,25 @@ class AnnotationTimeline extends React.Component {
 	        dur = this.props.duration;
 	        var ctx = c.getContext("2d");
 	        ctx.clearRect (0, 0, c.width, c.height);
-	        this.props.annotations.forEach((a, index) => {
-	        	if(a.target.selector.refinedBy) {
-	        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a);
-		        	if(frag) {
-			        	const start = c.width / 100 * (frag.start / (dur / 100));
-			        	const end = c.width / 100 * (frag.end / (dur / 100));
-			        	if(this.hoverPos >= frag.start && this.hoverPos <= frag.end) {
-			        		ctx.fillStyle = "#FF69B4";
-			        	} else if(this.props.annotation && a.id == this.props.annotation.id){
-			        		ctx.fillStyle = "lime";
-			        	} else {
-			        		ctx.fillStyle = "#00bfff";
-			        	}
-			        	ctx.fillRect(start, 0, end - start, c.height / 2);//time progressing
-			        }
-			    }
-	        });
+	        if(this.props.annotations) {
+		        this.props.annotations.forEach((a, index) => {
+		        	if(a.target) {
+		        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a.target);
+			        	if(frag) {
+				        	const start = c.width / 100 * (frag.start / (dur / 100));
+				        	const end = c.width / 100 * (frag.end / (dur / 100));
+				        	if(this.hoverPos >= frag.start && this.hoverPos <= frag.end) {
+				        		ctx.fillStyle = "#FF69B4";
+				        	} else if(this.props.annotation && a.id == this.props.annotation.id){
+				        		ctx.fillStyle = "lime";
+				        	} else {
+				        		ctx.fillStyle = "#00bfff";
+				        	}
+				        	ctx.fillRect(start, 0, end - start, c.height / 2);//time progressing
+				        }
+				    }
+		        });
+		    }
 	    } else {
 			dur = this.props.end - this.props.start;
 			const dt = t - this.props.start;

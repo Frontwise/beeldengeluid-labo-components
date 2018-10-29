@@ -51,7 +51,6 @@ class AnnotationList extends React.Component {
 
 	loadAnnotations() {
 		if(this.props.annotationTarget) {
-			console.debug(this.props.annotationTarget)
 			AppAnnotationStore.getMediaObjectAnnotations(
 			   	this.props.annotationTarget.source,
 			   	this.props.user,

@@ -8,67 +8,6 @@ const AnnotationUtil = {
 	 --------------------------- W3C BUSINESS LOGIC HERE ---------------------------------
 	*************************************************************************************/
 
-	//get the index of the segment within a list of annotations of a certain target
-	getSegmentIndex(annotations, annotation) {
-		if(annotations && annotation) {
-			let i = 0;
-			for(const a of annotations) {
-				if(a.target.selector.refinedBy) {
-					if(a.id == annotation.id) {
-						return i;
-					}
-					i++;
-				}
-			}
-		}
-		return -1;
-	},
-
-	//get the nth segment within a list of annotations of a certain target
-	getSegment(annotations, index) {
-		if(annotations) {
-			index = index < 0 ? 0 : index;
-			let i = 0;
-			for(const a of annotations) {
-				if(a.target.selector.refinedBy) {
-					if(i == index) {
-						return a;
-					}
-					i++;
-				}
-			}
-		}
-		return null;
-	},
-
-	toUpdatedAnnotation(user, project, collectionId, resourceId, mediaObject, segmentParams, annotation) {
-		if(!annotation) {
-			annotation = AnnotationUtil.generateW3CEmptyAnnotation(
-				user,
-				project,
-				collectionId,
-				resourceId,
-				mediaObject,
-				segmentParams
-			);
-		} else if(segmentParams) {
-			if(annotation.target.selector.refinedBy) {
-				annotation.target.selector.refinedBy.start = segmentParams.start;
-				annotation.target.selector.refinedBy.end = segmentParams.end;
-			} else {
-				console.debug('should not be here');
-			}
-		}
-		return annotation;
-	},
-
-	removeSourceUrlParams(url) {
-		if(url.indexOf('?') != -1 && url.indexOf('cgi?') == -1) {
-			return url.substring(0, url.indexOf('?'));
-		}
-		return url
-	},
-
 	//called from components that want to create a new annotation with a proper target
 	generateW3CEmptyAnnotation : function(user, project, collectionId, resourceId, mediaObject = null, segmentParams = null) {
 		//Resource or MediaObject annotations ALL start with this as part of the target
@@ -76,8 +15,6 @@ const AnnotationUtil = {
 		let refinedTarget = null;
 		//ALL THESE ARE MANDATORY TO BE ABLE TO PROPERLY ANNOTATE A MEDIA OBJECT!
 		//TODO DELETE/UPDATE NON-COMPATIBLE ANNOTATIONS
-		console.debug(mediaObject)
-		console.debug(segmentParams)
 		if(mediaObject && mediaObject.mimeType && mediaObject.assetId) {
 			let refinedBy = null; //when selecting a piece of the target
 			let mediaType = null;
@@ -119,6 +56,34 @@ const AnnotationUtil = {
 			body : null
 		}
 		return annotation
+	},
+
+	toUpdatedAnnotation(user, project, collectionId, resourceId, mediaObject, segmentParams, annotation) {
+		if(!annotation) {
+			annotation = AnnotationUtil.generateW3CEmptyAnnotation(
+				user,
+				project,
+				collectionId,
+				resourceId,
+				mediaObject,
+				segmentParams
+			);
+		} else if(segmentParams) {
+			if(annotation.target.selector.refinedBy) {
+				annotation.target.selector.refinedBy.start = segmentParams.start;
+				annotation.target.selector.refinedBy.end = segmentParams.end;
+			} else {
+				console.debug('should not be here');
+			}
+		}
+		return annotation;
+	},
+
+	removeSourceUrlParams(url) {
+		if(url.indexOf('?') != -1 && url.indexOf('cgi?') == -1) {
+			return url.substring(0, url.indexOf('?'));
+		}
+		return url
 	},
 
 	generateResourceLevelTarget(collectionId, resourceId) {
@@ -193,6 +158,43 @@ const AnnotationUtil = {
 		basicTarget.type = targetType;
 		basicTarget.source = assetId;
 		return basicTarget
+	},
+
+	/*************************************************************************************
+	 ******************************* USED BY PLAYERS TO GET THE RIGHT SEGMENTS ***********
+	*************************************************************************************/
+
+	//get the index of the segment within a list of annotations of a certain target
+	getSegmentIndex(annotations, annotation) {
+		if(annotations && annotation) {
+			let i = 0;
+			for(const a of annotations) {
+				if(a.target.selector.refinedBy) {
+					if(a.id == annotation.id) {
+						return i;
+					}
+					i++;
+				}
+			}
+		}
+		return -1;
+	},
+
+	//get the nth segment within a list of annotations of a certain target
+	getSegment(annotations, index) {
+		if(annotations) {
+			index = index < 0 ? 0 : index;
+			let i = 0;
+			for(const a of annotations) {
+				if(a.target.selector.refinedBy) {
+					if(i == index) {
+						return a;
+					}
+					i++;
+				}
+			}
+		}
+		return null;
 	},
 
 	/*************************************************************************************

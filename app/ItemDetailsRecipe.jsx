@@ -955,7 +955,6 @@ class ItemDetailsRecipe extends React.Component {
 					</button>
 				);
 			}
-			console.debug(this.props.params)
 			if(this.props.params.bodyClass !== 'noHeader') {
 				resourceListPagingButtons = this.renderResultListPagingButtons();
 			}

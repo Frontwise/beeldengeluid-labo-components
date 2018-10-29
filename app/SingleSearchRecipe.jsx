@@ -220,7 +220,6 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	onLoadPlayoutAccess(accessApproved, desiredState) {
-		console.debug('I can view thumbnails now: ' + accessApproved);
 		this.setState(
 			desiredState, () => {
 				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
