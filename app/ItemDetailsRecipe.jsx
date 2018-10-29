@@ -799,16 +799,107 @@ class ItemDetailsRecipe extends React.Component {
         return false;
     }
 
-	/* ------------------------------------------------------------------
-	----------------------- RENDER --------------------------------------
-	--------------------------------------------------------------------- */
+    /* --------------------------------------------------------------------------------------
+	* -----------------------------RENDER FUNCTIONS -----------------------------------------
+    -------------------------------------------------------------------------------------- */
+
+    //only render when coming from the single search recipe (checking this.props.param.bodyClass == noHeader)
+    renderResultListPagingButtons() {
+    	let previousResourceBtn = null;
+		let nextResourceBtn = null;
+		let backToSearchBtn = null;
+
+    	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query')
+    	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+    	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+    	if(!userLastQuery || !searchResults || !queryOutput) {
+    		return null;
+    	}
+        const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.params.id);
+
+        const prevResource = searchResults.findIndex(
+        	elem => elem.resourceId === this.props.params.id
+        ) ? searchResults[currentIndex-1].resourceId : false;
+
+        const nextResource = (searchResults.length - 1) > currentIndex ?
+        	searchResults[currentIndex+1].resourceId : false;
+
+		const isFirstResource = (userLastQuery.offset === 0 && currentIndex === 0);
+
+        let isLastHit = false;
+        if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
+            isLastHit = searchResults[searchResults.length - 1].resourceId === this.state.itemData.resourceId;
+        }
+
+		previousResourceBtn = (
+            <button className="btn btn-primary" disabled={isFirstResource}
+                    onClick={this.gotoItemDetails.bind(this, prevResource)}>
+                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
+            </button>
+        );
+        nextResourceBtn = (
+            <button className="btn btn-primary" disabled={isLastHit}
+                    onClick={this.gotoItemDetails.bind(this, nextResource)}>
+                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
+            </button>
+        );
+        backToSearchBtn = (
+            <button className="btn btn-primary"
+                    onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
+                Back to results
+            </button>
+        );
+
+
+        return (
+        	<span>{previousResourceBtn}&nbsp;{nextResourceBtn}&nbsp;{backToSearchBtn}</span>
+        )
+    }
+
+    renderExploreBlock() {
+    	const exploreFields = {};
+		this.state.collectionConfig.getKeywordFields().forEach((kw) => {
+			const values = this.getFieldValues(kw);
+			if(values) {
+				exploreFields[kw] = values;
+			}
+		})
+		if(Object.keys(exploreFields).length == 0) {
+			return null;
+		}
+		return (
+			<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+				<h3>Find related content based on these properties</h3>
+				<div className="property-list">
+					{
+						Object.keys(exploreFields).map(kw => {
+
+							//make nice buttons for each available value for the current keyword
+							const fieldValues = exploreFields[kw].map(value => {
+								const entity = {field : kw, value : value}
+								return (
+									<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+										{entity.value}
+									</div>
+								)
+							})
+
+							//then return a block with a pretty field title + a column of buttons for each value
+							return (
+								<div>
+									<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
+									{fieldValues}
+								</div>
+							)
+
+						})
+					}
+				</div>
+			</div>
+		)
+    }
 
 	render() {
-        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
-              offset = userLastQuery.offset,
-              resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
-              indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
-
 		if(!this.state.itemData) {
 			return (<h4>Loading item</h4>);
 		} else if(this.state.found === false) {
@@ -828,9 +919,8 @@ class ItemDetailsRecipe extends React.Component {
 			let projectSelectorBtn = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
-            let previousResourceBtn = null;
-            let nextResourceBtn = null;
-            let backToSearchBtn = null;
+            let resourceListPagingButtons = null;
+
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
 				if(this.state.showModal && this.state.activeAnnotation && this.state.activeAnnotation.target) {
@@ -864,39 +954,13 @@ class ItemDetailsRecipe extends React.Component {
 						Annotate resource
 					</button>
 				);
-
-                const currentIndexInStorage = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id),
-                      prevResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id) ? resultDetailsData[currentIndexInStorage-1].resourceId : false,
-                      nextResource = (resultDetailsData.length - 1) > currentIndexInStorage ? resultDetailsData[currentIndexInStorage+1].resourceId : false,
-				      isFirstResource = (offset === 0 && indexCurrentResource === 0),
-                      queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
-
-                let isLastHit = false;
-                if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
-                    isLastHit = resultDetailsData[resultDetailsData.length - 1].resourceId === this.state.itemData.resourceId;
-                }
-				previousResourceBtn = (
-                    <button className="btn btn-primary" disabled={isFirstResource}
-                            onClick={this.gotoItemDetails.bind(this, prevResource)}>
-                        <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
-                    </button>
-                );
-                nextResourceBtn = (
-                    <button className="btn btn-primary" disabled={isLastHit}
-                            onClick={this.gotoItemDetails.bind(this, nextResource)}>
-                        Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
-                    </button>
-                );
-                backToSearchBtn = (
-                    <button className="btn btn-primary"
-                            onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
-                        Back to results
-                    </button>
-                );
+			}
+			console.debug(this.props.params)
+			if(this.props.params.bodyClass !== 'noHeader') {
+				resourceListPagingButtons = this.renderResultListPagingButtons();
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
-
 				//project modal
 				if(this.state.showProjectModal) {
 					projectModal = (
@@ -967,55 +1031,18 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//make this pretty & nice and work with awesome LD later on
-			if(1 === 1) {
-				ldResourceViewer = (
-					<FlexBox title="Linked Data">
-						<LDResourceViewer
-							resourceId={this.state.itemData.resourceId}
-							collectionConfig={this.state.collectionConfig}
-							onOutput={this.onComponentOutput.bind(this)}
-						/>
-					</FlexBox>
-				)
+			ldResourceViewer = (
+				<FlexBox title="Linked Data">
+					<LDResourceViewer
+						resourceId={this.state.itemData.resourceId}
+						collectionConfig={this.state.collectionConfig}
+						onOutput={this.onComponentOutput.bind(this)}
+					/>
+				</FlexBox>
+			)
 
-				const exploreFields = {};
-				this.state.collectionConfig.getKeywordFields().forEach((kw) => {
-					const values = this.getFieldValues(kw);
-					if(values) {
-						exploreFields[kw] = values;
-					}
-				})
-				exploreBlock = (
-					<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
-						<h3>Find related content based on these properties</h3>
-						<div className="property-list">
-							{
-								Object.keys(exploreFields).map(kw => {
-
-									//make nice buttons for each available value for the current keyword
-									const fieldValues = exploreFields[kw].map(value => {
-										const entity = {field : kw, value : value}
-										return (
-											<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
-												{entity.value}
-											</div>
-										)
-									})
-
-									//then return a block with a pretty field title + a column of buttons for each value
-									return (
-										<div>
-											<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
-											{fieldValues}
-										</div>
-									)
-
-								})
-							}
-						</div>
-					</div>
-				)
-			}
+			//render the exploration block
+			exploreBlock = this.renderExploreBlock();
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1030,13 +1057,7 @@ class ItemDetailsRecipe extends React.Component {
 							&nbsp;
 							{resourceAnnotationBtn}
                             &nbsp;
-                            <span className="br__resource-paging">
-                                {previousResourceBtn}
-                                &nbsp;
-                                {nextResourceBtn}
-                                &nbsp;
-                                {backToSearchBtn}
-                            </span>
+                            {resourceListPagingButtons}
 							<br/>
 							{mediaPanel}
 							<br/>
