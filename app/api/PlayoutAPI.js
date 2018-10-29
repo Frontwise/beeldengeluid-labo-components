@@ -12,10 +12,8 @@ const PlayoutAPI = {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
 				if(xhr.status == 200) {
 					var resp = JSON.parse(xhr.responseText);
-					console.debug(resp);
 					callback(true, desiredState);
 				} else {
-					console.debug('no dice', xhr.responseText);
 					callback(false, desiredState);
 				}
 			}

@@ -92,9 +92,7 @@ class FlexPlayer extends React.Component {
 		const mediaObjects = this.props.mediaObject ? [this.props.mediaObject] : this.props.mediaObjects;
 		mediaObjects.forEach(mo => {
 			AppAnnotationStore.bind(
-				AnnotationUtil.removeSourceUrlParams(
-					mo.url
-				),
+				mo.assetId,
 				this.onChange.bind(this)
 			);
 		});
@@ -122,7 +120,7 @@ class FlexPlayer extends React.Component {
 			{activeAnnotation : annotation},
 			() => {
 				AppAnnotationStore.getMediaObjectAnnotations(
-					this.state.currentMediaObject.url,
+					this.state.currentMediaObject.assetId,
 					this.props.user,
 					this.props.project,
 					this.onLoadAnnotations.bind(this)
@@ -137,7 +135,7 @@ class FlexPlayer extends React.Component {
 		if(annotationList) {
 			//get the annotation on the media object level (there should be only one per user!)
 			mediaObjectAnnotation = annotationList.filter((a) => {
-				return a.target.source === this.state.currentMediaObject.url && a.target.selector == null;
+				return a.target.source === this.state.currentMediaObject.assetId && a.target.selector == null;
 			});
 			mediaObjectAnnotation = mediaObjectAnnotation.length > 0 ? mediaObjectAnnotation[0] : null;
 		}
@@ -478,9 +476,9 @@ class FlexPlayer extends React.Component {
 	playAnnotation(annotation) {
 		if(annotation && annotation.target) {
 			//TODO make sure to check the mimeType and also add support for images/spatial targets!!
-			if(annotation.target.source == AnnotationUtil.removeSourceUrlParams(this.state.currentMediaObject.url)) {
+			if(annotation.target.source == this.state.currentMediaObject.assetId) {
 				this.setActiveAnnotation(annotation);
-				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation);
+				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation.target);
 				if(frag) {
 					this.state.playerAPI.setActiveSegment(frag, true, true);
 				} else {

@@ -69,10 +69,12 @@ const AnnotationAPI = {
 		}
 	},
 
-	getFilteredAnnotations : function(userId, filters, callback, offset = 0, size = 250, sort = null, dateRange = null) {
+	getFilteredAnnotations : function(userId, filters, not_filters, callback,
+			offset = 0, size = 250, sort = null, dateRange = null) {
 		let url = _config.ANNOTATION_API_BASE + '/annotations/filter';
 		const params = {
 			filters : filters,
+			not_filters : not_filters,
 			offset : offset,
 			size : size,
 			sort : sort,
@@ -91,7 +93,7 @@ const AnnotationAPI = {
 		}
 		xhr.open("POST", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(params));
+		xhr.send(JSON.stringify(params)); //all params with empty values are removed from the params with stringify...
 	},
 
 	getBookmarks : function(userId, projectId, callback) {

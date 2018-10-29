@@ -20,6 +20,7 @@ class SessionSaver extends React.Component {
     AnnotationAPI.getFilteredAnnotations(
       this.props.user.id,
       filter,
+      null, //not_filters
       this.onLoadBookmarkAnnotations.bind(this)
     );
   }

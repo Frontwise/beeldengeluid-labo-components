@@ -266,10 +266,12 @@ class AnnotationTable extends React.PureComponent {
             //populate the deletion list required for the annotation API
             const deletionList = []
             annotationBodies.forEach(body => {
-                deletionList.push({
-                    annotationId : body.parentAnnotationId,
-                    type : 'body', // delete a body or a target,
-                    partId : body.annotationId,
+                body.bodyObjects.forEach(annotationBody => {
+                    deletionList.push({
+                        annotationId : annotationBody.parentAnnotationId,
+                        type : 'body',
+                        partId : annotationBody.annotationId
+                    })
                 })
             })
 
