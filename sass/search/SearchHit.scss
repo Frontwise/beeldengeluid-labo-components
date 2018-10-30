@@ -9,6 +9,13 @@
 	.bg__sh__select {
 		@include checkbox();
 	}
+	.bg__sh__bookmarked {
+	    background-color: #468dcb;
+		border: 1px solid #dedede;
+		color: white;
+		float: left;
+		padding: 9px 12px;
+	}
 	.bg__search-snippet {
 		margin: 5px;
 		.bg__ss__fragment {
@@ -30,5 +37,8 @@
 		border-right: 1px solid $highlight-color;
 		margin: 5px;
 		padding: $default-margin;
+	}
+	.savedToGroupToolTip {
+		padding-left: 16px;
 	}
 }

@@ -4,6 +4,7 @@ import ComponentUtil from '../../util/ComponentUtil';
 import SearchSnippet from './SearchSnippet';
 import ItemDetails from './ItemDetails';
 import FlexModal from '../FlexModal';
+import ReactTooltip from 'react-tooltip';
 
 class SearchHit extends React.Component {
 	constructor(props) {
@@ -45,6 +46,18 @@ class SearchHit extends React.Component {
 			})
 		}
 	}
+
+    renderToolTipContent() {
+        let groupList = (this.props.bookmarked && this.props.bookmarked.groups)
+            ? "<h5><u>For active project saved in group(s):</u></h5><ul class='savedToGroupToolTip'>"
+            : '';
+        (this.props.bookmarked && this.props.bookmarked.groups)
+            ? this.props.bookmarked.groups.map(
+            group => groupList += group.label ? "<li>" + group.label + "</li>" : ''
+        )
+            : '';
+        return groupList + '</ul>';
+    }
 
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
@@ -88,6 +101,18 @@ class SearchHit extends React.Component {
 			</div>
 		);
 
+        const bookmarkedInfo = this.props.bookmarked ? (
+            <div data-for={'__qb__tt' +this.props.bookmarked.id} data-tip={this.renderToolTipContent(this)}
+                 data-html={true} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+                <i className="fa fa-bookmark"/>
+                <ReactTooltip id={'__qb__tt' + this.props.bookmarked.id}/>
+            </div>
+        ) : (
+            <div style={{opacity: '0'}} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+            <i className="fa fa-bookmark"/>
+        </div>
+        );
+
 		const classNames = [IDUtil.cssClassName('search-hit')];
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
@@ -95,12 +120,13 @@ class SearchHit extends React.Component {
 		return (
 			<div className={classNames.join(' ')}>
 				{checkBox}
-				<div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
+                <div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
 					<button className="btn btn-default fa fa-file-text"
 						onClick={this.quickView.bind(this)} title="Quick view">
 					</button>
 				</div>
-				<div onClick={this.gotoItemDetails.bind(this, result)}>
+                {bookmarkedInfo}
+                <div onClick={this.gotoItemDetails.bind(this, result)}>
 					<SearchSnippet
 						data={snippet}
 						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}

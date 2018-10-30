@@ -319,6 +319,7 @@ class SingleSearchRecipe extends React.Component {
 
 	onProjectChanged(project) {
 		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+        this.saveBookmarksToLocalStorage();
 		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
 			if(this.state.awaitingProcess) {
 				switch(this.state.awaitingProcess) {
@@ -381,7 +382,18 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
+    saveBookmarksToLocalStorage() {
+        this.state.activeProject.id ?
+            AnnotationAPI.getBookmarks(
+                this.props.user.id,
+                this.state.activeProject.id,
+                data => ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+            ) :
+            false;
+    }
+
 	onSaveBookmarks(data) {
+	    this.saveBookmarksToLocalStorage();
 		this.setState({
 			selectedRows : {},
 			allRowsSelected : false,
@@ -447,6 +459,7 @@ class SingleSearchRecipe extends React.Component {
 		let sortButtons = null;
 		let actionButtons = null;
         const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
         const selectedSearchHitsInStorage = null;
         let bookmarkingContainer = null;
 
@@ -650,6 +663,7 @@ class SingleSearchRecipe extends React.Component {
                             <SearchHit
                                 key={'saved__' + index}
                                 result={result}
+                                bookmarked={false}
                                 searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
                                 dateField={
                                     this.state.currentOutput.query.dateRange ?
@@ -702,11 +716,13 @@ class SingleSearchRecipe extends React.Component {
 
 				//populate the list of search results
 				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
+                    let bookmarked = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : false;
 					return (
 
 						<SearchHit
 							key={'__' + index}
 							result={result}
+                            bookmarked={bookmarked}
 							searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
 							dateField={
 								this.state.currentOutput.query.dateRange ?
