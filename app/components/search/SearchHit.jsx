@@ -94,8 +94,9 @@ class SearchHit extends React.Component {
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
-        const visitedLink = (visitedItems && visitedItems.find(item => item === this.props.result._id))
-            ? 'visitedItem' : '';
+		if(visitedItems && visitedItems.find(item => item === this.props.result._id)) {
+            classNames.push('visitedItem')
+		}
 
 		return (
             <div className={classNames.join(' ')}>
@@ -106,7 +107,7 @@ class SearchHit extends React.Component {
                     </button>
                 </div>
                 <div onClick={this.gotoItemDetails.bind(this, result)}>
-                    <div className={visitedLink} onClick={this.gotoItemDetails.bind(this, result)}>
+                    <div onClick={this.gotoItemDetails.bind(this, result)}>
                         <SearchSnippet
                             data={snippet}
                             collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
