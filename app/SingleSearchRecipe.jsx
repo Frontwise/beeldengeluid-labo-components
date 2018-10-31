@@ -155,7 +155,8 @@ class SingleSearchRecipe extends React.Component {
 				currentOutput : null,
                 showBookmarkedItems : false
 			},
-			this.hideModalAndChangeHistory(data)
+			this.hideModalAndChangeHistory(data),
+		    ComponentUtil.removeJSONByKeyInLocalStorage('visitedHits')
 		);
 		} else if(componentClass === 'SearchHit') {
 			if(data) {
