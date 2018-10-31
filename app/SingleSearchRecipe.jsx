@@ -78,7 +78,6 @@ class SingleSearchRecipe extends React.Component {
 			if(this.props.params.queryId === 'cache') {
 				//if the query should be taken from cache, load from there
 				initialQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
-				console.debug(initialQuery)
 				collectionId = initialQuery ? initialQuery.collectionId : null;
 			} else if (this.props.params.queryId.indexOf('__') !== -1 && this.state.activeProject) {
 				loadingFromWorkSpace = true;
@@ -104,7 +103,20 @@ class SingleSearchRecipe extends React.Component {
 		if(!loadingFromWorkSpace) {
 			this.onReloadQueryData(collectionId, initialQuery);
 		}
+		//always refresh the saved bookmarks on load, since they could have been updated in
+		//either the workspace or the resource viewer
+		this.saveBookmarksToLocalStorage();
 	}
+
+	saveBookmarksToLocalStorage() {
+        this.state.activeProject.id ?
+            AnnotationAPI.getBookmarks(
+                this.props.user.id,
+                this.state.activeProject.id,
+                data => ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+            ) :
+            false;
+    }
 
 	onReloadQueryData(collectionId, initialQuery) {
 		//load the collection config and finally
@@ -319,6 +331,7 @@ class SingleSearchRecipe extends React.Component {
 
 	onProjectChanged(project) {
 		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+        this.saveBookmarksToLocalStorage();
 		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
 			if(this.state.awaitingProcess) {
 				switch(this.state.awaitingProcess) {
@@ -382,6 +395,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	onSaveBookmarks(data) {
+	    this.saveBookmarksToLocalStorage();
 		this.setState({
 			selectedRows : {},
 			allRowsSelected : false,
@@ -447,6 +461,7 @@ class SingleSearchRecipe extends React.Component {
 		let sortButtons = null;
 		let actionButtons = null;
         const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
         const selectedSearchHitsInStorage = null;
         let bookmarkingContainer = null;
 
@@ -650,6 +665,7 @@ class SingleSearchRecipe extends React.Component {
                             <SearchHit
                                 key={'saved__' + index}
                                 result={result}
+                                bookmarked={null}
                                 searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
                                 dateField={
                                     this.state.currentOutput.query.dateRange ?
@@ -702,11 +718,13 @@ class SingleSearchRecipe extends React.Component {
 
 				//populate the list of search results
 				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
+                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
 					return (
 
 						<SearchHit
 							key={'__' + index}
 							result={result}
+                            bookmark={bookmark}
 							searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
 							dateField={
 								this.state.currentOutput.query.dateRange ?
