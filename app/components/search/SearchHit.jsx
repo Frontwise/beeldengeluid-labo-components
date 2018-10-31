@@ -48,15 +48,21 @@ class SearchHit extends React.Component {
 	}
 
     renderToolTipContent() {
-        let groupList = (this.props.bookmarked && this.props.bookmarked.groups)
-            ? "<h5><u>For active project saved in group(s):</u></h5><ul class='savedToGroupToolTip'>"
-            : '';
-        (this.props.bookmarked && this.props.bookmarked.groups)
-            ? this.props.bookmarked.groups.map(
-            group => groupList += group.label ? "<li>" + group.label + "</li>" : ''
-        )
-            : '';
-        return groupList + '</ul>';
+    	if(!this.props.bookmark) {
+    		return null;
+    	}
+    	let html = ''
+    	if (this.props.bookmark.groups && this.props.bookmark.groups.length > 0) {
+    		html += '<h5><u>Bookmark group(s)</u>:</h5><ul>';
+    		html += this.props.bookmark.groups.map(
+         	   group => group.label ? "<li>" + group.label + "</li>" : ''
+        	).join('')
+        	html += '</ul>';
+    	}
+    	if(this.props.bookmark.annotations) {
+    		html += '<h5><u>Number of annotations</u>: '+this.props.bookmark.annotations.length+'</h5>';
+    	}
+        return html;
     }
 
 	render() {
@@ -66,6 +72,7 @@ class SearchHit extends React.Component {
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
 		const modalID = this.safeModalId(result.resourceId);
 		let modal = null;
+		let bookmarkIcon = null;
 
 		if(this.state.showModal && this.state.previewMode) {
 			modal = (
@@ -101,17 +108,22 @@ class SearchHit extends React.Component {
 			</div>
 		);
 
-        const bookmarkedInfo = this.props.bookmarked ? (
-            <div data-for={'__qb__tt' +this.props.bookmarked.id} data-tip={this.renderToolTipContent(this)}
-                 data-html={true} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
-                <i className="fa fa-bookmark"/>
-                <ReactTooltip id={'__qb__tt' + this.props.bookmarked.id}/>
-            </div>
-        ) : (
-            <div style={{opacity: '0'}} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
-            <i className="fa fa-bookmark"/>
-        </div>
-        );
+		//draw an icon with tooltip if this item was bookmarked
+		if(this.props.bookmark) {
+			bookmarkIcon = (
+	            <div data-for={'__qb__tt' +this.props.bookmark.id} data-tip={this.renderToolTipContent(this)}
+	                 data-html={true} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+	                <i className="fa fa-bookmark"/>
+	                <ReactTooltip id={'__qb__tt' + this.props.bookmark.id}/>
+	            </div>
+	        )
+		} else {
+			bookmarkIcon = (
+            	<div style={{opacity: '0'}} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+					<i className="fa fa-bookmark"/>
+				</div>
+        	)
+		}
 
 		const classNames = [IDUtil.cssClassName('search-hit')];
 		if(snippet.type === 'media_fragment') {
@@ -125,7 +137,7 @@ class SearchHit extends React.Component {
 						onClick={this.quickView.bind(this)} title="Quick view">
 					</button>
 				</div>
-                {bookmarkedInfo}
+                {bookmarkIcon}
                 <div onClick={this.gotoItemDetails.bind(this, result)}>
 					<SearchSnippet
 						data={snippet}
