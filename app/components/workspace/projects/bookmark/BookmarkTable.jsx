@@ -1,9 +1,7 @@
-import ProjectAPI from '../../../../api/ProjectAPI';
 import AnnotationAPI from '../../../../api/AnnotationAPI';
 
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
-//import BookmarkUtil from '../../../../util/BookmarkUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
@@ -245,30 +243,26 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
-        let collectionInfo = null;
         const sorted = bookmarks;
 
         // Enhance the bookmarks with a formatted date to allow sorting.
         sorted.map((item) => {
-            collectionInfo = CollectionUtil.generateCollectionConfig(
-               this.props.user.id,
-               this.props.user.name,
-               item.object.dataset,
-               config => {
-                  item.object.formattedDate = config.getInitialDate(item.object.date) || null;
-               },
-               true
-           );
+            const collectionClass = CollectionUtil.getCollectionClass(this.props.user.id, this.props.user.name, item.object.dataset, true);
+            if(collectionClass) {
+                item.object.formattedDate = collectionClass.prototype.getInitialDate(item.object.date)
+            }
         });
 
         const getFirst = (a, empty)=>(
             a.length > 0 ? a[0] : empty
         );
-        const sortOnNull = (order, a,b) => {
-            if(order === 'newest'){
-                return (a.object.formattedDate===null)-(b.object.formattedDate===null) || -(a.object.formattedDate>b.object.formattedDate)||+(a.object.formattedDate<b.object.formattedDate);
+        const sortOnNull = (order, a, b) => {
+            if (order === 'newest') {
+                return (a.object.formattedDate === null) - (b.object.formattedDate === null)
+                    || -(a.object.formattedDate > b.object.formattedDate) || +(a.object.formattedDate < b.object.formattedDate);
             }
-            return (a.object.formattedDate ===null)-(b.object.formattedDate===null) || +(a.object.formattedDate>b.object.formattedDate)||-(a.object.formattedDate<b.object.formattedDate);
+            return (a.object.formattedDate === null) - (b.object.formattedDate === null)
+                || +(a.object.formattedDate > b.object.formattedDate) || -(a.object.formattedDate < b.object.formattedDate);
         };
 
         switch (field) {
@@ -516,8 +510,8 @@ class BookmarkTable extends React.PureComponent {
                             onView={this.viewBookmark}
                             selected={
                                 this.state.selection.find(
-                                    item => item.resourceId == bookmark.resourceId
-                                ) != undefined
+                                    item => item.resourceId === bookmark.resourceId
+                                ) !== undefined
                             }
                             onSelect={this.selectItem}
                             showSubMediaObject={bookmark.resourceId in this.state.subMediaObject}
