@@ -253,8 +253,8 @@ class BookmarkTable extends React.PureComponent {
             }
         });
 
-        const getFirst = (a, empty)=>(
-            a.length > 0 ? a[0] : empty
+        const getFirst = (a, empty)=> (
+            a && a.length > 0 ? a[0] : empty
         );
         const sortOnNull = (order, a, b) => {
             if (order === 'newest') {
