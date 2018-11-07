@@ -245,7 +245,7 @@ class QueryBuilder extends React.Component {
             	{
 	            	//so involved components know that a new search was done
 	            	searchId: data.searchId,
-
+                    graphType : 'histogram',  // on new search resets graph to histogram.
 	            	//refresh params of the query object
 	            	query : data.query,
 
