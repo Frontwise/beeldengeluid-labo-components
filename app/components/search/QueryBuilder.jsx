@@ -336,7 +336,7 @@ class QueryBuilder extends React.Component {
             if (this.props.header) {
                 heading = (<div>
                         <h3>Searching in :&nbsp;{currentCollectionTitle}</h3>
-                        <h4>Total amount of records in this collection: {this.state.currentCollectionHits}</h4>
+                        <h4>Total number of records in this collection: {this.state.currentCollectionHits}</h4>
                     </div>
                 )
             }
