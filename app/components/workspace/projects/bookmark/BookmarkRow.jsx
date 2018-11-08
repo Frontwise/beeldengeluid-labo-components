@@ -180,9 +180,9 @@ class BookmarkRow extends React.PureComponent {
         let resourceDate = null;
         if(bookmark.object.date) {
             if(bookmark.object.date.match(/^\d/)) {
-                resourceDate = bookmark.object.date.substring(0, 10);
+                resourceDate = bookmark.object.date.replace( /[^0-9-]/g, '' ).substring(0, 10);
             } else {
-                resourceDate = bookmark.object.date
+                resourceDate = bookmark.object.date.replace( /[^0-9-]/g, '' );
             }
         }
         return (
