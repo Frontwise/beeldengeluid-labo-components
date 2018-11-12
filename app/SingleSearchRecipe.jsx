@@ -694,7 +694,7 @@ class SingleSearchRecipe extends React.Component {
                         type="button"
                         className="btn btn-primary"
                         onClick={this.saveQuery.bind(this)}
-                        title="Save current query to project">
+                        title="Save current query to the active project">
                         &nbsp;
                         <i className="fa fa-save" style={{color: 'white'}}/>
                         &nbsp;
@@ -793,7 +793,7 @@ class SingleSearchRecipe extends React.Component {
 						{queryModal}
 						{bookmarkModal}
 						{searchComponent}
-                        {resultList}
+            {resultList}
 					</div>
 				</div>
 
