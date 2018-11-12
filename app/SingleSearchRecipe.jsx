@@ -158,18 +158,18 @@ class SingleSearchRecipe extends React.Component {
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'QueryBuilder') {
 			this.onSearched(data);
-		} else if(componentClass === 'CollectionSelector') {
-			//set the default query for the selected collection; creates a new query builder
-			this.setState({
-				collectionId : data.collectionId,
-				collectionConfig : data,
-				initialQuery : QueryModel.ensureQuery({size : this.state.pageSize}, data),
-				currentOutput : null,
-                showBookmarkedItems : false
-			},
-			this.hideModalAndChangeHistory(data)
-		);
-		} else if(componentClass === 'SearchHit') {
+        } else if (componentClass === 'CollectionSelector') {
+            //set the default query for the selected collection; creates a new query builder
+            this.setState({
+                    collectionId: data.collectionId,
+                    collectionConfig: data,
+                    initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, data),
+                    currentOutput: null,
+                    showBookmarkedItems: false
+                },
+                this.hideModalAndChangeHistory(data)
+            );
+        } else if(componentClass === 'SearchHit') {
 			if(data) {
 				const selectedRows = this.state.selectedRows;
 				if(data.selected) {

@@ -22,7 +22,8 @@ class SearchHit extends React.Component {
 	//this function works with search snippet data (consulted the related config.getResultSnippetData())
 	gotoItemDetails(result, e) {
 		if(this.props.itemDetailsPath && result.resourceId) {
-			FlexRouter.gotoItemDetails(this.props.itemDetailsPath, result, this.props.searchTerm);
+            ComponentUtil.pushItemToLocalStorage('visitedHits', result.resourceId);
+            FlexRouter.gotoItemDetails(this.props.itemDetailsPath, result, this.props.searchTerm);
 		} else {
 			this.setState({showModal: true})
 		}
@@ -68,6 +69,7 @@ class SearchHit extends React.Component {
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
 		const modalID = this.safeModalId(result.resourceId);
@@ -129,6 +131,10 @@ class SearchHit extends React.Component {
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
+		if(visitedItems && visitedItems.find(item => item === this.props.result._id)) {
+            classNames.push('visitedItem')
+		}
+
 		return (
 			<div className={classNames.join(' ')}>
 				{checkBox}
