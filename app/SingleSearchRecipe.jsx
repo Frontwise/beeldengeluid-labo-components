@@ -62,8 +62,6 @@ class SingleSearchRecipe extends React.Component {
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
-        // Remove localstorage bookmarks when the page is reloaded.
-		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
 
 		window.onscroll = () => {this.afterRenderingHits()};
 
@@ -107,7 +105,7 @@ class SingleSearchRecipe extends React.Component {
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
 	}
-
+    // current bookmarks per project
 	saveBookmarksToLocalStorage() {
         this.state.activeProject && this.state.activeProject.id ?
             AnnotationAPI.getBookmarks(
@@ -344,7 +342,7 @@ class SingleSearchRecipe extends React.Component {
 
 	//this will first check if a project was selected. Then either bookmarks or opens the project selector first
 	bookmark() {
-		if(this.state.activeProject == null) {
+		if(this.state.activeProject === null) {
 			this.setState({
 				showProjectModal : true,
 				awaitingProcess : 'bookmark',
@@ -354,7 +352,6 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	//this will actually save the selection to the workspace API
 	selectBookmarkGroup() {
 		this.setState({
 			showBookmarkModal : true,
@@ -364,20 +361,17 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	//finally after a bookmark group is selected, save the bookmark
+    //this will actually save the selection to the workspace API
+    //finally after a bookmark group is selected, save the bookmark
 	bookmarkToGroupInProject(annotation) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-			//concatenate the
-			//const targets = annotation.target.concat(this.state.currentOutput.results
-            const targets = annotation.target.concat(selectedRows
 
-				.filter((result) => this.state.selectedRows[result._id]) //only include selected resources
-				.map((result) => AnnotationUtil.generateResourceLevelTarget(
+        ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
+            const targets = annotation.target
+                .concat(selectedRows.map((result) => AnnotationUtil.generateResourceLevelTarget(
 					this.state.collectionConfig.collectionId,
 					result._id
 				), this));
-
 			const temp = {};
 			const dedupedTargets = [];
 			targets.forEach((t) => {
@@ -639,15 +633,13 @@ class SingleSearchRecipe extends React.Component {
                 );
                 let selectedItems = null;
                 let selectedSearchHits = null;
-				if(Object.keys(this.state.selectedRows).length > 0) {
-				    const nrOfSelectedItems = Object.keys(this.state.selectedRows).length;
-
+				if(storedSelectedRows && storedSelectedRows.length > 0) {
                     selectedItems = (
                             <div className="dropdown bookmark-dropdown-menu">
                                 <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
                                         data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
-                                    <i className="fa fa-bookmark" style={{color: 'white'}} />{nrOfSelectedItems}
+                                    <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
                                 </button>
                                 <div className="dropdown-menu" aria-labelledby="dropdownMenu2">
                                     <button className="dropdown-item" type="button"
@@ -661,6 +653,8 @@ class SingleSearchRecipe extends React.Component {
                     actions.push(selectedItems);
                     // using the localstorage items
                     selectedSearchHits = storedSelectedRows ? storedSelectedRows.map((result, index) => {
+                        const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
+
                         return (
                             <SearchHit
                                 key={'saved__' + index}
@@ -673,7 +667,7 @@ class SingleSearchRecipe extends React.Component {
                                 } //for displaying the right date field in the hits
                                 collectionConfig={this.state.collectionConfig}
                                 itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-                                isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
+                                isSelected={isSelectedItem || false}
                                 onOutput={this.onComponentOutput.bind(this)}/>
                         )
                     }, this) : null;
@@ -719,6 +713,7 @@ class SingleSearchRecipe extends React.Component {
 				//populate the list of search results
 				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
                     const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
+                    const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
 					return (
 
 						<SearchHit
@@ -732,7 +727,7 @@ class SingleSearchRecipe extends React.Component {
 							} //for displaying the right date field in the hits
 							collectionConfig={this.state.collectionConfig}
 							itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-							isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
+							isSelected={isSelectedItem || false} //is the result selected. False added to make React happy.
 							onOutput={this.onComponentOutput.bind(this)}/>
 					)
 				}, this) : false;
