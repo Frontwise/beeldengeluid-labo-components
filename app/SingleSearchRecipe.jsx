@@ -109,7 +109,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	saveBookmarksToLocalStorage() {
-        this.state.activeProject.id ?
+        this.state.activeProject && this.state.activeProject.id ?
             AnnotationAPI.getBookmarks(
                 this.props.user.id,
                 this.state.activeProject.id,
