@@ -170,12 +170,15 @@ class SingleSearchRecipe extends React.Component {
         } else if(componentClass === 'SearchHit') {
 			if(data) {
 				const selectedRows = this.state.selectedRows;
-				if(data.selected) {
+                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
+
+                if(data.selected) {
 					selectedRows[data.resourceId] = true;
 				} else {
 					delete selectedRows[data.resourceId]
 				}
-                const indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
+                let indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
+				indexOf = indexOf > -1 ? indexOf : selRowsInLocalStorage.findIndex(item => item._id === data.resourceId) ;
                 const itemToStore = this.state.currentOutput.results[indexOf];
 				itemToStore.collectionConfig = this.state.collectionConfig;
                 itemToStore.query = this.state.currentOutput.query;
@@ -316,12 +319,17 @@ class SingleSearchRecipe extends React.Component {
                 }
             });
 		} else {
-			this.state.currentOutput.results.forEach(result => {
+            let itemToStore = null;
+			this.state.currentOutput.results.forEach((result, index) => {
                 rows[result._id] = !this.state.allRowsSelected;
+                itemToStore = result;
                 const isChecked = rowsOnLocalStorage ? rowsOnLocalStorage.findIndex(i => i._id === result._id) : -1;
 
                 if(isChecked === -1) {
-                    ComponentUtil.pushItemToLocalStorage('selectedRows', result);
+                    itemToStore = this.state.currentOutput.results[index];
+                    itemToStore.collectionConfig = this.state.collectionConfig;
+                    itemToStore.query = this.state.currentOutput.query;
+                    ComponentUtil.pushItemToLocalStorage('selectedRows', itemToStore);
                 }
 			});
 		}
