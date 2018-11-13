@@ -34,8 +34,8 @@ class SearchHit extends React.Component {
 		this.setState({showModal: true, previewMode: true});
 	}
 
-	safeModalId(resourceId) {
-		return resourceId.substr(0, resourceId.indexOf('@')) || resourceId + '__modal';
+	safeModalId() {
+		return this.CLASS_PREFIX + Math.floor((Math.random()*10000) + 1) + '__modal';
 	}
 
 	select(e) {
@@ -68,11 +68,10 @@ class SearchHit extends React.Component {
 
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
-		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
-		const modalID = this.safeModalId(result.resourceId);
+		const modalID = this.safeModalId();
 		let modal = null;
 		let bookmarkIcon = null;
 
@@ -90,12 +89,6 @@ class SearchHit extends React.Component {
 			)
 		}
 
-        let selectedCheckbox = false;
-        if(selectedRows !== null) {
-            selectedCheckbox = this.props.result._id in selectedRows;
-        } else {
-            selectedCheckbox = false;
-        }
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
 		const checkBox = (
 			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
@@ -104,7 +97,7 @@ class SearchHit extends React.Component {
                     onChange={this.select.bind(this)}
                     checked={this.props.isSelected}
 					id={'cb__' + modalID}
-                    key={modalID + '__"' + selectedCheckbox + '"'}
+                    key={modalID}
 				/>
 				<label htmlFor={'cb__' + modalID}><span/></label>
 			</div>
