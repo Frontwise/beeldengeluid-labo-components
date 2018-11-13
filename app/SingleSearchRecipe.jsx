@@ -176,7 +176,11 @@ class SingleSearchRecipe extends React.Component {
 					delete selectedRows[data.resourceId]
 				}
                 const indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
-                ComponentUtil.updateLocalStorage('selectedRows', this.state.currentOutput.results[indexOf], data);
+                const itemToStore = this.state.currentOutput.results[indexOf];
+				itemToStore.collectionConfig = this.state.collectionConfig;
+                itemToStore.query = this.state.currentOutput.query;
+                ComponentUtil.updateLocalStorage('selectedRows', itemToStore, data);
+
 				this.setState({
 					selectedRows : selectedRows,
 					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
@@ -369,7 +373,7 @@ class SingleSearchRecipe extends React.Component {
         ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
             const targets = annotation.target
                 .concat(selectedRows.map((result) => AnnotationUtil.generateResourceLevelTarget(
-					this.state.collectionConfig.collectionId,
+					result.collectionConfig.collectionId,
 					result._id
 				), this));
 			const temp = {};
@@ -654,18 +658,17 @@ class SingleSearchRecipe extends React.Component {
                     // using the localstorage items
                     selectedSearchHits = storedSelectedRows ? storedSelectedRows.map((result, index) => {
                         const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
-
                         return (
                             <SearchHit
                                 key={'saved__' + index}
                                 result={result}
                                 bookmarked={null}
-                                searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
+                                searchTerm={result.query.term} //for highlighting the search term
                                 dateField={
-                                    this.state.currentOutput.query.dateRange ?
-                                        this.state.currentOutput.query.dateRange.field : null
+                                    result.query.dateRange ?
+                                        result.query.dateRange.field : null
                                 } //for displaying the right date field in the hits
-                                collectionConfig={this.state.collectionConfig}
+                                collectionConfig={result.collectionConfig}
                                 itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
                                 isSelected={isSelectedItem || false}
                                 onOutput={this.onComponentOutput.bind(this)}/>
