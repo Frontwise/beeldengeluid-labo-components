@@ -63,7 +63,7 @@ class SingleSearchRecipe extends React.Component {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
 
-		window.onscroll = () => {this.afterRenderingHits()};
+		window.onscroll = () => {SingleSearchRecipe.afterRenderingHits()};
 
 		//either loads the collectionID + initial query from
 		//1) localStorage
@@ -187,7 +187,7 @@ class SingleSearchRecipe extends React.Component {
 				this.setState({
 					selectedRows : selectedRows,
 					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
-                    showBookmarkedItems : Object.keys(this.state.selectedRows).length === 0 ? false : this.state.showBookmarkedItems,
+                    showBookmarkedItems : Object.keys(this.state.selectedRows).length > 0 ? this.state.showBookmarkedItems : false,
 				});
 			}
 		} else if(componentClass === 'ProjectSelector') {
@@ -254,22 +254,21 @@ class SingleSearchRecipe extends React.Component {
 					);
 					FlexRouter.gotoSingleSearch('cache')
 				}
-				//this.afterRenderingHits();
 			}
 		);
 	}
 
-	elementInViewport(el) {
+	static elementInViewport(el) {
     	const rect = el.getBoundingClientRect();
     	return (
 			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
 		)
 	}
 
-	afterRenderingHits() {
+	static afterRenderingHits() {
 		const imgDefer = document.getElementsByTagName('img');
 		for (let i=0; i<imgDefer.length; i++) {
-			if(imgDefer[i].getAttribute('data-src') && this.elementInViewport(imgDefer[i])) {
+			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
 				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
 			}
 		}
@@ -400,7 +399,7 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	onSaveBookmarks(data) {
+	onSaveBookmarks() {
 	    this.saveBookmarksToLocalStorage();
 		this.setState({
 			selectedRows : {},
@@ -468,7 +467,6 @@ class SingleSearchRecipe extends React.Component {
 		let actionButtons = null;
         const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
-        const selectedSearchHitsInStorage = null;
         let bookmarkingContainer = null;
 
         if(this.props.recipe.ingredients.collectionSelector) {
@@ -604,35 +602,12 @@ class SingleSearchRecipe extends React.Component {
 						}/>
 				}
 
-				tableActionControls = (
-					<div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
-						onClick={this.toggleRows.bind(this)}>
-						<input type="checkbox" checked={
-							this.state.allRowsSelected ? 'checked' : ''
-						} id={'cb__select-all'}/>
-						<label htmlFor={'cb__select-all'}><span/></label>
-					</div>
-				);
-
-                /*if (this.state.currentOutput.query.sort) {
-                    //draw the sorting buttons
-                    sortButtons = <Sorting
-                        sortResults={this.sortResults.bind(this)}
-                        sortParams={this.state.currentOutput.query.sort}
-                        collectionConfig={this.state.collectionConfig}
-                        dateField={
-                            this.state.currentOutput.query.dateRange ?
-                                this.state.currentOutput.query.dateRange.field : null
-                        }/>
-                }*/
-
-
 				//draw the action buttons
 				const actions = [],
                       currentSelectedRows = Object.keys(this.state.selectedRows),
                       currentPage = this.state.currentOutput.results,
                       allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id)),
-                      isChecked = allChecked.findIndex(item => item === -1) === -1 ? true : false;
+                      isChecked = allChecked.findIndex(item => item === -1) === -1;
 
                 tableActionControls = (
                     <div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
@@ -648,12 +623,12 @@ class SingleSearchRecipe extends React.Component {
 				if(storedSelectedRows && storedSelectedRows.length > 0) {
                     selectedItems = (
                             <div className="dropdown bookmark-dropdown-menu">
-                                <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                                <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
                                         data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
                                     <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
                                 </button>
-                                <div className="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
                                     <button className="dropdown-item" type="button"
                                             onClick={this.showBookmarkedItems.bind(this)}>{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)</button>
                                     <button className="dropdown-item" type="button" onClick={this.bookmark.bind(this)}>Bookmark selection</button>
@@ -663,7 +638,6 @@ class SingleSearchRecipe extends React.Component {
 
                     );
                     actions.push(selectedItems);
-                    // using the localstorage items
                     selectedSearchHits = storedSelectedRows ? storedSelectedRows.map((result, index) => {
                         const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
                         return (
