@@ -169,25 +169,16 @@ class SingleSearchRecipe extends React.Component {
             );
         } else if(componentClass === 'SearchHit') {
 			if(data) {
-				const selectedRows = this.state.selectedRows;
                 const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
-
-                if(data.selected) {
-					selectedRows[data.resourceId] = true;
-				} else {
-					delete selectedRows[data.resourceId]
-				}
                 let indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
 				indexOf = indexOf > -1 ? indexOf : selRowsInLocalStorage.findIndex(item => item._id === data.resourceId) ;
                 const itemToStore = this.state.currentOutput.results[indexOf];
 				itemToStore.collectionConfig = this.state.collectionConfig;
                 itemToStore.query = this.state.currentOutput.query;
                 ComponentUtil.updateLocalStorage('selectedRows', itemToStore, data);
-
 				this.setState({
-					selectedRows : selectedRows,
 					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
-                    showBookmarkedItems : Object.keys(this.state.selectedRows).length > 0 ? this.state.showBookmarkedItems : false,
+                    showBookmarkedItems : selRowsInLocalStorage && selRowsInLocalStorage.length > 1 ? this.state.showBookmarkedItems : false,
 				});
 			}
 		} else if(componentClass === 'ProjectSelector') {
@@ -638,34 +629,42 @@ class SingleSearchRecipe extends React.Component {
 
                     );
                     actions.push(selectedItems);
-                    selectedSearchHits = storedSelectedRows ? storedSelectedRows.map((result, index) => {
-                        const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
-                        return (
-                            <SearchHit
-                                key={'saved__' + index}
-                                result={result}
-                                bookmarked={null}
-                                searchTerm={result.query.term} //for highlighting the search term
-                                dateField={
-                                    result.query.dateRange ?
-                                        result.query.dateRange.field : null
-                                } //for displaying the right date field in the hits
-                                collectionConfig={result.collectionConfig}
-                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-                                isSelected={isSelectedItem || false}
-                                onOutput={this.onComponentOutput.bind(this)}/>
-                        )
-                    }, this) : null;
-                    bookmarkingContainer = this.state.showBookmarkedItems ? (
-                        <div className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
-                            <h4 className={IDUtil.cssClassName('header-selected-items', this.CLASS_PREFIX)}>Selected items
-                                <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
-                            </h4>
-                            <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
-                                {selectedSearchHits}
+
+                    if (storedSelectedRows) {
+                        selectedSearchHits = storedSelectedRows.map((result, index) => {
+                            const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
+                            return (
+                                <SearchHit
+                                    key={'saved__' + index}
+                                    result={result}
+                                    bookmarked={null}
+                                    searchTerm={result.query.term} //for highlighting the search term
+                                    dateField={
+                                        result.query.dateRange ?
+                                            result.query.dateRange.field : null
+                                    } //for displaying the right date field in the hits
+                                    collectionConfig={result.collectionConfig}
+                                    itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+                                    isSelected={isSelectedItem || false}
+                                    onOutput={this.onComponentOutput.bind(this)}/>
+                            )
+                        }, this);
+                    }
+
+                    if (this.state.showBookmarkedItems) {
+                        bookmarkingContainer = (
+                            <div
+                                className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
+                                <h4 className={IDUtil.cssClassName('header-selected-items', this.CLASS_PREFIX)}>
+                                    Selected items
+                                    <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
+                                </h4>
+                                <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
+                                    {selectedSearchHits}
+                                </div>
                             </div>
-                        </div>
-                    ) : false;
+                        );
+                    }
 				}
                 //always add the save query button
                 actions.push(
@@ -700,7 +699,6 @@ class SingleSearchRecipe extends React.Component {
                     const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
                     const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
 					return (
-
 						<SearchHit
 							key={'__' + index}
 							result={result}
