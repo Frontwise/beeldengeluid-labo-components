@@ -169,7 +169,7 @@ class SingleSearchRecipe extends React.Component {
             );
         } else if(componentClass === 'SearchHit') {
 			if(data) {
-                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
+                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || false;
                 let indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
 				indexOf = indexOf > -1 ? indexOf : selRowsInLocalStorage.findIndex(item => item._id === data.resourceId) ;
                 const itemToStore = this.state.currentOutput.results[indexOf];
