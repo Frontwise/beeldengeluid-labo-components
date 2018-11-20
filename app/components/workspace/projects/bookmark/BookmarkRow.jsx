@@ -75,7 +75,9 @@ class BookmarkRow extends React.PureComponent {
                     {annotations.map(annotation => (
                         <tr>
                             <td className="type bold">
-                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>{AnnotationTranslator(annotation.annotationType)}</Link>
+                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>
+                                    {AnnotationTranslator(annotation.annotationType)}
+                                </Link>
                             </td>
                             <td className="content">
                                 {annotation.text ? annotation.text.substring(0, 200) : null}
@@ -84,7 +86,11 @@ class BookmarkRow extends React.PureComponent {
                             <td className="details">
                                 {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
                                 {annotation.annotationType === 'comment' ? annotation.created : null}
-                                {annotation.url ? <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a> : null}
+                                {annotation.url ?
+                                    <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>
+                                        {annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}
+                                    </a> : null
+                                }
                                 {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
                             </td>
                         </tr>
@@ -180,9 +186,9 @@ class BookmarkRow extends React.PureComponent {
         let resourceDate = null;
         if(bookmark.object.date) {
             if(bookmark.object.date.match(/^\d/)) {
-                resourceDate = bookmark.object.date.replace( /[^0-9-]/g, '' ).substring(0, 10);
+                resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '').substring(0, 10);
             } else {
-                resourceDate = bookmark.object.date.replace( /[^0-9-]/g, '' );
+                resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '');
             }
         }
         return (
@@ -196,7 +202,10 @@ class BookmarkRow extends React.PureComponent {
                             title={'Select this bookmark with resource ID:\n' + bookmark.resourceId}/>
                     </div>
 
-                    <div className="image" title={"Resource ID: " + bookmark.resourceId} onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
+                    <div className="image"
+                        title={"Resource ID: " + bookmark.resourceId} onClick={this.onView}
+                        style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}
+                    />
 
                     <ul className="info">
                         <li className="primary content-title">
