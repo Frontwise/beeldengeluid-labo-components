@@ -236,7 +236,6 @@ class ItemDetailsRecipe extends React.Component {
 		if(itemDetailData && itemDetailData.playableContent) {
 			const mediaObject = itemDetailData.playableContent[index];
 			if(mediaObject) {
-				console.debug('generating annotation target for: ', mediaObject)
 				const annotation = AnnotationUtil.generateW3CEmptyAnnotation(
 					this.props.user,
 					this.state.activeProject,

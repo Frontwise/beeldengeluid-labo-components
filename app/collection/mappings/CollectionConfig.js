@@ -296,6 +296,11 @@ class CollectionConfig {
 		return null;
 	}
 
+	// returns the date as a single value to use in sorting.
+	getInitialDate(date) {
+	    return date ? date : null;
+    }
+
 	//if the data has translations within its metadata
 	getPreferredLanguage() {
 		return null;
