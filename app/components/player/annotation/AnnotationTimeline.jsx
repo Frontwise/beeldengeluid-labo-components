@@ -63,10 +63,12 @@ class AnnotationTimeline extends React.Component {
 		if(this.props.annotations) {
 			const pos = this.props.curPosition;
 			currentAnnotation = this.props.annotations.filter((a, index)=> {
-				if(a.target.selector && a.target.selector.refinedBy) {
-					if(a.target.selector.refinedBy.start < pos && a.target.selector.refinedBy.end > pos) {
-						return true;
-					}
+			    if(a.target){
+				    if(a.target.selector && a.target.selector.refinedBy) {
+					    if(a.target.selector.refinedBy.start < pos && a.target.selector.refinedBy.end > pos) {
+						    return true;
+					    }
+				    }
 				}
 			})
 		}

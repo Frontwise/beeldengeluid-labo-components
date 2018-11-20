@@ -23,14 +23,14 @@ class CollectionConfig {
 		this.collectionInfo = collectionInfo; //CKAN metadata (null for personal collections or outside of CLARIAH)
 
 		this.docType = null;
-		this.stringFields = null;
-		this.textFields = null;
-		this.dateFields = null;
-		this.nonAnalyzedFields = null;
-		this.keywordFields = null;
-		this.longFields = null;
-		this.doubleFields = null;
-		this.nestedFields = null;
+		this.stringFields = [];
+		this.textFields = [];
+		this.dateFields = [];
+		this.nonAnalyzedFields = [];
+		this.keywordFields = [];
+		this.longFields = [];
+		this.doubleFields = [];
+		this.nestedFields = [];
 
 		if(collectionStats && collectionStats.collection_statistics) {
 			let temp = null;
@@ -55,7 +55,10 @@ class CollectionConfig {
 
 				//merged in getNonAnalyzedFields()
 				this.nonAnalyzedFields = temp.fields['not_analyzed'];
-				this.keywordFields = temp.fields['keyword'];
+
+                if(temp.fields['keyword']){
+                    this.keywordFields = temp.fields['keyword'];
+                }
 
 				this.dateFields = temp.fields['date'];
 				this.longFields = temp.fields['long'];
