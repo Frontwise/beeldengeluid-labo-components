@@ -245,7 +245,7 @@ class QueryBuilder extends React.Component {
             	{
 	            	//so involved components know that a new search was done
 	            	searchId: data.searchId,
-
+                    graphType : 'histogram',  // on new search resets graph to histogram.
 	            	//refresh params of the query object
 	            	query : data.query,
 
@@ -336,7 +336,7 @@ class QueryBuilder extends React.Component {
             if (this.props.header) {
                 heading = (<div>
                         <h3>Searching in :&nbsp;{currentCollectionTitle}</h3>
-                        <h4>Total amount of records in this collection: {this.state.currentCollectionHits}</h4>
+                        <h4>Total number of records in this collection: {this.state.currentCollectionHits}</h4>
                     </div>
                 )
             }

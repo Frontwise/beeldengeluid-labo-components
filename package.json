@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "prod": "webpack --mode production",
     "bundle:scss": "scss-bundle -e ./sass/labo-components.scss -d ./dist/labo-components.scss",
-    "prepublish" : "npm run bundle:scss"
+    "prepublish": "npm run bundle:scss"
   },
   "repository": {
     "type": "git",
