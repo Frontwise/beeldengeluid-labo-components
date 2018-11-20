@@ -109,7 +109,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	saveBookmarksToLocalStorage() {
-        this.state.activeProject.id ?
+        this.state.activeProject && this.state.activeProject.id ?
             AnnotationAPI.getBookmarks(
                 this.props.user.id,
                 this.state.activeProject.id,
@@ -158,18 +158,18 @@ class SingleSearchRecipe extends React.Component {
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'QueryBuilder') {
 			this.onSearched(data);
-		} else if(componentClass === 'CollectionSelector') {
-			//set the default query for the selected collection; creates a new query builder
-			this.setState({
-				collectionId : data.collectionId,
-				collectionConfig : data,
-				initialQuery : QueryModel.ensureQuery({size : this.state.pageSize}, data),
-				currentOutput : null,
-                showBookmarkedItems : false
-			},
-			this.hideModalAndChangeHistory(data)
-		);
-		} else if(componentClass === 'SearchHit') {
+        } else if (componentClass === 'CollectionSelector') {
+            //set the default query for the selected collection; creates a new query builder
+            this.setState({
+                    collectionId: data.collectionId,
+                    collectionConfig: data,
+                    initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, data),
+                    currentOutput: null,
+                    showBookmarkedItems: false
+                },
+                this.hideModalAndChangeHistory(data)
+            );
+        } else if(componentClass === 'SearchHit') {
 			if(data) {
 				const selectedRows = this.state.selectedRows;
 				if(data.selected) {
@@ -694,7 +694,7 @@ class SingleSearchRecipe extends React.Component {
                         type="button"
                         className="btn btn-primary"
                         onClick={this.saveQuery.bind(this)}
-                        title="Save current query to project">
+                        title="Save current query to the active project">
                         &nbsp;
                         <i className="fa fa-save" style={{color: 'white'}}/>
                         &nbsp;
@@ -793,7 +793,7 @@ class SingleSearchRecipe extends React.Component {
 						{queryModal}
 						{bookmarkModal}
 						{searchComponent}
-                        {resultList}
+            {resultList}
 					</div>
 				</div>
 

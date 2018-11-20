@@ -54,7 +54,11 @@ const ComponentUtil = {
             obj = [item];
             ComponentUtil.storeJSONInLocalStorage(key, obj)
         } else {
-            currentDataOnStorage.push(item);
+            // if item is not in array then push it.
+            if(!currentDataOnStorage.find(val => val === item)){
+                currentDataOnStorage.push(item);
+            }
+
             ComponentUtil.storeJSONInLocalStorage(key, currentDataOnStorage)
         }
     },
