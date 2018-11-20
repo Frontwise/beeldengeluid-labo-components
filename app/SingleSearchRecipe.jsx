@@ -37,7 +37,7 @@ class SingleSearchRecipe extends React.Component {
 			showBookmarkModal : false, //for the bookmark group selector
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
 			awaitingProcess : null, //which process is awaiting the output of the project selector
-
+            currentOutput: null,
 			collectionId : null,
 
 			//influences the query
@@ -169,6 +169,12 @@ class SingleSearchRecipe extends React.Component {
             );
         } else if(componentClass === 'SearchHit') {
 			if(data) {
+                const selectedRows = this.state.selectedRows;
+                if(data.selected) {
+                    selectedRows[data.resourceId] = true;
+                } else {
+                    delete selectedRows[data.resourceId]
+                }
                 const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || false;
                 let indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
 				indexOf = indexOf > -1 ? indexOf : selRowsInLocalStorage.findIndex(item => item._id === data.resourceId) ;
@@ -177,6 +183,7 @@ class SingleSearchRecipe extends React.Component {
                 itemToStore.query = this.state.currentOutput.query;
                 ComponentUtil.updateLocalStorage('selectedRows', itemToStore, data);
 				this.setState({
+                    selectedRows : selectedRows,
 					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
                     showBookmarkedItems : selRowsInLocalStorage && selRowsInLocalStorage.length > 1 ? this.state.showBookmarkedItems : false,
 				});
@@ -195,13 +202,26 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
+    updateSelectedRows(rows) {
+        const rowsInStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+        const selRows = {};
+        rows.forEach(
+            item => rowsInStorage.filter(obj => {
+                if(obj._id === item._id) {
+                    selRows[item._id] = true;
+                }
+            })
+        );
+        return selRows;
+    }
+
 	//this is updated via the query builder, but it does not update the state.query...
 	//TODO figure out if it's bad to update the state
 	onSearched(data, paging) {
 		const desiredState = {
 			currentOutput: data,
-			allRowsSelected : false,
-            showBookmarkedItems : false
+            showBookmarkedItems : false,
+            allRowsSelected : this.allSelected(ComponentUtil.getJSONFromLocalStorage('selectedRows') || {})
 		};
 		// if search is not the result of paging then clear selectedRows.
         !paging ? desiredState.selectedRows = {} : desiredState;
@@ -225,6 +245,10 @@ class SingleSearchRecipe extends React.Component {
 		} else {
 			this.onLoadPlayoutAccess(true, desiredState);
 		}
+        this.setState({
+            selectedRows : data && data.results ? this.updateSelectedRows(data.results) : {},
+            allSelectedRows: this.allSelected(ComponentUtil.getJSONFromLocalStorage('selectedRows'))
+        })
 	}
 
 	onLoadPlayoutAccess(accessApproved, desiredState) {
@@ -294,6 +318,16 @@ class SingleSearchRecipe extends React.Component {
 	/* ------------------------------------------------------------------------------
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
+    allSelected(storeSelectedRows) {
+        if(!storeSelectedRows) {
+            return false;
+        }
+        const currentPage = this.state.currentOutput && this.state.currentOutput.results ? this.state.currentOutput.results : [];
+        const    allSelected = currentPage.every(itemOnPage => storeSelectedRows.some(j => j._id === itemOnPage._id));
+        this.setState({
+            allRowsSelected : allSelected
+        })
+    }
 
 	toggleRows(e) {
 		e.preventDefault();
@@ -592,20 +626,17 @@ class SingleSearchRecipe extends React.Component {
 								this.state.currentOutput.query.dateRange.field : null
 						}/>
 				}
-
 				//draw the action buttons
-				const actions = [],
-                      currentSelectedRows = Object.keys(this.state.selectedRows),
-                      currentPage = this.state.currentOutput.results,
-                      allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id)),
-                      isChecked = allChecked.findIndex(item => item === -1) === -1;
-
+                const actions = [],
+                    currentSelectedRows = this.state.selectedRows ? Object.keys(this.state.selectedRows) : [],
+                    currentPage = this.state.currentOutput.results,
+                    allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id)),
+                    isChecked = allChecked.findIndex(item => item === -1) === -1;
                 tableActionControls = (
-                    <div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
-                         onClick={this.toggleRows.bind(this)}>
-                        <input type="checkbox" checked={
-                            isChecked ? 'checked' : ''
-                        } id={'cb__select-all'}/>
+                    <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
+                        <input type="checkbox"
+                               checked={isChecked ? 'checked' : ''}
+                               id={'cb__select-all'}/>
                         <label htmlFor={'cb__select-all'}><span/></label>
                     </div>
                 );
@@ -771,10 +802,9 @@ class SingleSearchRecipe extends React.Component {
 						{queryModal}
 						{bookmarkModal}
 						{searchComponent}
-            {resultList}
+                        {resultList}
 					</div>
 				</div>
-
 			</div>
 		);
 	}
