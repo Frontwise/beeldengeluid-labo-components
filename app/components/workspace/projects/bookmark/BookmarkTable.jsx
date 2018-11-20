@@ -243,14 +243,18 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
-        const sorted = bookmarks;
-
+        if(!bookmarks) {
+            return [];
+        }
         // Enhance the bookmarks with a formatted date to allow sorting.
-        sorted.map((item) => {
-            const collectionClass = CollectionUtil.getCollectionClass(this.props.user.id, this.props.user.name, item.object.dataset, true);
+        const sorted = bookmarks.map((item) => {
+            const collectionClass = CollectionUtil.getCollectionClass(
+                this.props.user.id, this.props.user.name, item.object.dataset, true
+            );
             if(collectionClass) {
                 item.object.formattedDate = collectionClass.prototype.getInitialDate(item.object.date)
             }
+            return item
         });
 
         const getFirst = (a, empty)=> (
@@ -470,8 +474,9 @@ class BookmarkTable extends React.PureComponent {
     }
 
     renderResults(renderState) {
-        const annotationTypeFilter = renderState.filter.annotations && !['yes','no'].includes(renderState.filter.annotations) ?
-            renderState.filter.annotations : '';
+        const annotationTypeFilter = renderState.filter.annotations && !['yes','no'].includes(
+            renderState.filter.annotations
+        ) ? renderState.filter.annotations : '';
         return (
             <div>
                 <h2>
@@ -479,7 +484,7 @@ class BookmarkTable extends React.PureComponent {
                         type="checkbox"
                         checked={
                             renderState.visibleItems.length > 0 && renderState.visibleItems.every(item =>
-                                this.state.selection.includes(item.resourceId)
+                                item && this.state.selection.includes(item.resourceId)
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
