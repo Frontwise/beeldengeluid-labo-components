@@ -191,7 +191,7 @@ class ItemDetailsRecipe extends React.Component {
 							collectionConfig : config
 						};
 						//TODO make sure this works for all carriers!!
-						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
+						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {							
 							PlayoutAPI.requestAccess(
 								itemDetailData.playableContent[0].contentServerId,
 								itemDetailData.playableContent[0].contentId,
