@@ -129,9 +129,10 @@ class SearchSnippet extends React.Component {
 				<div  className="media-body">
 					<h4 className="media-heading custom-pointer" title={this.props.data.id}>
 						<span dangerouslySetInnerHTML={this.createMarkup(this.highlightSearchedTerm(title))}></span>
-						{date}
-						&nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}
 					</h4>
+                    <span className="icons-snippet">{date}
+                        &nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}</span>
+                    <br />
 					<span className="snippet_description" dangerouslySetInnerHTML={this.createMarkup(
                         this.highlightSearchedTerm(CollectionUtil.highlightSearchTermInDescription(
                             this.props.data.description,
