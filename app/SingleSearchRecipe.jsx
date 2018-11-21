@@ -184,7 +184,7 @@ class SingleSearchRecipe extends React.Component {
                 ComponentUtil.updateLocalStorage('selectedRows', itemToStore, data);
 				this.setState({
                     selectedRows : selectedRows,
-					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
+					allRowsSelected : data.selected ? this.allSelected(selRowsInLocalStorage) : false,
                     showBookmarkedItems : selRowsInLocalStorage && selRowsInLocalStorage.length > 1 ? this.state.showBookmarkedItems : false,
 				});
 			}
@@ -220,8 +220,7 @@ class SingleSearchRecipe extends React.Component {
 	onSearched(data, paging) {
 		const desiredState = {
 			currentOutput: data,
-            showBookmarkedItems : false,
-            allRowsSelected : this.allSelected(ComponentUtil.getJSONFromLocalStorage('selectedRows') || {})
+            showBookmarkedItems : false
 		};
 		// if search is not the result of paging then clear selectedRows.
         !paging ? desiredState.selectedRows = {} : desiredState;
@@ -331,17 +330,17 @@ class SingleSearchRecipe extends React.Component {
 
 	toggleRows(e) {
 		e.preventDefault();
-		const rows = this.state.selectedRows,
+		let rows = this.state.selectedRows,
               rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
 
         if(this.state.allRowsSelected) {
             this.state.currentOutput.results.forEach(result => {
-                const isChecked = rowsOnLocalStorage.findIndex(i => i._id === result._id);
+                const isChecked = Object.keys(rows).findIndex(i => i === result._id);
                 if(isChecked !== -1) {
-                    ComponentUtil.removeItemInLocalStorage('selectedRows', result);
-                    delete rows[result._id];
+                    ComponentUtil.removeItemInLocalStorage('selectedRows', result._id);
                 }
             });
+            rows = {};
 		} else {
             let itemToStore = null;
 			this.state.currentOutput.results.forEach((result, index) => {
