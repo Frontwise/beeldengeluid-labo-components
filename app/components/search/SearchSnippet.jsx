@@ -26,18 +26,18 @@ class SearchSnippet extends React.Component {
 		if(text === null) {
 		 	return text
 		}
-        let regex = new RegExp(this.stripQuotes(this.props.searchTerm), 'gi');
+        const regex = new RegExp(SearchSnippet.stripQuotes(this.props.searchTerm), 'gi');
         return text.replace(regex, (term) => "<span class='highLightText'>" + term + "</span>");
     }
 
-    stripQuotes(str) {
+    static stripQuotes(str) {
     	if(str.startsWith('"') && str.endsWith('"') && str.length > 2) {
 			return str.substring(1, str.length -1)
 		}
 		return str
     }
 
-    createMarkup(text){
+    static createMarkup(text){
 		return {__html: text}
 	}
 	//possible default fields: posterURL, title, description, tags
@@ -73,7 +73,7 @@ class SearchSnippet extends React.Component {
 
 		//see if there are any tags added to this search result
 		if(this.props.data.tags) {
-			tags = this.props.data.tags.map((t, index) => {
+			tags = this.props.data.tags.map(t => {
 				return (<Classification classification={{label : t}}/>);
 			})
 		}
@@ -81,14 +81,14 @@ class SearchSnippet extends React.Component {
 		//show the user what content can be expected
 		if(this.props.data.mediaTypes) {
 			mediaTypes = this.getMediaTypes().map((mt) => {
-				if(mt == 'video') {
-					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"></span>);
-				} else if(mt == 'audio') {
-					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"></span>);
-				} else if(mt == 'image') {
-					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"></span>);
-				} else if(mt == 'text') {
-					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"></span>);
+				if(mt === 'video') {
+					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"/>);
+				} else if(mt === 'audio') {
+					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"/>);
+				} else if(mt === 'image') {
+					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"/>);
+				} else if(mt === 'text') {
+					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"/>);
  				}
 			});
 
@@ -104,9 +104,9 @@ class SearchSnippet extends React.Component {
 		}
 
 		//if this hit represents a media fragment, show an extra icon (TODO make sure this is not ugly later on)
-		if(this.props.data.type == 'media_fragment') {
+		if(this.props.data.type === 'media_fragment') {
 			fragmentIcon = (
-				<span className={IconUtil.getMimeTypeIcon('fragment', true, true)} title="Media fragment"></span>
+				<span className={IconUtil.getMimeTypeIcon('fragment', true, true)} title="Media fragment"/>
 			);
 
 			if(this.props.data.mediaFragment) {
@@ -128,15 +128,15 @@ class SearchSnippet extends React.Component {
 				</div>
 				<div  className="media-body">
 					<h4 className="media-heading custom-pointer" title={this.props.data.id}>
-						<span dangerouslySetInnerHTML={this.createMarkup(this.highlightSearchedTerm(title))}></span>
+						<span dangerouslySetInnerHTML={SearchSnippet.createMarkup(this.highlightSearchedTerm(title))}/>
 					</h4>
                     <span className="icons-snippet">{date}
                         &nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}</span>
                     <br />
-					<span className="snippet_description" dangerouslySetInnerHTML={this.createMarkup(
+					<span className="snippet_description" dangerouslySetInnerHTML={SearchSnippet.createMarkup(
                         this.highlightSearchedTerm(CollectionUtil.highlightSearchTermInDescription(
                             this.props.data.description,
-                            this.stripQuotes(this.props.searchTerm),
+                            SearchSnippet.stripQuotes(this.props.searchTerm),
                             35
                         ))
 					)} />
