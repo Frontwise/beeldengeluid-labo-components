@@ -73,7 +73,7 @@
 	}
 }
 
-@mixin switchButton($transition-time : 1s, $backColorBtnActive : #468dcb, $backColorBtnInactive :#7aabd6) {
+@mixin switchButton($transition-time : 1s, $backColorBtnActive : #468dcb, $backColorBtnInactive :#7aabd6, $widthBtn:100, $marginLeftBtn: 67) {
 	input.checkbox-toggle {
 		position: absolute;
 		left: -9999px;
@@ -88,6 +88,7 @@
 		user-select: none;
 		font-family: 'helvetica';
 		font-size: 13px;
+		margin: 0;
 	}
 
 	input.checkbox-toggle:checked + label:before {
@@ -104,7 +105,7 @@
 
 	input.checkbox-toggle-round + label {
 		padding: 2px;
-		width: 100px;
+		width: $widthBtn;
 		height: 25px;
 		background-color: #dddddd;
 		border-radius: 5px;
@@ -135,7 +136,7 @@
 	}
 
 	input.checkbox-toggle-round:checked + label:after {
-		margin-left: 67px
+		margin-left: $marginLeftBtn;
 	}
 
 	input.checkbox-toggle-round:checked + label:before {
