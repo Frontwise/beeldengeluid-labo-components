@@ -169,18 +169,30 @@ class SingleSearchRecipe extends React.Component {
             );
         } else if(componentClass === 'SearchHit') {
 			if(data) {
+				//get the selected rows on the current page
                 const selectedRows = this.state.selectedRows;
+
+				//check if the search hit was selected and update the selected rows accordingly
                 if(data.selected) {
                     selectedRows[data.resourceId] = true;
                 } else {
                     delete selectedRows[data.resourceId]
                 }
-                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || false;
+
+				//find the index of the toggled search hit within the current page
                 let indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
+
+				//now fetch which rows were selected in the local storage
+                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || false; //FIXME an array || false is bad!
+
+				//
 				indexOf = indexOf > -1 ? indexOf : selRowsInLocalStorage.findIndex(item => item._id === data.resourceId) ;
+
+
                 const itemToStore = this.state.currentOutput.results[indexOf];
 				itemToStore.collectionConfig = this.state.collectionConfig;
                 itemToStore.query = this.state.currentOutput.query;
+
                 ComponentUtil.updateLocalStorage('selectedRows', itemToStore, data);
 				this.setState({
                     selectedRows : selectedRows,
@@ -330,8 +342,8 @@ class SingleSearchRecipe extends React.Component {
 
 	toggleRows(e) {
 		e.preventDefault();
-		let rows = this.state.selectedRows,
-              rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
+		let rows = this.state.selectedRows;
+    	let rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
 
         if(this.state.allRowsSelected) {
             this.state.currentOutput.results.forEach(result => {
@@ -352,7 +364,7 @@ class SingleSearchRecipe extends React.Component {
                     itemToStore = this.state.currentOutput.results[index];
                     itemToStore.collectionConfig = this.state.collectionConfig;
                     itemToStore.query = this.state.currentOutput.query;
-                    ComponentUtil.pushItemToLocalStorage('selectedRows', itemToStore);
+                    ComponentUtil.pushItemToLocalStorage('selectedRows', itemToStore, 'resourceId');
                 }
 			});
 		}
@@ -476,6 +488,9 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	render() {
+		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
+
 		let chooseCollectionBtn = null; // for changing the collection
 		let collectionModal = null; //modal that holds the collection selector
 		let projectModal = null;
@@ -488,10 +503,13 @@ class SingleSearchRecipe extends React.Component {
 		let tableActionControls = null;
 		let paging = null;
 		let sortButtons = null;
-		let actionButtons = null;
-        const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
         let bookmarkingContainer = null;
+		let searchHits = null;
+
+		//for containing the action buttons
+		const actions = []
+		let actionButtons = null;
+		let bookmarkDropDownMenu = null; //added to action buttons, in case there are active selections
 
         if(this.props.recipe.ingredients.collectionSelector) {
 			//show the button to open the modal
@@ -625,12 +643,12 @@ class SingleSearchRecipe extends React.Component {
 								this.state.currentOutput.query.dateRange.field : null
 						}/>
 				}
-				//draw the action buttons
-                const actions = [],
-                    currentSelectedRows = this.state.selectedRows ? Object.keys(this.state.selectedRows) : [],
-                    currentPage = this.state.currentOutput.results,
-                    allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id)),
-                    isChecked = allChecked.findIndex(item => item === -1) === -1;
+
+				const currentSelectedRows = this.state.selectedRows ? Object.keys(this.state.selectedRows) : []
+				const currentPage = this.state.currentOutput.results;
+                const allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id));
+                const isChecked = allChecked.findIndex(item => item === -1) === -1;
+
                 tableActionControls = (
                     <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
                         <input type="checkbox"
@@ -639,10 +657,12 @@ class SingleSearchRecipe extends React.Component {
                         <label htmlFor={'cb__select-all'}><span/></label>
                     </div>
                 );
-                let selectedItems = null;
-                let selectedSearchHits = null;
+
+				//now render the stuff for bookmarking
 				if(storedSelectedRows && storedSelectedRows.length > 0) {
-                    selectedItems = (
+
+					//render the bookmark dropdown menu
+                    bookmarkDropDownMenu = (
                             <div className="dropdown bookmark-dropdown-menu">
                                 <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
                                         data-toggle="dropdown"
@@ -658,30 +678,30 @@ class SingleSearchRecipe extends React.Component {
                             </div>
 
                     );
-                    actions.push(selectedItems);
+                    actions.push(bookmarkDropDownMenu);
 
-                    if (storedSelectedRows) {
-                        selectedSearchHits = storedSelectedRows.map((result, index) => {
-                            const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
-                            return (
-                                <SearchHit
-                                    key={'saved__' + index}
-                                    result={result}
-                                    bookmarked={null}
-                                    searchTerm={result.query.term} //for highlighting the search term
-                                    dateField={
-                                        result.query.dateRange ?
-                                            result.query.dateRange.field : null
-                                    } //for displaying the right date field in the hits
-                                    collectionConfig={result.collectionConfig}
-                                    itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-                                    isSelected={isSelectedItem || false}
-                                    onOutput={this.onComponentOutput.bind(this)}/>
-                            )
-                        }, this);
-                    }
-
+					//if the user wants to see the selection list, instead of the search results
                     if (this.state.showBookmarkedItems) {
+						//populate the list of selected bookmarks/resources
+	                    const selectedSearchHits = storedSelectedRows.map((result, index) => {
+	                        return (
+	                            <SearchHit
+	                                key={'saved__' + index}
+	                                result={result}
+	                                bookmarked={null}
+	                                searchTerm={result.query.term} //for highlighting the search term
+	                                dateField={
+	                                    result.query.dateRange ?
+	                                        result.query.dateRange.field : null
+	                                } //for displaying the right date field in the hits
+	                                collectionConfig={result.collectionConfig}
+	                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+	                                isSelected={true}
+	                                onOutput={this.onComponentOutput.bind(this)}
+								/>
+	                        )
+	                    }, this);
+
                         bookmarkingContainer = (
                             <div
                                 className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
@@ -696,6 +716,7 @@ class SingleSearchRecipe extends React.Component {
                         );
                     }
 				}
+
                 //always add the save query button
                 actions.push(
                     <button
@@ -723,70 +744,49 @@ class SingleSearchRecipe extends React.Component {
 
                 ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
 
-
 				//populate the list of search results
-				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
-                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
-                    const isSelectedItem = storedSelectedRows ? storedSelectedRows.find(item => item._id === result._id) : false;
-					return (
-						<SearchHit
-							key={'__' + index}
-							result={result}
-                            bookmark={bookmark}
-							searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
-							dateField={
-								this.state.currentOutput.query.dateRange ?
-									this.state.currentOutput.query.dateRange.field : null
-							} //for displaying the right date field in the hits
-							collectionConfig={this.state.collectionConfig}
-							itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-							isSelected={isSelectedItem || false} //is the result selected. False added to make React happy.
-							onOutput={this.onComponentOutput.bind(this)}/>
-					)
-				}, this) : false;
+				if(!this.state.showBookmarkedItems) {
+					searchHits = this.state.currentOutput.results.map((result, index) => {
+	                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
+	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result._id) != undefined;
+						return (
+							<SearchHit
+								key={'__' + index}
+								result={result}
+	                            bookmark={bookmark}
+								searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
+								dateField={
+									this.state.currentOutput.query.dateRange ?
+										this.state.currentOutput.query.dateRange.field : null
+								} //for displaying the right date field in the hits
+								collectionConfig={this.state.collectionConfig}
+								itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+								isSelected={isSelectedItem}
+								onOutput={this.onComponentOutput.bind(this)}
+							/>
+						)
+					}, this)
+				}
 
-                if (this.props.recipe.ingredients.aggregationView === 'box') {
-                    resultList = (
-                        <div className="row">
-                            <div className="col-md-12">
-                                <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
-                                    {tableActionControls}
-                                    {actionButtons}
-                                    <div style={{textAlign: 'center'}}>
-                                        {paging}
-                                        <div style={{float: 'right'}}>
-                                            {sortButtons}
-                                        </div>
-                                    </div>
-                                </div>
-                                {items}
-                                <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
-                                    {paging}
-                                </div>
-                            </div>
-                        </div>
-                    )
-                } else {
-                    resultList = (
-                        <div className="col-md-9 result-list">
-                            <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
-                                {tableActionControls}
-                                {actionButtons}
-                                <div style={{textAlign: 'center'}}>
-                                    {paging}
-                                    <div style={{float: 'right'}}>
-                                        {sortButtons}
-                                    </div>
-                                </div>
-                            </div>
-                            {bookmarkingContainer}
-                            {items}
-                            <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
+                resultList = (
+                    <div className="col-md-9 result-list">
+                        <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
+                            {tableActionControls}
+                            {actionButtons}
+                            <div style={{textAlign: 'center'}}>
                                 {paging}
+                                <div style={{float: 'right'}}>
+                                    {sortButtons}
+                                </div>
                             </div>
                         </div>
-                    )
-                }
+                        {bookmarkingContainer}
+                        {searchHits}
+                        <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
+                            {paging}
+                        </div>
+                    </div>
+                )
 
 			}
 		}

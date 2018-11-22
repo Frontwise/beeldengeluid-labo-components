@@ -68,22 +68,23 @@ class SearchHit extends React.Component {
     }
 
 	render() {
-    let result = null;
-    let snippet = null;
-    let collectionMediaTypes = null;
-    if(this.props.collectionConfig && typeof this.props.collectionConfig.getItemDetailData === 'function') {
-        result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
-        snippet = this.props.collectionConfig.getResultSnippetData(result);
-        collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
-    } else {
-        const collectionConfig = CollectionUtil.getCollectionClass(this.props.collectionConfig.clientId, null, this.props.collectionConfig.collectionId, true)
-        result = collectionConfig.prototype.getItemDetailData(this.props.result, this.props.dateField);
-        snippet = collectionConfig.prototype.getResultSnippetData(result);
-        collectionMediaTypes = collectionConfig.prototype.getCollectionMediaTypes();
-    }
+	    let result = null;
+	    let snippet = null;
+	    let collectionMediaTypes = null;
+	    if(this.props.collectionConfig && typeof this.props.collectionConfig.getItemDetailData === 'function') {
+	        result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
+	        snippet = this.props.collectionConfig.getResultSnippetData(result);
+	        collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
+	    } else {
+	        const collectionConfig = CollectionUtil.getCollectionClass(
+				this.props.collectionConfig.clientId, null, this.props.collectionConfig.collectionId, true
+			)
+	        result = collectionConfig.prototype.getItemDetailData(this.props.result, this.props.dateField);
+	        snippet = collectionConfig.prototype.getResultSnippetData(result);
+	        collectionMediaTypes = collectionConfig.prototype.getCollectionMediaTypes();
+	    }
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
-		//TODO get rid of this separate piece of data
 		const modalID = this.safeModalId(result.resourceId);
 
 		let modal = null;

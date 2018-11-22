@@ -191,7 +191,7 @@ class ItemDetailsRecipe extends React.Component {
 							collectionConfig : config
 						};
 						//TODO make sure this works for all carriers!!
-						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {							
+						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
 							PlayoutAPI.requestAccess(
 								itemDetailData.playableContent[0].contentServerId,
 								itemDetailData.playableContent[0].contentId,
@@ -807,6 +807,7 @@ class ItemDetailsRecipe extends React.Component {
     	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
     	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
     	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+		console.debug(selectedRows);
     	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
 
     	if(!userLastQuery || !searchResults || !queryOutput) {

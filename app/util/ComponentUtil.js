@@ -31,6 +31,10 @@ const ComponentUtil = {
 		}
 	},
 
+	/*--------------------------------------------------------------------------------
+	* ------------------------- CRUD OF JSON OBJECTS IN LOCALSTORAGE -----------------
+	---------------------------------------------------------------------------------*/
+
     storeJSONInLocalStorage(key, data) {
         if(ComponentUtil.supportsHTML5Storage()) {
             try {
@@ -47,7 +51,35 @@ const ComponentUtil = {
         return false
     },
 
-    pushItemToLocalStorage(key, item) {
+	getJSONFromLocalStorage(key) {
+		if(ComponentUtil.supportsHTML5Storage() && localStorage[key]) {
+			try {
+				return JSON.parse(localStorage[key])
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		return null
+	},
+
+	removeJSONByKeyInLocalStorage(key) {
+        if (ComponentUtil.supportsHTML5Storage()) {
+            try {
+                localStorage.removeItem(key);
+                return true
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        return false
+    },
+
+	/*--------------------------------------------------------------------------------
+	* ------------------------- CRUD OF ARRAYS WITH IDS IN LOCALSTORAGE -----------------
+	---------------------------------------------------------------------------------*/
+
+	//if you are pushing an object to the stored array, make sure to supply the identifier field name (string) of that object
+	pushItemToLocalStorage(key, item, itemIdentifier=null) {
         const currentDataOnStorage = ComponentUtil.getJSONFromLocalStorage(key);
         let obj = null;
         if(currentDataOnStorage === null) {
@@ -55,7 +87,12 @@ const ComponentUtil = {
             ComponentUtil.storeJSONInLocalStorage(key, obj)
         } else {
             // if item is not in array then push it.
-            if(!currentDataOnStorage.find(val => val === item)){
+            if(!currentDataOnStorage.find(val => {
+				if(itemIdentifier) { //for comparing objects
+					return val[itemIdentifier] === item[itemIdentifier];
+				}
+				return val === item;
+			})) {
                 currentDataOnStorage.push(item);
             }
 
@@ -88,30 +125,7 @@ const ComponentUtil = {
             }
         }
         return false
-    },
-
-    removeJSONByKeyInLocalStorage(key) {
-        if (ComponentUtil.supportsHTML5Storage()) {
-            try {
-                localStorage.removeItem(key);
-                return true
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        return false
-    },
-
-	getJSONFromLocalStorage(key) {
-		if(ComponentUtil.supportsHTML5Storage() && localStorage[key]) {
-			try {
-				return JSON.parse(localStorage[key])
-			} catch (e) {
-				console.error(e);
-			}
-		}
-		return null
-	}
+    }
 
 };
 
