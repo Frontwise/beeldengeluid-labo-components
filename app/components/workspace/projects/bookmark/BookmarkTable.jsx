@@ -1,9 +1,7 @@
-import ProjectAPI from '../../../../api/ProjectAPI';
 import AnnotationAPI from '../../../../api/AnnotationAPI';
 
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
-//import BookmarkUtil from '../../../../util/BookmarkUtil';
 
 import AnnotationStore from '../../../../flux/AnnotationStore';
 
@@ -22,6 +20,7 @@ import BookmarkRow from './BookmarkRow';
 import NestedTable from '../../helpers/NestedTable';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import CollectionUtil from "../../../../util/CollectionUtil";
 
 /**
 * This view handles the loading, filtering and selection of data of
@@ -178,7 +177,7 @@ class BookmarkTable extends React.PureComponent {
         // filter on group
         if (filter.group) {
             bookmarks = bookmarks.filter(bookmark =>
-                bookmark.groups.some((g) => (g.annotationId == filter.group))
+                bookmark.groups.some((g) => (g.annotationId === filter.group))
             );
         }
 
@@ -227,12 +226,12 @@ class BookmarkTable extends React.PureComponent {
                     bookmark =>
                     // object
                     (bookmark.object && Object.keys(bookmark.object).some((key)=>(
-                        typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k))
+                        typeof bookmark.object[key] === 'string' && bookmark.object[key].toLowerCase().includes(k))
                         ))
                     ||
                     // annotations
                     (bookmark.annotations && bookmark.annotations.some((annotation)=>(
-                        Object.keys(annotation).some((key)=>(typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k)))
+                        Object.keys(annotation).some((key)=>(typeof annotation[key] === 'string' && annotation[key].toLowerCase().includes(k)))
                         )))
                 );
             });
@@ -244,20 +243,41 @@ class BookmarkTable extends React.PureComponent {
     }
 
     sortBookmarks(bookmarks, field) {
-        const getFirst = (a, empty)=>(
-            a.length > 0 ? a[0] : empty
+        if(!bookmarks) {
+            return [];
+        }
+        // Enhance the bookmarks with a formatted date to allow sorting.
+        const sorted = bookmarks.map((item) => {
+            const collectionClass = CollectionUtil.getCollectionClass(
+                this.props.user.id, this.props.user.name, item.object.dataset, true
             );
+            if(collectionClass) {
+                item.object.formattedDate = collectionClass.prototype.getInitialDate(item.object.date)
+            }
+            return item
+        });
 
-        const sorted = bookmarks;
+        const getFirst = (a, empty)=> (
+            a && a.length > 0 ? a[0] : empty
+        );
+        const sortOnNull = (order, a, b) => {
+            if (order === 'newest') {
+                return (a.object.formattedDate === null) - (b.object.formattedDate === null)
+                    || -(a.object.formattedDate > b.object.formattedDate) || +(a.object.formattedDate < b.object.formattedDate);
+            }
+            return (a.object.formattedDate === null) - (b.object.formattedDate === null)
+                || +(a.object.formattedDate > b.object.formattedDate) || -(a.object.formattedDate < b.object.formattedDate);
+        };
+
         switch (field) {
             case 'created':
                 sorted.sort((a, b) => a.created > b.created ? 1 : -1);
                 break;
             case 'newest':
-                sorted.sort((a, b) => a.object.date < b.object.date ? 1 : -1);
+                sorted.sort((a, b) => sortOnNull('newest', a, b));
                 break;
             case 'oldest':
-                sorted.sort((a, b) => a.object.date > b.object.date ? 1 : -1);
+                sorted.sort((a, b) => sortOnNull('oldest', a, b));
                 break;
             case 'name-az':
                 sorted.sort((a, b) => a.object.title > b.object.title ? 1 : -1);
@@ -351,7 +371,7 @@ class BookmarkTable extends React.PureComponent {
     selectAllChange(selectedItems, e) {
         let newSelection = this.state.selection.slice(); //copy the array
         selectedItems.forEach(item => {
-            const found = newSelection.find(selected => selected.resourceId == item.resourceId)
+            const found = newSelection.find(selected => selected.resourceId === item.resourceId)
             if(!found && e.target.checked) { // add it to the selection
                 newSelection.push(item);
             } else if (e.target.checked && found) { // remove the selected item
@@ -366,7 +386,7 @@ class BookmarkTable extends React.PureComponent {
     selectItem(item, select) {
         let newSelection = this.state.selection.slice(); //copy the array
         const index = newSelection.findIndex(selected => {
-            return selected.resourceId == item.resourceId
+            return selected.resourceId === item.resourceId
         })
         if(index == -1 && select) { // add it to the selection
             newSelection.push(item);
@@ -454,8 +474,9 @@ class BookmarkTable extends React.PureComponent {
     }
 
     renderResults(renderState) {
-        const annotationTypeFilter = renderState.filter.annotations && !['yes','no'].includes(renderState.filter.annotations) ?
-            renderState.filter.annotations : '';
+        const annotationTypeFilter = renderState.filter.annotations && !['yes','no'].includes(
+            renderState.filter.annotations
+        ) ? renderState.filter.annotations : '';
         return (
             <div>
                 <h2>
@@ -463,7 +484,7 @@ class BookmarkTable extends React.PureComponent {
                         type="checkbox"
                         checked={
                             renderState.visibleItems.length > 0 && renderState.visibleItems.every(item =>
-                                this.state.selection.includes(item.resourceId)
+                                item && this.state.selection.includes(item.resourceId)
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
@@ -494,8 +515,8 @@ class BookmarkTable extends React.PureComponent {
                             onView={this.viewBookmark}
                             selected={
                                 this.state.selection.find(
-                                    item => item.resourceId == bookmark.resourceId
-                                ) != undefined
+                                    item => item.resourceId === bookmark.resourceId
+                                ) !== undefined
                             }
                             onSelect={this.selectItem}
                             showSubMediaObject={bookmark.resourceId in this.state.subMediaObject}
