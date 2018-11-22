@@ -75,7 +75,7 @@ const ComponentUtil = {
     },
 
 	/*--------------------------------------------------------------------------------
-	* ------------------------- CRUD OF ARRAYS WITH IDS IN LOCALSTORAGE -----------------
+	* ------------------------- CRUD OF ARRAYS WITH OJECTS/IDS IN LOCALSTORAGE -------
 	---------------------------------------------------------------------------------*/
 
 	//if you are pushing an object to the stored array, make sure to supply the identifier field name (string) of that object
@@ -109,22 +109,6 @@ const ComponentUtil = {
         } else {
            ComponentUtil.removeJSONByKeyInLocalStorage(key);
         }
-    },
-
-    updateLocalStorage(key, item, data) {
-        if (ComponentUtil.supportsHTML5Storage()) {
-            try {
-                if (data.selected) {
-                    ComponentUtil.pushItemToLocalStorage(key, item);
-                } else {
-                    ComponentUtil.removeItemInLocalStorage(key, data.resourceId);
-                }
-                return true
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        return false
     }
 
 };
