@@ -90,21 +90,28 @@ const ComponentUtil = {
             if(!currentDataOnStorage.find(val => {
 				if(itemIdentifier) { //for comparing objects
 					return val[itemIdentifier] === item[itemIdentifier];
+				} else {
+					return val === item;
 				}
-				return val === item;
 			})) {
                 currentDataOnStorage.push(item);
             }
-
             ComponentUtil.storeJSONInLocalStorage(key, currentDataOnStorage)
         }
     },
 
-    removeItemInLocalStorage(key, item) {
+	//if you are removing an object from the stored array, make sure to supply the identifier field name (string) of that object
+    removeItemInLocalStorage(key, item, itemIdentifier=null) {
         const currentDataOnStorage = ComponentUtil.getJSONFromLocalStorage(key);
-        const indexFromItemToRemove = currentDataOnStorage.findIndex(current =>current._id === item);
-        currentDataOnStorage.splice(indexFromItemToRemove,1);
-        if(currentDataOnStorage.length) {
+        const index = currentDataOnStorage.findIndex(val => {
+			if(itemIdentifier) { //for comparing objects
+				return val[itemIdentifier] === item[itemIdentifier]
+			} else {
+				return val === item
+			}
+		});
+        currentDataOnStorage.splice(index, 1);
+        if(currentDataOnStorage.length > 0) {
             ComponentUtil.storeJSONInLocalStorage(key, currentDataOnStorage);
         } else {
            ComponentUtil.removeJSONByKeyInLocalStorage(key);

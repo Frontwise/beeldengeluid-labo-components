@@ -44,7 +44,9 @@ class SearchHit extends React.Component {
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				resourceId : this.props.result._id,
-				selected : !this.props.isSelected
+				resource : this.props.result,
+				selected : !this.props.isSelected,
+				collectionConfig : this.props.collectionConfig
 			})
 		}
 	}
@@ -68,25 +70,12 @@ class SearchHit extends React.Component {
     }
 
 	render() {
-	    let result = null;
-	    let snippet = null;
-	    let collectionMediaTypes = null;
-	    if(this.props.collectionConfig && typeof this.props.collectionConfig.getItemDetailData === 'function') {
-	        result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
-	        snippet = this.props.collectionConfig.getResultSnippetData(result);
-	        collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
-	    } else {
-	        const collectionConfig = CollectionUtil.getCollectionClass(
-				this.props.collectionConfig.clientId, null, this.props.collectionConfig.collectionId, true
-			)
-	        result = collectionConfig.prototype.getItemDetailData(this.props.result, this.props.dateField);
-	        snippet = collectionConfig.prototype.getResultSnippetData(result);
-	        collectionMediaTypes = collectionConfig.prototype.getCollectionMediaTypes();
-	    }
+		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
+		const snippet = this.props.collectionConfig.getResultSnippetData(result);
+		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		const modalID = this.safeModalId(result.resourceId);
-
 		let modal = null;
 		let bookmarkIcon = null;
 
