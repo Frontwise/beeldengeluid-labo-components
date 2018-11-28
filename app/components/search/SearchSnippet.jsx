@@ -93,7 +93,7 @@ class SearchSnippet extends React.Component {
 			});
 
 			//Note: assigning a media type (to the result data) automatically means it's accessible in the media suite!
-			if(this.props.data.mediaTypes.length > 0) {
+			if(this.props.data.playable) {
 				accessIcon = (
 					<span
 						className={IconUtil.getMediaObjectAccessIcon(true, true, true, true, false)}
