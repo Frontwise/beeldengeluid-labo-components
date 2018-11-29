@@ -19,6 +19,13 @@ class FieldCategorySelector extends React.Component {
 		this.CLASS_PREFIX = 'fcs';
 	}
 
+    shouldComponentUpdate(nextProps, nextState) {
+	    if (nextProps.fieldCategory && this.props.fieldCategory) {
+            return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
+        }
+        return true
+    }
+
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'FieldCategoryCreator') {
 			this.onFieldsSelected(data);
@@ -27,11 +34,11 @@ class FieldCategorySelector extends React.Component {
 
 	onOutput(data) {
 		if(this.props.onOutput) {
-			if(data === null) {
-				this.props.onOutput(this.constructor.name, null);
-			} else {
+			if(data !== null) {
                 this.props.onOutput(this.constructor.name, data);
-			}
+			} else {
+                this.props.onOutput(this.constructor.name, null);
+            }
 		}
 	}
 
