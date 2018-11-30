@@ -1,7 +1,7 @@
 .bg__aggregation-list {
     .bg__agl__aggregationSwitchBtn {
-        @include switchBtn();
-
+        @include switchButton($transition-time : 1s, $backColorBtnActive : #468dcb, $backColorBtnInactive :#7aabd6, $widthBtn:78,$marginLeftBtn: 47);
+		padding: 0;
         .ms_toggle_btn {
             text-transform: capitalize;
         }
@@ -120,7 +120,7 @@
 			border-radius: 0 0 6px 6px;
 			color: #666;
 			display: block;
-			padding: 6px;
+			padding: 5px;
 			&:hover {
 				color: red;
 			}
