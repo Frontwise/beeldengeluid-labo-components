@@ -31,7 +31,7 @@ class SearchSnippet extends React.Component {
     }
 
     static stripQuotes(str) {
-    	if(str.startsWith('"') && str.endsWith('"') && str.length > 2) {
+    	if(str && str.startsWith('"') && str.endsWith('"') && str.length > 2) {
 			return str.substring(1, str.length -1)
 		}
 		return str

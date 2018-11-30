@@ -5,6 +5,7 @@ import SearchSnippet from './SearchSnippet';
 import ItemDetails from './ItemDetails';
 import FlexModal from '../FlexModal';
 import ReactTooltip from 'react-tooltip';
+import CollectionUtil from '../../util/CollectionUtil';
 
 class SearchHit extends React.Component {
 	constructor(props) {
@@ -43,7 +44,9 @@ class SearchHit extends React.Component {
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				resourceId : this.props.result._id,
-				selected : !this.props.isSelected
+				resource : this.props.result,
+				selected : !this.props.isSelected,
+				collectionConfig : this.props.collectionConfig
 			})
 		}
 	}
@@ -68,10 +71,11 @@ class SearchHit extends React.Component {
 
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
-        const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
-		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
-		const modalID = this.safeModalId();
+		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
+		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
+		const modalID = this.safeModalId(result.resourceId);
 		let modal = null;
 		let bookmarkIcon = null;
 
@@ -140,7 +144,7 @@ class SearchHit extends React.Component {
                 <div onClick={this.gotoItemDetails.bind(this, result)}>
 					<SearchSnippet
 						data={snippet}
-						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
+						collectionMediaTypes={collectionMediaTypes}
 						searchTerm={this.props.searchTerm}
 					/>
 				</div>

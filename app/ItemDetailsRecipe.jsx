@@ -191,7 +191,7 @@ class ItemDetailsRecipe extends React.Component {
 							collectionConfig : config
 						};
 						//TODO make sure this works for all carriers!!
-						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {							
+						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
 							PlayoutAPI.requestAccess(
 								itemDetailData.playableContent[0].contentServerId,
 								itemDetailData.playableContent[0].contentId,
@@ -804,20 +804,19 @@ class ItemDetailsRecipe extends React.Component {
 
     //only render when coming from the single search recipe (checking this.props.param.bodyClass == noHeader)
     renderResultListPagingButtons() {
-    	let previousResourceBtn = null;
-		let nextResourceBtn = null;
-		let backToSearchBtn = null;
-
-    	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query')
+    	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
     	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+    	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+		console.debug(selectedRows);
     	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+
     	if(!userLastQuery || !searchResults || !queryOutput) {
     		return null;
     	}
         const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.params.id);
-
+        // Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
         const prevResource = searchResults.findIndex(
-        	elem => elem.resourceId === this.props.params.id
+        	elem => (elem && elem.resourceId) || selectedRows._id === this.props.params.id
         ) ? searchResults[currentIndex-1].resourceId : false;
 
         const nextResource = (searchResults.length - 1) > currentIndex ?
@@ -830,19 +829,19 @@ class ItemDetailsRecipe extends React.Component {
             isLastHit = searchResults[searchResults.length - 1].resourceId === this.state.itemData.resourceId;
         }
 
-		previousResourceBtn = (
+        let previousResourceBtn = (
             <button className="btn btn-primary" disabled={isFirstResource}
                     onClick={this.gotoItemDetails.bind(this, prevResource)}>
                 <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
             </button>
         );
-        nextResourceBtn = (
+        let nextResourceBtn = (
             <button className="btn btn-primary" disabled={isLastHit}
                     onClick={this.gotoItemDetails.bind(this, nextResource)}>
                 Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
             </button>
         );
-        backToSearchBtn = (
+        let backToSearchBtn = (
             <button className="btn btn-primary"
                     onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
                 Back to results

@@ -67,7 +67,7 @@ class QueryEditor extends React.PureComponent {
 				<div className="row">
                     <div className="col-md-12">
                         <form className="form-horizontal" onSubmit={this.save.bind(this)}>
-                            <div class="form-group">
+                            <div className="form-group">
     							<label htmlFor="queryName">Name</label>
     							<input
     								type="text"
