@@ -1,4 +1,3 @@
-import TimeUtil from './util/TimeUtil';
 import IDUtil from './util/IDUtil';
 import IconUtil from './util/IconUtil';
 import ComponentUtil from './util/ComponentUtil';
@@ -153,7 +152,7 @@ class ItemDetailsRecipe extends React.Component {
 			this.setActiveAnnotationTarget({
 				source : data.assetId //data => mediaObject
 			})
-		} else if(componentClass == 'LDResourceViewer') {
+		} else if(componentClass === 'LDResourceViewer') {
 			this.browseEntity(data);
 		}
 	}
@@ -217,7 +216,7 @@ class ItemDetailsRecipe extends React.Component {
 				itemData : data,
 				annotationTarget : null,
 				found : false
-			})
+			});
 			console.debug('this item does not exist');
 		}
 	}
@@ -438,7 +437,7 @@ class ItemDetailsRecipe extends React.Component {
 				exclude : false
 			}],
 			selectedFacets : selectedFacets
-		}, this.state.collectionConfig)
+		}, this.state.collectionConfig);
 
 		ComponentUtil.storeJSONInLocalStorage(
 			'user-last-query',
@@ -450,13 +449,13 @@ class ItemDetailsRecipe extends React.Component {
 
 	getFieldValues(fieldName) {
 		//filter out the uninteresting fields
-		if(fieldName.indexOf('@context') != -1 ||
-			fieldName.indexOf('hasFormat') != -1 ||
-			fieldName.indexOf('@language') != -1) {
+		if(fieldName.indexOf('@context') !== -1 ||
+			fieldName.indexOf('hasFormat') !== -1 ||
+			fieldName.indexOf('@language') !== -1) {
 			return null
 		}
 		//make sure to remove the ES .keyword suffix, since the rawdata fieldnames don't have them
-		fieldName = fieldName.indexOf('.keyword') == -1 ?
+		fieldName = fieldName.indexOf('.keyword') === -1 ?
 			fieldName :
 			fieldName.substring(0, fieldName.length - 8)
 
@@ -464,15 +463,15 @@ class ItemDetailsRecipe extends React.Component {
 		let curObj = this.state.itemData.rawData;
 
 		//split the field name in path elements for lookup
-		let path = fieldName.split('.');
+		const path = fieldName.split('.');
 		let i = 0;
 
 		//now look for the values of the selected field
 		while(i < path.length) {
 			if(curObj) {
 				//check if the current object is a list and the current path selects @value attributes from it
-				if(typeof(curObj) == "object" && curObj['@value'] == undefined && path[i] == '@value') {
-					curObj = curObj.map(obj => obj[path[i]])
+				if(typeof(curObj) === "object" && curObj['@value'] === undefined && path[i] === '@value') {
+					curObj = curObj.map(obj => obj[path[i]]);
 					break;
 				}
 				//otherwise continue down the path, until the end is reached
@@ -483,7 +482,7 @@ class ItemDetailsRecipe extends React.Component {
 			}
 		}
 		//always wrap the end-result in a list
-		if(typeof(curObj) == 'string') {
+		if(typeof(curObj) === 'string') {
 			return [curObj]
 		}
 		return curObj;
@@ -829,19 +828,19 @@ class ItemDetailsRecipe extends React.Component {
             isLastHit = searchResults[searchResults.length - 1].resourceId === this.state.itemData.resourceId;
         }
 
-        let previousResourceBtn = (
+        const previousResourceBtn = (
             <button className="btn btn-primary" disabled={isFirstResource}
                     onClick={this.gotoItemDetails.bind(this, prevResource)}>
                 <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
             </button>
         );
-        let nextResourceBtn = (
+        const nextResourceBtn = (
             <button className="btn btn-primary" disabled={isLastHit}
                     onClick={this.gotoItemDetails.bind(this, nextResource)}>
                 Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
             </button>
         );
-        let backToSearchBtn = (
+        const backToSearchBtn = (
             <button className="btn btn-primary"
                     onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
                 Back to results
@@ -861,40 +860,46 @@ class ItemDetailsRecipe extends React.Component {
 			if(values) {
 				exploreFields[kw] = values;
 			}
-		})
-		if(Object.keys(exploreFields).length == 0) {
+		});
+		if(Object.keys(exploreFields).length === 0) {
 			return null;
 		}
-		return (
-			<div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
-				<h3>Find related content based on these properties</h3>
-				<div className="property-list">
-					{
-						Object.keys(exploreFields).map(kw => {
+        return (
+            <FlexBox isVisible={false} title="Related content (experimental)">
+                <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+                    <h4>Find related content based on these properties</h4>
+                    <div className="property-list">
+                        {
+                            Object.keys(exploreFields).map(kw => {
 
-							//make nice buttons for each available value for the current keyword
-							const fieldValues = exploreFields[kw].map(value => {
-								const entity = {field : kw, value : value}
-								return (
-									<div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
-										{entity.value}
-									</div>
-								)
-							})
+                                //make nice buttons for each available value for the current keyword
+                                const fieldValues = exploreFields[kw].map(value => {
+                                    const entity = {field: kw, value: value};
+                                    return (
+                                        <div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+                                            {entity.value}
+                                        </div>
+                                    )
+                                });
 
-							//then return a block with a pretty field title + a column of buttons for each value
-							return (
-								<div>
-									<h4>{this.state.collectionConfig.toPrettyFieldName(kw)}</h4>
-									{fieldValues}
-								</div>
-							)
+                                //then return a block with a pretty field title + a column of buttons for each value
+                                return (
+                                    <div className="cl_table cl_table--2cols">
+                                        <div className="cl_table-cell left-cell">
+                                            {this.state.collectionConfig.toPrettyFieldName(kw)}
+                                        </div>
+                                        <div className="cl_table-cell right-cell">
+                                            {fieldValues}
+                                        </div>
+                                    </div>
+                                )
 
-						})
-					}
-				</div>
-			</div>
-		)
+                            })
+                        }
+                    </div>
+                </div>
+            </FlexBox>
+        )
     }
 
 	render() {
@@ -903,11 +908,9 @@ class ItemDetailsRecipe extends React.Component {
 		} else if(this.state.found === false) {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
-			let ldResourceViewer = null;
-			let exploreBlock = null;
 			let annotationList = null;
 
-			let metadataPanel = null;
+			let metadataPanel;
 			let mediaPanel = null;
 
 			let annotationModal = null;
@@ -1027,19 +1030,8 @@ class ItemDetailsRecipe extends React.Component {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
-			//make this pretty & nice and work with awesome LD later on
-			ldResourceViewer = (
-				<FlexBox title="Linked Data">
-					<LDResourceViewer
-						resourceId={this.state.itemData.resourceId}
-						collectionConfig={this.state.collectionConfig}
-						onOutput={this.onComponentOutput.bind(this)}
-					/>
-				</FlexBox>
-			)
-
 			//render the exploration block
-			exploreBlock = this.renderExploreBlock();
+            const exploreBlock = this.renderExploreBlock();
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1063,15 +1055,12 @@ class ItemDetailsRecipe extends React.Component {
 									<div className="row">
 										{metadataPanel}
 									</div>
-									<div className="row">
-										{ldResourceViewer}
-									</div>
+                                    <div className="row">
+                                        {exploreBlock}
+                                    </div>
 								</div>
 								<div className="col-md-5">
 									{annotationList}
-									<div className="row">
-										{exploreBlock}
-									</div>
 								</div>
 								<br/>
 							</div>

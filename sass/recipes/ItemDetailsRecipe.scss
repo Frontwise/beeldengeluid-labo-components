@@ -5,20 +5,65 @@
 		margin: 10px;
 		padding: 5px;
 		.property-list {
-			width: 400px;
-	    	height: 600px;
 	    	overflow-y: auto;
 			.keyword {
-				margin:0px 5px 5px 0px;
-				padding:5px;
+				margin :0 0 5px 0;
+				padding :5px;
 				border-radius:3px;
 				background-color: $clBlue;
 				color: white;
 				cursor:pointer;
 				&:hover {
-					background-color: 666;
+					background-color: #666;
 				}
 			}
 		}
+		h4 {
+			border-bottom: 1px solid #eee;
+			padding-bottom: 5px;
+		}
+	}
+
+	.cl_table {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0;
+		padding: 0;
+	}
+	.cl_table-cell {
+		box-sizing: border-box;
+		flex-grow: 1;
+		width: 100%;
+		padding: 0.8em 0;
+		overflow: hidden;
+		list-style: none;
+		border: solid 3px white;
+
+		p {
+			margin: 0;
+		}
+		ul {
+			padding-left: 15px;
+		}
+
+		&.left-cell {
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		b {
+			color: #666;
+		}
+	}
+
+	.cl_table--2cols > .cl_table-cell  {
+		width: 50%;
+
+	}
+	.cl_table--2cols > .left-cell  {
+		width: 60%;
+	}
+	.cl_table--2cols > .right-cell  {
+		width: 40%;
 	}
 }

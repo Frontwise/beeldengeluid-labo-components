@@ -5,8 +5,8 @@ class FlexBox extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			visible: true
-		}
+			visible: props.isVisible !== undefined ? props.isVisible : true
+		};
 		this.CLASS_PREFIX = 'fb';
 	}
 
@@ -17,7 +17,7 @@ class FlexBox extends React.Component {
 	}
 
 	render() {
-		const header = (
+        const header = (
 			<div className="row fb-header" onClick={this.toggle.bind(this)}>
 				<div className="col-md-12">
 					<div className={
@@ -29,10 +29,10 @@ class FlexBox extends React.Component {
 					</div>
 				</div>
 			</div>
-		)
+		);
 
 		//the component's css class names
-		const classNames = [IDUtil.cssClassName('flex-box')]
+		const classNames = [IDUtil.cssClassName('flex-box')];
 		if(!this.state.visible) {
 			classNames.push('closed')
 		}
