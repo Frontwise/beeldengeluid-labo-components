@@ -12,7 +12,7 @@ class FieldCategoryCreator extends React.PureComponent {
 	onOutput() {
 		if(this.props.onOutput) {
 			const s = document.getElementById('field_selector');
-			let fields = []
+			const fields = [];
 			let fieldCategory = null;
 			for(let i=0;i<s.selectedOptions.length;i++) {
 				fields.push(s.selectedOptions[i].value);
@@ -37,7 +37,6 @@ class FieldCategoryCreator extends React.PureComponent {
 		});
 		return (
 			<div className={IDUtil.cssClassName('field-category-creator')}>
-				<form onSubmit={this.onOutput.bind(this)}>
 					<label htmlFor="field_selector">Select one or more fields to include</label>
 					<select className="form-control" multiple id="field_selector">
 						{options}
@@ -49,8 +48,7 @@ class FieldCategoryCreator extends React.PureComponent {
                         ref={input => (this.clusterName = input)}
 						type="text"
 						placeholder="Cluster name"/>
-					<button className="btn btn-primary" type="submit">Choose</button>
-				</form>
+					<button className="btn btn-primary" onClick={this.onOutput.bind(this)} type="button">Choose</button>
 			</div>
 		)
 	}
@@ -60,6 +58,6 @@ class FieldCategoryCreator extends React.PureComponent {
 FieldCategoryCreator.propTypes = {
 	collectionConfig: PropTypes.object.isRequired,
 	onOutput : PropTypes.func.isRequired
-}
+};
 
 export default FieldCategoryCreator;
