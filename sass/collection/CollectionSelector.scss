@@ -1,20 +1,43 @@
 .bg__collection-selector {
-	.bg__cls__collection {
-		border: 1px solid grey;
-	    border-radius: $border-radius;
-	    float: left;
-	    height: 175px;
-	    margin: 1% 1% 1% 1%;
-	    overflow:hidden;
-	    padding: 10px;
-	    text-align: center;
-	    width: 30%;
-		img {
-	    	width: 50%;
+	.bg__collection-wrapper {
+        border-bottom: 1px solid #d3d3d3;
+		border-radius: $border-radius;
+		float: left;
+		height: 220px;
+		margin: 1% 1% 1% 1%;
+		overflow: hidden;
+		padding: 10px;
+		position: relative;
+		text-align: center;
+		width: 30%;
+
+		.bg__cls__collection {
+			padding: 10px;
+
+			img {
+				width: 50%;
+			}
+			&:hover {
+				cursor: pointer;
+			}
+			.bg__cls__caption {
+				h4 {
+					margin-top: 0;
+				}
+			}
 		}
-		&:hover {
-			box-shadow: 3px 3px 3px grey;
+
+		.bg__collection-info-ckan {
+          	align-items: center;
+			margin-top: 10px;
+
+			img {
+				margin-left: 3px;
+			}
+			a.bg__url_ckan {
+				color: #000;
+				text-decoration: underline;
+			}
 		}
-		.bg__cls__caption {}
 	}
 }
