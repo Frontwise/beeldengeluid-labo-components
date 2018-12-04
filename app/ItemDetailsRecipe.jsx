@@ -9,6 +9,7 @@ import FlexModal from './components/FlexModal';
 import FlexPlayer from './components/player/video/FlexPlayer';
 import FlexImageViewer from './components/player/image/FlexImageViewer';
 import FlexRouter from './util/FlexRouter';
+import ReactTooltip from 'react-tooltip';
 
 import MetadataTable from './components/search/MetadataTable';
 
@@ -855,10 +856,12 @@ class ItemDetailsRecipe extends React.Component {
 
     renderExploreBlock() {
     	const exploreFields = {};
+    	const orgNames = {};
 		this.state.collectionConfig.getKeywordFields().forEach((kw) => {
 			const values = this.getFieldValues(kw);
 			if(values) {
                 exploreFields[this.state.collectionConfig.toPrettyFieldName(kw)] = values;
+                orgNames[this.state.collectionConfig.toPrettyFieldName(kw)] = kw;
 			}
 		});
 		if(Object.keys(exploreFields).length === 0) {
@@ -870,7 +873,7 @@ class ItemDetailsRecipe extends React.Component {
                     <h4>Search for related content</h4>
                     <div className="property-list">
                         {
-                            Object.keys(exploreFields).sort().map(kw => {
+                            Object.keys(exploreFields).sort().map((kw, index) => {
 
                                 //make nice buttons for each available value for the current keyword
                                 const fieldValues = exploreFields[kw].map(value => {
@@ -881,12 +884,14 @@ class ItemDetailsRecipe extends React.Component {
                                         </div>
                                     )
                                 });
-
                                 //then return a block with a pretty field title + a column of buttons for each value
                                 return (
                                     <div className="cl_table cl_table--2cols">
                                         <div className="cl_table-cell left-cell">
-                                            {kw}
+                                            <span data-for={'tooltip__' + index} data-tip={orgNames[kw]} data-html={true}>
+                                                <i className="fa fa-info-circle"/>
+                                            </span> {kw}
+                                            <ReactTooltip id={'tooltip__' + index}/>
                                         </div>
                                         <div className="cl_table-cell right-cell">
                                             {fieldValues}
