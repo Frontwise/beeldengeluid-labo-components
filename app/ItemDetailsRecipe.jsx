@@ -877,7 +877,7 @@ class ItemDetailsRecipe extends React.Component {
 
                                 //make nice buttons for each available value for the current keyword
                                 const fieldValues = exploreFields[kw].map(value => {
-                                    const entity = {field: kw, value: value};
+                                    const entity = {field: orgNames[kw], value: value};
                                     return (
                                         <div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
                                             {entity.value}
