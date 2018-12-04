@@ -867,7 +867,7 @@ class ItemDetailsRecipe extends React.Component {
         return (
             <FlexBox isVisible={false} title="Related content (experimental)">
                 <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
-                    <h4>Find related content based on these properties</h4>
+                    <h4>Search for related content</h4>
                     <div className="property-list">
                         {
                             Object.keys(exploreFields).sort().map(kw => {
