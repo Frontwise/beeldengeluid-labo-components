@@ -94,7 +94,7 @@ class FieldCategorySelector extends React.Component {
         });
 
         optionsToSelect.forEach(fc => {
-            if (fc.nestedPath) {
+            if (fc.enrichment) {
                 optsEnrichment.push(fc)
             } else {
                 optsMetadata.push(fc)
