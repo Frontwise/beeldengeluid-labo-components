@@ -3,22 +3,26 @@
         border-bottom: 1px solid #d3d3d3;
 		border-radius: $border-radius;
 		float: left;
-		height: 220px;
+		height: 240px;
 		margin: 1% 1% 1% 1%;
 		overflow: hidden;
 		padding: 10px;
 		position: relative;
 		text-align: center;
-		width: 30%;
+		width: 30%;	
+
+		&:hover {
+			color: $highlight-color;
+		}
 
 		.bg__cls__collection {
 			padding: 10px;
-
+			border-top: 1px solid white;
 			img {
 				width: 50%;
 			}
 			&:hover {
-				cursor: pointer;
+				cursor: pointer;				
 			}
 			.bg__cls__caption {
 				h4 {
@@ -37,7 +41,11 @@
 			a.bg__url_ckan {
 				color: #000;
 				text-decoration: underline;
+				&:hover {
+					text-decoration: none;
+				}	
 			}
 		}
-	}
+	}	
+	
 }
