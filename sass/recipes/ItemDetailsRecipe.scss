@@ -34,7 +34,7 @@
 		box-sizing: border-box;
 		flex-grow: 1;
 		width: 100%;
-		padding: 0.8em 0;
+		padding: 8px 0;
 		overflow: hidden;
 		list-style: none;
 		border: solid 3px white;
@@ -57,6 +57,7 @@
 	}
 
 	.cl_table--2cols > .cl_table-cell  {
+		border-bottom: 1px solid #eee;
 		width: 50%;
 
 	}

@@ -858,7 +858,7 @@ class ItemDetailsRecipe extends React.Component {
 		this.state.collectionConfig.getKeywordFields().forEach((kw) => {
 			const values = this.getFieldValues(kw);
 			if(values) {
-				exploreFields[kw] = values;
+                exploreFields[this.state.collectionConfig.toPrettyFieldName(kw)] = values;
 			}
 		});
 		if(Object.keys(exploreFields).length === 0) {
@@ -870,7 +870,7 @@ class ItemDetailsRecipe extends React.Component {
                     <h4>Find related content based on these properties</h4>
                     <div className="property-list">
                         {
-                            Object.keys(exploreFields).map(kw => {
+                            Object.keys(exploreFields).sort().map(kw => {
 
                                 //make nice buttons for each available value for the current keyword
                                 const fieldValues = exploreFields[kw].map(value => {
@@ -886,7 +886,7 @@ class ItemDetailsRecipe extends React.Component {
                                 return (
                                     <div className="cl_table cl_table--2cols">
                                         <div className="cl_table-cell left-cell">
-                                            {this.state.collectionConfig.toPrettyFieldName(kw)}
+                                            {kw}
                                         </div>
                                         <div className="cl_table-cell right-cell">
                                             {fieldValues}
