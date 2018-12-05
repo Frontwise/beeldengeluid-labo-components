@@ -10,21 +10,6 @@ class AnnotationStore {
 
 	/* --------------- FOR FETCHING ANNOTATIONS ------------------- */
 
-	getDirectResourceAnnotations(resourceId, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
-		const notFilter = {
-			'motivation' : 'bookmarking'
-		}
-		const filter = {
-			'target.type' : 'Resource', //indicates this annotations target is the resource
-			'target.selector.value.id' : resourceId,
-			'user.keyword' : user.id,
-		}
-		if(project && project.id) {
-			filter['project'] = project.id
-		}
-		AnnotationAPI.getFilteredAnnotations(user.id, filter, notFilter, callback, offset, size, sort, dateRange);
-	}
-
 	//Note: the source of the annotation is always set to the assetId (i.e. media object ID)
 	getMediaObjectAnnotations(assetId, user, project, callback, offset = 0, size = 250, sort = null, dateRange = null) {
 		const notFilter = {

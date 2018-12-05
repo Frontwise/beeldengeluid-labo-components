@@ -7,7 +7,7 @@ class BookmarkSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			bookmarks : []
+			bookmarkGroups : []
 		}
 	}
 
@@ -25,8 +25,40 @@ class BookmarkSelector extends React.Component {
 		);
 	}
 
-	onLoadBookmarkAnnotations(data) {
-		this.setState({bookmarks : data || []});
+	onLoadBookmarkAnnotations(allGroups) {
+		if(this.props.resourceId) {
+			this.updateGroupMembership(this.props.resourceId, allGroups);
+		} else {
+			this.setState({bookmarkGroups : allGroups || []});
+		}
+	}
+
+	updateGroupMembership(resourceId, bookmarkGroups) {		
+		const filter = {			
+			'target.selector.value.id' : resourceId,
+			'user.keyword' : this.props.user.id,
+			'motivation' : 'bookmarking'
+		}
+		if(this.props.project && this.props.project.id) {
+			filter['project'] = this.props.project.id
+		}
+		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id, 
+			filter, 
+			null, 
+			this.onUpdateGroupMembership.bind(this, bookmarkGroups),
+			0, //offset 
+			250, //size
+			null, //sort direction
+			null //date range
+		);
+	}
+
+	onUpdateGroupMembership(allGroups, resourceGroups) {		
+		allGroups.forEach(group => {
+			group.isMember = resourceGroups.findIndex(resourceGroup => resourceGroup.id === group.id) != -1;
+		})
+		this.setState({bookmarkGroups : allGroups});
 	}
 
 	submitNewBookmark(e) {
@@ -47,20 +79,36 @@ class BookmarkSelector extends React.Component {
 	}
 
 	//communicate back a multi-target annotation with a classification body
-	onOutput(annotation) {
+	onOutput(bookmarkGroup) {
 		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, annotation);
+			this.props.onOutput(this.constructor.name, bookmarkGroup);
 		}
 	}
 
 	render() {
 		let bookmarkList = null;
-		if(this.state.bookmarks.length > 0) {
+		if(this.state.bookmarkGroups.length > 0) {
 			//TODO which part of the body is the name of the bookmark group?
-		 	const options = this.state.bookmarks.map((b, index) => {
-		 		return (<a className="list-group-item" href="#" key={'an__' + index} onClick={this.onOutput.bind(this, b)}>
-		 			{b.body[0].label}
-		 		</a>)
+		 	const options = this.state.bookmarkGroups.sort((a, b) => {
+				const nameA = a.body[0].label.toUpperCase(); // ignore upper and lowercase
+				const nameB = b.body[0].label.toUpperCase(); // ignore upper and lowercase
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+
+				// names must be equal
+				return 0;
+		 	}).map((group, index) => {
+		 		return (
+		 			<a className="list-group-item" href="#" key={'an__' + index} onClick={this.onOutput.bind(this, group)}>
+		 				<i className="fa fa-bookmark" style={ group.isMember ? {color: '#468dcb'} : {color: 'white'} }/>
+		 				&nbsp;
+		 				{group.body[0].label}		 						 				
+		 			</a>
+		 		)
 		 	});
 		 	bookmarkList = (
 		 		<div className="list-group">
@@ -80,7 +128,7 @@ class BookmarkSelector extends React.Component {
 					<div className="col-md-12">
 						<form>
 							<div className="form-group">
-								<h4>Bookmark category</h4>
+								<h4>Bookmark group</h4>
 								<input
                                     ref={input => (this.setSearchTerm = input)}
 									type="text"
