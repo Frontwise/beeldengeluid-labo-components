@@ -427,7 +427,7 @@ class ItemDetailsRecipe extends React.Component {
 	*************************************************************************/
 
 	browseEntity(entity) {
-		const selectedFacets = {}
+		const selectedFacets = {};
 		selectedFacets[entity.field] = [entity.value];
 		const query = QueryModel.ensureQuery({
 			id : this.state.collectionConfig.getCollectionId(),
@@ -814,11 +814,9 @@ class ItemDetailsRecipe extends React.Component {
     		return null;
     	}
         const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.params.id);
-        // Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
-        const prevResource = searchResults.findIndex(
-        	elem => (elem && elem.resourceId) || selectedRows._id === this.props.params.id
-        ) ? searchResults[currentIndex-1].resourceId : false;
 
+    	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
+    	const prevResource = currentIndex > 0 ? searchResults[currentIndex-1].resourceId : false;
         const nextResource = (searchResults.length - 1) > currentIndex ?
         	searchResults[currentIndex+1].resourceId : false;
 
@@ -914,8 +912,6 @@ class ItemDetailsRecipe extends React.Component {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
 			let annotationList = null;
-
-			let metadataPanel;
 			let mediaPanel = null;
 
 			let annotationModal = null;
@@ -1024,7 +1020,7 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			//render the complete metadata block, which includes unique and basic metadata
-			metadataPanel = (
+			const metadataPanel = (
 				<FlexBox title="Metadata">
 					<MetadataTable data={this.state.itemData}/>
 				</FlexBox>
