@@ -98,8 +98,9 @@ class DateRangeSelector extends React.Component {
     getMaxDate() {
         if(this.props.dateRange && this.props.dateRange.field) {
             const buckets = this.props.aggregations[this.props.dateRange.field];
+
             if(buckets && buckets.length > 0) {
-                const maxDate = moment(buckets[buckets.length -1].date_millis, 'x')
+                const maxDate = moment(buckets[buckets.length -1].date_millis, 'x').endOf("year");
                 const today = moment()
                 if(maxDate.isBefore(today)) {
                     return maxDate

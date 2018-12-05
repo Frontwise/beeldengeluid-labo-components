@@ -59,10 +59,15 @@ class QueryBuilder extends React.Component {
 		let collectionHits = -1;
 		if(config && config.collectionStats) {
 			let stats = config.collectionStats;
+			let docType = config.getDocumentType();
 			if(stats && stats.collection_statistics && stats.collection_statistics.document_types) {
 				let docTypes = stats.collection_statistics.document_types;
 				if(docTypes.length > 0) {
-					collectionHits = docTypes[0].doc_count;
+				    for(let i=0;i<docTypes.length;i++) {
+                        if(docTypes[i].doc_type === docType) {
+                            collectionHits = docTypes[i].doc_count
+                        }
+                    }
 				}
 			}
 		}

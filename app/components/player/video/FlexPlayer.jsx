@@ -135,7 +135,11 @@ class FlexPlayer extends React.Component {
 		if(annotationList) {
 			//get the annotation on the media object level (there should be only one per user!)
 			mediaObjectAnnotation = annotationList.filter((a) => {
-				return a.target.source === this.state.currentMediaObject.assetId && a.target.selector == null;
+			    if (a.target){
+			        return a.target.source === this.state.currentMediaObject.assetId && a.target.selector === null;
+			    } else {
+			        return false;
+			    }
 			});
 			mediaObjectAnnotation = mediaObjectAnnotation.length > 0 ? mediaObjectAnnotation[0] : null;
 		}
