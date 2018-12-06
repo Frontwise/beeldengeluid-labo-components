@@ -39,6 +39,10 @@
 		padding: $default-margin;
 	}
 	&.visitedItem {
-		color: $fill-color;
+		color: $visited-item;
+		.highLightText {
+			color: #f79e8e;
+
+		}
 	}
 }
