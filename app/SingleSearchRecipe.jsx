@@ -405,13 +405,13 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-    //this will actually save the selection to the workspace API
-    //finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+    // adds the selected resources to the selected bookmark groups
+    // TODO this should become a list of targets
+	bookmarkToGroupInProject(bookmarkGroup) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
 
         ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-            const targets = annotation.target
+            const targets = bookmarkGroup.target
                 .concat(selectedRows.map((result) => AnnotationUtil.generateResourceLevelTarget(
 					result._index,
 					result._id
@@ -426,9 +426,9 @@ class SingleSearchRecipe extends React.Component {
 			});
 
 			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
+			bookmarkGroup.target = dedupedTargets;
 			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
+			AnnotationAPI.saveAnnotation(bookmarkGroup, this.onSaveBookmarks.bind(this));
 		});
 	}
 

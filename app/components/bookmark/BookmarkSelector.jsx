@@ -7,7 +7,8 @@ class BookmarkSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			bookmarkGroups : []
+			allBookmarkGroups : [],
+			selectedGroups : {}
 		}
 	}
 
@@ -29,11 +30,11 @@ class BookmarkSelector extends React.Component {
 		if(this.props.resourceId) {
 			this.updateGroupMembership(this.props.resourceId, allGroups);
 		} else {
-			this.setState({bookmarkGroups : allGroups || []});
+			this.setState({allBookmarkGroups : allGroups || []});
 		}
 	}
 
-	updateGroupMembership(resourceId, bookmarkGroups) {		
+	updateGroupMembership(resourceId, allGroups) {		
 		const filter = {			
 			'target.selector.value.id' : resourceId,
 			'user.keyword' : this.props.user.id,
@@ -46,7 +47,7 @@ class BookmarkSelector extends React.Component {
 			this.props.user.id, 
 			filter, 
 			null, 
-			this.onUpdateGroupMembership.bind(this, bookmarkGroups),
+			this.onUpdateGroupMembership.bind(this, allGroups),
 			0, //offset 
 			250, //size
 			null, //sort direction
@@ -54,14 +55,20 @@ class BookmarkSelector extends React.Component {
 		);
 	}
 
-	onUpdateGroupMembership(allGroups, resourceGroups) {		
+	onUpdateGroupMembership(allGroups, resourceGroups) {
+		const selectedGroups = {}		
 		allGroups.forEach(group => {
-			group.isMember = resourceGroups.findIndex(resourceGroup => resourceGroup.id === group.id) != -1;
+			if(resourceGroups.findIndex(resourceGroup => resourceGroup.id === group.id) != -1) {
+				selectedGroups[group.id] = true;
+			}
 		})
-		this.setState({bookmarkGroups : allGroups});
+		this.setState({
+			allBookmarkGroups : allGroups, 
+			selectedGroups : selectedGroups
+		});
 	}
 
-	submitNewBookmark(e) {
+	addNewBookmarkGroup(e) {
 		e.preventDefault();
 		let annotation = AnnotationUtil.generateEmptyW3CMultiTargetAnnotation(
 			this.props.user,
@@ -75,21 +82,47 @@ class BookmarkSelector extends React.Component {
 			"label": this.setSearchTerm.value,
 			"user": this.props.user.id
 		}]
-		this.onOutput(annotation);
+		const allBookmarkGroups = this.state.allBookmarkGroups;
+		allBookmarkGroups.push(annotation);
+		this.setState({
+			allBookmarkGroups : allBookmarkGroups
+		})
+	}
+
+	//selects or deselects a bunch of groups
+	toggleBookmarkGroup(group) {
+		const selectedGroups = this.state.selectedGroups;
+		if(selectedGroups[group.id] === true) {
+			delete selectedGroups[group.id]
+		} else {
+			selectedGroups[group.id] = true;
+		}
+		this.setState({selectedGroups : selectedGroups});
 	}
 
 	//communicate back a multi-target annotation with a classification body
-	onOutput(bookmarkGroup) {
+	onOutput() {
 		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, bookmarkGroup);
+			//returns all bookmark groups (multi-target annotations) + which have been selected
+			this.props.onOutput(
+				this.constructor.name, 
+				{
+					allGroups : this.state.allBookmarkGroups,
+					selectedGroups : this.state.selectedGroups
+				}
+			);
 		}
+	}
+
+	deleteGroup() {
+		console.debug('TO BE IMPLEMENTED');
 	}
 
 	render() {
 		let bookmarkList = null;
-		if(this.state.bookmarkGroups.length > 0) {
+		if(this.state.allBookmarkGroups.length > 0) {
 			//TODO which part of the body is the name of the bookmark group?
-		 	const options = this.state.bookmarkGroups.sort((a, b) => {
+		 	const options = this.state.allBookmarkGroups.sort((a, b) => {
 				const nameA = a.body[0].label.toUpperCase(); // ignore upper and lowercase
 				const nameB = b.body[0].label.toUpperCase(); // ignore upper and lowercase
 				if (nameA < nameB) {
@@ -103,10 +136,11 @@ class BookmarkSelector extends React.Component {
 				return 0;
 		 	}).map((group, index) => {
 		 		return (
-		 			<a className="list-group-item" href="#" key={'an__' + index} onClick={this.onOutput.bind(this, group)}>
-		 				<i className="fa fa-bookmark" style={ group.isMember ? {color: '#468dcb'} : {color: 'white'} }/>
+		 			<a className="list-group-item" href="#" key={'an__' + index} onClick={this.toggleBookmarkGroup.bind(this, group)}>
+		 				<i className="fa fa-bookmark" style={ this.state.selectedGroups[group.id] === true ? {color: '#468dcb'} : {color: 'white'} }/>
 		 				&nbsp;
-		 				{group.body[0].label}		 						 				
+		 				{group.body[0].label}
+		 				<span style={{'float' : 'right'}}>Members: {group.target.length}</span> 						 				
 		 			</a>
 		 		)
 		 	});
@@ -135,10 +169,13 @@ class BookmarkSelector extends React.Component {
 									className="form-control"
 								/>
 								<br/>
-								<button className="btn btn-primary" onClick={this.submitNewBookmark.bind(this)}>Use</button>
+								<button className="btn btn-primary" onClick={this.addNewBookmarkGroup.bind(this)}>Use</button>
 							</div>
 						</form>
 					</div>
+				</div>
+				<div className="row">
+					<button className="btn btn-primary" style={{'float' : 'right'}} onClick={this.onOutput.bind(this)}>Save</button>
 				</div>
 			</div>
 		)

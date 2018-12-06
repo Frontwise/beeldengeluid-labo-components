@@ -144,7 +144,9 @@ class ItemDetailsRecipe extends React.Component {
 				}
 			);
 		} else if(componentClass === 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}
 		} else if(componentClass === 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
 				source : data.assetId //data => mediaObject
@@ -395,28 +397,53 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
+		console.debug(selectedGroups)
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-			//concatenate this resource to the existing "bookmark annotation"
-			const targets = annotation.target;
-			targets.push(
-				AnnotationUtil.generateResourceLevelTarget(
-					this.state.itemData.index, //collectionId
-					this.state.itemData.resourceId
-				)
-			);
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
+			//run through all the bookmark groups to check if this resource is a member. Then check if it should be a member or not (anymore)
+			allGroups.forEach(group => {
+				console.debug('checking group membership of ' + group.id)
+				const targets = group.target;
+				const shouldBeMember = selectedGroups[group.id] === true; //should the resource be a member or not
+
+				console.debug('should be a member: ' + shouldBeMember)
+
+				//first see if the resource is a member of the current group
+				const index = targets.findIndex(t => t.source == this.state.itemData.resourceId)				
+
+				//this check only updates the bookmark group (and calls the annotation API) if membership changed
+				if(index != -1) { // if already a member
+					console.debug('already a member')
+					if(!shouldBeMember) { // ...and it shouldn't: remove it
+						console.debug('should not be though, removing')
+						targets.splice(index, 1);
+						group.target = targets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
+				} else { //if not a member
+					console.debug('not a member yet')
+					if(shouldBeMember) { // ...and it should be: add it
+						console.debug('should be though, adding')
+						targets.push(
+							AnnotationUtil.generateResourceLevelTarget(
+								this.state.itemData.index, //collectionId
+								this.state.itemData.resourceId
+							)
+						);
+						const temp = {};
+						const dedupedTargets = [];
+						targets.forEach((t) => {
+							if(!temp[t.source]) {
+								temp[t.source] = true;
+								dedupedTargets.push(t);
+							}
+						});
+						//set the deduped targets as the annotation target
+						group.target = dedupedTargets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
 				}
-			});
-			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
+			})			
 		});
 	}
 
@@ -926,6 +953,7 @@ class ItemDetailsRecipe extends React.Component {
 			let bookmarkModal = null;
 
 			let projectSelectorBtn = null;
+			let bookmarkIcon = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
             let resourceListPagingButtons = null;
@@ -1014,15 +1042,25 @@ class ItemDetailsRecipe extends React.Component {
 				);
 
 				
-				//draw the bookmark group button
-				const partOfBookmarkGroup = this.state.resourceAnnotations && this.state.resourceAnnotations.length > 0;								
-				bookmarkBtn = (
-					<button className="btn btn-primary" onClick={this.bookmark.bind(this)}>
-						Bookmark group(s)
-						&nbsp;
-						<i className="fa fa-star" style={ partOfBookmarkGroup ? {color: 'red'} : {color: 'white'} }/>
-					</button>
-				)
+				if(this.state.resourceAnnotations) {
+					//draw the bookmark group button					
+					bookmarkBtn = (
+						<button 
+							className="btn btn-primary" 
+							onClick={this.bookmark.bind(this)} 
+							title="Control the bookmark groups this resource is associated with">
+							Groups							
+							({this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking').length})
+						</button>
+					)
+
+					//draw the bookmark icon
+		            bookmarkIcon = (
+		            	<i className="fa fa-bookmark" style={
+							this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
+						}/>
+		            )
+		        }
 			}
 
 			//render the complete metadata block, which includes unique and basic metadata
@@ -1039,6 +1077,8 @@ class ItemDetailsRecipe extends React.Component {
 
 			//render the exploration block
             const exploreBlock = this.renderExploreBlock();
+            
+            
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1047,6 +1087,7 @@ class ItemDetailsRecipe extends React.Component {
 					{bookmarkModal}
 					<div className="row">
 						<div className="col-md-12">
+							{bookmarkIcon}
 							{projectSelectorBtn}
 							&nbsp;
 							{bookmarkBtn}
