@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-class ReadMoreCollection extends React.Component {
+class ReadMoreLink extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -28,11 +28,11 @@ class ReadMoreCollection extends React.Component {
     }
 }
 
-ReadMoreCollection.propTypes = {
+ReadMoreLink.propTypes = {
     linkUrl : PropTypes.string
 };
 
-ReadMoreCollection.defaultProps = {
+ReadMoreLink.defaultProps = {
     bg__url_ckan: 'bg__link-tag',
     containerClass : 'bg__read-more-link',
     heightImg : '16px',
@@ -43,4 +43,4 @@ ReadMoreCollection.defaultProps = {
     widthImg : '16px'
 };
 
-export default ReadMoreCollection;
+export default ReadMoreLink;

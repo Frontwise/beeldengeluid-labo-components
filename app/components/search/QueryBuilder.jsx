@@ -13,7 +13,7 @@ import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
-import ReadMoreCollection from '../../util/readMoreCollection/ReadMoreCollection';
+import ReadMoreLink from '../../util/readMoreLink/ReadMoreLink';
 import moment from 'moment';
 /*
 Notes about this component TODO rewrite:
@@ -339,7 +339,7 @@ class QueryBuilder extends React.Component {
             	currentCollectionTitle = this.props.collectionConfig.collectionInfo.title || null;
 
                 if (this.props.collectionConfig.collectionInfo.ckanUrl) {
-                    ckanLink = <ReadMoreCollection linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
+                    ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
                 }
             }
 

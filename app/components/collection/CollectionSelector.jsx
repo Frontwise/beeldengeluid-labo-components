@@ -3,7 +3,7 @@ import CollectionAPI from '../../api/CollectionAPI';
 
 import CollectionUtil from '../../util/CollectionUtil';
 import IDUtil from '../../util/IDUtil';
-import ReadMoreCollection from '../../util/readMoreCollection/ReadMoreCollection';
+import ReadMoreLink from '../../util/readMoreLink/ReadMoreLink';
 
 import PropTypes from 'prop-types';
 import { PowerSelect } from 'react-power-select';
@@ -129,7 +129,7 @@ class CollectionSelector extends React.Component {
 						organisationImage = (<img src={collection.organization.image_url}/>)
 					}
 					if (collection.ckanUrl) {
-						ckanLink = (<ReadMoreCollection linkUrl={collection.ckanUrl}/>)
+						ckanLink = (<ReadMoreLink linkUrl={collection.ckanUrl}/>)
 					}
 					return (
 					    <div className="bg__collection-wrapper">
