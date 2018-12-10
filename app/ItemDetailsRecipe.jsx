@@ -259,6 +259,7 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//TODO currently this is only called via the ugly componentDidUpdate() function
+	//FIXME this only properly supports whenever the target is a media object (see FlexPlayer)
 	setActiveAnnotationTarget(annotationTarget) {		
 		this.setState(
 			{annotationTarget : annotationTarget},
@@ -271,16 +272,11 @@ class ItemDetailsRecipe extends React.Component {
 	//overall there can be only one active annotation
 	//TODO extend with activeSubAnnotation?
 	setActiveAnnotation(annotation) {
-		this.setState(
-			{
-				activeAnnotation : annotation,
-				activeSubAnnotation : null,
-				annotationTarget : annotation.target
-			},
-			() => {
-				AnnotationActions.changeTarget(annotation.target)
-			}
-		);
+		this.setState({
+			annotationTarget: annotation.target,
+			activeAnnotation: annotation,
+			activeSubAnnotation : null
+		});
 	}
 
 	//tied to the annotateResourceBtn; used to annotate a resource as a whole
@@ -478,8 +474,7 @@ class ItemDetailsRecipe extends React.Component {
 		this.setState({
 			selectedRows : {},
 			allRowsSelected : false
-		}, () => {
-			console.debug('saved bookmark, refreshing the annotations', data);
+		}, () => {			
 			this.refreshResourceAnnotations();
 		})
 	}
@@ -1004,15 +999,18 @@ class ItemDetailsRecipe extends React.Component {
 					);
 				}
 
-				//draw the annotation list, which only shows annotations related to the active annotationTarget				
-				annotationList = (
-					<AnnotationList
-						user={this.props.user} //current user
-						project={this.state.activeProject} //selected via ProjectSelector
-						activeAnnotation={this.state.activeAnnotation} //the active annotation
-						annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
-					/>
-				);
+				//draw the annotation list, which only shows annotations related to the active annotationTarget								
+				if(this.state.annotationTarget) {
+					annotationList = (
+						<AnnotationList
+							key={'__anno-list__' + this.state.annotationTarget.source}
+							user={this.props.user} //current user
+							project={this.state.activeProject} //selected via ProjectSelector
+							activeAnnotation={this.state.activeAnnotation} //the active annotation
+							annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
+						/>
+					);
+				}
 
 				//draw the button for annotating the resource as a whole
 				const hasResourceAnnotation = this.getResourceAnnotation() ? true : false;
