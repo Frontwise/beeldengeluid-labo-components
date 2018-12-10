@@ -111,7 +111,10 @@ class SingleSearchRecipe extends React.Component {
             AnnotationAPI.getBookmarks(
                 this.props.user.id,
                 this.state.activeProject.id,
-                data => ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                (data) => {
+                	console.debug('latest bookmarks', data);
+                	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                }
             ) :
             false;
     }

@@ -63,9 +63,15 @@ class SearchHit extends React.Component {
         	).join('')
         	html += '</ul>';
     	}
+    	let bodyCount = 0;    	
     	if(this.props.bookmark.annotations) {
-    		html += '<h5><u>Number of annotations</u>: '+this.props.bookmark.annotations.length+'</h5>';
+    		bodyCount += this.props.bookmark.annotations.length
+    		
     	}
+    	if(this.props.bookmark.segments) {
+    		this.props.bookmark.segments.forEach(segment => bodyCount += segment.annotations ? segment.annotations.length : 0)    		
+    	}
+    	html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
         return html;
     }
 

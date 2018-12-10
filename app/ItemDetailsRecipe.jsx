@@ -259,7 +259,7 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//TODO currently this is only called via the ugly componentDidUpdate() function
-	setActiveAnnotationTarget(annotationTarget) {
+	setActiveAnnotationTarget(annotationTarget) {		
 		this.setState(
 			{annotationTarget : annotationTarget},
 			() => {
@@ -271,9 +271,16 @@ class ItemDetailsRecipe extends React.Component {
 	//overall there can be only one active annotation
 	//TODO extend with activeSubAnnotation?
 	setActiveAnnotation(annotation) {
-		this.setState({
-			activeAnnotation : annotation
-		})
+		this.setState(
+			{
+				activeAnnotation : annotation,
+				activeSubAnnotation : null,
+				annotationTarget : annotation.target
+			},
+			() => {
+				AnnotationActions.changeTarget(annotation.target)
+			}
+		);
 	}
 
 	//tied to the annotateResourceBtn; used to annotate a resource as a whole
@@ -306,9 +313,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	//show the annnotation form with the correct annotation target
 	//TODO extend this so the target can also be a piece of text or whatever
-	editAnnotation(annotation, subAnnotation) {
-		//TODO this should simply always just set the active annotation
-		//an annotation ALWAYS has a target, but not always a body or ID (in case of a new annotation)
+	editAnnotation(annotation, subAnnotation) {		
 		if(annotation.target) {
 			this.setState({
 				showModal: true,
@@ -364,9 +369,16 @@ class ItemDetailsRecipe extends React.Component {
         	).join('')
         	html += '</ul>';
     	}
-    	if(annotations) {
-    		html += '<h5><u>Number of annotations</u>: '+annotations.length+'</h5>';
+    	//count the number of annotation bodies
+    	if(annotations) {    		
+    		//html += '<h5><u>Number of annotated parts of this resource</u>: '+annotations.length+'</h5>';
+    		//count the number of annotation bodies
+    		let bodyCount = 0;
+    		annotations.forEach(a => bodyCount += a.body ? a.body.length : 0)
+    		html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
     	}
+
+
         return html;
     }
 
@@ -991,6 +1003,8 @@ class ItemDetailsRecipe extends React.Component {
 						</FlexModal>
 					);
 				}
+
+				//draw the annotation list, which only shows annotations related to the active annotationTarget				
 				annotationList = (
 					<AnnotationList
 						user={this.props.user} //current user
