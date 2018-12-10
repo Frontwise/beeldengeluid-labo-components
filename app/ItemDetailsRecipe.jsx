@@ -349,6 +349,27 @@ class ItemDetailsRecipe extends React.Component {
 		})
 	}
 
+	renderResourceAnnotationsTooltip() {
+    	if(!this.state.resourceAnnotations) {
+    		return null;
+    	}
+    	let html = ''
+    	const bookmarkGroups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
+    	const annotations = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking');
+
+    	if (bookmarkGroups.length > 0) {
+    		html += '<h5><u>Bookmark group(s)</u>:</h5><ul>';
+    		html += bookmarkGroups.map(
+         	   group => group.body && group.body.length > 0 && group.body[0].label ? "<li>" + group.body[0].label + "</li>" : ''
+        	).join('')
+        	html += '</ul>';
+    	}
+    	if(annotations) {
+    		html += '<h5><u>Number of annotations</u>: '+annotations.length+'</h5>';
+    	}
+        return html;
+    }
+
 	/* ------------------------------------------------------------------
 	----------------------- PROJECTS ------------------------------------
 	--------------------------------------------------------------------- */
@@ -1050,9 +1071,12 @@ class ItemDetailsRecipe extends React.Component {
 
 					//draw the bookmark icon
 		            bookmarkIcon = (
-		            	<i className="fa fa-bookmark" style={
-							this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
-						}/>
+		            	 <div data-for="__res_anno" data-tip={this.renderResourceAnnotationsTooltip()} data-html={true} className="bookmarked">
+							<i className="fa fa-bookmark" style={
+								this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
+							}/>
+							<ReactTooltip id={'__res_anno'}/>
+						</div>		            	
 		            )
 		        }
 			}

@@ -96,12 +96,14 @@ class SingleSearchRecipe extends React.Component {
 				collectionId = this.props.recipe.ingredients.collection;
 			}
 		}
-		if(!loadingFromWorkSpace) {
-			this.onReloadQueryData(collectionId, initialQuery);
-		}
+
 		//always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
+		
+		if(!loadingFromWorkSpace) {
+			this.onReloadQueryData(collectionId, initialQuery);
+		}		
 	}
     // current bookmarks per project
 	saveBookmarksToLocalStorage() {

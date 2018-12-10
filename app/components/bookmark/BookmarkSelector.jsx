@@ -145,7 +145,7 @@ class BookmarkSelector extends React.Component {
 		 				<i className="fa fa-bookmark" style={ this.state.selectedGroups[group.id] === true ? {color: '#468dcb'} : {color: 'white'} }/>
 		 				&nbsp;
 		 				{group.body[0].label}
-		 				<span class="member-count">Bookmarks: {group.target.length}</span> 						 				
+		 				<span className="member-count">Bookmarks: {group.target.length}</span> 						 				
 		 			</a>
 		 		)
 		 	});
@@ -168,8 +168,8 @@ class BookmarkSelector extends React.Component {
 						<form>
 							<div className="form-group">
 								<h4>Bookmark group</h4>
-								<div class="input-group">
-									<div class="input-group-btn">    
+								<div className="input-group">
+									<div className="input-group-btn">    
 										<button className="btn btn-default" onClick={this.addNewBookmarkGroup.bind(this)}>New</button>
 									</div>
 									<input

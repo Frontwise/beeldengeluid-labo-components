@@ -1,4 +1,10 @@
 .bg__item-details-recipe {
+	
+	.bookmarked {
+    	float: left;
+    	padding: 9px 12px;
+	}
+
 	.bg__rcp__id__media-player {}
 
 	.bg__rcp__id__keyword-browser {
@@ -30,6 +36,7 @@
 		margin: 0;
 		padding: 0;
 	}
+
 	.cl_table-cell {
 		box-sizing: border-box;
 		flex-grow: 1;
@@ -61,9 +68,11 @@
 		width: 50%;
 
 	}
+
 	.cl_table--2cols > .left-cell  {
 		width: 60%;
 	}
+
 	.cl_table--2cols > .right-cell  {
 		width: 40%;
 	}
