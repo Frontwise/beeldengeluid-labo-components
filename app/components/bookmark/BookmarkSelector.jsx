@@ -82,11 +82,15 @@ class BookmarkSelector extends React.Component {
 			"label": this.setSearchTerm.value,
 			"user": this.props.user.id
 		}]
+		//assign a guid, so the multi-select mechanism does not break in this component (context: normally the annotation ID is generated on the server)
+		annotation.id = IDUtil.guid();
 		const allBookmarkGroups = this.state.allBookmarkGroups;
 		allBookmarkGroups.push(annotation);
+
+		//update the state and reset the text field to ''
 		this.setState({
 			allBookmarkGroups : allBookmarkGroups
-		})
+		}, () => {this.setSearchTerm.value = ''})
 	}
 
 	//selects or deselects a bunch of groups
@@ -114,6 +118,7 @@ class BookmarkSelector extends React.Component {
 		}
 	}
 
+	//TODO implement deleting groups from here
 	deleteGroup() {
 		console.debug('TO BE IMPLEMENTED');
 	}
@@ -140,7 +145,7 @@ class BookmarkSelector extends React.Component {
 		 				<i className="fa fa-bookmark" style={ this.state.selectedGroups[group.id] === true ? {color: '#468dcb'} : {color: 'white'} }/>
 		 				&nbsp;
 		 				{group.body[0].label}
-		 				<span style={{'float' : 'right'}}>Members: {group.target.length}</span> 						 				
+		 				<span class="member-count">Bookmarks: {group.target.length}</span> 						 				
 		 			</a>
 		 		)
 		 	});
@@ -163,19 +168,23 @@ class BookmarkSelector extends React.Component {
 						<form>
 							<div className="form-group">
 								<h4>Bookmark group</h4>
-								<input
-                                    ref={input => (this.setSearchTerm = input)}
-									type="text"
-									className="form-control"
-								/>
-								<br/>
-								<button className="btn btn-primary" onClick={this.addNewBookmarkGroup.bind(this)}>Use</button>
+								<div class="input-group">
+									<div class="input-group-btn">    
+										<button className="btn btn-default" onClick={this.addNewBookmarkGroup.bind(this)}>New</button>
+									</div>
+									<input
+	                                    ref={input => (this.setSearchTerm = input)}
+										type="text"
+										className="form-control"
+										aria-label="Create new bookmark group"
+									/>									
+								</div>
 							</div>
 						</form>
 					</div>
 				</div>
 				<div className="row">
-					<button className="btn btn-primary" style={{'float' : 'right'}} onClick={this.onOutput.bind(this)}>Save</button>
+					<button className="btn btn-primary btn-save" onClick={this.onOutput.bind(this)}>Save</button>
 				</div>
 			</div>
 		)

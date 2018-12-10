@@ -398,38 +398,32 @@ class ItemDetailsRecipe extends React.Component {
 
 	//finally after a bookmark group is selected, save the bookmark
 	bookmarkToGroupInProject(allGroups, selectedGroups) {
-		console.debug(selectedGroups)
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
 			//run through all the bookmark groups to check if this resource is a member. Then check if it should be a member or not (anymore)
-			allGroups.forEach(group => {
-				console.debug('checking group membership of ' + group.id)
+			allGroups.forEach(group => {				
 				const targets = group.target;
 				const shouldBeMember = selectedGroups[group.id] === true; //should the resource be a member or not
-
-				console.debug('should be a member: ' + shouldBeMember)
-
+				
 				//first see if the resource is a member of the current group
 				const index = targets.findIndex(t => t.source == this.state.itemData.resourceId)				
 
 				//this check only updates the bookmark group (and calls the annotation API) if membership changed
-				if(index != -1) { // if already a member
-					console.debug('already a member')
-					if(!shouldBeMember) { // ...and it shouldn't: remove it
-						console.debug('should not be though, removing')
+				if(index != -1) { // if already a member					
+					if(!shouldBeMember) { // ...and it shouldn't: remove it						
 						targets.splice(index, 1);
 						group.target = targets;
 						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
 					}
-				} else { //if not a member
-					console.debug('not a member yet')
-					if(shouldBeMember) { // ...and it should be: add it
-						console.debug('should be though, adding')
+				} else { //if not a member					
+					if(shouldBeMember) { // ...and it should be: add it						
 						targets.push(
 							AnnotationUtil.generateResourceLevelTarget(
 								this.state.itemData.index, //collectionId
 								this.state.itemData.resourceId
 							)
 						);
+
+						//FIXME remove: this deduplocation check should not be necessary?
 						const temp = {};
 						const dedupedTargets = [];
 						targets.forEach((t) => {
@@ -1022,7 +1016,7 @@ class ItemDetailsRecipe extends React.Component {
 							stateVariable="showBookmarkModal"
 							owner={this}
 							size="large"
-							title="Select or enter a bookmark group for the selected resource">
+							title="Select one or more bookmark groups to associate the current resource with">
 								<BookmarkSelector
 									onOutput={this.onComponentOutput.bind(this)}
 									user={this.props.user}

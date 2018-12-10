@@ -196,7 +196,9 @@ class SingleSearchRecipe extends React.Component {
 				}
 			);
 		} else if(componentClass === 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}			
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -404,31 +406,38 @@ class SingleSearchRecipe extends React.Component {
             showBookmarkedItems : false
 		});
 	}
-
-    // adds the selected resources to the selected bookmark groups
-    // TODO this should become a list of targets
-	bookmarkToGroupInProject(bookmarkGroup) {
+    
+    // makes sure that all selected resources are ADDED to the selected groups
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-
         ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-            const targets = bookmarkGroup.target
-                .concat(selectedRows.map((result) => AnnotationUtil.generateResourceLevelTarget(
-					result._index,
-					result._id
-				), this));
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
-				}
-			});
+        	let saveCount = 0;
+        	//run through all the selected groups
+        	allGroups.filter(group => selectedGroups[group.id] === true).forEach(group => {
+        		//then add all the selected resources to the group's list of targets
+        		const targets = group.target.concat(
+        			selectedRows.map(result => AnnotationUtil.generateResourceLevelTarget(result._index, result._id))
+        		);
 
-			//set the deduped targets as the annotation target
-			bookmarkGroup.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(bookmarkGroup, this.onSaveBookmarks.bind(this));
+        		//make sure to remove duplicate targets (could happen in case a target was already in a group)
+				const temp = {};
+				const dedupedTargets = [];
+				targets.forEach((t) => {
+					if(!temp[t.source]) {
+						temp[t.source] = true;
+						dedupedTargets.push(t);
+					}
+				});				
+				group.target = dedupedTargets;
+				
+				//FIXME this code is not entirely safe: what if somehow the saveAnnotation does not return?
+				AnnotationAPI.saveAnnotation(group, () => {					
+					if(++saveCount == Object.keys(selectedGroups).length) {
+						this.onSaveBookmarks();
+					}
+				});
+        	});
+            
 		});
 	}
 
@@ -569,7 +578,7 @@ class SingleSearchRecipe extends React.Component {
 					stateVariable="showBookmarkModal"
 					owner={this}
 					size="large"
-					title="Select or enter a bookmark group">
+					title="Select one or more bookmark groups for your selection of resources">
 						<BookmarkSelector
 							onOutput={this.onComponentOutput.bind(this)}
 							user={this.props.user}
