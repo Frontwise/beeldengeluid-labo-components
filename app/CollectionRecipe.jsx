@@ -2,7 +2,7 @@ import IDUtil from './util/IDUtil';
 import FlexRouter from './util/FlexRouter';
 import ComponentUtil from './util/ComponentUtil';
 import CollectionUtil from './util/CollectionUtil';
-import ReadMoreLink from './util/readMoreLink/ReadMoreLink';
+import ReadMoreLink from './components/helpers/ReadMoreLink';
 
 import CollectionAPI from './api/CollectionAPI';
 

@@ -3,7 +3,7 @@ import CollectionAPI from '../../api/CollectionAPI';
 
 import CollectionUtil from '../../util/CollectionUtil';
 import IDUtil from '../../util/IDUtil';
-import ReadMoreLink from '../../util/readMoreLink/ReadMoreLink';
+import ReadMoreLink from '../helpers/ReadMoreLink';
 
 import PropTypes from 'prop-types';
 import { PowerSelect } from 'react-power-select';

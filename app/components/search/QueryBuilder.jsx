@@ -13,7 +13,7 @@ import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
-import ReadMoreLink from '../../util/readMoreLink/ReadMoreLink';
+import ReadMoreLink from '../helpers/ReadMoreLink';
 import moment from 'moment';
 /*
 Notes about this component TODO rewrite:
