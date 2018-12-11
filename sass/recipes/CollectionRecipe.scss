@@ -12,6 +12,17 @@
 			border-radius: 6px;
 		}
 	}
+	.list-group-item {
+		.bg__read-more-link {
+			float: right;
+		}
+
+		&.active {
+			.bg__link-tag {
+				color: #fff;
+			}
+		}
+	}
 	.fieldAnalysisStats {
 		background-color: $subdued-bg;
 		border-radius: 6px;
