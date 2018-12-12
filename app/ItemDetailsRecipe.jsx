@@ -144,7 +144,9 @@ class ItemDetailsRecipe extends React.Component {
 				}
 			);
 		} else if(componentClass === 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}
 		} else if(componentClass === 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
 				source : data.assetId //data => mediaObject
@@ -203,12 +205,7 @@ class ItemDetailsRecipe extends React.Component {
 						}
 
 						//finally load the resource annotation with motivation bookmarking
-						AnnotationStore.getDirectResourceAnnotations(
-							itemDetailData.resourceId,
-							this.props.user,
-							this.state.activeProject,
-							this.onLoadResourceAnnotations.bind(this)
-						)
+						this.refreshResourceAnnotations(itemDetailData.resourceId);
 					}
 				}.bind(this));
 		}
@@ -251,22 +248,19 @@ class ItemDetailsRecipe extends React.Component {
 
 	onSaveAnnotation(annotation) {
 		ComponentUtil.hideModal(this, 'showModal' , 'annotation__modal', true);
-		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type === 'Resource') {
-			this.refreshResourceAnnotations();
-		}
+		//finally update the resource annotations (the "bookmark")		
+		this.refreshResourceAnnotations();		
 	}
 
 	onDeleteAnnotation(annotation) {
 		ComponentUtil.hideModal(this, 'showModal', 'annotation__modal', true);
-		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type === 'Resource') {
-			this.refreshResourceAnnotations();
-		}
+		//finally update the resource annotations (the "bookmark")		
+		this.refreshResourceAnnotations();
 	}
 
 	//TODO currently this is only called via the ugly componentDidUpdate() function
-	setActiveAnnotationTarget(annotationTarget) {
+	//FIXME this only properly supports whenever the target is a media object (see FlexPlayer)
+	setActiveAnnotationTarget(annotationTarget) {		
 		this.setState(
 			{annotationTarget : annotationTarget},
 			() => {
@@ -279,8 +273,10 @@ class ItemDetailsRecipe extends React.Component {
 	//TODO extend with activeSubAnnotation?
 	setActiveAnnotation(annotation) {
 		this.setState({
-			activeAnnotation : annotation
-		})
+			annotationTarget: annotation.target,
+			activeAnnotation: annotation,
+			activeSubAnnotation : null
+		});
 	}
 
 	//tied to the annotateResourceBtn; used to annotate a resource as a whole
@@ -299,10 +295,13 @@ class ItemDetailsRecipe extends React.Component {
 		}
 	}
 
+	//returns the annotation that is directly added to the resource via the "Annotate resource" button
 	getResourceAnnotation() {
 		let annotation = null;
 		if(this.state.resourceAnnotations) {
-			const temp = this.state.resourceAnnotations.filter(a => a.motivation !== 'bookmarking')
+			const temp = this.state.resourceAnnotations.filter(
+				a => a.motivation !== 'bookmarking' && a.target.source === this.state.itemData.resourceId
+			)
 			annotation = temp.length > 0 ? temp[0] : null;
 		}
 		return annotation
@@ -310,9 +309,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	//show the annnotation form with the correct annotation target
 	//TODO extend this so the target can also be a piece of text or whatever
-	editAnnotation(annotation, subAnnotation) {
-		//TODO this should simply always just set the active annotation
-		//an annotation ALWAYS has a target, but not always a body or ID (in case of a new annotation)
+	editAnnotation(annotation, subAnnotation) {		
 		if(annotation.target) {
 			this.setState({
 				showModal: true,
@@ -323,21 +320,63 @@ class ItemDetailsRecipe extends React.Component {
 		}
 	}
 
-	refreshResourceAnnotations() {
-		AnnotationStore.getDirectResourceAnnotations(
-			this.state.itemData.resourceId,
-			this.props.user,
-			this.state.activeProject,
-			this.onLoadResourceAnnotations.bind(this)
-		)
-	}
+	//returns all annotations that are tied to the given resourceId
+	refreshResourceAnnotations(resourceId = null) {
+		if(resourceId == null) {
+			resourceId = this.state.itemData.resourceId;
+		}		
+		const filter = {			
+			'target.selector.value.id' : resourceId,
+			'user.keyword' : this.props.user.id,
+		}
+		if(this.state.activeProject && this.state.activeProject.id) {
+			filter['project'] = this.state.activeProject.id
+		}
+		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id, 
+			filter, 
+			null, 
+			this.onLoadResourceAnnotations.bind(this), 
+			0, //offset
+			250, //size
+			null, //sort direction
+			null //dateRange
+		);
+	}	
 
-	//TODO loaded all bookmarks associated with this resource (e.g. program, newspaper)
-	onLoadResourceAnnotations(annotationList) {
+	onLoadResourceAnnotations(annotationList) {		
 		this.setState({
 			resourceAnnotations : annotationList || []
 		})
 	}
+
+	renderResourceAnnotationsTooltip() {
+    	if(!this.state.resourceAnnotations) {
+    		return null;
+    	}
+    	let html = ''
+    	const bookmarkGroups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
+    	const annotations = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking');
+
+    	if (bookmarkGroups.length > 0) {
+    		html += '<h5><u>Bookmark group(s)</u>:</h5><ul>';
+    		html += bookmarkGroups.map(
+         	   group => group.body && group.body.length > 0 && group.body[0].label ? "<li>" + group.body[0].label + "</li>" : ''
+        	).join('')
+        	html += '</ul>';
+    	}
+    	//count the number of annotation bodies
+    	if(annotations) {    		
+    		//html += '<h5><u>Number of annotated parts of this resource</u>: '+annotations.length+'</h5>';
+    		//count the number of annotation bodies
+    		let bodyCount = 0;
+    		annotations.forEach(a => bodyCount += a.body ? a.body.length : 0)
+    		html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
+    	}
+
+
+        return html;
+    }
 
 	/* ------------------------------------------------------------------
 	----------------------- PROJECTS ------------------------------------
@@ -387,28 +426,47 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-			//concatenate this resource to the existing "bookmark annotation"
-			const targets = annotation.target;
-			targets.push(
-				AnnotationUtil.generateResourceLevelTarget(
-					this.state.itemData.index, //collectionId
-					this.state.itemData.resourceId
-				)
-			);
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
+			//run through all the bookmark groups to check if this resource is a member. Then check if it should be a member or not (anymore)
+			allGroups.forEach(group => {				
+				const targets = group.target;
+				const shouldBeMember = selectedGroups[group.id] === true; //should the resource be a member or not
+				
+				//first see if the resource is a member of the current group
+				const index = targets.findIndex(t => t.source == this.state.itemData.resourceId)				
+
+				//this check only updates the bookmark group (and calls the annotation API) if membership changed
+				if(index != -1) { // if already a member					
+					if(!shouldBeMember) { // ...and it shouldn't: remove it						
+						targets.splice(index, 1);
+						group.target = targets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
+				} else { //if not a member					
+					if(shouldBeMember) { // ...and it should be: add it						
+						targets.push(
+							AnnotationUtil.generateResourceLevelTarget(
+								this.state.itemData.index, //collectionId
+								this.state.itemData.resourceId
+							)
+						);
+
+						//FIXME remove: this deduplocation check should not be necessary?
+						const temp = {};
+						const dedupedTargets = [];
+						targets.forEach((t) => {
+							if(!temp[t.source]) {
+								temp[t.source] = true;
+								dedupedTargets.push(t);
+							}
+						});
+						//set the deduped targets as the annotation target
+						group.target = dedupedTargets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
 				}
-			});
-			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
+			})			
 		});
 	}
 
@@ -416,8 +474,7 @@ class ItemDetailsRecipe extends React.Component {
 		this.setState({
 			selectedRows : {},
 			allRowsSelected : false
-		}, () => {
-			console.debug('saved bookmark, refreshing the annotations', data);
+		}, () => {			
 			this.refreshResourceAnnotations();
 		})
 	}
@@ -806,8 +863,7 @@ class ItemDetailsRecipe extends React.Component {
     renderResultListPagingButtons() {
     	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
     	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
-    	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-		console.debug(selectedRows);
+    	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');		
     	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
 
     	if(!userLastQuery || !searchResults || !queryOutput) {
@@ -919,6 +975,7 @@ class ItemDetailsRecipe extends React.Component {
 			let bookmarkModal = null;
 
 			let projectSelectorBtn = null;
+			let bookmarkIcon = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
             let resourceListPagingButtons = null;
@@ -941,19 +998,27 @@ class ItemDetailsRecipe extends React.Component {
 						</FlexModal>
 					);
 				}
-				annotationList = (
-					<AnnotationList
-						user={this.props.user} //current user
-						project={this.state.activeProject} //selected via ProjectSelector
-						activeAnnotation={this.state.activeAnnotation} //the active annotation
-						annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
-					/>
-				);
 
+				//draw the annotation list, which only shows annotations related to the active annotationTarget								
+				if(this.state.annotationTarget) {
+					annotationList = (
+						<AnnotationList
+							key={'__anno-list__' + this.state.annotationTarget.source}
+							user={this.props.user} //current user
+							project={this.state.activeProject} //selected via ProjectSelector
+							activeAnnotation={this.state.activeAnnotation} //the active annotation
+							annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
+						/>
+					);
+				}
 
+				//draw the button for annotating the resource as a whole
+				const hasResourceAnnotation = this.getResourceAnnotation() ? true : false;
 				resourceAnnotationBtn = (
 					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
 						Annotate resource
+						&nbsp;
+						<i className="fa fa-star" style={ hasResourceAnnotation ? {color: 'red'} : {color: 'white'} }/>
 					</button>
 				);
 			}
@@ -984,12 +1049,13 @@ class ItemDetailsRecipe extends React.Component {
 							stateVariable="showBookmarkModal"
 							owner={this}
 							size="large"
-							title="Select or enter a bookmark group">
+							title="Select one or more bookmark groups to associate the current resource with">
 								<BookmarkSelector
 									onOutput={this.onComponentOutput.bind(this)}
 									user={this.props.user}
 									project={this.state.activeProject}
 									collectionId={this.state.itemData.index}
+									resourceId={this.state.itemData.resourceId}
 									/>
 						</FlexModal>
 					)
@@ -1002,21 +1068,29 @@ class ItemDetailsRecipe extends React.Component {
 					</button>
 				);
 
-				//let's determine whether the resource was added to a bookmark group
-				let partOfBookmarkGroup = false;
+				
 				if(this.state.resourceAnnotations) {
-					const groups = this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking');
-					partOfBookmarkGroup = groups.length > 0;
-				}
+					//draw the bookmark group button					
+					bookmarkBtn = (
+						<button 
+							className="btn btn-primary" 
+							onClick={this.bookmark.bind(this)} 
+							title="Control the bookmark groups this resource is associated with">
+							Groups							
+							({this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking').length})
+						</button>
+					)
 
-				//bookmark button (TODO query for determining existing bookmark should be updated!!!)
-				bookmarkBtn = (
-					<button className="btn btn-primary" onClick={this.bookmark.bind(this)}>
-						Bookmark
-						&nbsp;
-						<i className="fa fa-star" style={ partOfBookmarkGroup ? {color: 'red'} : {color: 'white'} }/>
-					</button>
-				)
+					//draw the bookmark icon
+		            bookmarkIcon = (
+		            	 <div data-for="__res_anno" data-tip={this.renderResourceAnnotationsTooltip()} data-html={true} className="bookmarked">
+							<i className="fa fa-bookmark" style={
+								this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
+							}/>
+							<ReactTooltip id={'__res_anno'}/>
+						</div>		            	
+		            )
+		        }
 			}
 
 			//render the complete metadata block, which includes unique and basic metadata
@@ -1033,6 +1107,8 @@ class ItemDetailsRecipe extends React.Component {
 
 			//render the exploration block
             const exploreBlock = this.renderExploreBlock();
+            
+            
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1041,6 +1117,7 @@ class ItemDetailsRecipe extends React.Component {
 					{bookmarkModal}
 					<div className="row">
 						<div className="col-md-12">
+							{bookmarkIcon}
 							{projectSelectorBtn}
 							&nbsp;
 							{bookmarkBtn}
