@@ -192,12 +192,16 @@ class ItemDetailsRecipe extends React.Component {
 						};
 						//TODO make sure this works for all carriers!!
 						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
-							PlayoutAPI.requestAccess(
+						    if (itemDetailData.playableContent.length > 0){
+						        PlayoutAPI.requestAccess(
 								itemDetailData.playableContent[0].contentServerId,
 								itemDetailData.playableContent[0].contentId,
 								desiredState,
 								this.onLoadPlayoutAccess.bind(this)
-							)
+							    )
+						    } else {
+						        this.setState(desiredState);
+						    }
 						} else {
 							this.setState(desiredState);
 						}

@@ -299,6 +299,11 @@ class CollectionConfig {
 		return null;
 	}
 
+	// returns the date as a single value to use in sorting.
+	getInitialDate(date) {
+	    return date ? date : null;
+    }
+
 	//if the data has translations within its metadata
 	getPreferredLanguage() {
 		return null;
@@ -392,7 +397,7 @@ class CollectionConfig {
 			result.start = result._source.start ? result._source.start : 0;
 			result.end = result._source.end ? result._source.end : -1;
 		}
-		if(result.playableContent){
+		if(result.playableContent && result.playableContent.length > 0){
 		    snippet['playable'] = true;
 		} else
 		    snippet['playable']= false;

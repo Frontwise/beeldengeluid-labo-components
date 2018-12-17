@@ -2,6 +2,7 @@
 
 import IconUtil from '../../util/IconUtil';
 import IDUtil from '../../util/IDUtil';
+import RegexUtil from '../../util/RegexUtil';
 import CollectionUtil from '../../util/CollectionUtil';
 import Classification from '../annotation/Classification';
 
@@ -24,18 +25,22 @@ class SearchSnippet extends React.Component {
 
     highlightSearchedTerm(text) {
 		if(text === null) {
-		 	return text
+		 	return text;
 		}
-        let regex = new RegExp(this.stripQuotes(this.props.searchTerm), 'gi');
-        return text.replace(regex, (term) => "<span class='highLightText'>" + term + "</span>");
-    }
+		if(this.props.searchTerm){
+            let regex = RegexUtil.generateRegexForSearchTerm(this.props.searchTerm);
+            return text.replace(regex, (term) => "<span class='highLightText'>" + term + "</span>");
+		} else {
+		    return text;
+		}
+	}
 
-    stripQuotes(str) {
-    	if(str.startsWith('"') && str.endsWith('"') && str.length > 2) {
-			return str.substring(1, str.length -1)
-		}
-		return str
-    }
+//    stripQuotes(str) {
+//    	if(str.startsWith('"') && str.endsWith('"') && str.length > 2) {
+//			return str.substring(1, str.length -1)
+//		}
+//		return str
+//    }
 
     createMarkup(text){
 		return {__html: text}
@@ -134,10 +139,7 @@ class SearchSnippet extends React.Component {
 					</h4>
 					<span className="snippet_description" dangerouslySetInnerHTML={this.createMarkup(
                         this.highlightSearchedTerm(CollectionUtil.highlightSearchTermInDescription(
-                            this.props.data.description,
-                            this.stripQuotes(this.props.searchTerm),
-                            35
-                        ))
+                            this.props.data.description, this.props.searchTerm, 35))
 					)} />
 					{fragmentInfo}
 					{tags}
