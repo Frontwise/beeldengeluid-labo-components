@@ -13,7 +13,7 @@ class AggregationList extends React.Component {
         this.state = {
             showModal: false,
             showModalWarning: false,
-            facetItems: this.props.aggregations || null
+            sortModes: {}
         };
         this.CLASS_PREFIX = 'agl';
         this.minToShow = 5;
@@ -118,7 +118,8 @@ class AggregationList extends React.Component {
         }
     }
 
-    //FIXME this does not work yet for removing empty aggregations!
+    /*------------------------------------- REMOVE DIALOG ----------------------------*/
+
     showRemoveDialog(key, index) {
         this.currentFacet = key;
         if(document.querySelector("#index__"+ index)) {
@@ -147,48 +148,59 @@ class AggregationList extends React.Component {
         this.onOutput(desiredFacets, this.props.selectedFacets);
     }
 
+    /*------------------------------------- EXCLUDE MODE AGGREGATION ----------------------------*/
+
     toggleExcludeFacets(index) {
         this.props.desiredFacets[index]['exclude'] = !this.props.desiredFacets[index]['exclude'];
         this.onOutput(this.props.desiredFacets, this.props.selectedFacets);
     }
 
-    sorting(arr, order="asc", type="alpha", index) {
-        const currentFacets = arr;
-        let facetA, facetB;
-        arr.sort(function (a, b) {
-            //define order
-            if(type === "alpha") {
-                if (order === 'desc') {
-                    facetA = b.key.toLowerCase(), facetB = a.key.toLowerCase();
-                } else {
-                    facetA = a.key.toLowerCase(), facetB = b.key.toLowerCase();
+    /*------------------------------------- SORTING FACETS ----------------------------*/
+
+    setSortingMode(aggrField, type, direction) {
+        const sortModes = this.state.sortModes;
+        sortModes[aggrField] = {
+            type : type,
+            direction, direction
+        }
+        this.setState({sortModes : sortModes})
+    }
+
+    sortFacetList(a, b, sortType, sortDirection) {
+        if(sortType === 'alpha') {
+            if (sortDirection === 'desc') {
+                if(b.key.toLowerCase() < a.key.toLowerCase()) {
+                    return -1;
+                } else if(b.key.toLowerCase() > a.key.toLowerCase()) {
+                    return 1;
                 }
-            } else {
-                if (order === 'desc') {
-                    facetA = b.doc_count, facetB = a.doc_count;
-                } else {
-                    facetA = a.doc_count, facetB = b.doc_count;
+            } else { //asc
+                if(a.key.toLowerCase() < b.key.toLowerCase()) {
+                    return -1;
+                } else if(a.key.toLowerCase() > b.key.toLowerCase()) {
+                    return 1;
                 }
             }
-            return (facetA < facetB ? -1 : 1);
-        });
-
-        //FIXME this is not a nice way to update the properties!
-        const aggregationsFromProps = {
-            ...this.state.facetItems,
-            index: currentFacets
-        };
-
-        this.setState({facetItems: aggregationsFromProps});
+            return 0;
+        } else { //non-alpha
+            if (sortDirection === 'desc') {
+                return b.count - a.count;
+            } else {
+                return a.count - b.count;
+            }
+        }
     }
+
+    /*------------------------------------- FUNCTIONS FOR RENDERING ----------------------------*/
 
     //returns render friendly object based on the data supplied in the props
     generateUIData() {
+
         //will be ultimately returned containing a list of ui data per "desired aggregation"
         const uiData = []
 
-        //first filter out the histogram facets not supported in this view
-        const aggregationData = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
+        //firt filter out the histogram aggregations: they are not supported in this list view
+        const desiredFacets = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
             aggr => aggr.type !== 'date_histogram'
         );
 
@@ -202,9 +214,19 @@ class AggregationList extends React.Component {
             });
         });
 
-        aggregationData.forEach((da, index) => {
+        //loop through the desired facets, available in the state
+        desiredFacets.forEach((da, index) => {
             //first check if the aggregation has anything in it
             const isEmptyAggr = this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0 ? false : true;
+
+            //then determine the sort mode
+            let sortMode = this.state.sortModes[da.field];
+            if(!sortMode) {
+                sortMode = {
+                    type : 'alpha',
+                    direction : 'asc'
+                }
+            }
 
             //then parse the retrieved facets/buckets
             let facets = [];
@@ -226,7 +248,7 @@ class AggregationList extends React.Component {
 
                 //sort them properly (selected facets go on top)
                 facets.sort((a, b) => { // first sort the whole list of facets
-                    return a.key - b.key
+                    return this.sortFacetList(a, b, sortMode.type, sortMode.direction)
                 })
                 facets = facets.filter( // filter out the selected ones
                     f => !f.selected
@@ -322,25 +344,25 @@ class AggregationList extends React.Component {
                             <label htmlFor={aggr.field} data-on="Excl" data-off="Incl"/></span>
                         </li>
                         <li title="Alphanumeric descending" onClick={
-                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "alpha", aggr.field)
+                            this.setSortingMode.bind(this, aggr.field, 'alpha', 'desc')
                         }>
                             <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
                         </li>
                         <li title="Alphanumeric ascending" onClick={
-                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'asc', "alpha", aggr.field)
+                            this.setSortingMode.bind(this, aggr.field, 'alpha', 'asc')
                         }>
                             <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
                         <li title="Numeric Asceding" onClick={
-                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'asc', "non-alpha", aggr.field)
+                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'asc')
                         }>
                             <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"/> </li>
                         <li title="Numeric descending" onClick={
-                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "non-alpha", aggr.field)
+                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'desc')
                         }>
                             <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"/> </li>
 
                         <li title="Download as CSV" onClick={
-                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "non-alpha", aggr.field)
+                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'desc')
                         }>
                             <CSVLink
                                 filename={aggr.title}
@@ -379,10 +401,10 @@ class AggregationList extends React.Component {
         //loop through the non-empty "desired aggregations" (non-histogram only)
         uiData.filter(aggr => !aggr.empty).forEach(curAggr => {
 
-            //first add the non-empty aggregations
+            //add another (rendered) aggregation block to the list
             aggregationBlocks.push(this.renderAggregationBlock(curAggr));
 
-            //then add the selected facets from this aggregation to the list shown at the top
+            //add the (rendered) facets that are selected within the current aggregation block (to be displayed at the top)
             curAggr.facets.filter(f => f.selected).forEach((f, index) => {
                 let title = f.key;
                 let count = f.count;
@@ -400,7 +422,7 @@ class AggregationList extends React.Component {
 
         });
 
-        //then loop through the empty "desired aggregations"
+        //for each empty aggregation, add a (rendered) block to the list (of empty aggregations)
         emptyAggrBlocks = uiData.filter(aggr => aggr.empty).map((aggr, index) => {
             return (
                 <div className={IDUtil.cssClassName('hamburger-header aggregation-no-results', this.CLASS_PREFIX)}
