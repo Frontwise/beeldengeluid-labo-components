@@ -66,7 +66,7 @@ class AggregationList extends React.Component {
         document.querySelector("#index__" + t.index + " .switchViewText").textContent = t.text;
     }
 
-    __setViewItems(index, option) {
+    __generateViewItems(index, option) {
         const currentStatus = option === 'more' ?
             {
                 'text': 'Show More',
@@ -184,6 +184,8 @@ class AggregationList extends React.Component {
 
     //returns render friendly object based on the data supplied in the props
     generateUIData() {
+        //will be ultimately returned containing a list of ui data per "desired aggregation"
+        const uiData = []
 
         //first filter out the histogram facets not supported in this view
         const aggregationData = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
@@ -193,7 +195,6 @@ class AggregationList extends React.Component {
         //Check if all selected facets are in the desired aggragtion list, if not, add doc_count 0
         Object.keys(this.props.selectedFacets).forEach(field => {
             this.props.selectedFacets[field].forEach(facetValue => {
-                console.debug(field)
                 const found = this.props.aggregations[field].find(aggr => aggr['key'] === facetValue);
                 if(!found){
                     this.props.aggregations[field].push({'key':facetValue, 'doc_count': 0});
@@ -201,7 +202,6 @@ class AggregationList extends React.Component {
             });
         });
 
-        const uiData = {}
         aggregationData.forEach((da, index) => {
             //first check if the aggregation has anything in it
             const isEmptyAggr = this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0 ? false : true;
@@ -209,7 +209,7 @@ class AggregationList extends React.Component {
             //then parse the retrieved facets/buckets
             let facets = [];
             if(!isEmptyAggr) {
-                let facets = this.props.aggregations[da.field].map(facet => {
+                facets = this.props.aggregations[da.field].map(facet => {
                     let isSelected = false;
                     if (this.props.selectedFacets[da.field] && this.props.selectedFacets[da.field].indexOf(facet.key) != -1) {
                         isSelected = true;
@@ -237,30 +237,188 @@ class AggregationList extends React.Component {
             }
 
             //then add them to the conventient UI object (together with the exclusion property)
-            uiData[da.field] = {
+            uiData.push({
                 facets : facets,
                 exclude : da.exclude === undefined ? false : da.exclude,
+                field : da.field,
                 title : da.title,
                 empty : isEmptyAggr, //does the aggregation have anything in it
-                index : index // temprarily needed for guid
-            }
+                index : index, // temprarily needed for guid
+                guid : "facets__" + index
+            })
         });
         return uiData;
     }
 
-    render() {
-        let emptyAggrBlock = null; //contains aggregations without any results
-        const facets = [];
-        const selectedFacets = [];
-        const nonDateAggregations = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
-            aggr => aggr.type !== 'date_histogram'
-        );
+    renderAggregationBlock(aggr) {
 
+        //first generate the facet (options) to be included in the block later on
+        const sortedFacets = aggr.facets.map((f, index) => {
+            return (
+                <li key={'facet__' + aggr.index + '__' + index} hidden={!f.selected}
+                    className={IDUtil.cssClassName('facet-item', this.CLASS_PREFIX)}>
+                    <div className="checkbox">
+                        <input id={f.guid}
+                               type="checkbox"
+                               checked={f.selected}
+                               onChange={this.toggleSelectedFacet.bind(this, aggr.field, f.key)}/>
+                        <label>
+                            <span> </span>
+                            {f.key}&nbsp;({f.count})
+                        </label>
+                    </div>
+                </li>
+            )
+        });
+
+        //then determine which ones should be hidden
+        let hiddenCheckboxes = 0;
+        if (sortedFacets.length > 0) {
+            sortedFacets.forEach((item, index) => {
+                if (aggr.facets.filter(f => f.selected === true).length < this.minToShow && index < this.minToShow) {
+                    item.props.hidden = false;
+                } else {
+                    hiddenCheckboxes++;
+                }
+            });
+        }
+
+        //then draw the "show more" button, if needed
+        let changeViewItems = null;
+        if (hiddenCheckboxes > 0) {
+            changeViewItems = this.__generateViewItems(aggr.index, 'more');
+        }
+
+        //finally return the whole block with all of the (selected) facets and their counts etc...
+        return (
+            <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)}
+                key={'facet__' + aggr.index} id={'index__' + aggr.index}>
+                <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
+                    <input className="hamburger-toggle" type="checkbox" id={aggr.guid}/>
+                    <label htmlFor={aggr.guid}>
+                        <span className="bg__facet-title" data-for={'tooltip__' + aggr.index} data-tip={aggr.field}
+                              data-html={true}>
+                           <i className="fa fa-info-circle"/> {aggr.title}
+                                    </span>
+
+                        <span className="fa fa-remove" onClick={
+                            this.showRemoveDialog.bind(this, aggr.field, aggr.index)
+                        }/>
+                        <div className="hb">
+                            <div className="hb-line hb-line-top"/>
+                            <div className="hb-line hb-line-center"/>
+                        </div>
+                    </label>
+                    <ul className={aggr.guid}>
+                        <li className={IDUtil.cssClassName('aggregationSwitchBtn', this.CLASS_PREFIX)}>
+                            <span className="ms_toggle_btn">
+                                <input
+                                    type="checkbox"
+                                    id={aggr.field}
+                                    className="checkbox-toggle checkbox-toggle-round"
+                                    checked={this.props.desiredFacets[aggr.index]['exclude']}
+                                    onChange={this.toggleExcludeFacets.bind(this, aggr.index)}
+                                />
+                            <label htmlFor={aggr.field} data-on="Excl" data-off="Incl"/></span>
+                        </li>
+                        <li title="Alphanumeric descending" onClick={
+                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "alpha", aggr.field)
+                        }>
+                            <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
+                        </li>
+                        <li title="Alphanumeric ascending" onClick={
+                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'asc', "alpha", aggr.field)
+                        }>
+                            <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
+                        <li title="Numeric Asceding" onClick={
+                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'asc', "non-alpha", aggr.field)
+                        }>
+                            <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"/> </li>
+                        <li title="Numeric descending" onClick={
+                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "non-alpha", aggr.field)
+                        }>
+                            <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"/> </li>
+
+                        <li title="Download as CSV" onClick={
+                            this.sorting.bind(this, this.props.aggregations[aggr.field], 'desc', "non-alpha", aggr.field)
+                        }>
+                            <CSVLink
+                                filename={aggr.title}
+                                headers={[
+                                    {label: 'Value', key: 'key'},
+                                    {label: 'Count', key: 'doc_count'}
+                                ]}
+                                data={this.props.aggregations[aggr.field]}>
+                                <i className="fa fa-download" aria-hidden="true"/>
+                            </CSVLink>
+                        </li>
+                    </ul>
+                </div>
+                <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
+                    {sortedFacets}
+                </ul>
+                {changeViewItems}
+                <ReactTooltip id={'tooltip__' + aggr.index}/>
+            </div>
+        )
+    }
+
+    render() {
+        const uiData = this.generateUIData(); //contains all required data for generating the (empty) aggregation blocks and selected facets
+
+        const selectedFacets = []; //holds the list of selected facets to be displayed at the top
+
+        let emptyAggrBlocks = null; //contains aggregations without any results
+
+        const aggregationBlocks = []; //contains aggregations WITH results
+
+        //modals
         let aggregationCreatorModal = null;
         let aggregationModalWarning = null;
-        let selectedOpts = [];
-        let nrCheckedOpts = 0;
-        let emptyAggregations = [];
+
+        //loop through the non-empty "desired aggregations" (non-histogram only)
+        uiData.filter(aggr => !aggr.empty).forEach(curAggr => {
+
+            //first add the non-empty aggregations
+            aggregationBlocks.push(this.renderAggregationBlock(curAggr));
+
+            //then add the selected facets from this aggregation to the list shown at the top
+            curAggr.facets.filter(f => f.selected).forEach((f, index) => {
+                let title = f.key;
+                let count = f.count;
+                if(curAggr.exclude === true) {
+                    title = "NOT - " + title;
+                    count = 0;
+                }
+                selectedFacets.push(
+                    <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
+                        {title.toUpperCase()} ({count})
+                        <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, curAggr.field, f.key)}/>
+                    </div>
+                )
+            });
+
+        });
+
+        //then loop through the empty "desired aggregations"
+        emptyAggrBlocks = uiData.filter(aggr => aggr.empty).map((aggr, index) => {
+            return (
+                <div className={IDUtil.cssClassName('hamburger-header aggregation-no-results', this.CLASS_PREFIX)}
+                    key={'facet__' + aggr.index}
+                    id={'index__' + aggr.index}>
+                    <span data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
+                        <i className="fa fa-info-circle"/>
+                    </span>
+                    <h4 className="bg__empty-facet">
+                        (0) {aggr.title}
+                    </h4>
+                    <span className="fa fa-remove" onClick={
+                        this.showRemoveDialog.bind(this, aggr.field, aggr.index - 1)
+                    }/>
+                    <ReactTooltip id={'tooltip__' + aggr.index}/>
+                </div>
+            )
+        });
 
         //show modal for adding a new aggregation
         if (this.state.showModal) {
@@ -305,223 +463,6 @@ class AggregationList extends React.Component {
             )
         }
 
-        const uiData = this.generateUIData();
-        console.debug('UI DATA', uiData)
-
-        //only display aggregation blocks for non histogram facets
-        nonDateAggregations.forEach((da, index) => { //da stands for: desired aggregation
-            if (this.props.desiredFacets[index].exclude === undefined) {
-                this.props.desiredFacets[index].exclude = false;
-            }
-            const sortedOpts = [];
-            let options = null;
-            //console.debug('DESIRED FACET FIELD', da.field);
-            if (this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0) {
-
-                //Check if all selected facets are in the aggregations-list, if not, add doc_count 0
-                if (this.props.selectedFacets[da.field]) {
-                    this.props.selectedFacets[da.field].forEach(facetValue => {
-                        const found = this.props.aggregations[da.field].find(aggr => aggr['key'] === facetValue);
-                        if(!found){
-                            this.props.aggregations[da.field].push({'key':facetValue, 'doc_count': 0});
-                        }
-                    });
-                }
-
-                //determine the selected options per aggregation (if not empty)
-                options = this.props.aggregations[da.field].map((facet, fIndex) => {
-                    const value = facet.date_millis ? facet.date_millis : facet.key;
-                    const facetId = da.field + '|' + value;
-                    let checkedOpt = false;
-
-                    if (this.props.selectedFacets[da.field]) {
-                        if (checkedOpt = this.props.selectedFacets[da.field].indexOf(value) > -1) {
-                            selectedOpts[facet.key] = facet.doc_count;
-                            nrCheckedOpts++;
-                        }
-                    }
-
-                    return (
-                        <li key={'facet__' + index + '__' + fIndex} hidden={!checkedOpt}
-                            className={IDUtil.cssClassName('facet-item', this.CLASS_PREFIX)}>
-                            <div className="checkbox">
-                                <input id={facetId}
-                                       type="checkbox"
-                                       checked={checkedOpt}
-                                       onChange={this.toggleSelectedFacet.bind(this, da.field, facet.key)}/>
-                                <label>
-                                    <span> </span>
-                                    {facet.key}&nbsp;({facet.doc_count})
-                                </label>
-                            </div>
-                        </li>
-                    )
-
-                });
-
-                //console.debug('the required object', selectedOpts)
-
-                // placing checked options on top of list.
-                let nrCheckedOpt = 0;
-                options.forEach(function (item) {
-                    if (item.props.children.props.children[0].props.checked) {
-                        nrCheckedOpt++;
-                        sortedOpts.unshift(item);
-                    } else {
-                        sortedOpts.push(item);
-                    }
-                });
-
-            } else if (this.props.aggregations[da.field] && this.props.aggregations[da.field].length === 0) {
-                //if the desired aggregation is empty, add it to the list of empty aggregations
-                emptyAggregations.push({
-                    field: da.field,
-                    formattedTitle: da.title,
-                    index: index
-                })
-            }
-
-            if (sortedOpts.length > 0) {
-                let changeViewItems = null;
-                let hiddenCheckboxes = 0;
-
-                sortedOpts.forEach((item, index) => {
-                    if (nrCheckedOpts < this.minToShow && index < this.minToShow) {
-                        item.props.hidden = false;
-                    } else {
-                        hiddenCheckboxes++;
-                    }
-                });
-
-                if (hiddenCheckboxes) {
-                    changeViewItems = this.__setViewItems(index, 'more');
-                }
-                const facetId = "facets__" + index;
-                const headers = [
-                    {label: 'Value', key: 'key'},
-                    {label: 'Count', key: 'doc_count'}
-                ]
-                facets.push((
-                    <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)}
-                        key={'facet__' + index} id={'index__' + index}>
-                        <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
-                            <input className="hamburger-toggle" type="checkbox" id={facetId}/>
-                            <label htmlFor={facetId}>
-                                <span className="bg__facet-title" data-for={'tooltip__' + index} data-tip={da.field}
-                                      data-html={true}>
-                                   <i className="fa fa-info-circle"/> {da.title}
-						                    </span>
-
-                                <span className="fa fa-remove" onClick={
-                                    this.showRemoveDialog.bind(this, da.field, index)
-                                }/>
-                                <div className="hb">
-                                    <div className="hb-line hb-line-top"/>
-                                    <div className="hb-line hb-line-center"/>
-                                </div>
-                            </label>
-                            <ul className={facetId}>
-                                <li className={IDUtil.cssClassName('aggregationSwitchBtn', this.CLASS_PREFIX)}>
-                                    <span className="ms_toggle_btn">
-                                        <input
-                                            type="checkbox"
-                                            id={da.field}
-                                            className="checkbox-toggle checkbox-toggle-round"
-                                            checked={this.props.desiredFacets[index]['exclude']}
-                                            onChange={this.toggleExcludeFacets.bind(this, index)}
-                                        />
-                                    <label htmlFor={da.field} data-on="Excl" data-off="Incl"/></span>
-                                </li>
-                                <li title="Alphanumeric descending" onClick={
-                                    this.sorting.bind(this, this.props.aggregations[da.field], 'desc', "alpha", da.field)
-                                }>
-                                    <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
-                                </li>
-                                <li title="Alphanumeric ascending" onClick={
-                                    this.sorting.bind(this, this.props.aggregations[da.field], 'asc', "alpha", da.field)
-                                }>
-                                    <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
-                                <li title="Numeric Asceding" onClick={
-                                    this.sorting.bind(this, this.props.aggregations[da.field], 'asc', "non-alpha", da.field)
-                                }>
-                                    <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"/> </li>
-                                <li title="Numeric descending" onClick={
-                                    this.sorting.bind(this, this.props.aggregations[da.field], 'desc', "non-alpha", da.field)
-                                }>
-                                    <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"/> </li>
-
-                                <li title="Download as CSV" onClick={
-                                    this.sorting.bind(this, this.props.aggregations[da.field], 'desc', "non-alpha", da.field)
-                                }>
-                                    <CSVLink filename={da.title} headers={headers} data={this.props.aggregations[da.field]}>
-                                        <i className="fa fa-download" aria-hidden="true"/>
-                                    </CSVLink>
-                                </li>
-                            </ul>
-                        </div>
-                        <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
-                            {sortedOpts}
-                        </ul>
-                        {changeViewItems}
-                        <ReactTooltip id={'tooltip__' + index}/>
-                    </div>
-                ));
-
-                //List of selected facets on top
-                if (this.props.selectedFacets.hasOwnProperty(da.field)) {
-                    console.debug('props', this.props.selectedFacets)
-                    for (var entry in this.props.selectedFacets[da.field]) {
-                        var facetName = this.props.selectedFacets[da.field][entry];
-                        var label = facetName;
-
-                        var hits = 0
-                        if (selectedOpts.hasOwnProperty(facetName)) {
-                            var hits = selectedOpts[facetName];
-                        }
-
-                        if (this.props.desiredFacets[index]['exclude'] === true){
-                            label = "NOT - "+label;
-                            hits = 0;
-                        }
-
-                        selectedFacets.push(
-                        <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                            {label.toUpperCase()} ({hits})
-                            <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, da.field, facetName)}/>
-                        </div>
-                        )
-                    }
-                }
-            }
-            nrCheckedOpts = 0;
-            selectedOpts = [];
-        }); // end foreach nonDateAggregations
-
-
-
-        //render empty aggregations a separate block
-        if(emptyAggregations.length > 0) {
-            emptyAggrBlock = emptyAggregations.map((aggr, index) => {
-                return (
-                    <div className={IDUtil.cssClassName('hamburger-header aggregation-no-results', this.CLASS_PREFIX)}
-                        key={'facet__' + aggr.index}
-                        id={'index__' + aggr.index}>
-                        <span data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
-                            <i className="fa fa-info-circle"/>
-                        </span>
-                        <h4 className="bg__empty-facet">
-                            (0) {aggr.formattedTitle}
-                        </h4>
-                        <span className="fa fa-remove" onClick={
-                            this.showRemoveDialog.bind(this, aggr.field, aggr.index - 1)
-                        }/>
-                        <ReactTooltip id={'tooltip__' + aggr.index}/>
-                    </div>
-                )
-            });
-        }
-
-
         //finally render the whole thing
         return (
             <div className={IDUtil.cssClassName('aggregation-list checkboxes')}>
@@ -534,9 +475,9 @@ class AggregationList extends React.Component {
                 </li>
                 <div className={IDUtil.cssClassName('selected-facets', this.CLASS_PREFIX)}>
                     {selectedFacets}
-                    {emptyAggrBlock}
+                    {emptyAggrBlocks}
                 </div>
-                {facets}
+                {aggregationBlocks}
             </div>
         )
     }
