@@ -20,7 +20,7 @@ class CopyToClipboard extends React.Component {
 
     render() {
         return (
-            <button id={this.randomId} type="button" title={this.props.textToSave} onClick={this.copyToClipboard.bind(this)} className="btn btn-primary bg__copy-to-clipboard">
+            <button id={this.randomId} type="button" onClick={this.copyToClipboard.bind(this)} className="btn btn-primary bg__copy-to-clipboard">
                 <i className="fa fa-info-query"/>
             </button>
         )
