@@ -144,7 +144,7 @@ class CustomTooltip extends React.Component{
                             <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
                             <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
                             <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
-                            <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                            <p>Total: <span className="rightAlign">{payload[0].payload['total']}</span></p>
                         </div>
                     );
                 }
