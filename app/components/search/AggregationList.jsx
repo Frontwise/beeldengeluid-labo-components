@@ -13,7 +13,8 @@ class AggregationList extends React.Component {
         this.state = {
             showModal: false,
             showModalWarning: false,
-            sortModes: {}
+            sortModes: {},
+            showAllModes: {}
         };
         this.CLASS_PREFIX = 'agl';
         this.minToShow = 5;
@@ -60,62 +61,32 @@ class AggregationList extends React.Component {
         }
     }
 
-    __changeBtnContext(t) {
-        document.querySelector("#index__" + t.index + " .switchIcon").classList.remove(t.classToRemove);
-        document.querySelector("#index__" + t.index + " .switchIcon").classList.add(t.classToAdd);
-        document.querySelector("#index__" + t.index + " .switchViewText").textContent = t.text;
-    }
+    /* ------------------------------------- SHOW MORE/LESS -------------------------------- */
 
-    __generateViewItems(index, option) {
-        const currentStatus = option === 'more' ?
-            {
-                'text': 'Show More',
-                'symbol': 'switchIcon glyphicon glyphicon-plus'
-            } :
+    __generateViewItems(aggr) {
+        const showAll = this.state.showAllModes[aggr.field] === undefined ? false : this.state.showAllModes[aggr.field];
+        const currentStatus = showAll ?
             {
                 'text': 'Show Less',
                 'symbol': 'switchIcon glyphicon glyphicon-minus'
+            } :
+            {
+                'text': 'Show More',
+                'symbol': 'switchIcon glyphicon glyphicon-plus'
             };
 
         return (
-            <a className="switchView" onClick={this.switchListView.bind(this, index)}>
+            <a className="switchView" onClick={this.switchListView.bind(this, aggr)}>
                 <span className="switchViewText">{currentStatus.text}</span>
                 <span className={currentStatus.symbol} aria-hidden="true"/>
             </a>
         )
     }
 
-    switchListView(index) {
-        const btnText = document.querySelectorAll("#index__" + index + " .switchViewText")[0].textContent;
-        const jCurrentList = Array.from(document.querySelectorAll("#index__" + index + " ul > li[class='bg__agl__facet-item']"));
-        let currentlyChecked = 0;
-
-        if (btnText === "Show More") {
-            this.__changeBtnContext({
-                index: index,
-                text: "Show Less",
-                classToRemove: "glyphicon-plus",
-                classToAdd: "glyphicon-minus"
-            });
-            jCurrentList.map((item) => {
-                item.hidden = false;
-            });
-        } else {
-            // hide elements after clicking Show Less based on min already set or the current number of selected opts.
-            currentlyChecked = document.querySelectorAll("#index__" + index + ' input[type="checkbox"]:checked').length;
-            currentlyChecked = currentlyChecked > this.minToShow ? currentlyChecked : this.minToShow;
-            jCurrentList.map((item, index) => {
-                if (index >= currentlyChecked) {
-                    item.hidden = true;
-                }
-            });
-            this.__changeBtnContext({
-                index: index,
-                text: "Show More",
-                classToRemove: "glyphicon-minus",
-                classToAdd: "glyphicon-plus"
-            });
-        }
+    switchListView(aggr) {
+        let states = this.state.showAllModes;
+        states[aggr.field] = states[aggr.field] === undefined ? true : !states[aggr.field];
+        this.setState({showAllModes : states});
     }
 
     /*------------------------------------- REMOVE DIALOG ----------------------------*/
@@ -199,7 +170,7 @@ class AggregationList extends React.Component {
         //will be ultimately returned containing a list of ui data per "desired aggregation"
         const uiData = []
 
-        //firt filter out the histogram aggregations: they are not supported in this list view
+        //first filter out the histogram aggregations: they are not supported in this list view
         const desiredFacets = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
             aggr => aggr.type !== 'date_histogram'
         );
@@ -231,16 +202,29 @@ class AggregationList extends React.Component {
             //then parse the retrieved facets/buckets
             let facets = [];
             if(!isEmptyAggr) {
+                let visibleFacets = 0;
                 facets = this.props.aggregations[da.field].map(facet => {
-                    let isSelected = false;
+                    let isSelected = false; // is the facet selected
+
+                    //if showing all facets, no items should be hidden
+                    let hidden = this.state.showAllModes[da.field] === undefined ? true : !this.state.showAllModes[da.field];
+                    if(hidden && visibleFacets < this.minToShow) {
+                        hidden = false;
+                    }
+
                     if (this.props.selectedFacets[da.field] && this.props.selectedFacets[da.field].indexOf(facet.key) != -1) {
                         isSelected = true;
+                        hidden = false; //always show selected facets
+                    }
+                    if(!hidden) {
+                        visibleFacets++;
                     }
                     return {
                         key : facet.key,
                         guid : da.field + '|' + facet.key,
                         count : facet.doc_count,
-                        selected : isSelected
+                        selected : isSelected,
+                        hidden : hidden
                     }
                 });
 
@@ -277,7 +261,7 @@ class AggregationList extends React.Component {
         //first generate the facet (options) to be included in the block later on
         const sortedFacets = aggr.facets.map((f, index) => {
             return (
-                <li key={'facet__' + aggr.index + '__' + index} hidden={!f.selected}
+                <li key={'facet__' + aggr.index + '__' + index} hidden={f.hidden}
                     className={IDUtil.cssClassName('facet-item', this.CLASS_PREFIX)}>
                     <div className="checkbox">
                         <input id={f.guid}
@@ -292,24 +276,6 @@ class AggregationList extends React.Component {
                 </li>
             )
         });
-
-        //then determine which ones should be hidden
-        let hiddenCheckboxes = 0;
-        if (sortedFacets.length > 0) {
-            sortedFacets.forEach((item, index) => {
-                if (aggr.facets.filter(f => f.selected === true).length < this.minToShow && index < this.minToShow) {
-                    item.props.hidden = false;
-                } else {
-                    hiddenCheckboxes++;
-                }
-            });
-        }
-
-        //then draw the "show more" button, if needed
-        let changeViewItems = null;
-        if (hiddenCheckboxes > 0) {
-            changeViewItems = this.__generateViewItems(aggr.index, 'more');
-        }
 
         //finally return the whole block with all of the (selected) facets and their counts etc...
         return (
@@ -379,7 +345,7 @@ class AggregationList extends React.Component {
                 <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
                     {sortedFacets}
                 </ul>
-                {changeViewItems}
+                {this.__generateViewItems(aggr, true)}
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
             </div>
         )
