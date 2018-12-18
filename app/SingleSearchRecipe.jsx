@@ -747,9 +747,10 @@ class SingleSearchRecipe extends React.Component {
 				);
 
                 const detailResults = this.state.currentOutput.results.map( (result, index) => {
-                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
-                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
-                            ? this.state.initialQuery.dateRange.dateField : null);
+                    return this.state.collectionConfig.getItemDetailData(
+                    	this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
+					);
                 });
 
                 ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);

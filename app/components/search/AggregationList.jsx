@@ -40,6 +40,8 @@ class AggregationList extends React.Component {
         }
     }
 
+    /* ------------------------------------- FACET SELECTION -------------------------------- */
+
     toggleSelectedFacet(key, value, e) {
         const facets = this.props.selectedFacets;
         if (facets) {
@@ -89,10 +91,12 @@ class AggregationList extends React.Component {
         this.setState({showAllModes : states});
     }
 
-    /*------------------------------------- REMOVE DIALOG ----------------------------*/
+    /*------------------------------------- REMOVE DIALOG (TODO MAKE NICER) ----------------------------*/
 
     showRemoveDialog(key, index) {
         this.currentFacet = key;
+
+        //FIXME this part is still nasty, but for now it's necessary to prevent toggling the header menu when clicking the "X"
         if(document.querySelector("#index__"+ index)) {
            document.querySelector("#index__"+ index).addEventListener("click", function(event) {
                 event.preventDefault();
@@ -256,6 +260,7 @@ class AggregationList extends React.Component {
         return uiData;
     }
 
+    //renders a block showing the facets for a single aggregation
     renderAggregationBlock(aggr) {
 
         //first generate the facet (options) to be included in the block later on
