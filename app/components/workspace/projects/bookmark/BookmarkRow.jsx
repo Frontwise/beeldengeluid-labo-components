@@ -1,6 +1,7 @@
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
+import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import {secToTime} from '../../helpers/time';
 import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
@@ -72,29 +73,30 @@ class BookmarkRow extends React.PureComponent {
                 </thead>
                 : null}
                 <tbody>
-                    {annotations.map(annotation => (
-                        <tr>
-                            <td className="type bold">
-                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>
-                                    {AnnotationTranslator(annotation.annotationType)}
-                                </Link>
-                            </td>
-                            <td className="content">
-                                {annotation.text ? annotation.text.substring(0, 200) : null}
-                                {annotation.label ? annotation.label : null}
-                            </td>
-                            <td className="details">
-                                {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
-                                {annotation.annotationType === 'comment' ? annotation.created : null}
-                                {annotation.url ?
-                                    <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>
-                                        {annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}
-                                    </a> : null
-                                }
-                                {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
-                            </td>
-                        </tr>
-                    ))}
+                    {annotations.map(annotation => {                        
+                        return (
+                            <tr>
+                                <td className="type bold">
+                                    <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>
+                                        {AnnotationTranslator(annotation.annotationType)}
+                                    </Link>
+                                </td>
+                                <td className="content">
+                                    {AnnotationUtil.annotationBodyToPrettyText(annotation)}
+                                </td>
+                                <td className="details">
+                                    {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
+                                    {annotation.annotationType === 'comment' ? annotation.created : null}
+                                    {annotation.url ?
+                                        <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>
+                                            {annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}
+                                        </a> : null
+                                    }
+                                    {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
+                                </td>
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
         )

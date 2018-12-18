@@ -83,11 +83,29 @@
 
 		h4 {
 			padding: 10px 0 8px 0;
+			margin: 0;
 		}
 
 		&.aggregation-no-results {
-			background-color: #d9534f;
+			background-color: #468dcb;
+			border-radius: 0;
+
 			color: #fff;
+			h4 {
+				display: inline-block;
+				font-size: 16px;
+				font-weight: 400;
+				max-width: 72%;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				top: 4px;
+				white-space: nowrap;
+			}
+
+			.fa-info-circle, .fa-remove {
+				padding-top: 8px;
+				font-size: 17px;
+			}
 		}
 
 		.fa-remove {
@@ -225,7 +243,7 @@
 				text-overflow: ellipsis;
 				top: 4px;
 				white-space: nowrap;
-				width: 225px;
+				max-width: 76%;
 				z-index: 10;
 
 				.fa-info-circle {

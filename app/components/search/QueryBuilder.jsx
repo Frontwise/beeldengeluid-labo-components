@@ -14,7 +14,7 @@ import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
-
+import ReadMoreLink from '../helpers/ReadMoreLink';
 import moment from 'moment';
 /*
 Notes about this component TODO rewrite:
@@ -331,17 +331,22 @@ class QueryBuilder extends React.Component {
             let searchIcon = null;
             let layerOptions = null;
             let resultBlock = null;
-            let fieldCategorySelector = null;
+            let fieldCategorySelector;
             let currentCollectionTitle = this.props.collectionConfig.collectionId;
+            let ckanLink = null;
 
             //collectionInfo comes from CKAN, which can be empty
             if(this.props.collectionConfig.collectionInfo) {
             	currentCollectionTitle = this.props.collectionConfig.collectionInfo.title || null;
+
+                if (this.props.collectionConfig.collectionInfo.ckanUrl) {
+                    ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
+                }
             }
 
             if (this.props.header) {
                 heading = (<div>
-                        <h3>Searching in :&nbsp;{currentCollectionTitle}</h3>
+                        <h3>Searching in :&nbsp;{currentCollectionTitle} {ckanLink}</h3>
                         <h4>Total number of records in this collection: {ComponentUtil.formatNumber(this.state.currentCollectionHits)}</h4>
                     </div>
                 )

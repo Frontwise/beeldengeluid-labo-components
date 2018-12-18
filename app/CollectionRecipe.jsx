@@ -2,6 +2,8 @@ import IDUtil from './util/IDUtil';
 import FlexRouter from './util/FlexRouter';
 import ComponentUtil from './util/ComponentUtil';
 import CollectionUtil from './util/CollectionUtil';
+import ReadMoreLink from './components/helpers/ReadMoreLink';
+
 import CollectionAPI from './api/CollectionAPI';
 
 import FlexBox from './components/FlexBox';
@@ -58,7 +60,7 @@ class CollectionRecipe extends React.Component {
 
 	//redeives data from child components
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'CollectionSelector') {
+		if(componentClass === 'CollectionSelector') {
 			if(data) {
 				const sc = this.state.selectedCollections;
 				sc[data.collectionId] = data;
@@ -90,7 +92,7 @@ class CollectionRecipe extends React.Component {
 			selectedCollections : collections
 		}
 		//if you remove the selected collection also reset the active stats/visuals
-		if(ac == collectionId) {
+		if(ac === collectionId) {
 			newStateObj['activeCollection'] = null;
 			newStateObj['fieldAnalysisStats'] = null;
 			newStateObj['fieldAnalysisTimeline'] = null;
@@ -157,14 +159,14 @@ class CollectionRecipe extends React.Component {
     toTimelineData(data) {
         const timelineData = {};
         if(data) {
-            let totalChart = [];
-            let missingChart = [];
-            let presentChart = [];
+            const totalChart = [];
+            const missingChart = [];
+            const presentChart = [];
             for (const item in data.timeline) {
                 totalChart.push({
                     year: data.timeline[item].year, //y-axis
                     total: data.timeline[item].background_count, //different line on graph
-                })
+                });
                 presentChart.push({
                     year : data.timeline[item].year, //y-axis
                     present: data.timeline[item].field_count, //different line on graph
@@ -181,7 +183,7 @@ class CollectionRecipe extends React.Component {
                 prettyQuery : null, //what to do here?
                 data : totalChart,
                 queryId : 'total_chart'
-            }
+            };
 
             timelineData['missing'] = {
                 label : 'Missing',
@@ -189,7 +191,7 @@ class CollectionRecipe extends React.Component {
                 prettyQuery : null, //what to do here?
                 data : missingChart,
                 queryId : 'missing_chart'
-            }
+            };
 
             timelineData['present'] = {
                 label : 'Present',
@@ -222,7 +224,7 @@ class CollectionRecipe extends React.Component {
 
         let field = null;
         fields.some((f)=>{
-            if (f.id == fieldToSearch){
+            if (f.id === fieldToSearch){
                 field = f;
                 return true;
             }
@@ -237,7 +239,7 @@ class CollectionRecipe extends React.Component {
 		let collectionBlock = null; //shows all selected collections
 
         let dateFieldSelector = null; // shows date field selector
-		let statsModal = null; //for selecting collections for the list
+		const statsModal = null; //for selecting collections for the list
 
 		let analysisBlock = null; //only shown after a collection has been selected
 
@@ -248,14 +250,22 @@ class CollectionRecipe extends React.Component {
 				const c = this.state.selectedCollections[key];
 				const classNames = ['list-group-item'];
 				const collectionTitle = c.collectionInfo ? c.collectionInfo.title : c.collectionId;
-				if(key == this.state.activeCollection) {
+				let ckanLink = null;
+				let linkIcon = ReadMoreLink.svgImg('000');
+
+				if(key === this.state.activeCollection) {
 					classNames.push('active');
+                    linkIcon = ReadMoreLink.svgImg('fff');
 				}
+                if (c.collectionInfo && c.collectionInfo.ckanUrl) {
+                    ckanLink = <ReadMoreLink linkIcon={linkIcon} linkUrl={c.collectionInfo.ckanUrl}/>
+                }
+
 				return (
 					<li key={key} id={key} className={classNames.join(' ')} onClick={this.setActiveCollection.bind(this)}>
-						<span className="fa fa-remove" onClick={this.removeCollection.bind(this, key)}></span>
+						<span className="fa fa-remove" onClick={this.removeCollection.bind(this, key)}/>
 						&nbsp;
-						{collectionTitle}
+						{collectionTitle} {ckanLink}
 					</li>
 				)
 			});
@@ -268,7 +278,7 @@ class CollectionRecipe extends React.Component {
                     <div className="box">
 						<div className="text-right">
 							<button className="btn btn-primary"	onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
-								Add collection&nbsp;<i className="fa fa-plus"></i>
+								Add collection&nbsp;<i className="fa fa-plus"/>
 							</button>
 						</div>
 						<br/>

@@ -96,12 +96,14 @@ class SingleSearchRecipe extends React.Component {
 				collectionId = this.props.recipe.ingredients.collection;
 			}
 		}
-		if(!loadingFromWorkSpace) {
-			this.onReloadQueryData(collectionId, initialQuery);
-		}
+
 		//always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
+		
+		if(!loadingFromWorkSpace) {
+			this.onReloadQueryData(collectionId, initialQuery);
+		}		
 	}
     // current bookmarks per project
 	saveBookmarksToLocalStorage() {
@@ -109,7 +111,10 @@ class SingleSearchRecipe extends React.Component {
             AnnotationAPI.getBookmarks(
                 this.props.user.id,
                 this.state.activeProject.id,
-                data => ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                (data) => {
+                	console.debug('latest bookmarks', data);
+                	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                }
             ) :
             false;
     }
@@ -196,7 +201,9 @@ class SingleSearchRecipe extends React.Component {
 				}
 			);
 		} else if(componentClass === 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}			
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -404,31 +411,38 @@ class SingleSearchRecipe extends React.Component {
             showBookmarkedItems : false
 		});
 	}
-
-    //this will actually save the selection to the workspace API
-    //finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+    
+    // makes sure that all selected resources are ADDED to the selected groups
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-
         ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-            const targets = annotation.target
-                .concat(selectedRows.map((result) => AnnotationUtil.generateResourceLevelTarget(
-					result._index,
-					result._id
-				), this));
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
-				}
-			});
+        	let saveCount = 0;
+        	//run through all the selected groups
+        	allGroups.filter(group => selectedGroups[group.id] === true).forEach(group => {
+        		//then add all the selected resources to the group's list of targets
+        		const targets = group.target.concat(
+        			selectedRows.map(result => AnnotationUtil.generateResourceLevelTarget(result._index, result._id))
+        		);
 
-			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
+        		//make sure to remove duplicate targets (could happen in case a target was already in a group)
+				const temp = {};
+				const dedupedTargets = [];
+				targets.forEach((t) => {
+					if(!temp[t.source]) {
+						temp[t.source] = true;
+						dedupedTargets.push(t);
+					}
+				});				
+				group.target = dedupedTargets;
+				
+				//FIXME this code is not entirely safe: what if somehow the saveAnnotation does not return?
+				AnnotationAPI.saveAnnotation(group, () => {					
+					if(++saveCount == Object.keys(selectedGroups).length) {
+						this.onSaveBookmarks();
+					}
+				});
+        	});
+            
 		});
 	}
 
@@ -569,7 +583,7 @@ class SingleSearchRecipe extends React.Component {
 					stateVariable="showBookmarkModal"
 					owner={this}
 					size="large"
-					title="Select or enter a bookmark group">
+					title="Select one or more bookmark groups for your selection of resources">
 						<BookmarkSelector
 							onOutput={this.onComponentOutput.bind(this)}
 							user={this.props.user}
@@ -747,9 +761,10 @@ class SingleSearchRecipe extends React.Component {
 				);
 
                 const detailResults = this.state.currentOutput.results.map( (result, index) => {
-                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
-                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
-                            ? this.state.initialQuery.dateRange.dateField : null);
+                    return this.state.collectionConfig.getItemDetailData(
+                    	this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
+					);
                 });
 
                 ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
