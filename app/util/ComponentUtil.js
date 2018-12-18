@@ -11,7 +11,7 @@ const ComponentUtil = {
 
 	//hides a FlexModal (used in AggregationBox, ItemDetailsRecipe, SearchHit)
 	hideModal(component, stateVariable, elementId, manualCloseRequired, callback) {
-		const stateObj = {}
+		const stateObj = {};
 		stateObj[stateVariable] = false;
 		if(elementId && manualCloseRequired) {
 			$('#' + elementId).modal('hide');
@@ -116,6 +116,16 @@ const ComponentUtil = {
         } else {
            ComponentUtil.removeJSONByKeyInLocalStorage(key);
         }
+    },
+
+    /*--------------------------------------------------------------------------------
+    * ------------------------- NUMBER FORMATTING METHOD -----------------------------
+    ---------------------------------------------------------------------------------*/
+    formatNumber(numberToFormat) {
+        if(!isNaN(numberToFormat)) {
+            return numberToFormat.toLocaleString().replace(/,/g, ' ')
+        }
+		return numberToFormat;
     }
 
 };
