@@ -119,14 +119,13 @@ const ComponentUtil = {
     },
 
     /*--------------------------------------------------------------------------------
-    * ------------------------- UTILITY METHODS -------
+    * ------------------------- NUMBER FORMATTING METHOD -----------------------------
     ---------------------------------------------------------------------------------*/
     formatNumber(numberToFormat) {
         if(!isNaN(numberToFormat)) {
             return numberToFormat.toLocaleString().replace(/,/g, ' ')
-        } else {
-            return null;
         }
+		return numberToFormat;
     }
 
 };
