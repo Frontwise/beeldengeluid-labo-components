@@ -22,7 +22,7 @@ class ItemDetails extends React.Component {
 				* Draw a media player based on the mimetype of each item
 				* TODO put each player in a separate React component
 				*/
-				if(mediaItem.mimeType.indexOf('image') != -1) {//image player
+				if(mediaItem.mimeType.indexOf('image') !== -1) {//image player
 					mediaPlayer = (
 						<a href={mediaItem.url}
 							target="__external">
@@ -36,7 +36,7 @@ class ItemDetails extends React.Component {
 							Your browser does not support the audio element
 						</audio>
 					)
-				} else if(mediaItem.mimeType.indexOf('video') != -1) {//video player
+				} else if(mediaItem.mimeType.indexOf('video') !== -1) {//video player
 					mediaPlayer = (
 						<video width="320" height="240" controls>
 							<source src={mediaItem.url} type={mediaItem.mimeType}/>

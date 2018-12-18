@@ -1,5 +1,5 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
+import {Bar, BarChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 
 /*
 See:
@@ -21,14 +21,14 @@ class CollectionInspectorLineChart extends React.Component {
         super(props);
         this.state = {
             opacity: {}
-        }
+        };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
     }
 
     toggleLine(event) {
         const dataKey = event.dataKey;
         let currentKeyValue = this.state.opacity[dataKey];
-        let opacity = this.state.opacity;
+        const opacity = this.state.opacity;
 
         if (currentKeyValue === 1) {
             currentKeyValue = 0;
@@ -70,13 +70,13 @@ class CollectionInspectorLineChart extends React.Component {
         });
 
         //concatenate all the data for each query, because rechart likes it this way (TODO make nicer)
-        const temp = {}
+        const temp = {};
         Object.keys(this.props.data).forEach((k) => {
             this.props.data[k].data.forEach((d) => {
                 if(temp[d.year]) {
                     temp[d.year][k] = d[k];
                 } else {
-                    let t = {};
+                    const t = {};
                     t[k] = d[k];
                     temp[d.year] = t;
                 }
@@ -84,7 +84,7 @@ class CollectionInspectorLineChart extends React.Component {
 
         });
         const timelineData = Object.keys(temp).map((k) => {
-            let d = temp[k];
+            const d = temp[k];
             d.year = k;
             return d;
         });
@@ -98,7 +98,7 @@ class CollectionInspectorLineChart extends React.Component {
                     Completeness of metadata field "{fieldLabel}" over time for the selected date field
                 </h4>
                 <ResponsiveContainer width="100%" height="50%">
-                    <LineChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
+                    <BarChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines}
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year" height={100}>
@@ -111,7 +111,9 @@ class CollectionInspectorLineChart extends React.Component {
                         </YAxis>
                         <Tooltip content={<CustomTooltip/>}/>
                         <Legend verticalAlign="top" onClick={this.toggleLine.bind(this)} height={36}/>
-                    </LineChart>
+                        <Bar dataKey="present" stackId="a" fill="#468dcb" />
+                        <Bar dataKey="missing" stackId="b" fill="#f26c50" />
+                    </BarChart>
                 </ResponsiveContainer>
             </div>
         )
@@ -142,7 +144,7 @@ class CustomTooltip extends React.Component{
                             <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
                             <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
                             <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
-                            <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                            <p>Total: <span className="rightAlign">{payload[0].payload['total']}</span></p>
                         </div>
                     );
                 }

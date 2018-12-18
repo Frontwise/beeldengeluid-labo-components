@@ -2,6 +2,7 @@ import SearchAPI from '../../api/SearchAPI';
 
 //data utilities
 import CollectionUtil from '../../util/CollectionUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import IDUtil from '../../util/IDUtil';
 import TimeUtil from '../../util/TimeUtil';
 
@@ -13,7 +14,7 @@ import AggregationList from './AggregationList';
 import Histogram from '../stats/Histogram';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
-
+import ReadMoreLink from '../helpers/ReadMoreLink';
 import moment from 'moment';
 /*
 Notes about this component TODO rewrite:
@@ -58,10 +59,10 @@ class QueryBuilder extends React.Component {
 	getCollectionHits(config) {
 		let collectionHits = -1;
 		if(config && config.collectionStats) {
-			let stats = config.collectionStats;
-			let docType = config.getDocumentType();
+			const stats = config.collectionStats;
+			const docType = config.getDocumentType();
 			if(stats && stats.collection_statistics && stats.collection_statistics.document_types) {
-				let docTypes = stats.collection_statistics.document_types;
+				const docTypes = stats.collection_statistics.document_types;
 				if(docTypes.length > 0) {
 				    for(let i=0;i<docTypes.length;i++) {
                         if(docTypes[i].doc_type === docType) {
@@ -108,7 +109,7 @@ class QueryBuilder extends React.Component {
 	}
 
 	newSearch() {
-		let q = this.state.query;
+		const q = this.state.query;
 
 		//reset certain query properties
 		q.selectedFacets = {};
@@ -125,7 +126,7 @@ class QueryBuilder extends React.Component {
 
 	//this resets the paging
 	toggleSearchLayer(e) {
-		let q = this.state.query;
+		const q = this.state.query;
 		const searchLayers = this.state.query.searchLayers;
 		searchLayers[e.target.id] = !searchLayers[e.target.id];
 
@@ -141,7 +142,7 @@ class QueryBuilder extends React.Component {
 
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'AggregationList' || componentClass === 'AggregationBox') {
-			let q = this.state.query;
+			const q = this.state.query;
 
 			//reset the following query params
 			q.desiredFacets = data.desiredFacets;
@@ -174,7 +175,7 @@ class QueryBuilder extends React.Component {
 				});
 			}
 
-			let q = this.state.query;
+			const q = this.state.query;
 
 			//reset the following params
 			q.dateRange = data;
@@ -184,7 +185,7 @@ class QueryBuilder extends React.Component {
 
 			this.doSearch(q, true)
 		} else if(componentClass === 'FieldCategorySelector') {
-			let q = this.state.query;
+			const q = this.state.query;
 			q.fieldCategory = data;
 			q.offset = 0;
 			q.term = this.setSearchTerm.value;
@@ -197,7 +198,7 @@ class QueryBuilder extends React.Component {
 
 	//this function is piped back to the owner via onOutput()
 	gotoPage(pageNumber) {
-		let q = this.state.query;
+		const q = this.state.query;
 		q.offset = (pageNumber-1) * this.props.pageSize;
 		q.term = this.setSearchTerm.value;
 
@@ -206,7 +207,7 @@ class QueryBuilder extends React.Component {
 
 	//this function is piped back to the owner via onOutput()
 	sortResults(sortParams) {
-		let q = this.state.query;
+		const q = this.state.query;
 		q.sort = sortParams;
 		q.offset = 0;
 		q.term = this.setSearchTerm.value;
@@ -215,7 +216,7 @@ class QueryBuilder extends React.Component {
 	}
 
 	resetDateRange() {
-		let q = this.state.query;
+		const q = this.state.query;
 		q.dateRange = null;
 		q.offset = 0;
 		q.term = this.setSearchTerm.value;
@@ -250,7 +251,7 @@ class QueryBuilder extends React.Component {
             	{
 	            	//so involved components know that a new search was done
 	            	searchId: data.searchId,
-
+                    graphType : 'histogram',  // on new search resets graph to histogram.
 	            	//refresh params of the query object
 	            	query : data.query,
 
@@ -265,7 +266,7 @@ class QueryBuilder extends React.Component {
             );
         } else {
         	//Note: searchLayers & desiredFacets & selectedSortParams stay the same
-        	let q = this.state.query;
+        	const q = this.state.query;
         	//q.dateRange = null;
         	q.selectedFacets = {};
         	//q.fieldCategory = null;
@@ -330,18 +331,23 @@ class QueryBuilder extends React.Component {
             let searchIcon = null;
             let layerOptions = null;
             let resultBlock = null;
-            let fieldCategorySelector = null;
+            let fieldCategorySelector;
             let currentCollectionTitle = this.props.collectionConfig.collectionId;
+            let ckanLink = null;
 
             //collectionInfo comes from CKAN, which can be empty
             if(this.props.collectionConfig.collectionInfo) {
             	currentCollectionTitle = this.props.collectionConfig.collectionInfo.title || null;
+
+                if (this.props.collectionConfig.collectionInfo.ckanUrl) {
+                    ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
+                }
             }
 
             if (this.props.header) {
                 heading = (<div>
-                        <h3>Searching in :&nbsp;{currentCollectionTitle}</h3>
-                        <h4>Total number of records in this collection: {this.state.currentCollectionHits}</h4>
+                        <h3>Searching in :&nbsp;{currentCollectionTitle} {ckanLink}</h3>
+                        <h4>Total number of records in this collection: {ComponentUtil.formatNumber(this.state.currentCollectionHits)}</h4>
                     </div>
                 )
             }
@@ -393,7 +399,7 @@ class QueryBuilder extends React.Component {
 				let outOfRangeCount = 0;
 
                 //let countsBasedOnDateRange = null;
-                let currentSearchTerm = (this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
+                const currentSearchTerm = (this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
@@ -524,7 +530,7 @@ class QueryBuilder extends React.Component {
 			                    }
 
 		                    	let info = '';
-		                    	let tmp = [];
+		                    	const tmp = [];
 		                        if(this.state.query.dateRange.start) {
 		                        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.start));
 		                        } else {
@@ -571,18 +577,19 @@ class QueryBuilder extends React.Component {
 			            if(dateCounts != null) {
 			            	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
 			            	info += '<br/>making it possible that there are more dates found than the number of search results';
+			            	console.log(outOfRangeCount)
 			            	dateStats = (
 			            		<div>
 			            			<br/>
-			            			Total number of dates found based on the selected date field: {dateCounts}&nbsp;
+			            			Total number of dates found based on the selected date field: {ComponentUtil.formatNumber(dateCounts)}&nbsp;
 			            			<span data-for={'__qb__tt' + this.state.query.id}
 			            				data-tip={info}
 			            				data-html={true}>
 										<i className="fa fa-info-circle"/>
 									</span>
 			            			<ul>
-				            			<li>Dates within the selected date range: {dateCounts - outOfRangeCount}</li>
-				            			<li>Dates outside of the selected date range: {outOfRangeCount}</li>
+				            			<li>Dates within the selected date range: {ComponentUtil.formatNumber(dateCounts - outOfRangeCount)}</li>
+				            			<li>Dates outside of the selected date range: {ComponentUtil.formatNumber(outOfRangeCount)}</li>
 			            			</ul>
 			            			<ReactTooltip id={'__qb__tt' + this.state.query.id}/>
 			            		</div>
@@ -597,7 +604,7 @@ class QueryBuilder extends React.Component {
                     <div>
                         <div>
                             Total number of results based on <em>&quot;{currentSearchTerm}&quot; </em>
-                            and selected filters: <b>{this.state.totalHits}</b>
+                            and selected filters: <b>{ComponentUtil.formatNumber(this.state.totalHits)}</b>
                             {dateStats}
                         </div>
                     </div>

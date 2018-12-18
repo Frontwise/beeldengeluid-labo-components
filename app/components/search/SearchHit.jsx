@@ -5,6 +5,7 @@ import SearchSnippet from './SearchSnippet';
 import ItemDetails from './ItemDetails';
 import FlexModal from '../FlexModal';
 import ReactTooltip from 'react-tooltip';
+import CollectionUtil from '../../util/CollectionUtil';
 
 class SearchHit extends React.Component {
 	constructor(props) {
@@ -22,7 +23,8 @@ class SearchHit extends React.Component {
 	//this function works with search snippet data (consulted the related config.getResultSnippetData())
 	gotoItemDetails(result, e) {
 		if(this.props.itemDetailsPath && result.resourceId) {
-			FlexRouter.gotoItemDetails(this.props.itemDetailsPath, result, this.props.searchTerm);
+            ComponentUtil.pushItemToLocalStorage('visitedHits', result.resourceId);
+            FlexRouter.gotoItemDetails(this.props.itemDetailsPath, result, this.props.searchTerm);
 		} else {
 			this.setState({showModal: true})
 		}
@@ -33,8 +35,8 @@ class SearchHit extends React.Component {
 		this.setState({showModal: true, previewMode: true});
 	}
 
-	safeModalId(resourceId) {
-		return resourceId.substr(0, resourceId.indexOf('@')) || resourceId + '__modal';
+	safeModalId() {
+		return this.CLASS_PREFIX + Math.floor((Math.random()*10000) + 1) + '__modal';
 	}
 
 	select(e) {
@@ -42,7 +44,9 @@ class SearchHit extends React.Component {
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				resourceId : this.props.result._id,
-				selected : !this.props.isSelected
+				resource : this.props.result,
+				selected : !this.props.isSelected,
+				collectionConfig : this.props.collectionConfig
 			})
 		}
 	}
@@ -59,17 +63,24 @@ class SearchHit extends React.Component {
         	).join('')
         	html += '</ul>';
     	}
+    	let bodyCount = 0;    	
     	if(this.props.bookmark.annotations) {
-    		html += '<h5><u>Number of annotations</u>: '+this.props.bookmark.annotations.length+'</h5>';
+    		bodyCount += this.props.bookmark.annotations.length
+    		
     	}
+    	if(this.props.bookmark.segments) {
+    		this.props.bookmark.segments.forEach(segment => bodyCount += segment.annotations ? segment.annotations.length : 0)    		
+    	}
+    	html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
         return html;
     }
 
 	render() {
 		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
-		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-		//TODO get rid of this separate piece of data
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
+		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
+		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+        const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		const modalID = this.safeModalId(result.resourceId);
 		let modal = null;
 		let bookmarkIcon = null;
@@ -88,12 +99,6 @@ class SearchHit extends React.Component {
 			)
 		}
 
-        let selectedCheckbox = false;
-        if(selectedRows !== null) {
-            selectedCheckbox = this.props.result._id in selectedRows;
-        } else {
-            selectedCheckbox = false;
-        }
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
 		const checkBox = (
 			<div  className={IDUtil.cssClassName('select', this.CLASS_PREFIX)} >
@@ -102,7 +107,7 @@ class SearchHit extends React.Component {
                     onChange={this.select.bind(this)}
                     checked={this.props.isSelected}
 					id={'cb__' + modalID}
-                    key={modalID + '__"' + selectedCheckbox + '"'}
+                    key={modalID}
 				/>
 				<label htmlFor={'cb__' + modalID}><span/></label>
 			</div>
@@ -129,6 +134,10 @@ class SearchHit extends React.Component {
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
+		if(visitedItems && visitedItems.find(item => item === this.props.result._id)) {
+            classNames.push('visitedItem')
+		}
+
 		return (
 			<div className={classNames.join(' ')}>
 				{checkBox}
@@ -141,7 +150,7 @@ class SearchHit extends React.Component {
                 <div onClick={this.gotoItemDetails.bind(this, result)}>
 					<SearchSnippet
 						data={snippet}
-						collectionMediaTypes={this.props.collectionConfig.getCollectionMediaTypes()}
+						collectionMediaTypes={collectionMediaTypes}
 						searchTerm={this.props.searchTerm}
 					/>
 				</div>

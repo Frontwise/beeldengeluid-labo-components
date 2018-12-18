@@ -19,6 +19,13 @@ class FieldCategorySelector extends React.Component {
 		this.CLASS_PREFIX = 'fcs';
 	}
 
+    shouldComponentUpdate(nextProps, nextState) {
+	    if (nextProps.fieldCategory && this.props.fieldCategory) {
+            return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
+        }
+        return true
+    }
+
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'FieldCategoryCreator') {
 			this.onFieldsSelected(data);
@@ -27,19 +34,19 @@ class FieldCategorySelector extends React.Component {
 
 	onOutput(data) {
 		if(this.props.onOutput) {
-			if(data === null) {
-				this.props.onOutput(this.constructor.name, null);
-			} else {
+			if(data !== null) {
                 this.props.onOutput(this.constructor.name, data);
-			}
+			} else {
+                this.props.onOutput(this.constructor.name, null);
+            }
 		}
 	}
 
     handleChange ({ options }) {
     	let found = false;
-    	let tmp = {};
+    	const tmp = {};
     	for(let i=0;i<options.length;i++) {
-    		let fc = options[i];
+    		const fc = options[i];
     		if(tmp[fc.id]) {
     			found = true;
     			break;
@@ -66,7 +73,7 @@ class FieldCategorySelector extends React.Component {
     	ComponentUtil.hideModal(this, 'showBookmarkModal', 'fields__modal', true, () => {
     		const fields = this.props.fieldCategory || [];
     		if(data) { //when nothing was selected, it is no use to update the owner
-	    		fields.push(data)
+	    		fields.push(data);
 	    		this.onOutput(fields)
 	    	}
     	});
@@ -79,12 +86,40 @@ class FieldCategorySelector extends React.Component {
     	})
     }
 
+    getGroupedOptions(fieldCategories, selectedFields) {
+        const optsMetadata = [];
+        const optsEnrichment = [];
+        const optionsToSelect = fieldCategories.filter((fc) => {
+            return !this.isSelected(fc, selectedFields);
+        });
+
+        optionsToSelect.forEach(fc => {
+            if (fc.enrichment) {
+                optsEnrichment.push(fc)
+            } else {
+                optsMetadata.push(fc)
+            }
+        });
+        if (optsEnrichment.length && optsMetadata.length) {
+            return [{"label": "-- Archive's metadata --", "options": optsMetadata},
+                {"label": "-- Enrichments --", "options": optsEnrichment}]
+        } else if (optsMetadata.length) {
+            return [{"label": "-- Archive's metadata --", "options": optsMetadata}]
+        } else if (optsEnrichment.length) {
+            return [{"label": "-- Enrichments --", "options": optsEnrichment}]
+        } else {
+            return [];
+        }
+    }
+
 	render() {
 		let fieldCategorySelector = null;
-		const includedFields = 'All metadata fields (classified as text field) are included in your search';
-		const selectedFields = this.props.fieldCategory || [];
+        let fieldSelectionModal = null;
+        const selectedFields = this.props.fieldCategory || [];
+        const fieldCategories = this.props.collectionConfig
+            ? this.props.collectionConfig.getMetadataFieldCategories()
+            : null;
 
-		let fieldSelectionModal = null;
 		if(this.state.showModal) {
 			fieldSelectionModal = (
 				<FlexModal
@@ -98,16 +133,14 @@ class FieldCategorySelector extends React.Component {
 			)
 		}
 
-		if(this.props.collectionConfig.getMetadataFieldCategories()) {
-			const optionsToSelect = this.props.collectionConfig.getMetadataFieldCategories().filter((fc)=> {
-				return !this.isSelected(fc, selectedFields);
-			});
+		if(fieldCategories && selectedFields) {
+            const groupedOptions = this.getGroupedOptions(fieldCategories, selectedFields);
 
 			fieldCategorySelector = (
 				<div className={IDUtil.cssClassName('field-category-selector')}>
 					<PowerSelectMultiple
 						key={'__pwsm__' + this.props.queryId}
-						options={optionsToSelect}
+						options={groupedOptions}
 						selected={selectedFields}
 						optionLabelPath="label"
           				optionComponent={
@@ -119,14 +152,14 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="Search in: all fields"
+						placeholder="Search in: all metadata fields"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
 									onClick={() => {
 										this.addCustomFields(select);
 									}}>
-					              + Custom category
+					              + Custom field cluster
 								</button>
 							</div>
 						)}

@@ -1,7 +1,7 @@
 .bg__search-hit {
 	border-bottom: 1px solid $border-color;
 	margin: 5px;
-	padding: 10px;
+	padding: 10px 0;
 	.bg__sh__quickview {
 		float:left;
 		margin-right: $default-margin;
@@ -37,5 +37,12 @@
 		border-right: 1px solid $highlight-color;
 		margin: 5px;
 		padding: $default-margin;
+	}
+	&.visitedItem {
+		color: $visited-item;
+		.highLightText {
+			color: #f79e8e;
+
+		}
 	}
 }

@@ -1,16 +1,18 @@
 .bg__field-category-selector {
 	.PowerSelectMultiple__SelectedOptions {
-		margin:0px;
+		margin:0;
+
 		.PowerSelectMultiple__SelectedOption {
 			background-color: $fill-color;
-			color: white;
 			border: 1px solid $border-color;
+			color: white;
 			.bg__ul-selectedOption {
 				list-style-type: none;
 				-moz-padding-start: 0;
 				-webkit-padding-start: 0;
 			}
 		}
+
 		.PowerSelectMultiple__SelectedOption__Close {
 			&:hover {
 				background-color: $hover-color;
@@ -20,5 +22,6 @@
 }
 
 .bg__fcs__option-create {
-	padding: 0px 5px 5px 10px;
+	margin-top: 8px;
+	padding: 0 5px 5px 10px;
 } /* NOTE: Also in FieldCategorySelector.jsx */

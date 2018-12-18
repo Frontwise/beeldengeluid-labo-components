@@ -12,7 +12,8 @@ module.exports = {
         libraryTarget: 'umd',
         library: 'labo'
     },
-    devtool: 'source-map',
+    mode: 'development',
+    devtool: 'cheap-module-source-map',
     module: {
         rules: [
             {

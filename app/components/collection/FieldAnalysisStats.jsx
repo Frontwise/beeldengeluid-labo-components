@@ -1,5 +1,6 @@
 import IDUtil from '../../util/IDUtil';
 import ReactTooltip from 'react-tooltip';
+import ComponentUtil from '../../util/ComponentUtil';
 
 class FieldAnalysisStats extends React.Component {
 
@@ -20,7 +21,7 @@ class FieldAnalysisStats extends React.Component {
 			stats.push(
 				<tr>
 					<td>Total number of records in the collection</td>
-					<td><strong>{this.props.data.doc_stats.total}</strong></td>
+					<td className="align-right"><strong>{ComponentUtil.formatNumber(this.props.data.doc_stats.total)}</strong></td>
 				</tr>
 			);
             stats.push(
@@ -32,7 +33,7 @@ class FieldAnalysisStats extends React.Component {
 							<i className="fa fa-info-circle"></i>
 						</span>
 					</td>
-					<td>{this.props.data.doc_stats.date_field}</td>
+					<td className="align-right">{ComponentUtil.formatNumber(this.props.data.doc_stats.date_field)}</td>
 				</tr>
             );
             stats.push(
@@ -44,7 +45,7 @@ class FieldAnalysisStats extends React.Component {
 							<i className="fa fa-info-circle"></i>
 						</span>
 					</td>
-					<td>{this.props.data.field_stats.analysis_field_count}</td>
+					<td className="align-right">{ComponentUtil.formatNumber(this.props.data.field_stats.analysis_field_count)}</td>
 				</tr>
 			);
 			stats.push(
@@ -56,26 +57,26 @@ class FieldAnalysisStats extends React.Component {
 							<i className="fa fa-info-circle"></i>
 						</span>
 					</td>
-					<td>{this.props.data.doc_stats.no_analysis_field}</td>
+					<td className="align-right">{ComponentUtil.formatNumber(this.props.data.doc_stats.no_analysis_field)}</td>
 				</tr>
 			);
 			stats.push(
 				<tr>
 					<td>Expected date range (in {this.props.data.field_stats.date_field_scope.unit}s) based on selected date field</td>
-					<td>{this.props.data.field_stats.date_field_scope.start} - {this.props.data.field_stats.date_field_scope.end}</td>
+					<td className="align-right">{this.props.data.field_stats.date_field_scope.start} - {this.props.data.field_stats.date_field_scope.end}</td>
 				</tr>
 			)
 			stats.push(
 				<tr>
 					<td>Actual date range (in {this.props.data.field_stats.date_field_scope.unit}s) based on selected date field</td>
-					<td>{this.props.data.doc_stats.min_year} - {this.props.data.doc_stats.max_year}</td>
+					<td className="align-right">{this.props.data.doc_stats.min_year} - {this.props.data.doc_stats.max_year}</td>
 				</tr>
 			);
 			stats.push(
 				<tr>
 					<td>
 						Dates outside of expected range</td>
-					<td>{this.props.data.field_stats.date_field_out_of_scope}</td>
+					<td className="align-right">{this.props.data.field_stats.date_field_out_of_scope}</td>
 				</tr>
 			);
 		}

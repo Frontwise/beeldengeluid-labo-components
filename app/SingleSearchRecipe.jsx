@@ -37,20 +37,18 @@ class SingleSearchRecipe extends React.Component {
 			showBookmarkModal : false, //for the bookmark group selector
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
 			awaitingProcess : null, //which process is awaiting the output of the project selector
-
+            currentOutput: null,
 			collectionId : null,
 
-			//influences the query
-			pageSize : 20,
+			pageSize : 20, //amount of search results on page
 
 			//use for a lot TODO write proper reasons
 			collectionConfig : null, //loaded after mounting, without it nothing works
 			initialQuery : null, //yikes this is only used for storing the initial query
 
 			//for doing actions on the search results
-			selectedRows : {},
-			allRowsSelected : false,
-            allRowsSelectedPerPage : {}
+			selectedRows : {}, // key = resourceId, value = true/false
+			allRowsSelected : false, // are all search results selected
 		};
 		this.CLASS_PREFIX = 'rcp__ss'
 	}
@@ -62,10 +60,8 @@ class SingleSearchRecipe extends React.Component {
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
-        // Remove localstorage bookmarks when the page is reloaded.
-		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
 
-		window.onscroll = () => {this.afterRenderingHits()};
+		window.onscroll = () => {SingleSearchRecipe.afterRenderingHits()};
 
 		//either loads the collectionID + initial query from
 		//1) localStorage
@@ -100,20 +96,25 @@ class SingleSearchRecipe extends React.Component {
 				collectionId = this.props.recipe.ingredients.collection;
 			}
 		}
-		if(!loadingFromWorkSpace) {
-			this.onReloadQueryData(collectionId, initialQuery);
-		}
+
 		//always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
+		
+		if(!loadingFromWorkSpace) {
+			this.onReloadQueryData(collectionId, initialQuery);
+		}		
 	}
-
+    // current bookmarks per project
 	saveBookmarksToLocalStorage() {
         this.state.activeProject && this.state.activeProject.id ?
             AnnotationAPI.getBookmarks(
                 this.props.user.id,
                 this.state.activeProject.id,
-                data => ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                (data) => {
+                	console.debug('latest bookmarks', data);
+                	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                }
             ) :
             false;
     }
@@ -158,31 +159,38 @@ class SingleSearchRecipe extends React.Component {
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'QueryBuilder') {
 			this.onSearched(data);
-		} else if(componentClass === 'CollectionSelector') {
-			//set the default query for the selected collection; creates a new query builder
-			this.setState({
-				collectionId : data.collectionId,
-				collectionConfig : data,
-				initialQuery : QueryModel.ensureQuery({size : this.state.pageSize}, data),
-				currentOutput : null,
-                showBookmarkedItems : false
-			},
-			this.hideModalAndChangeHistory(data)
-		);
-		} else if(componentClass === 'SearchHit') {
+        } else if (componentClass === 'CollectionSelector') {
+            //set the default query for the selected collection; creates a new query builder
+            this.setState({
+                    collectionId: data.collectionId,
+                    collectionConfig: data,
+                    initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, data),
+                    currentOutput: null,
+                    showBookmarkedItems: false
+                },
+                this.hideModalAndChangeHistory(data)
+            );
+        } else if(componentClass === 'SearchHit') {
 			if(data) {
-				const selectedRows = this.state.selectedRows;
-				if(data.selected) {
-					selectedRows[data.resourceId] = true;
-				} else {
-					delete selectedRows[data.resourceId]
-				}
-                const indexOf = this.state.currentOutput.results.findIndex(item => item._id === data.resourceId);
-                ComponentUtil.updateLocalStorage('selectedRows', this.state.currentOutput.results[indexOf], data);
+				//get the selected rows on the current page
+                const selectedRows = this.state.selectedRows;
+				//check if the search hit was selected and update the selected rows accordingly
+                if(data.selected) {
+                    selectedRows[data.resourceId] = true;
+                } else {
+                    delete selectedRows[data.resourceId]
+                }
+
+				// make sure to update the list of stored bookmarks with the changed selection
+				this.updateStoredBookmarkList(data.resource, data.selected);
+
+				//now fetch which rows are still selected (in the local storage)
+                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+
 				this.setState({
-					selectedRows : selectedRows,
-					allRowsSelected : data.selected ? this.state.allRowsSelected : false,
-                    showBookmarkedItems : Object.keys(this.state.selectedRows).length === 0 ? false : this.state.showBookmarkedItems,
+                    selectedRows : selectedRows,
+					allRowsSelected : data.selected ? this.areAllRowsSelected() : false,
+                    showBookmarkedItems : selRowsInLocalStorage.length > 0 ? this.state.showBookmarkedItems : false,
 				});
 			}
 		} else if(componentClass === 'ProjectSelector') {
@@ -193,7 +201,9 @@ class SingleSearchRecipe extends React.Component {
 				}
 			);
 		} else if(componentClass === 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}			
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -204,7 +214,6 @@ class SingleSearchRecipe extends React.Component {
 	onSearched(data, paging) {
 		const desiredState = {
 			currentOutput: data,
-			allRowsSelected : false,
             showBookmarkedItems : false
 		};
 		// if search is not the result of paging then clear selectedRows.
@@ -229,7 +238,38 @@ class SingleSearchRecipe extends React.Component {
 		} else {
 			this.onLoadPlayoutAccess(true, desiredState);
 		}
+        this.setState({
+            selectedRows : this.getAlreadySelectedRows(data),
+            allRowsSelected: this.areAllRowsSelected()
+        })
 	}
+
+	//checks if the search results contain resources that were already selected in another query
+	getAlreadySelectedRows(searchData) {
+		if(!searchData || !searchData.results) {
+			return {};
+		}
+		const rowsInStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+		const selRows = {};
+		searchData.results.forEach(item => rowsInStorage.filter(obj => {
+			if(obj._id === item._id) {
+				selRows[item._id] = true;
+			}}
+		));
+		return selRows;
+	}
+
+	//TODO check this function
+	areAllRowsSelected() {
+		const storeSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows')
+		if(!storeSelectedRows || !(this.state.currentOutput && this.state.currentOutput.results)) {
+			return false;
+		}
+		return this.state.currentOutput.results.every(
+			itemOnPage => storeSelectedRows.find(j => j._id === itemOnPage._id)
+		);
+	}
+
 
 	onLoadPlayoutAccess(accessApproved, desiredState) {
 		this.setState(
@@ -249,22 +289,21 @@ class SingleSearchRecipe extends React.Component {
 					);
 					FlexRouter.gotoSingleSearch('cache')
 				}
-				//this.afterRenderingHits();
 			}
 		);
 	}
 
-	elementInViewport(el) {
+	static elementInViewport(el) {
     	const rect = el.getBoundingClientRect();
     	return (
 			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
 		)
 	}
 
-	afterRenderingHits() {
+	static afterRenderingHits() {
 		const imgDefer = document.getElementsByTagName('img');
 		for (let i=0; i<imgDefer.length; i++) {
-			if(imgDefer[i].getAttribute('data-src') && this.elementInViewport(imgDefer[i])) {
+			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
 				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
 			}
 		}
@@ -302,24 +341,23 @@ class SingleSearchRecipe extends React.Component {
 
 	toggleRows(e) {
 		e.preventDefault();
-		const rows = this.state.selectedRows,
-              rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
+		let rows = this.state.selectedRows;
+    	let rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
 
         if(this.state.allRowsSelected) {
             this.state.currentOutput.results.forEach(result => {
-                const isChecked = rowsOnLocalStorage.findIndex(i => i._id === result._id);
+                const isChecked = Object.keys(rows).findIndex(i => i === result._id);
                 if(isChecked !== -1) {
-                    ComponentUtil.removeItemInLocalStorage('selectedRows', result);
-                    delete rows[result._id];
+                    ComponentUtil.removeItemInLocalStorage('selectedRows', result, '_id');
                 }
             });
+            rows = {};
 		} else {
 			this.state.currentOutput.results.forEach(result => {
                 rows[result._id] = !this.state.allRowsSelected;
                 const isChecked = rowsOnLocalStorage ? rowsOnLocalStorage.findIndex(i => i._id === result._id) : -1;
-
                 if(isChecked === -1) {
-                    ComponentUtil.pushItemToLocalStorage('selectedRows', result);
+                    this.updateStoredBookmarkList(result, true);
                 }
 			});
 		}
@@ -327,6 +365,17 @@ class SingleSearchRecipe extends React.Component {
 			allRowsSelected : !this.state.allRowsSelected,
 			selectedRows : rows
 		});
+	}
+
+	updateStoredBookmarkList(resource, select) {
+		if(select) {
+			resource.query = this.state.currentOutput.query;
+		}
+		if(select) {
+			ComponentUtil.pushItemToLocalStorage('selectedRows', resource, '_id');
+		} else {
+			ComponentUtil.removeItemInLocalStorage('selectedRows', resource, '_id');
+		}
 	}
 
 	onProjectChanged(project) {
@@ -344,7 +393,7 @@ class SingleSearchRecipe extends React.Component {
 
 	//this will first check if a project was selected. Then either bookmarks or opens the project selector first
 	bookmark() {
-		if(this.state.activeProject == null) {
+		if(this.state.activeProject === null) {
 			this.setState({
 				showProjectModal : true,
 				awaitingProcess : 'bookmark',
@@ -354,7 +403,6 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	//this will actually save the selection to the workspace API
 	selectBookmarkGroup() {
 		this.setState({
 			showBookmarkModal : true,
@@ -363,38 +411,42 @@ class SingleSearchRecipe extends React.Component {
             showBookmarkedItems : false
 		});
 	}
-
-	//finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+    
+    // makes sure that all selected resources are ADDED to the selected groups
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-			//concatenate the
-			//const targets = annotation.target.concat(this.state.currentOutput.results
-            const targets = annotation.target.concat(selectedRows
+        ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
+        	let saveCount = 0;
+        	//run through all the selected groups
+        	allGroups.filter(group => selectedGroups[group.id] === true).forEach(group => {
+        		//then add all the selected resources to the group's list of targets
+        		const targets = group.target.concat(
+        			selectedRows.map(result => AnnotationUtil.generateResourceLevelTarget(result._index, result._id))
+        		);
 
-				.filter((result) => this.state.selectedRows[result._id]) //only include selected resources
-				.map((result) => AnnotationUtil.generateResourceLevelTarget(
-					this.state.collectionConfig.collectionId,
-					result._id
-				), this));
-
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
-				}
-			});
-
-			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
+        		//make sure to remove duplicate targets (could happen in case a target was already in a group)
+				const temp = {};
+				const dedupedTargets = [];
+				targets.forEach((t) => {
+					if(!temp[t.source]) {
+						temp[t.source] = true;
+						dedupedTargets.push(t);
+					}
+				});				
+				group.target = dedupedTargets;
+				
+				//FIXME this code is not entirely safe: what if somehow the saveAnnotation does not return?
+				AnnotationAPI.saveAnnotation(group, () => {					
+					if(++saveCount == Object.keys(selectedGroups).length) {
+						this.onSaveBookmarks();
+					}
+				});
+        	});
+            
 		});
 	}
 
-	onSaveBookmarks(data) {
+	onSaveBookmarks() {
 	    this.saveBookmarksToLocalStorage();
 		this.setState({
 			selectedRows : {},
@@ -424,12 +476,13 @@ class SingleSearchRecipe extends React.Component {
         });
     }
 
-    clearSelectedItems(){
+    clearSelectedResources() {
+		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows')
         this.setState({
-            selectedRows : {},
-            allRowsSelected : false,
-            showBookmarkedItems : false,
-        }, () => ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows'));
+        	selectedRows : {},
+        	allRowsSelected : false,
+        	showBookmarkedItems : false,
+    	});
     }
 
 	showQueryModal() {
@@ -447,6 +500,8 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	render() {
+		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
 		let chooseCollectionBtn = null; // for changing the collection
 		let collectionModal = null; //modal that holds the collection selector
 		let projectModal = null;
@@ -459,11 +514,13 @@ class SingleSearchRecipe extends React.Component {
 		let tableActionControls = null;
 		let paging = null;
 		let sortButtons = null;
-		let actionButtons = null;
-        const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
-        const selectedSearchHitsInStorage = null;
         let bookmarkingContainer = null;
+		let searchHits = null;
+
+		//for containing the action buttons
+		const actions = []
+		let actionButtons = null;
+		let bookmarkDropDownMenu = null; //added to action buttons, in case there are active selections
 
         if(this.props.recipe.ingredients.collectionSelector) {
 			//show the button to open the modal
@@ -526,7 +583,7 @@ class SingleSearchRecipe extends React.Component {
 					stateVariable="showBookmarkModal"
 					owner={this}
 					size="large"
-					title="Select or enter a bookmark group">
+					title="Select one or more bookmark groups for your selection of resources">
 						<BookmarkSelector
 							onOutput={this.onComponentOutput.bind(this)}
 							user={this.props.user}
@@ -598,103 +655,99 @@ class SingleSearchRecipe extends React.Component {
 						}/>
 				}
 
-				tableActionControls = (
-					<div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
-						onClick={this.toggleRows.bind(this)}>
-						<input type="checkbox" checked={
-							this.state.allRowsSelected ? 'checked' : ''
-						} id={'cb__select-all'}/>
-						<label htmlFor={'cb__select-all'}><span/></label>
-					</div>
-				);
-
-                /*if (this.state.currentOutput.query.sort) {
-                    //draw the sorting buttons
-                    sortButtons = <Sorting
-                        sortResults={this.sortResults.bind(this)}
-                        sortParams={this.state.currentOutput.query.sort}
-                        collectionConfig={this.state.collectionConfig}
-                        dateField={
-                            this.state.currentOutput.query.dateRange ?
-                                this.state.currentOutput.query.dateRange.field : null
-                        }/>
-                }*/
-
-
-				//draw the action buttons
-				const actions = [],
-                      currentSelectedRows = Object.keys(this.state.selectedRows),
-                      currentPage = this.state.currentOutput.results,
-                      allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id)),
-                      isChecked = allChecked.findIndex(item => item === -1) === -1 ? true : false;
+				const currentSelectedRows = this.state.selectedRows ? Object.keys(this.state.selectedRows) : []
+				const currentPage = this.state.currentOutput.results;
+                const allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id));
+                const isChecked = allChecked.findIndex(item => item === -1) === -1;
 
                 tableActionControls = (
-                    <div className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}
-                         onClick={this.toggleRows.bind(this)}>
-                        <input type="checkbox" checked={
-                            isChecked ? 'checked' : ''
-                        } id={'cb__select-all'}/>
+                    <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
+                        <input type="checkbox"
+                               checked={isChecked ? 'checked' : ''}
+                               id={'cb__select-all'}/>
                         <label htmlFor={'cb__select-all'}><span/></label>
                     </div>
                 );
-                let selectedItems = null;
-                let selectedSearchHits = null;
-				if(Object.keys(this.state.selectedRows).length > 0) {
-				    const nrOfSelectedItems = Object.keys(this.state.selectedRows).length;
 
-                    selectedItems = (
+				//now render the stuff for bookmarking
+				if(storedSelectedRows && storedSelectedRows.length > 0) {
+
+					//render the bookmark dropdown menu
+                    bookmarkDropDownMenu = (
                             <div className="dropdown bookmark-dropdown-menu">
-                                <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                                <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
                                         data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
-                                    <i className="fa fa-bookmark" style={{color: 'white'}} />{nrOfSelectedItems}
+                                    <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
                                 </button>
-                                <div className="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
                                     <button className="dropdown-item" type="button"
-                                            onClick={this.showBookmarkedItems.bind(this)}>{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)</button>
+                                        onClick={this.showBookmarkedItems.bind(this)}>
+											{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
+									</button>
                                     <button className="dropdown-item" type="button" onClick={this.bookmark.bind(this)}>Bookmark selection</button>
-                                    <button className="dropdown-item" type="button" onClick={this.clearSelectedItems.bind(this)}>Clear selection</button>
+                                    <button
+										className="dropdown-item"
+										type="button"
+										onClick={this.clearSelectedResources.bind(this)}>
+											Clear selection
+									</button>
                                 </div>
                             </div>
 
                     );
-                    actions.push(selectedItems);
-                    // using the localstorage items
-                    selectedSearchHits = storedSelectedRows ? storedSelectedRows.map((result, index) => {
-                        return (
-                            <SearchHit
-                                key={'saved__' + index}
-                                result={result}
-                                bookmarked={null}
-                                searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
-                                dateField={
-                                    this.state.currentOutput.query.dateRange ?
-                                        this.state.currentOutput.query.dateRange.field : null
-                                } //for displaying the right date field in the hits
-                                collectionConfig={this.state.collectionConfig}
-                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-                                isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
-                                onOutput={this.onComponentOutput.bind(this)}/>
-                        )
-                    }, this) : null;
-                    bookmarkingContainer = this.state.showBookmarkedItems ? (
-                        <div className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
-                            <h4 className={IDUtil.cssClassName('header-selected-items', this.CLASS_PREFIX)}>Selected items
-                                <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
-                            </h4>
-                            <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
-                                {selectedSearchHits}
+                    actions.push(bookmarkDropDownMenu);
+
+					//if the user wants to see the selection list, instead of the search results
+                    if (this.state.showBookmarkedItems) {
+						//populate the list of selected bookmarks/resources
+	                    const selectedSearchHits = storedSelectedRows.map((result, index) => {
+							const collectionClass = CollectionUtil.getCollectionClass(
+								this.props.clientId, this.props.user,	result._index, true
+							);
+							const collectionConfig = new collectionClass(
+								this.props.clientId, this.props.user, result._index
+							);
+	                        return (
+	                            <SearchHit
+	                                key={'saved__' + index}
+	                                result={result}
+	                                bookmarked={null}
+	                                searchTerm={result.query ? result.query.term : ''} //for highlighting the search term
+	                                dateField={
+	                                    result.query && result.query.dateRange ?
+	                                        result.query.dateRange.field : null
+	                                } //for displaying the right date field in the hits
+	                                collectionConfig={collectionConfig}
+	                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+	                                isSelected={true}
+	                                onOutput={this.onComponentOutput.bind(this)}
+								/>
+	                        )
+	                    }, this);
+
+                        bookmarkingContainer = (
+                            <div
+                                className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
+                                <h4 className={IDUtil.cssClassName('header-selected-items', this.CLASS_PREFIX)}>
+                                    Selected items
+                                    <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
+                                </h4>
+                                <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
+                                    {selectedSearchHits}
+                                </div>
                             </div>
-                        </div>
-                    ) : false;
+                        );
+                    }
 				}
+
                 //always add the save query button
                 actions.push(
                     <button
                         type="button"
                         className="btn btn-primary"
                         onClick={this.saveQuery.bind(this)}
-                        title="Save current query to project">
+                        title="Save current query to the active project">
                         &nbsp;
                         <i className="fa fa-save" style={{color: 'white'}}/>
                         &nbsp;
@@ -708,77 +761,57 @@ class SingleSearchRecipe extends React.Component {
 				);
 
                 const detailResults = this.state.currentOutput.results.map( (result, index) => {
-                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
-                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
-                            ? this.state.initialQuery.dateRange.dateField : null);
+                    return this.state.collectionConfig.getItemDetailData(
+                    	this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
+					);
                 });
 
                 ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
 
-
 				//populate the list of search results
-				const items = !this.state.showBookmarkedItems ? this.state.currentOutput.results.map((result, index) => {
-                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
-					return (
+				if(!this.state.showBookmarkedItems) {
+					searchHits = this.state.currentOutput.results.map((result, index) => {
+	                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
+	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result._id) != undefined;
+						return (
+							<SearchHit
+								key={'__' + index}
+								result={result}
+	                            bookmark={bookmark}
+								searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
+								dateField={
+									this.state.currentOutput.query.dateRange ?
+										this.state.currentOutput.query.dateRange.field : null
+								} //for displaying the right date field in the hits
+								collectionConfig={this.state.collectionConfig}
+								itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+								isSelected={isSelectedItem}
+								onOutput={this.onComponentOutput.bind(this)}
+							/>
+						)
+					}, this)
+				}
 
-						<SearchHit
-							key={'__' + index}
-							result={result}
-                            bookmark={bookmark}
-							searchTerm={this.state.currentOutput.query.term} //for highlighting the search term
-							dateField={
-								this.state.currentOutput.query.dateRange ?
-									this.state.currentOutput.query.dateRange.field : null
-							} //for displaying the right date field in the hits
-							collectionConfig={this.state.collectionConfig}
-							itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-							isSelected={this.state.selectedRows[result._id] === true || false} //is the result selected
-							onOutput={this.onComponentOutput.bind(this)}/>
-					)
-				}, this) : false;
-
-                if (this.props.recipe.ingredients.aggregationView === 'box') {
-                    resultList = (
-                        <div className="row">
-                            <div className="col-md-12">
-                                <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
-                                    {tableActionControls}
-                                    {actionButtons}
-                                    <div style={{textAlign: 'center'}}>
-                                        {paging}
-                                        <div style={{float: 'right'}}>
-                                            {sortButtons}
-                                        </div>
-                                    </div>
-                                </div>
-                                {items}
-                                <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
-                                    {paging}
-                                </div>
-                            </div>
-                        </div>
-                    )
-                } else {
-                    resultList = (
-                        <div className="col-md-9 result-list">
-                            <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
-                                {tableActionControls}
-                                {actionButtons}
-                                <div style={{textAlign: 'center'}}>
-                                    {paging}
-                                    <div style={{float: 'right'}}>
-                                        {sortButtons}
-                                    </div>
-                                </div>
-                            </div>
-                            {bookmarkingContainer}
-                            {items}
-                            <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
+                resultList = (
+                    <div className="col-md-9 result-list">
+                        <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
+                            {tableActionControls}
+                            {actionButtons}
+                            <div style={{textAlign: 'center'}}>
                                 {paging}
+                                <div style={{float: 'right'}}>
+                                    {sortButtons}
+                                </div>
                             </div>
                         </div>
-                    )
-                }
+                        {bookmarkingContainer}
+                        {searchHits}
+                        <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
+                            {paging}
+                        </div>
+                    </div>
+                )
 
 			}
 		}
@@ -796,7 +829,6 @@ class SingleSearchRecipe extends React.Component {
                         {resultList}
 					</div>
 				</div>
-
 			</div>
 		);
 	}
