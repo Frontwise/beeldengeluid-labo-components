@@ -17,6 +17,7 @@ import CollectionAPI from '../api/CollectionAPI';
 import CKANAPI from '../api/CKANAPI';
 
 import TimeUtil from '../util/TimeUtil';
+import RegexUtil from '../util/RegexUtil';
 
 import CollectionConfig from '../collection/mappings/CollectionConfig';
 import CollectionMapping from '../collection/mappings/CollectionMapping';
@@ -146,9 +147,13 @@ const CollectionUtil = {
 	//for pruning long descriptions; makes sure to return the snippet that contains the search term
 	highlightSearchTermInDescription(text, searchTerm=null, maxWords=35) {
 		if(text) {
+		    if(Array.isArray(text)) {
+		        text = text.join('\n');
+		    }
 			let index = 0;
 			if(searchTerm) {
-				const regex = new RegExp(searchTerm.toLowerCase(), 'gi');
+				//const regex = new RegExp(searchTerm.toLowerCase(), 'gi');
+				const regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
 				index = text.toLowerCase().search(regex);
 			}
 			index = index > 50 ? index - 50 : 0;

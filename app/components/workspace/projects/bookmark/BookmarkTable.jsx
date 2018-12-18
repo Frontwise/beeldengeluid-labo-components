@@ -38,6 +38,7 @@ class BookmarkTable extends React.PureComponent {
             { value: 'name-az', name: 'Title A-Z' },
             { value: 'name-za', name: 'Title Z-A' },
             { value: 'mediatype', name: 'Media' },
+            { value: 'playable', name: 'Playable'},
             { value: 'dataset', name: 'Dataset' },
             { value: 'group', name: 'Groups' },
         ];
@@ -236,9 +237,6 @@ class BookmarkTable extends React.PureComponent {
                 );
             });
         }
-
-
-
         return bookmarks;
     }
 
@@ -291,6 +289,8 @@ class BookmarkTable extends React.PureComponent {
                     sorted.sort((a, b) => getFirst(a.object.mediaTypes, e) > getFirst(b.object.mediaTypes, e) ? 1 : -1);
                     break;
                 }
+            case 'playable':
+                sorted.sort((a, b) => a.object.playable < b.object.playable ? -1 : 1);
             case 'dataset':
                 sorted.sort((a, b) => a.object.dataset > b.object.dataset ? 1 : -1);
                 break;
