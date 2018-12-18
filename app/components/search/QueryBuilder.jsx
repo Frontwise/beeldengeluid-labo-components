@@ -643,7 +643,7 @@ class QueryBuilder extends React.Component {
                               data-html={true}>
                             There are no results for your search parameters <i className="fa fa-info-circle"/>
                         </span>
-                        <ReactTooltip id={'__no-query-results'}/>
+                        <ReactTooltip place="bottom" id={'__no-query-results'}/>
                     </div>
                 );
 			}
