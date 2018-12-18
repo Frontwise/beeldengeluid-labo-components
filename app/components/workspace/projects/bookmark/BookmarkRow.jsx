@@ -74,7 +74,7 @@ class BookmarkRow extends React.PureComponent {
                 </thead>
                 : null}
                 <tbody>
-                    {annotations.map(annotation => {                        
+                    {annotations.map(annotation => {
                         return (
                             <tr>
                                 <td className="type bold">
@@ -187,7 +187,7 @@ class BookmarkRow extends React.PureComponent {
 
         //format the date of the resource/target (i.e. bookmark.object)
         let resourceDate = null;
-        if(bookmark.object.date) {
+        if(bookmark.object.date && typeof(bookmark.object.date) === 'string')  {
             if(bookmark.object.date.match(/^\d/)) {
                 resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '').substring(0, 10);
             } else {

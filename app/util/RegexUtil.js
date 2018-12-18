@@ -6,7 +6,6 @@ const RegexUtil = {
         for (var i = 0; i < splitTerms.length; i++) {
             splitTerms[i] = splitTerms[i].replace(/\"/g, "");
         }
-        console.log(splitTerms);
         let regex = new RegExp(splitTerms.join("|"), 'gi');
         return regex;
     },

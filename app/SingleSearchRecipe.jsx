@@ -100,10 +100,10 @@ class SingleSearchRecipe extends React.Component {
 		//always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
-		
+
 		if(!loadingFromWorkSpace) {
 			this.onReloadQueryData(collectionId, initialQuery);
-		}		
+		}
 	}
     // current bookmarks per project
 	saveBookmarksToLocalStorage() {
@@ -112,7 +112,6 @@ class SingleSearchRecipe extends React.Component {
                 this.props.user.id,
                 this.state.activeProject.id,
                 (data) => {
-                	console.debug('latest bookmarks', data);
                 	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
                 }
             ) :
@@ -203,7 +202,7 @@ class SingleSearchRecipe extends React.Component {
 		} else if(componentClass === 'BookmarkSelector') {
 			if(data && data.allGroups && data.selectedGroups) {
 				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
-			}			
+			}
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -411,7 +410,7 @@ class SingleSearchRecipe extends React.Component {
             showBookmarkedItems : false
 		});
 	}
-    
+
     // makes sure that all selected resources are ADDED to the selected groups
 	bookmarkToGroupInProject(allGroups, selectedGroups) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
@@ -432,17 +431,17 @@ class SingleSearchRecipe extends React.Component {
 						temp[t.source] = true;
 						dedupedTargets.push(t);
 					}
-				});				
+				});
 				group.target = dedupedTargets;
-				
+
 				//FIXME this code is not entirely safe: what if somehow the saveAnnotation does not return?
-				AnnotationAPI.saveAnnotation(group, () => {					
+				AnnotationAPI.saveAnnotation(group, () => {
 					if(++saveCount == Object.keys(selectedGroups).length) {
 						this.onSaveBookmarks();
 					}
 				});
         	});
-            
+
 		});
 	}
 
