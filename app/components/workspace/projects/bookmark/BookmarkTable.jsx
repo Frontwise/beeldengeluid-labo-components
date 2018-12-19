@@ -124,7 +124,7 @@ class BookmarkTable extends React.PureComponent {
             },
             // group filter
             {
-                title:'☆ Group',
+                title:'Group',
                 key: 'group',
                 type: 'select',
                 titleAttr: 'Bookmark group',
