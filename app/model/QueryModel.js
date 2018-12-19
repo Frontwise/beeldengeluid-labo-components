@@ -129,6 +129,7 @@ const QueryModel = {
         }
         return null;
     },
+
     __getSelectedFacets(selectedFacets) {
         const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
         let fieldsCategory = null;
@@ -150,6 +151,7 @@ const QueryModel = {
             return "";
         }
     },
+
     queryDetailsTooltip(query) {
         if (query) {
             const queryDetailsHeader = "<h3>Query details</h3>",
