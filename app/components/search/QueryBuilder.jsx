@@ -578,7 +578,6 @@ class QueryBuilder extends React.Component {
 			            if(dateCounts != null) {
 			            	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
 			            	info += '<br/>making it possible that there are more dates found than the number of search results';
-			            	console.log(outOfRangeCount)
 			            	dateStats = (
 			            		<div>
 			            			<br/>
