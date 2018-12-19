@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil'
 import { Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Legend, Bar } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
 import TimeUtil from "../../util/TimeUtil";
@@ -136,7 +137,7 @@ class Histogram extends React.Component {
 
         let totalHitsPerQuery = 0;
         data.map(item => totalHitsPerQuery += item.count);
-        const graphTitle = "Timeline chart of query results (" + totalHitsPerQuery + ")";
+        const graphTitle = "Timeline chart of query results (" + ComponentUtil.formatNumber(totalHitsPerQuery) + ")";
         return (
         	<div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >

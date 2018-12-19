@@ -1,6 +1,7 @@
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
+import IconUtil from '../../../../util/IconUtil';
 import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import {secToTime} from '../../helpers/time';
@@ -73,7 +74,7 @@ class BookmarkRow extends React.PureComponent {
                 </thead>
                 : null}
                 <tbody>
-                    {annotations.map(annotation => {                        
+                    {annotations.map(annotation => {
                         return (
                             <tr>
                                 <td className="type bold">
@@ -186,13 +187,44 @@ class BookmarkRow extends React.PureComponent {
 
         //format the date of the resource/target (i.e. bookmark.object)
         let resourceDate = null;
-        if(bookmark.object.date) {
+        if(bookmark.object.date && typeof(bookmark.object.date) === 'string')  {
             if(bookmark.object.date.match(/^\d/)) {
                 resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '').substring(0, 10);
             } else {
                 resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '');
             }
         }
+
+        //show the user what media can be expected
+        let mediaIcon = null;
+        let playableIcon = (
+			<span
+				className={IconUtil.getMediaObjectAccessIcon(false, false, true, true, false)}
+				title="Media object(s) not accessible">
+			</span>
+		);
+		if(bookmark.object.mediaTypes) {
+			mediaIcon = bookmark.object.mediaTypes.map((mt) => {
+				if(mt == 'video') {
+					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"></span>);
+				} else if(mt == 'audio') {
+					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"></span>);
+				} else if(mt == 'image') {
+					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"></span>);
+				} else if(mt == 'text') {
+					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"></span>);
+ 				}
+			});
+		}
+		if(bookmark.object.playable) {
+            playableIcon = (
+                <span
+                    className={IconUtil.getMediaObjectAccessIcon(true, true, true, true, false)}
+                    title="Media object(s) can be viewed">
+                </span>
+            );
+		}
+
         return (
             <div className={classNames(IDUtil.cssClassName('bookmark-row'), 'item-row')}>
                 <div className="item">
@@ -221,8 +253,9 @@ class BookmarkRow extends React.PureComponent {
                             <p title={bookmark.object.dateField}>{resourceDate}</p>
                         </li>
                         <li className="content-media">
-                            <h4 className="label">Media</h4>
-                            <p>{bookmark.object.mediaTypes ? bookmark.object.mediaTypes.join(",") : 'Unknown'}</p>
+                            <h4 className="label">Media info</h4>
+                            {/*<p>{bookmark.object.mediaTypes ? bookmark.object.mediaTypes.join(",") : 'Unknown'}</p>-->*/}
+                            <p>{mediaIcon} {playableIcon}</p>
                         </li>
                         <li className="content-dataset">
                             <h4 className="label">Dataset</h4>
