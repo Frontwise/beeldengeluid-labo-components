@@ -89,6 +89,7 @@ class QueryBuilder extends React.Component {
 	}
 
 	doSearch(query, updateUrl = false) {
+        this.props.loadingWatcher();
 		this.setState(
 			{isSearching : true},
 			() => {
@@ -308,8 +309,8 @@ class QueryBuilder extends React.Component {
                 }
 
                 let i = buckets.findIndex(d => {
-                	return desiredMinYear == moment(d.date_millis, 'x').year()
-                })
+                	return desiredMinYear === moment(d.date_millis, 'x').year()
+                });
                 i = i === -1 ? 0 : i;
 
                 let j = buckets.findIndex(d => {
@@ -387,7 +388,7 @@ class QueryBuilder extends React.Component {
 
 			//only draw this when there are search results
 			if(this.state.totalHits > 0) {
-				let resultStats = null;
+				let resultStats;
 				let dateStats = null;
 				let graph = null;
 				let aggrView = null; //either a box or list (TODO the list might not work properly anymore!)
