@@ -7,20 +7,6 @@
 	}
 }
 
-.page-loader {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 1030;
-	display: block;
-	text-align: center;
-	width: 100%;
-	padding-top: 25%;
-	background-color: rgba(255, 255, 255, 0.6);
-}
-
 .bg__single-search-recipe {
 	.bg__rcp__ss__select {
 		@include checkbox();

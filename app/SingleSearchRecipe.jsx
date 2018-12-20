@@ -331,14 +331,18 @@ class SingleSearchRecipe extends React.Component {
 
 	//the sortMode is translated to sort params inside the QueryBuilder component
 	//sortMode = {type : date/rel, order : desc/asc}
-	sortResults(queryId, sortParams) {
-		if(this.state.currentOutput) {
-			const sr = this.state.currentOutput;
-			sr.query.sort = sortParams;
-			sr.query.offset = 0;
-			SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, false), true)
-		}
-	}
+    sortResults(queryId, sortParams) {
+	    this.setState({
+            isSearching : true
+        }, () => {
+            if (this.state.currentOutput) {
+                const sr = this.state.currentOutput;
+                sr.query.sort = sortParams;
+                sr.query.offset = 0;
+                SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, false), true)
+            }
+        })
+    }
 
 	/* ------------------------------------------------------------------------------
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
