@@ -34,6 +34,7 @@ import BookmarkSelector from './components/bookmark/BookmarkSelector';
 import PropTypes from 'prop-types';
 
 import { initHelp } from './components/workspace/helpers/helpDoc';
+import LoadingSpinner from "./components/helpers/LoadingSpinner";
 
 //import TranscriptExample from './components/transcript.json';
 
@@ -332,7 +333,7 @@ class ItemDetailsRecipe extends React.Component {
 		const filter = {			
 			'target.selector.value.id' : resourceId,
 			'user.keyword' : this.props.user.id,
-		}
+		};
 		if(this.state.activeProject && this.state.activeProject.id) {
 			filter['project'] = this.state.activeProject.id
 		}
@@ -358,15 +359,15 @@ class ItemDetailsRecipe extends React.Component {
     	if(!this.state.resourceAnnotations) {
     		return null;
     	}
-    	let html = ''
-    	const bookmarkGroups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
-    	const annotations = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking');
+    	let html = '';
+    	const bookmarkGroups = this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking');
+    	const annotations = this.state.resourceAnnotations.filter(a => a.motivation !== 'bookmarking');
 
     	if (bookmarkGroups.length > 0) {
     		html += '<h5><u>Bookmark group(s)</u>:</h5><ul>';
     		html += bookmarkGroups.map(
          	   group => group.body && group.body.length > 0 && group.body[0].label ? "<li>" + group.body[0].label + "</li>" : ''
-        	).join('')
+        	).join('');
         	html += '</ul>';
     	}
     	//count the number of annotation bodies
@@ -374,7 +375,7 @@ class ItemDetailsRecipe extends React.Component {
     		//html += '<h5><u>Number of annotated parts of this resource</u>: '+annotations.length+'</h5>';
     		//count the number of annotation bodies
     		let bodyCount = 0;
-    		annotations.forEach(a => bodyCount += a.body ? a.body.length : 0)
+    		annotations.forEach(a => bodyCount += a.body ? a.body.length : 0);
     		html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
     	}
 
@@ -438,7 +439,7 @@ class ItemDetailsRecipe extends React.Component {
 				const shouldBeMember = selectedGroups[group.id] === true; //should the resource be a member or not
 				
 				//first see if the resource is a member of the current group
-				const index = targets.findIndex(t => t.source == this.state.itemData.resourceId)				
+				const index = targets.findIndex(t => t.source === this.state.itemData.resourceId)
 
 				//this check only updates the bookmark group (and calls the annotation API) if membership changed
 				if(index != -1) { // if already a member					
@@ -967,7 +968,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	render() {
 		if(!this.state.itemData) {
-			return (<h4>Loading item</h4>);
+           return <LoadingSpinner message="Loading resource..."/>;
 		} else if(this.state.found === false) {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
@@ -1081,7 +1082,7 @@ class ItemDetailsRecipe extends React.Component {
 							onClick={this.bookmark.bind(this)} 
 							title="Control the bookmark groups this resource is associated with">
 							Groups							
-							({this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking').length})
+							({this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking').length})
 						</button>
 					)
 
