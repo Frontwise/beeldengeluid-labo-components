@@ -376,7 +376,7 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-    loadingWatcher() {
+    onStartSearch() {
         this.setState({
             isSearching : true
         })
@@ -635,7 +635,6 @@ class SingleSearchRecipe extends React.Component {
 			searchComponent = (
 				<QueryBuilder
 					key={this.state.collectionId} //for resetting all the states held within after selecting a new collection
-                    loadingWatcher={this.loadingWatcher.bind(this)}
 					//UI options not relevant for querying
 					header={true}
 					aggregationView={this.props.recipe.ingredients.aggregationView}
@@ -645,6 +644,7 @@ class SingleSearchRecipe extends React.Component {
 					query={this.state.initialQuery || QueryModel.ensureQuery(null, this.state.collectionConfig) }
 					collectionConfig={this.state.collectionConfig}
 
+					onStartSearch={this.onStartSearch.bind(this)}
 					onOutput={this.onComponentOutput.bind(this)}/>
 			);
 
@@ -679,7 +679,7 @@ class SingleSearchRecipe extends React.Component {
                 tableActionControls = (
                     <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
                         <input type="checkbox"
-                               checked={isChecked ? 'checked' : ''}
+                               defaultChecked={isChecked ? 'checked' : ''}
                                id={'cb__select-all'}/>
                         <label htmlFor={'cb__select-all'}><span/></label>
                     </div>

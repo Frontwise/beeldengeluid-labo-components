@@ -1,3 +1,7 @@
+//data model for the query
+import QueryModel from '../../model/QueryModel';
+
+//search api
 import SearchAPI from '../../api/SearchAPI';
 
 //data utilities
@@ -11,15 +15,18 @@ import FieldCategorySelector from './FieldCategorySelector';
 import DateRangeSelector from './DateRangeSelector';
 import AggregationBox from './AggregationBox';
 import AggregationList from './AggregationList';
+
+//visualisations
 import Histogram from '../stats/Histogram';
 import QuerySingleLineChart from '../stats/QuerySingleLineChart';
-import ReactTooltip from 'react-tooltip';
+
+//simple visual component
 import ReadMoreLink from '../helpers/ReadMoreLink';
+
+//third party
+import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
-import QueryModel from '../../model/QueryModel';
-/*
-Notes about this component TODO rewrite:
-*/
+import PropTypes from 'prop-types';
 
 class QueryBuilder extends React.Component {
 
@@ -89,7 +96,9 @@ class QueryBuilder extends React.Component {
 	}
 
 	doSearch(query, updateUrl = false) {
-        this.props.loadingWatcher();
+		if(this.props.onStartSearch && typeof(this.props.onStartSearch) === 'function') {
+     	   this.props.onStartSearch();
+    	}
 		this.setState(
 			{isSearching : true},
 			() => {
@@ -701,5 +710,16 @@ class QueryBuilder extends React.Component {
 		}
 	}
 }
+
+QueryBuilder.propTypes = {
+	header: PropTypes.bool, //whether to show a header with a title
+	aggregationView: PropTypes.string, //always set to 'list' (used to support 'box' as well)
+	dateRangeSelector: PropTypes.bool, //wheter or not to show a date range selector
+	showTimeLine: PropTypes.bool, //whether or not to show the timeline component
+    query: PropTypes.object.isRequired, //the initual query that is run when this component has mounted
+    collectionConfig: PropTypes.object.isRequired, //needed for each search query
+    onOutput: PropTypes.func, //calls this function after the search results are received, so the owner can process/visualise them
+    onStartSearch : PropTypes.func //calls this function whenever a search call starts, so the owner can draw a loading graphic
+};
 
 export default QueryBuilder;
