@@ -16,9 +16,9 @@ import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 import ReactTooltip from 'react-tooltip';
 import ReadMoreLink from '../helpers/ReadMoreLink';
 import moment from 'moment';
+import QueryModel from '../../model/QueryModel';
 /*
 Notes about this component TODO rewrite:
-
 */
 
 class QueryBuilder extends React.Component {
@@ -195,7 +195,7 @@ class QueryBuilder extends React.Component {
 		}
 	}
 
-	/*---------------------------------- FUNCTIONS THAT COMMINICATE TO THE PARENT --------------------------------------*/
+	/*---------------------------------- FUNCTIONS THAT COMMUNICATE TO THE PARENT --------------------------------------*/
 
 	//this function is piped back to the owner via onOutput()
 	gotoPage(pageNumber) {
@@ -281,7 +281,6 @@ class QueryBuilder extends React.Component {
 					aggregations: null,
 	                totalHits: 0,
 	                totalUniqueHits: 0
-
             	},
             	() => {
             		this.setState({isSearching: false});
@@ -315,7 +314,7 @@ class QueryBuilder extends React.Component {
 
                 let j = buckets.findIndex(d => {
                 	return maxDate.isBefore(moment(d.date_millis, 'x'))
-                })
+                });
 				j = j === -1 ? buckets.length -1 : j;
 
                 if(!(i === 0 && j === (buckets.length -1))) {
@@ -332,17 +331,14 @@ class QueryBuilder extends React.Component {
             let searchIcon = null;
             let layerOptions = null;
             let resultBlock = null;
-            let fieldCategorySelector;
-            let currentCollectionTitle = this.props.collectionConfig.collectionId;
             let ckanLink = null;
-
             //collectionInfo comes from CKAN, which can be empty
-            if(this.props.collectionConfig.collectionInfo) {
-            	currentCollectionTitle = this.props.collectionConfig.collectionInfo.title || null;
+            const currentCollectionTitle = this.props.collectionConfig.collectionInfo
+                ? this.props.collectionConfig.collectionInfo.title
+                :  this.props.collectionConfig.collectionId;
 
-                if (this.props.collectionConfig.collectionInfo.ckanUrl) {
-                    ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
-                }
+            if (this.props.collectionConfig.collectionInfo && this.props.collectionConfig.collectionInfo.ckanUrl) {
+                ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
             }
 
             if (this.props.header) {
@@ -354,7 +350,7 @@ class QueryBuilder extends React.Component {
             }
 
 			//draw the field category selector
-			fieldCategorySelector = (
+			const fieldCategorySelector = (
 				<FieldCategorySelector
 					queryId={this.state.query.id}
 					fieldCategory={this.state.query.fieldCategory}
@@ -388,7 +384,6 @@ class QueryBuilder extends React.Component {
 
 			//only draw this when there are search results
 			if(this.state.totalHits > 0) {
-				let resultStats;
 				let dateStats = null;
 				let graph = null;
 				let aggrView = null; //either a box or list (TODO the list might not work properly anymore!)
@@ -422,11 +417,9 @@ class QueryBuilder extends React.Component {
 								searchId={this.state.searchId} //for determining when the component should rerender
 								queryId={this.state.query.id} //TODO implement in the list component
 								aggregations={this.state.aggregations} //part of the search results
-
-                desiredFacets={this.state.query.desiredFacets}
+                                desiredFacets={this.state.query.desiredFacets}
 								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-
-                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
+                                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
 								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
 							/>
 						)
@@ -454,7 +447,6 @@ class QueryBuilder extends React.Component {
 					// and the length of the data is greater than 0.
 					//TODO fix the ugly if/else statements!!
 					if(this.state.query.dateRange && this.state.aggregations[this.state.query.dateRange.field] !== undefined) {
-
 						//draw a graph
 						if(this.props.showTimeLine) {
 							if (this.state.aggregations[this.state.query.dateRange.field].length !== 0) {
@@ -469,14 +461,12 @@ class QueryBuilder extends React.Component {
 	                                        	className="btn btn-primary btn-xs">
 	                                        	Histogram
 	                                        </button>
-
 	                                        <QuerySingleLineChart
 	                                            data={this.state.aggregations[this.state.query.dateRange.field]}
 	                                            comparisonId={this.state.searchId}
 												query={this.state.query}
 												collectionConfig={this.props.collectionConfig}
 											/>
-
 	                                    </div>
 	                                );
 	                            } else {
@@ -600,7 +590,7 @@ class QueryBuilder extends React.Component {
                 }
 
                 //draw the overall result statistics
-                resultStats = (
+                const resultStats = (
                     <div>
                         <div>
                             Total number of results based on <em>&quot;{currentSearchTerm}&quot; </em>
@@ -650,22 +640,16 @@ class QueryBuilder extends React.Component {
                 }
             //if hits is not greater than 0
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
-				let dateRangeMessage = null;
-				if(this.state.query.dateRange) {
-					dateRangeMessage = (
-						<span>
-							Between <strong>{TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.start)}</strong>
-								and <strong>{TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.end)}</strong>
-						</span>
-					)
-				}
-				resultBlock = (
-					<div className="alert alert-danger">
-						No results found for search term <b>{this.setSearchTerm.value.toUpperCase()}</b>
-						<br />
-						{dateRangeMessage}
-					</div>
-				)
+                resultBlock = (
+                    <div className="alert alert-danger">
+                        <span data-for={'__no-query-results'}
+                              data-tip={QueryModel.queryDetailsTooltip(this.state)}
+                              data-html={true}>
+                            There are no results for your search parameters <i className="fa fa-info-circle"/>
+                        </span>
+                        <ReactTooltip place="bottom" id={'__no-query-results'}/>
+                    </div>
+                );
 			}
 
 			//determine which icon to show after the search input
@@ -715,9 +699,7 @@ class QueryBuilder extends React.Component {
 		} else {
 			return (<div>Loading collection configuration...</div>);
 		}
-
 	}
-
 }
 
 export default QueryBuilder;
