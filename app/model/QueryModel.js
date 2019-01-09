@@ -201,8 +201,9 @@ const QueryModel = {
                     ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
                 selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
                 fieldCategory = query.query.fieldCategory
-                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "";
-            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets;
+                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "",
+                copyToClipBoardMsn = "<div class='bg__copyToClipboardMSN'>On click copy to clipboard</div>";
+            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets + copyToClipBoardMsn;
         } else {
             return null;
         }
