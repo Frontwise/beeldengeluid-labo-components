@@ -8,6 +8,7 @@ import FlexRouter from '../../../../util/FlexRouter';
 import SortTable from '../../SortTable';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import CopyToClipboard from '../../../helpers/CopyToClipboard';
 
 class ProjectQueriesTable extends React.PureComponent {
 
@@ -179,9 +180,12 @@ class ProjectQueriesTable extends React.PureComponent {
                                       data-class="bg__custom-queryTooltip"
                                       data-tip={QueryModel.queryDetailsTooltip(query)}
                                       data-html={true}>
-							    <i className="fa fa-info-query"/>
-                                <ReactTooltip id={'__ci_tooltip'}/>
-						    </span>{QueryModel.toHumanReadableString(query.query)}</div>
+                                    <CopyToClipboard
+                                        textToSave={QueryModel.queryDetailsToClipboard(query)} />
+                                    <ReactTooltip id={'__ci_tooltip'}/>
+						        </span>
+                                <span className="bg__searchTerm">{QueryModel.toHumanReadableString(query.query)}</span>
+                            </div>
                     },
                     {
                         content: (
