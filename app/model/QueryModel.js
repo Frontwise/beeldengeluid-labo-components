@@ -130,18 +130,6 @@ const QueryModel = {
         return null;
     },
 
-    __getFieldsCategoryToClipboard(fieldCategories) {
-        const header = "Fields category\r";
-        let fieldsCategory = null;
-        if (fieldCategories) {
-            fieldsCategory = header;
-            fieldCategories.map(item => fieldsCategory += " " + item.label + "\r")
-            fieldsCategory += "\r";
-            return fieldsCategory;
-        }
-        return null;
-    },
-
     __getSelectedFacets(selectedFacets) {
         const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
         let fieldsCategory = null;
@@ -164,28 +152,6 @@ const QueryModel = {
         }
     },
 
-    __getSelectedFacetsToClipboard(selectedFacets) {
-        const header = "Selected category\r";
-        let fieldsCategory = null;
-
-        if (selectedFacets) {
-            if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
-                fieldsCategory = header;
-                const keys = Object.keys(selectedFacets);
-                keys.map(k => {
-                    fieldsCategory += "Facet name: " + k + " \r";
-                    selectedFacets[k].map(facet => {
-                        fieldsCategory += " " + facet + "\r";
-                    });
-                    fieldsCategory += "\r";
-                });
-                fieldsCategory += "\r";
-                return fieldsCategory;
-            }
-            return "";
-        }
-    },
-
     queryDetailsTooltip(query) {
         if (query) {
             const queryDetailsHeader = "<h3>Query details</h3>",
@@ -202,33 +168,8 @@ const QueryModel = {
                 searchTerm = query.query.term
                     ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
                 selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
-                fieldCategory = query.query.fieldCategory
-                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "",
-                copyToClipBoardMsn = "<div class='bg__copyToClipboardMSN'>On click copy to clipboard</div>";
-            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets + copyToClipBoardMsn;
-        } else {
-            return null;
-        }
-    },
-
-    queryDetailsToClipboard(query) {
-        if (query) {
-            const queryDetailsHeader = "Query details\r\r",
-                queryName = "Name: " + query.name + "\r",
-                dateFieldName = query.query.dateRange && query.query.dateRange.field
-                    ? " Name: " + query.query.dateRange.field + "\n" : "",
-                startDate = query.query.dateRange && query.query.dateRange.start
-                    ? " Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "\r" : "",
-                endDate = query.query.dateRange && query.query.dateRange.end
-                    ? " End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "\r" : "",
-                date = dateFieldName || startDate || endDate
-                    ? "Date Field: \r" + dateFieldName + startDate + endDate + "\r"
-                    : "",
-                searchTerm = query.query.term
-                    ? "Search Term: " + query.query.term + "\r" : "",
-                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacetsToClipboard(query.query.selectedFacets) : "",
                 fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
-                    ? QueryModel.__getFieldsCategoryToClipboard(query.query.fieldCategory) : "";
+                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "";
             return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets;
         } else {
             return null;
