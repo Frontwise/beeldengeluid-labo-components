@@ -144,7 +144,7 @@ class Histogram extends React.Component {
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                 </span>
-				<ResponsiveContainer width="100%" height="40%">
+				<ResponsiveContainer width="100%" minHeight="360px" height="40%">
 					<BarChart width={830} height={250} data={dataPrettyfied} barCategoryGap="1%">
                         <Legend verticalAlign="top" height={36}/>
 						<CartesianGrid strokeDasharray="1 6"/>
@@ -153,7 +153,7 @@ class Histogram extends React.Component {
 								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
 						</XAxis>
 						<YAxis width={100} >
-                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                            <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
 						</YAxis>
 						<Tooltip content={<CustomTooltip/>}/>
