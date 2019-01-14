@@ -97,7 +97,7 @@ class CollectionInspectorLineChart extends React.Component {
                 <h4>
                     Completeness of metadata field "{fieldLabel}" over time for the selected date field
                 </h4>
-                <ResponsiveContainer width="100%" height="50%">
+                <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <BarChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines}
                         <CartesianGrid stroke="#cacaca"/>
@@ -106,7 +106,7 @@ class CollectionInspectorLineChart extends React.Component {
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
                         </XAxis>
                         <YAxis width={100}>
-                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                            <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
                         <Tooltip content={<CustomTooltip/>}/>
@@ -144,7 +144,7 @@ class CustomTooltip extends React.Component{
                             <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
                             <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
                             <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
-                            <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                            <p>Total: <span className="rightAlign">{payload[0].payload['total']}</span></p>
                         </div>
                     );
                 }

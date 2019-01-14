@@ -26,6 +26,7 @@ import Sorting from './components/search/Sorting';
 
 import PropTypes from 'prop-types';
 import { initHelp } from './components/workspace/helpers/helpDoc';
+import LoadingSpinner from './components/helpers/LoadingSpinner';
 
 class SingleSearchRecipe extends React.Component {
 	constructor(props) {
@@ -39,7 +40,7 @@ class SingleSearchRecipe extends React.Component {
 			awaitingProcess : null, //which process is awaiting the output of the project selector
             currentOutput: null,
 			collectionId : null,
-
+            isSearching : false,
 			pageSize : 20, //amount of search results on page
 
 			//use for a lot TODO write proper reasons
@@ -100,10 +101,10 @@ class SingleSearchRecipe extends React.Component {
 		//always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
-		
+
 		if(!loadingFromWorkSpace) {
 			this.onReloadQueryData(collectionId, initialQuery);
-		}		
+		}
 	}
     // current bookmarks per project
 	saveBookmarksToLocalStorage() {
@@ -112,7 +113,6 @@ class SingleSearchRecipe extends React.Component {
                 this.props.user.id,
                 this.state.activeProject.id,
                 (data) => {
-                	console.debug('latest bookmarks', data);
                 	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
                 }
             ) :
@@ -203,7 +203,7 @@ class SingleSearchRecipe extends React.Component {
 		} else if(componentClass === 'BookmarkSelector') {
 			if(data && data.allGroups && data.selectedGroups) {
 				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
-			}			
+			}
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -240,7 +240,8 @@ class SingleSearchRecipe extends React.Component {
 		}
         this.setState({
             selectedRows : this.getAlreadySelectedRows(data),
-            allRowsSelected: this.areAllRowsSelected()
+            allRowsSelected: this.areAllRowsSelected(),
+            isSearching: false
         })
 	}
 
@@ -316,24 +317,32 @@ class SingleSearchRecipe extends React.Component {
 	//FIXME this function is tied to the function returned by the search component (which is kind of weird, but works)
 	//TODO hiermee verder gaan morgen
 	gotoPage(queryId, pageNumber) {
-		if(this.state.currentOutput) {
-			const sr = this.state.currentOutput;
+        this.setState({
+            isSearching : true
+        }, () => {
+            if(this.state.currentOutput) {
+                const sr = this.state.currentOutput;
 
-			sr.query.offset = (pageNumber-1) * this.state.pageSize;
-			SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, true), true)
-		}
+                sr.query.offset = (pageNumber-1) * this.state.pageSize;
+                SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, true), true)
+            }
+        })
 	}
 
 	//the sortMode is translated to sort params inside the QueryBuilder component
 	//sortMode = {type : date/rel, order : desc/asc}
-	sortResults(queryId, sortParams) {
-		if(this.state.currentOutput) {
-			const sr = this.state.currentOutput;
-			sr.query.sort = sortParams;
-			sr.query.offset = 0;
-			SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, false), true)
-		}
-	}
+    sortResults(queryId, sortParams) {
+	    this.setState({
+            isSearching : true
+        }, () => {
+            if (this.state.currentOutput) {
+                const sr = this.state.currentOutput;
+                sr.query.sort = sortParams;
+                sr.query.offset = 0;
+                SearchAPI.search(sr.query, sr.collectionConfig, data => this.onSearched(data, false), true)
+            }
+        })
+    }
 
 	/* ------------------------------------------------------------------------------
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
@@ -342,7 +351,7 @@ class SingleSearchRecipe extends React.Component {
 	toggleRows(e) {
 		e.preventDefault();
 		let rows = this.state.selectedRows;
-    	let rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
+    	const rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
 
         if(this.state.allRowsSelected) {
             this.state.currentOutput.results.forEach(result => {
@@ -366,6 +375,12 @@ class SingleSearchRecipe extends React.Component {
 			selectedRows : rows
 		});
 	}
+
+    onStartSearch() {
+        this.setState({
+            isSearching : true
+        })
+    }
 
 	updateStoredBookmarkList(resource, select) {
 		if(select) {
@@ -411,7 +426,7 @@ class SingleSearchRecipe extends React.Component {
             showBookmarkedItems : false
 		});
 	}
-    
+
     // makes sure that all selected resources are ADDED to the selected groups
 	bookmarkToGroupInProject(allGroups, selectedGroups) {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
@@ -432,17 +447,17 @@ class SingleSearchRecipe extends React.Component {
 						temp[t.source] = true;
 						dedupedTargets.push(t);
 					}
-				});				
+				});
 				group.target = dedupedTargets;
-				
+
 				//FIXME this code is not entirely safe: what if somehow the saveAnnotation does not return?
-				AnnotationAPI.saveAnnotation(group, () => {					
-					if(++saveCount == Object.keys(selectedGroups).length) {
+				AnnotationAPI.saveAnnotation(group, () => {
+					if(++saveCount === Object.keys(selectedGroups).length) {
 						this.onSaveBookmarks();
 					}
 				});
         	});
-            
+
 		});
 	}
 
@@ -516,9 +531,10 @@ class SingleSearchRecipe extends React.Component {
 		let sortButtons = null;
         let bookmarkingContainer = null;
 		let searchHits = null;
+        let loadingMessage = null;
 
 		//for containing the action buttons
-		const actions = []
+		const actions = [];
 		let actionButtons = null;
 		let bookmarkDropDownMenu = null; //added to action buttons, in case there are active selections
 
@@ -619,7 +635,6 @@ class SingleSearchRecipe extends React.Component {
 			searchComponent = (
 				<QueryBuilder
 					key={this.state.collectionId} //for resetting all the states held within after selecting a new collection
-
 					//UI options not relevant for querying
 					header={true}
 					aggregationView={this.props.recipe.ingredients.aggregationView}
@@ -629,6 +644,7 @@ class SingleSearchRecipe extends React.Component {
 					query={this.state.initialQuery || QueryModel.ensureQuery(null, this.state.collectionConfig) }
 					collectionConfig={this.state.collectionConfig}
 
+					onStartSearch={this.onStartSearch.bind(this)}
 					onOutput={this.onComponentOutput.bind(this)}/>
 			);
 
@@ -663,7 +679,7 @@ class SingleSearchRecipe extends React.Component {
                 tableActionControls = (
                     <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
                         <input type="checkbox"
-                               checked={isChecked ? 'checked' : ''}
+                               defaultChecked={isChecked ? 'checked' : ''}
                                id={'cb__select-all'}/>
                         <label htmlFor={'cb__select-all'}><span/></label>
                     </div>
@@ -761,9 +777,10 @@ class SingleSearchRecipe extends React.Component {
 				);
 
                 const detailResults = this.state.currentOutput.results.map( (result, index) => {
-                    return this.state.collectionConfig.getItemDetailData(this.state.currentOutput.results[index],
-                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField
-                            ? this.state.initialQuery.dateRange.dateField : null);
+                    return this.state.collectionConfig.getItemDetailData(
+                    	this.state.currentOutput.results[index],
+                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
+					);
                 });
 
                 ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
@@ -772,7 +789,7 @@ class SingleSearchRecipe extends React.Component {
 				if(!this.state.showBookmarkedItems) {
 					searchHits = this.state.currentOutput.results.map((result, index) => {
 	                    const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
-	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result._id) != undefined;
+	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result._id) !== undefined;
 						return (
 							<SearchHit
 								key={'__' + index}
@@ -815,6 +832,10 @@ class SingleSearchRecipe extends React.Component {
 			}
 		}
 
+		if(this.state.isSearching) {
+		    loadingMessage = <LoadingSpinner message="Loading results..."/>;
+        }
+
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
@@ -824,7 +845,10 @@ class SingleSearchRecipe extends React.Component {
 						{projectModal}
 						{queryModal}
 						{bookmarkModal}
-						{searchComponent}
+						<div className="search-component">
+                            {loadingMessage}
+                            {searchComponent}
+                        </div>
                         {resultList}
 					</div>
 				</div>

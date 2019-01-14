@@ -1,10 +1,5 @@
 import AnnotationAPI from '../../../../api/AnnotationAPI';
-import ProjectAPI from '../../../../api/ProjectAPI';
-
 import IDUtil from '../../../../util/IDUtil';
-import ComponentUtil from '../../../../util/ComponentUtil';
-
-import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import BulkActions from '../../helpers/BulkActions';
 import { createOptionList, createAnnotationClassificationOptionList } from '../../helpers/OptionList';
@@ -15,7 +10,6 @@ import ResourceViewerModal from '../../ResourceViewerModal';
 import NestedTable from '../../helpers/NestedTable';
 import AnnotationRow from './AnnotationRow';
 import classNames from 'classnames';
-
 import PropTypes from 'prop-types';
 
 
@@ -113,7 +107,7 @@ class AnnotationTable extends React.PureComponent {
     sortAnnotations(annotations, field) {
         const safeToLowerCase= (s)=>(
             s && typeof s === 'string' ? s.toLowerCase() : ''
-        )
+        );
         switch (field) {
             case 'created': return annotations.sort((a, b) => a.created < b.created ? 1 : -1);
             case 'a-z-label': return annotations.sort((a, b) => safeToLowerCase(a.label) > safeToLowerCase(b.label) ? 1 : -1);
@@ -138,35 +132,31 @@ class AnnotationTable extends React.PureComponent {
                         key: 'keywords',
                         type: 'search',
                         placeholder: 'Search Annotations'
-                    }
-                break;
+                    };
                 case 'vocabulary':
                     return {
                         title:'Vocabulary',
                         key: 'vocabulary',
                         type: 'select',
                         options: createOptionList(items,  (i)=>(i['vocabulary']) )
-                    }
-                break;
+                    };
                 case 'bookmarkGroup':
 
                     return {
-                        title:'☆ Group',
+                        title:'Group',
                         titleAttr: 'Bookmark group',
                         key: 'bookmarkGroup',
                         type: 'select',
                         options: createAnnotationClassificationOptionList(items, 'groups'),
-                    }
-                break;
+                    };
                 case 'classification':
                     return {
-                        title:'☆ Code',
+                        title:'Code',
                         titleAttr: 'Bookmark code',
                         key: 'bookmarkClassification',
                         type: 'select',
                         options: createAnnotationClassificationOptionList(items, 'classifications'),
-                    }
-                break;
+                    };
                 default:
                     console.error('Unknown filter preset', filter);
             }
@@ -231,15 +221,15 @@ class AnnotationTable extends React.PureComponent {
                     annotation =>
                     // annotation
                     (Object.keys(annotation).some((key)=>(
-                        typeof annotation[key] == 'string' && annotation[key].toLowerCase().includes(k))
+                        typeof annotation[key] === 'string' && annotation[key].toLowerCase().includes(k))
                         ))
                     ||
                     // bookmarks
                     (annotation.bookmarks && annotation.bookmarks.some((bookmark)=>(
                         // bookmark
-                        Object.keys(bookmark).some((key)=>(typeof bookmark[key] == 'string' && bookmark[key].toLowerCase().includes(k)))
+                        Object.keys(bookmark).some((key)=>(typeof bookmark[key] === 'string' && bookmark[key].toLowerCase().includes(k)))
                         // bookmark-object
-                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark.object[key] == 'string' && bookmark.object[key].toLowerCase().includes(k)))
+                        || Object.keys(bookmark.object).some((key)=>(typeof bookmark.object[key] === 'string' && bookmark.object[key].toLowerCase().includes(k)))
                         // bookmark-groups
                         || bookmark.groups.some((g)=>(g.label.toLowerCase().includes(k)))
                         // bookmark-groups
@@ -258,13 +248,13 @@ class AnnotationTable extends React.PureComponent {
         if(annotationBodies) {
             // always ask before deleting
             let msg = 'Are you sure you want to remove the selected annotation';
-            msg += annotationBodies.length == 1 ? '?' : 's?';
+            msg += annotationBodies.length === 1 ? '?' : 's?';
             if (!confirm(msg)) {
                 return;
             }
 
             //populate the deletion list required for the annotation API
-            const deletionList = []
+            const deletionList = [];
             annotationBodies.forEach(body => {
                 body.bodyObjects.forEach(annotationBody => {
                     deletionList.push({
@@ -273,7 +263,7 @@ class AnnotationTable extends React.PureComponent {
                         partId : annotationBody.annotationId
                     })
                 })
-            })
+            });
 
             //now delete all the annotations with a single call to the annotation API
             AnnotationAPI.deleteUserAnnotations(
@@ -349,15 +339,15 @@ class AnnotationTable extends React.PureComponent {
 
     //TODO test this function
     selectAllChange(selectedItems, e) {
-        let newSelection = this.state.selection.slice(); //copy the array
+        const newSelection = this.state.selection.slice(); //copy the array
         selectedItems.forEach(item => {
-            const found = newSelection.find(selected => selected.annotationId == item.annotationId)
+            const found = newSelection.find(selected => selected.annotationId === item.annotationId)
             if(!found && e.target.checked) { // add it to the selection
                 newSelection.push(item);
             } else if (e.target.checked && found) { // remove the selected item
                 newSelection.splice(found, 1);
             }
-        })
+        });
         this.setState({
             selection: newSelection
         });
@@ -365,13 +355,13 @@ class AnnotationTable extends React.PureComponent {
 
     //TODO test this function
     selectItem(item, select) {
-        let newSelection = this.state.selection.slice(); //copy the array
+        const newSelection = this.state.selection.slice(); //copy the array
         const index = newSelection.findIndex(selected => {
-            return selected.annotationId == item.annotationId
-        })
-        if(index == -1 && select) { // add it to the selection
+            return selected.annotationId === item.annotationId
+        });
+        if(index === -1 && select) { // add it to the selection
             newSelection.push(item);
-        } else if (!select && index != -1) { // remove the selected item
+        } else if (!select && index !== -1) { // remove the selected item
             newSelection.splice(index, 1);
         }
         this.setState({
@@ -436,8 +426,8 @@ class AnnotationTable extends React.PureComponent {
                             onView={this.viewBookmark}
                             selected={
                                 this.state.selection.find(
-                                    item => item.annotationId == annotation.annotationId
-                                ) != undefined
+                                    item => item.annotationId === annotation.annotationId
+                                ) !== undefined
                             }
                             onSelect={this.selectItem}
                             showSub={annotation.annotationId in this.state.showSub}
@@ -447,8 +437,6 @@ class AnnotationTable extends React.PureComponent {
                         : <h3>∅ No results</h3>
                     }
                 </div>
-
-
             </div>
         )
     }
@@ -501,6 +489,6 @@ AnnotationTable.propTypes = {
 AnnotationTable.defaultTypes = {
     filters: [],
     sort: [],
-}
+};
 
 export default AnnotationTable;

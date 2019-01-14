@@ -163,6 +163,7 @@ const QueryModel = {
             return "";
         }
     },
+
     __getSelectedFacetsToClipboard(selectedFacets) {
         const header = "Selected category\r";
         let fieldsCategory = null;
@@ -184,10 +185,11 @@ const QueryModel = {
             return "";
         }
     },
+
     queryDetailsTooltip(query) {
         if (query) {
             const queryDetailsHeader = "<h3>Query details</h3>",
-                queryName = "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>",
+                queryName = query.name ? "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>" : '',
                 dateFieldName = query.query.dateRange && query.query.dateRange.field
                     ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
                 startDate = query.query.dateRange && query.query.dateRange.start
@@ -225,7 +227,7 @@ const QueryModel = {
                 searchTerm = query.query.term
                     ? "Search Term: " + query.query.term + "\r" : "",
                 selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacetsToClipboard(query.query.selectedFacets) : "",
-                fieldCategory = query.query.fieldCategory
+                fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
                     ? QueryModel.__getFieldsCategoryToClipboard(query.query.fieldCategory) : "";
             return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets;
         } else {

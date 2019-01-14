@@ -382,7 +382,7 @@ class CollectionConfig {
 
 	//the result object passed here was passed through getItemDetailData, so all possible data has already been extracted (bit ugly)
 	getResultSnippetData(result) {
-		const snippet = {
+	    const snippet = {
 			id : result.resourceId,
 			type : result.docType,
 			title: result.title || 'No title for: ' + result.resourceId + '',
@@ -397,6 +397,10 @@ class CollectionConfig {
 			result.start = result._source.start ? result._source.start : 0;
 			result.end = result._source.end ? result._source.end : -1;
 		}
+		if(result.playableContent && result.playableContent.length > 0){
+		    snippet['playable'] = true;
+		} else
+		    snippet['playable']= false;
 		return snippet;
 	}
 

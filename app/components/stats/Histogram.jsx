@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil'
 import { Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Legend, Bar } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
 import TimeUtil from "../../util/TimeUtil";
@@ -136,14 +137,14 @@ class Histogram extends React.Component {
 
         let totalHitsPerQuery = 0;
         data.map(item => totalHitsPerQuery += item.count);
-        const graphTitle = "Timeline chart of query results (" + totalHitsPerQuery + ")";
+        const graphTitle = "Timeline chart of query results (" + ComponentUtil.formatNumber(totalHitsPerQuery) + ")";
         return (
         	<div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                 </span>
-				<ResponsiveContainer width="100%" height="40%">
+				<ResponsiveContainer width="100%" minHeight="360px" height="40%">
 					<BarChart width={830} height={250} data={dataPrettyfied} barCategoryGap="1%">
                         <Legend verticalAlign="top" height={36}/>
 						<CartesianGrid strokeDasharray="1 6"/>
@@ -152,7 +153,7 @@ class Histogram extends React.Component {
 								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
 						</XAxis>
 						<YAxis width={100} >
-                            <Label value="Number of records" offset={10} position="insideLeft" angle={-90}
+                            <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
 						</YAxis>
 						<Tooltip content={<CustomTooltip/>}/>
