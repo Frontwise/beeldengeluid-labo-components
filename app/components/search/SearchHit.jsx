@@ -3,7 +3,6 @@ import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import SearchSnippet from './SearchSnippet';
 import ItemDetails from './ItemDetails';
-import FlexModal from '../FlexModal';
 import ReactTooltip from 'react-tooltip';
 import CollectionUtil from '../../util/CollectionUtil';
 
@@ -11,7 +10,6 @@ class SearchHit extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showModal : false,
 			previewMode : false
 		};
 		this.CLASS_PREFIX = 'sh';
@@ -28,11 +26,6 @@ class SearchHit extends React.Component {
 		} else {
 			this.setState({showModal: true})
 		}
-	}
-
-	quickView(e) {
-		e.stopPropagation();
-		this.setState({showModal: true, previewMode: true});
 	}
 
 	safeModalId() {
@@ -75,29 +68,22 @@ class SearchHit extends React.Component {
         return html;
     }
 
+    onQuickView(){
+        if(this.props.onQuickView){
+            this.props.onQuickView(this.props.resultDetailData, this.props.highlightData);
+        }
+    }
+
 	render() {
-		const result = this.props.collectionConfig.getItemDetailData(this.props.result, this.props.dateField);
+		const result = this.props.resultDetailData;
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
+		snippet['highlights'] = this.props.highlightData[0];
 		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		const modalID = this.safeModalId(result.resourceId);
-		let modal = null;
+		//let modal = null;
 		let bookmarkIcon = null;
-
-		if(this.state.showModal && this.state.previewMode) {
-			modal = (
-				<FlexModal
-					elementId={modalID}
-					stateVariable="showModal"
-					key={modalID}
-					owner={this}
-					size="large"
-					title={result.title}>
-					<ItemDetails data={result} previewMode={this.state.previewMode}/>
-				</FlexModal>
-			)
-		}
 
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
 		const checkBox = (
@@ -143,7 +129,7 @@ class SearchHit extends React.Component {
 				{checkBox}
                 <div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
 					<button className="btn btn-default fa fa-file-text"
-						onClick={this.quickView.bind(this)} title="Quick view">
+						onClick={this.onQuickView.bind(this)} title="Quick view">
 					</button>
 				</div>
                 {bookmarkIcon}
@@ -154,7 +140,6 @@ class SearchHit extends React.Component {
 						searchTerm={this.props.searchTerm}
 					/>
 				</div>
-				{modal}
 			</div>
 		);
 	}

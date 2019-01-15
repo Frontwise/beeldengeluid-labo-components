@@ -125,6 +125,13 @@ class SearchSnippet extends React.Component {
         const classNames = ['media', IDUtil.cssClassName('search-snippet')];
         const title = this.props.data.title ? this.props.data.title + ' ' : '';
         const date = this.props.data.date ? '(' + this.props.data.date + ')' : '';
+        const highlights = this.props.data.highlights;
+
+        var subHeading = date;
+        if(date !== ""){
+            subHeading += " | ";
+        }
+        subHeading += highlights + " match(es) |";
 
         return (
 			<div className={classNames.join(' ')}>
@@ -135,7 +142,7 @@ class SearchSnippet extends React.Component {
 					<h4 className="media-heading custom-pointer" title={this.props.data.id}>
 						<span dangerouslySetInnerHTML={SearchSnippet.createMarkup(this.highlightSearchedTerm(title))}/>
 					</h4>
-                    <span className="icons-snippet">{date}
+                    <span className="icons-snippet">{subHeading}
                         &nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}</span>
                     <br />
 					<span className="snippet_description" dangerouslySetInnerHTML={SearchSnippet.createMarkup(
