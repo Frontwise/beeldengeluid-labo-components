@@ -35,7 +35,6 @@ class DatePickerSelector extends React.Component {
 
     endDateChanged(d) {
         let tzOffset = moment(d).toString().split(" ")[5].slice(-4).slice(0,2);
-        console.log(moment(d).add(parseInt(tzOffset), 'hours'));
         this.props.onOutput(this.constructor.name, {
             start : this.getStartDate(),
             end : moment(d).add(parseInt(tzOffset), 'hours')

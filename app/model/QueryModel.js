@@ -118,18 +118,34 @@ const QueryModel = {
 		return null;
 	},
 
-    __getFieldsCategory(fieldCategories) {
-        const header = "<p><u>Fields category</u></p>";
-        let fieldsCategory = null;
-        if (fieldCategories) {
-            fieldsCategory = header + "<ul>";
-            fieldCategories.map(item => fieldsCategory += "<li>" + item.label + "</li>")
-            fieldsCategory += "</ul>";
-            return fieldsCategory;
+	/* --------------------------------- FOR SHOWING A QUERY IN A TOOLTIP ---------------------------------- */
+
+    queryDetailsTooltip(query) {
+        if (query) {
+            const queryDetailsHeader = "<h3>Query details</h3>",
+                queryName = query.name ? "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>" : '',
+                dateFieldName = query.query.dateRange && query.query.dateRange.field
+                    ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
+                startDate = query.query.dateRange && query.query.dateRange.start
+                    ? "<li>Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "</li>" : "",
+                endDate = query.query.dateRange && query.query.dateRange.end
+                    ? "<li>End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "</li>" : "",
+                date = dateFieldName || startDate || endDate
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Date Field: </u></p><ul>" + dateFieldName + startDate + endDate + "</ul></div>"
+                    : "",
+                searchTerm = query.query.term
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
+                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
+                fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
+                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "",
+                copyToClipBoardMsn = "<div class='bg__copyToClipboardMSN'>On click copy to clipboard</div>";
+            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets + copyToClipBoardMsn;
+        } else {
+            return null;
         }
-        return null;
     },
-    __getSelectedFacets(selectedFacets) {
+
+	__getSelectedFacets(selectedFacets) {
         const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
         let fieldsCategory = null;
 
@@ -150,68 +166,79 @@ const QueryModel = {
             return "";
         }
     },
-    queryDetailsTooltip(query) {
+
+	__getFieldsCategory(fieldCategories) {
+        const header = "<p><u>Fields category</u></p>";
+        let fieldsCategory = null;
+        if (fieldCategories) {
+            fieldsCategory = header + "<ul>";
+            fieldCategories.map(item => fieldsCategory += "<li>" + item.label + "</li>")
+            fieldsCategory += "</ul>";
+            return fieldsCategory;
+        }
+        return null;
+    },
+
+    /* --------------------------------- FOR COPYING A QUERY TO THE CLIPBOARD ---------------------------------- */
+
+    queryDetailsToClipboard(query) {
         if (query) {
-            const queryDetailsHeader = "<h3>Query details</h3>",
-                queryName = "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>",
+            const queryDetailsHeader = "Query details\r\r",
+                queryName = "Name: " + query.name + "\r",
                 dateFieldName = query.query.dateRange && query.query.dateRange.field
-                    ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
+                    ? " Name: " + query.query.dateRange.field + "\n" : "",
                 startDate = query.query.dateRange && query.query.dateRange.start
-                    ? "<li>Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "</li>" : "",
+                    ? " Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "\r" : "",
                 endDate = query.query.dateRange && query.query.dateRange.end
-                    ? "<li>End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "</li>" : "",
+                    ? " End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "\r" : "",
                 date = dateFieldName || startDate || endDate
-                    ? "<div class='bg_queryDetails-wrapper'><p><u>Date Field: </u></p><ul>" + dateFieldName + startDate + endDate + "</ul></div>"
+                    ? "Date Field: \r" + dateFieldName + startDate + endDate + "\r"
                     : "",
                 searchTerm = query.query.term
-                    ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
-                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
-                fieldCategory = query.query.fieldCategory
-                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "";
+                    ? "Search Term: " + query.query.term + "\r" : "",
+                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacetsToClipboard(query.query.selectedFacets) : "",
+                fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
+                    ? QueryModel.__getFieldsCategoryToClipboard(query.query.fieldCategory) : "";
             return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets;
         } else {
             return null;
         }
+    },
+
+    __getSelectedFacetsToClipboard(selectedFacets) {
+        const header = "Selected category\r";
+        let fieldsCategory = null;
+
+        if (selectedFacets) {
+            if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
+                fieldsCategory = header;
+                const keys = Object.keys(selectedFacets);
+                keys.map(k => {
+                    fieldsCategory += "Facet name: " + k + " \r";
+                    selectedFacets[k].map(facet => {
+                        fieldsCategory += " " + facet + "\r";
+                    });
+                    fieldsCategory += "\r";
+                });
+                fieldsCategory += "\r";
+                return fieldsCategory;
+            }
+            return "";
+        }
+    },
+
+	__getFieldsCategoryToClipboard(fieldCategories) {
+        const header = "Fields category\r";
+        let fieldsCategory = null;
+        if (fieldCategories) {
+            fieldsCategory = header;
+            fieldCategories.map(item => fieldsCategory += " " + item.label + "\r")
+            fieldsCategory += "\r";
+            return fieldsCategory;
+        }
+        return null;
     }
 
-	/*----------------------------------------------------------------------
-	*---------------------------- NOT USED YET ------------------------------
-	----------------------------------------------------------------------*/
-
-	//e.g. { "nisv-catalogue-aggr": true}
-	// validateSearchLayers : function(obj) {
-    //
-	// },
-
-	// validateDateRange : function(obj) {
-	// 	return {
-	// 		field : obj.field || null,
-	// 		start : obj.start || -1,
-	// 		end : obj.end || -1
-	// 	};
-	// },
-
-	// validateFieldCategories : function(list) {
-	// 	return {
-	// 		id : obj.id,
-	// 		label : obj.label,
-	// 		fields : obj.fields || []
-	// 	};
-	// },
-
-	//e.g. {bg:publications.bg:publication.bg:broadcasters.bg:broadcaster: ["VARA"]}
-	// validateSelectedFacets : function(obj) {
-    //
-	// },
-
-	// validateDesiredFacets : function(list) {
-	// 	return {
-	// 		id : obj.id || null, //"broadcaster",
-	// 		title : obj.title || null, //"Broadcaster",
-	// 		field : obj.field || null, //"bg:publications.bg:publication.bg:broadcasters.bg:broadcaster",
-	// 		type : obj.type || null, // "string" | "date_histogram"
-	// 	};
-	// }
 };
 
 export default QueryModel;

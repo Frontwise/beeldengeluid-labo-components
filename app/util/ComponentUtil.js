@@ -121,11 +121,11 @@ const ComponentUtil = {
     /*--------------------------------------------------------------------------------
     * ------------------------- NUMBER FORMATTING METHOD -----------------------------
     ---------------------------------------------------------------------------------*/
-    formatNumber(numberToFormat) {
-        if(!isNaN(numberToFormat)) {
-            return numberToFormat.toLocaleString().replace(/,/g, ' ')
+    formatNumber(number) {
+        if(!isNaN(number)) {
+            return number.toLocaleString()
         }
-		return numberToFormat;
+		return number;
     }
 
 };

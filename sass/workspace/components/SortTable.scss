@@ -106,6 +106,25 @@
           }
         }
       }
+
+      .bg__copy-to-clipboard {
+        background-image: none;
+        border-radius: 6px;
+        box-shadow: 0 1px 0px rgba(0, 0, 0, .1);
+        padding: 0 0 0 14px;
+      }
+
+      .bg__copyToClipboardMSN {
+        bottom: 0;
+        color: $clOrange;
+        margin-top: 20px;
+        position: relative;
+        text-align: center;
+      }
+
+      .bg__searchTerm {
+        margin-left: 10px;
+      }
     }
   }
 }
