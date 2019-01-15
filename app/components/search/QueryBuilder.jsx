@@ -501,7 +501,7 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-                                const text = QueryModel.queryDetails(this.props);
+                                const text = QueryModel.queryDetails(this.state);
 							    graph = (
                                     <div>
                                         <div className="alert alert-danger">
