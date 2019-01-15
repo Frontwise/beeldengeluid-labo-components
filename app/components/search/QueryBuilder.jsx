@@ -501,11 +501,23 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
+                                const text = QueryModel.queryDetails(this.props);
 							    graph = (
-									 <div>
-										 <br/>
-										 <div className="alert alert-danger">No data found for this Date Type Field</div>
-									 </div>
+                                    <div>
+                                        <div className="alert alert-danger">
+                                            <span dangerouslySetInnerHTML={{__html: text}}/>
+                                            <div className='bg__refineQuery'>Refine your query or
+                                                <button
+                                                    onClick={() => this.clearSearch()}
+                                                    type="button"
+                                                    className="btn btn-primary btn-xs bg__clear-query-btn">
+                                                    Clear search
+                                                </button>
+                                                <div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 							    )
 							}
 						}

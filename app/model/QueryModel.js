@@ -145,6 +145,31 @@ const QueryModel = {
         }
     },
 
+    queryDetails(query) {
+        if (query) {
+            const queryDetailsHeader = "<h3>No data found for this Date Type Field</h3><div class='bg__content'><h4>Query details</h4>",
+                queryName = query.name ? "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>" : '',
+                dateFieldName = query.query.dateRange && query.query.dateRange.field
+                    ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
+                startDate = query.query.dateRange && query.query.dateRange.start
+                    ? "<li>Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "</li>" : "",
+                endDate = query.query.dateRange && query.query.dateRange.end
+                    ? "<li>End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "</li>" : "",
+                date = dateFieldName || startDate || endDate
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Date Field: </u></p><ul>" + dateFieldName + startDate + endDate + "</ul></div>"
+                    : "",
+                searchTerm = query.query.term
+                    ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
+                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
+                fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
+                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "",
+                copyToClipBoardMsn = "</div>";
+            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets + copyToClipBoardMsn;
+        } else {
+            return null;
+        }
+    },
+
 	__getSelectedFacets(selectedFacets) {
         const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
         let fieldsCategory = null;
