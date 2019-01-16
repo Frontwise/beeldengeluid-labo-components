@@ -22,6 +22,7 @@ import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 
 //simple visual component
 import ReadMoreLink from '../helpers/ReadMoreLink';
+import MessageHelper from '../helpers/MessageHelper';
 
 //third party
 import ReactTooltip from 'react-tooltip';
@@ -501,24 +502,7 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-                                const text = QueryModel.queryDetails(this.state);
-							    graph = (
-                                    <div>
-                                        <div className="alert alert-danger">
-                                            <span dangerouslySetInnerHTML={{__html: text}}/>
-                                            <div className='bg__refineQuery'>Refine your query or
-                                                <button
-                                                    onClick={() => this.clearSearch()}
-                                                    type="button"
-                                                    className="btn btn-primary btn-xs bg__clear-query-btn">
-                                                    Clear search
-                                                </button>
-                                                <div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-							    )
+							    graph = MessageHelper.getNoDocumentsWithDateFieldMessage();
 							}
 						}
 
@@ -663,12 +647,7 @@ class QueryBuilder extends React.Component {
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
                 resultBlock = (
                     <div className="alert alert-danger">
-                        <span data-for={'__no-query-results'}
-                              data-tip={QueryModel.queryDetailsTooltip(this.state)}
-                              data-html={true}>
-                            There are no results for your search parameters <i className="fa fa-info-circle"/>
-                        </span>
-                        <ReactTooltip place="bottom" id={'__no-query-results'}/>
+                    	{MessageHelper.getNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
                     </div>
                 );
 			}
