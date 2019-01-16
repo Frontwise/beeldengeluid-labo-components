@@ -8,7 +8,9 @@ import FlexRouter from '../../../../util/FlexRouter';
 import SortTable from '../../SortTable';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+
 import CopyToClipboard from '../../../helpers/CopyToClipboard';
+import MessageHelper from '../../../helpers/MessageHelper';
 
 class ProjectQueriesTable extends React.PureComponent {
 
@@ -139,6 +141,8 @@ class ProjectQueriesTable extends React.PureComponent {
         return sort.order === 'desc' ? sorted.reverse() : sorted;
     }
 
+    //MessageHelper.getQueryDetailsForTooltip(query)
+
     render() {
         const bulkActions = this.props.handleCompareLink
             ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
@@ -161,54 +165,52 @@ class ProjectQueriesTable extends React.PureComponent {
                     </div>
                 </div>
 
-            <SortTable
-                items={this.state.queries}
-                head={[
-                    { field: 'name', content: 'Name', sortable: true },
-                    { field: 'query', content: 'Query', sortable: true },
-                    { field: '', content: '', sortable: false },
-                    { field: '', content: '', sortable: false }
-                ]}
-                row={query => [
-                    {
-                        props: { className: 'primary' },
-                        content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
-                    },
-                    { content:
-                            <div>
-                                <span data-for={'__ci_tooltip'}
-                                      data-class="bg__custom-queryTooltip"
-                                      data-tip={QueryModel.queryDetailsTooltip(query)}
-                                      data-html={true}>
-                                      <CopyToClipboard
-                                        textToSave={QueryModel.queryDetailsToClipboard(query)} />
-                                    <ReactTooltip id={'__ci_tooltip'}/>
-                                </span>
-                                <span className="bg__searchTerm">{QueryModel.toHumanReadableString(query.query)}</span>
-                            </div>
-                    },
-                    {
-                        content: (
-                            <a className="btn blank warning" onClick={this.deleteQuery.bind(this, query)}>
-                                Delete
-                            </a>
-                        )
-                    },
-                    {
-                        content: (
-                            <a onClick={this.viewQuery.bind(this, query)} className="btn">
-                                Open
-                            </a>
-                        )
-                    }
-                ]}
-                onSort={this.sortQueries.bind(this)}
-                loading={this.state.loading}
-                bulkActions={bulkActions}
-                defaultSort={{
-                    field: 'name',
-                    order: 'asc'
-                }}/>
+                <SortTable
+                    items={this.state.queries}
+                    head={[
+                        { field: 'name', content: 'Name', sortable: true },
+                        { field: 'query', content: 'Query', sortable: true },
+                        { field: '', content: '', sortable: false },
+                        { field: '', content: '', sortable: false }
+                    ]}
+                    row={query => [
+                        {
+                            props: { className: 'primary' },
+                            content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
+                        },
+                        { content:
+                                <div>
+                                    <a data-tip data-for={'__qtt__' + query.query.id} data-class="bg__custom-queryTooltip">
+                                        <CopyToClipboard textToSave={QueryModel.queryDetailsToClipboard(query)} />
+                                    </a>
+                                    <ReactTooltip id={'__qtt__' + query.query.id}
+                                        getContent={() => MessageHelper.renderQueryForTooltip(query.query)}>
+                                    </ReactTooltip>
+                                    <span className="bg__searchTerm">{QueryModel.toHumanReadableString(query.query)}</span>
+                                </div>
+                        },
+                        {
+                            content: (
+                                <a className="btn blank warning" onClick={this.deleteQuery.bind(this, query)}>
+                                    Delete
+                                </a>
+                            )
+                        },
+                        {
+                            content: (
+                                <a onClick={this.viewQuery.bind(this, query)} className="btn">
+                                    Open
+                                </a>
+                            )
+                        }
+                    ]}
+                    onSort={this.sortQueries.bind(this)}
+                    loading={this.state.loading}
+                    bulkActions={bulkActions}
+                    defaultSort={{
+                        field: 'name',
+                        order: 'asc'
+                    }}/>
             </div>
         )
     }

@@ -40,7 +40,10 @@ const TimeUtil = {
 	},
 
 	UNIXTimeToPrettyDate(epochMillis) {
-		return moment(epochMillis).format('DD-MM-YYYY');
+		if(epochMillis !== null) {
+			return moment(epochMillis).format('DD-MM-YYYY');
+		}
+		return '-';
 	}
 
 }

@@ -22,6 +22,7 @@ import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 
 //simple visual component
 import ReadMoreLink from '../helpers/ReadMoreLink';
+import MessageHelper from '../helpers/MessageHelper';
 
 //third party
 import ReactTooltip from 'react-tooltip';
@@ -501,12 +502,7 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-							    graph = (
-									 <div>
-										 <br/>
-										 <div className="alert alert-danger">No data found for this Date Type Field</div>
-									 </div>
-							    )
+							    graph = MessageHelper.renderNoDocumentsWithDateFieldMessage();
 							}
 						}
 
@@ -651,12 +647,7 @@ class QueryBuilder extends React.Component {
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
                 resultBlock = (
                     <div className="alert alert-danger">
-                        <span data-for={'__no-query-results'}
-                              data-tip={QueryModel.queryDetailsTooltip(this.state)}
-                              data-html={true}>
-                            There are no results for your search parameters <i className="fa fa-info-circle"/>
-                        </span>
-                        <ReactTooltip place="bottom" id={'__no-query-results'}/>
+                    	{MessageHelper.renderNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
                     </div>
                 );
 			}
