@@ -2,7 +2,7 @@ import TimeUtil from '../../util/TimeUtil';
 
 const MessageHelper = {
 
-	getNoDocumentsWithDateFieldMessage : function() {
+	renderNoDocumentsWithDateFieldMessage : function() {
 		return (<div className="alert alert-danger">
 			<strong>Notice:</strong> None of the search results contain the selected date field, so plotting a timeline based on this field is not possible.
 			<br/><br/>
@@ -10,16 +10,11 @@ const MessageHelper = {
 		</div>)
 	},
 
-	getNoSearchResultsMessage : function(query, clearSearchFunc) {
+	renderNoSearchResultsMessage : function(query, clearSearchFunc) {
 		return (
 			<div>
 				<h4>Your query did not yield any results</h4>
-
-				<h5>Query details:</h5>
-				<div className='bg_queryDetails-wrapper'><p><u>Search Term:</u>{query.term}</p></div>
-				{MessageHelper.__getDateRange(query.dateRange)}
-				{MessageHelper.__getSelectedFacets(query.selectedFacets)}
-				{MessageHelper.__getFieldsCategory(query.fieldCategories)}
+				{MessageHelper.__renderQuery(query)}
 				<strong>Note:</strong> Please try to refine or clear your search
 				<button
 	                onClick={() => clearSearchFunc()}
@@ -31,10 +26,32 @@ const MessageHelper = {
 		)
 	},
 
-	__getDateRange : function(dateRange) {
+	renderQueryForTooltip : function(query) {
+		return (
+			<div>
+				{MessageHelper.__renderQuery(query)}
+				<div className='bg__copyToClipboardMSN'>On click copy to clipboard</div>
+			</div>
+		)
+	},
+
+	/* -------------------------------- PARTIAL RENDERING FUNCTIONS --------------------------- */
+
+	__renderQuery : function(query) {
+		return (
+			<div>
+				<div className='bg_queryDetails-wrapper'><strong>Search Term:</strong> {query.term}</div>
+				{MessageHelper.__renderDateRange(query.dateRange)}
+				{MessageHelper.__renderSelectedFacets(query.selectedFacets)}
+				{MessageHelper.__renderFieldsCategory(query.fieldCategory)}
+			</div>
+		)
+	},
+
+	__renderDateRange : function(dateRange) {
 		if(dateRange) {
 			return (
-				<div className='bg_queryDetails-wrapper'><p><u>Date Field: </u></p>
+				<div className='bg_queryDetails-wrapper'><strong>Date Field: </strong>
 					<ul>
 						<li>Name: {dateRange.field}</li>
 						<li>Start: {TimeUtil.UNIXTimeToPrettyDate(dateRange.start)}</li>
@@ -46,7 +63,7 @@ const MessageHelper = {
 		return null;
 	},
 
-	__getSelectedFacets : function(selectedFacets) {
+	__renderSelectedFacets : function(selectedFacets) {
         if (selectedFacets) {
             if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
                 const facets = Object.keys(selectedFacets).map(k => {
@@ -59,7 +76,7 @@ const MessageHelper = {
                 return (
 	            	<div className='bg_queryDetails-wrapper'>
 	            		<p>
-	            			<u>Selected category</u>
+	            			<strong>Selected facets</strong>
 	            		</p>
 	            		<div className='bg__selectedFacet-list'>
 	            			{facets}
@@ -72,13 +89,11 @@ const MessageHelper = {
         return null;
     },
 
-	__getFieldsCategory : function(fieldCategories) {
-        if (fieldCategories) {
+	__renderFieldsCategory : function(fieldCategories) {
+        if (fieldCategories && fieldCategories.length > 0) {
             return (
             	<div>
-            		<p>
-            			<u>Fields category</u>
-            		</p>
+            		<strong>Selected field categories</strong>
             		<ul>
             			{fieldCategories.map(item => {
             				return (<li>{item.label}</li>)

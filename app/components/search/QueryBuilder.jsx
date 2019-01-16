@@ -502,7 +502,7 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-							    graph = MessageHelper.getNoDocumentsWithDateFieldMessage();
+							    graph = MessageHelper.renderNoDocumentsWithDateFieldMessage();
 							}
 						}
 
@@ -647,7 +647,7 @@ class QueryBuilder extends React.Component {
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
                 resultBlock = (
                     <div className="alert alert-danger">
-                    	{MessageHelper.getNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
+                    	{MessageHelper.renderNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
                     </div>
                 );
 			}
