@@ -93,7 +93,7 @@ const MessageHelper = {
         if (fieldCategories && fieldCategories.length > 0) {
             return (
             	<div>
-            		<strong>Selected field categories</strong>
+            		<strong>Selected field clusters</strong>
             		<ul>
             			{fieldCategories.map(item => {
             				return (<li>{item.label}</li>)
