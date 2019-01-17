@@ -18,9 +18,9 @@ class ItemDetails extends React.Component {
 	    this.props.onSwitchQuickViewResult(resource, this.props.highlightData);
 	}
 
-	gotoBookmark(resource){
+	gotoBookmark(){
 	    var selected = !this.state.selected;
-        this.props.onSelected(resource.resourceId, selected)
+        this.props.onSelected(this.props.data.resourceId, selected)
 	    this.setState({selected: selected});
 	}
 
@@ -35,16 +35,45 @@ class ItemDetails extends React.Component {
     		return null;
     	}
 
-        const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.data.resourceId);
+    	var currentIndex = -1;
+    	var prevResource = false;
+    	var nextResource = false;
+    	var resourceId = null;
+    	var isLastHit = false;
 
-    	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
-    	const prevResource = currentIndex > 0 ? searchResults[currentIndex-1] : false;
-        const nextResource = (searchResults.length - 1) > currentIndex ?
-        	searchResults[currentIndex+1] : false;
+    	if(this.props.showSelection){
+            //The user only sees his selection. Get the current, next and previous selected search result
+            currentIndex = selectedRows.findIndex(elem => elem._id === this.props.data.resourceId);
 
-		const isFirstResource = (currentIndex === 0);
+            if(currentIndex === -1){
+                //In case the user deselected the current resource...
+                currentIndex = this.props.lastUnselectedIndex;
+                resourceId = this.props.lastUnselectedResource;
 
-        let isLastHit = (currentIndex === searchResults.length-1)
+                nextResource = (selectedRows.length) > currentIndex ?
+                    selectedRows[currentIndex] : false;
+
+                isLastHit = (currentIndex === selectedRows.length);
+            } else {
+                resourceId = selectedRows[currentIndex].resourceId;
+                nextResource = (selectedRows.length - 1) > currentIndex ?
+                selectedRows[currentIndex+1] : false;
+                isLastHit = (currentIndex === selectedRows.length-1);
+            }
+            prevResource = currentIndex > 0 ? selectedRows[currentIndex-1] : false;
+
+    	} else {
+    	    //Just get the current, next and previous search result
+    	    currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.data.resourceId);
+
+    	    resourceId = searchResults[currentIndex].resourceId;
+            prevResource = currentIndex > 0 ? searchResults[currentIndex-1] : false;
+            nextResource = (searchResults.length - 1) > currentIndex ?
+                searchResults[currentIndex+1] : false;
+
+            isLastHit = (currentIndex === searchResults.length-1);
+    	}
+        const isFirstResource = (currentIndex <= 0);
 
         const previousResourceBtn = (
             <button className="btn btn-primary" disabled={isFirstResource}
@@ -62,7 +91,7 @@ class ItemDetails extends React.Component {
             <input type="checkbox"
                 className="btn btn-primary"
                 checked={this.props.selected}
-                onChange={this.gotoBookmark.bind(this, searchResults[currentIndex])}
+                onChange={this.gotoBookmark.bind(this)}
                 label="Control the bookmark groups this resource is associated with">
             </input>
 		);

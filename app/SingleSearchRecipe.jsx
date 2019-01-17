@@ -448,7 +448,11 @@ class SingleSearchRecipe extends React.Component {
         }
 
         ComponentUtil.storeJSONInLocalStorage("selectedRows", currentSelection);
-        this.setState({selectedRows: selectedRows});
+        if(currentSelection.length === 0){
+            this.clearSelectedResources()
+        } else {
+            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
+        }
 	}
 
 	selectBookmarkGroup() {
@@ -540,15 +544,17 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	showQuickViewModal(result, highlightData) {
-	    var currentQueryOutput = ComponentUtil.getJSONFromLocalStorage("currentQueryOutput");
+	showQuickViewModal(result, highlightData, fullResult=null) {
+	    if(!fullResult){
+	        var currentQueryOutput = ComponentUtil.getJSONFromLocalStorage("currentQueryOutput");
 
-	    var fullResult = null;
-	    for(var i = 0; i < currentQueryOutput.results.length; i++){
-            if(currentQueryOutput.results[i]._id === result.resourceId){
-                fullResult = currentQueryOutput.results[i];
+            for(var i = 0; i < currentQueryOutput.results.length; i++){
+                if(currentQueryOutput.results[i]._id === result.resourceId){
+                    fullResult = currentQueryOutput.results[i];
+                }
             }
 	    }
+
 	    this.setState({
 	        quickViewResult: result,
 	        quickViewFullResult: fullResult,
@@ -558,22 +564,80 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	switchQuickViewResult(result){
-	    const highlightData = this.state.highlightData[result.resourceId];
-	    this.showQuickViewModal(result, highlightData);
+	    var highlightData = null;
+	    var resultDetailData = null;
+	    var fullResult = null;
+	    if(this.state.showBookmarkedItems){
+	        fullResult = result;
+	        //In this case, result can be a 'raw' result, not yet processed through the config
+	        //because it is outside the current search page.
+            var searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+            var currentIndex = searchResults.findIndex(elem => elem.resourceId === result._id);
+            if(currentIndex !== -1){
+                //Still inside the search page
+                resultDetailData = searchResults[currentIndex]
+                //We can load the highlight data the normal way, so keep it null.
+                highlightData = null;
+            }else{
+                //The result is outside the search page, so run it through the config
+                const dateField = this.state.currentOutput.query.dateRange ?
+										this.state.currentOutput.query.dateRange.field : null
+				resultDetailData = this.state.collectionConfig.getItemDetailData(result, dateField);
+
+                highlightData = this.state.collectionConfig.getHighlights(result["_source"], this.state.currentOutput.query.term);
+            }
+	    } else {
+	        //If we are not in selection-mode, the result is already "detailed"
+	        resultDetailData = result;
+	    }
+
+	    if(!highlightData){
+	        highlightData = this.state.highlightData[resultDetailData.resourceId];
+	    }
+
+	    this.showQuickViewModal(resultDetailData, highlightData, fullResult=fullResult);
 	}
 
 	onKeyPressedInQuickView(keyCode){
-	    const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
-	    const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.state.quickViewResult.resourceId);
+	    var searchResults = [];
+	    var currentIndex = -1;
+	    var resourceId = null;
+	    var nextResource = null;
+	    var isLastHit = false;
+	    if(this.state.showBookmarkedItems){
+            searchResults = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+            currentIndex = searchResults.findIndex(elem => elem._id === this.state.quickViewResult.resourceId);
+            if(currentIndex === -1){
+                currentIndex = this.state.lastUnselectedIndex;
+                resourceId = this.state.lastUnselectedResource;
+
+                nextResource = (searchResults.length) > currentIndex ?
+        	    searchResults[currentIndex] : false;
+
+        	    isLastHit = (currentIndex === searchResults.length)
+            } else {
+                resourceId = searchResults[currentIndex]._id;
+                isLastHit = (currentIndex === searchResults.length-1)
+            }
+	    } else {
+	        searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+	        currentIndex = searchResults.findIndex(elem => elem.resourceId === this.state.quickViewResult.resourceId);
+	        resourceId = searchResults[currentIndex].resourceId;
+
+	        const nextResource = (searchResults.length - 1) > currentIndex ?
+        	searchResults[currentIndex+1] : false;
+        	isLastHit = (currentIndex === searchResults.length-1)
+	    }
+
+	    if(!nextResource){
+	        nextResource = (searchResults.length - 1) > currentIndex ?
+        	    searchResults[currentIndex+1] : false;
+	    }
 
     	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
     	const prevResource = currentIndex > 0 ? searchResults[currentIndex-1] : false;
-        const nextResource = (searchResults.length - 1) > currentIndex ?
-        	searchResults[currentIndex+1] : false;
 
 		const isFirstResource = (currentIndex === 0);
-
-        let isLastHit = (currentIndex === searchResults.length-1)
 
 	    if(keyCode === 39) {
 	        //Next
@@ -589,13 +653,12 @@ class SingleSearchRecipe extends React.Component {
 	    }
 	    if(keyCode === 83) {
 	        //S(elected)
-	        var currentRow = searchResults[currentIndex];
 	        var currentSelection = this.state.selectedRows;
 	        var selected = true;
-	        if (currentRow.resourceId in currentSelection){
+	        if (resourceId in currentSelection){
 	            selected = false;
 	        }
-	        this.selectedQuickViewResult(currentRow.resourceId, selected);
+	        this.selectedQuickViewResult(resourceId, selected);
 	    }
 	}
 
@@ -724,8 +787,14 @@ class SingleSearchRecipe extends React.Component {
 		//Modal that shows the quickview of the search result
 		if(this.state.showQuickViewModal) {
 		    var selected = false;
-		    if(this.state.quickViewResult.resourceId in this.state.selectedRows){
+		    var currentIndex = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewResult.resourceId);
+		    if(currentIndex>=0){
 		        selected = true;
+		    }
+		    var lastUnselectedResource = this.state.lastUnselectedResource || null;
+		    var lastUnselectedIndex = -1;
+		    if(this.state.lastUnselectedIndex !== undefined){
+		        lastUnselectedIndex = this.state.lastUnselectedIndex;
 		    }
 		    quickViewModal = (
 		        <FlexModal
@@ -741,6 +810,9 @@ class SingleSearchRecipe extends React.Component {
 					    initialSelected={this.state.selectedRows.hasOwnProperty(this.state.quickViewResult.resourceId)}
 					    selected={selected}
 					    onSelected={this.selectedQuickViewResult.bind(this)}
+					    showSelection={this.state.showBookmarkedItems}
+					    lastUnselectedResource={lastUnselectedResource}
+					    lastUnselectedIndex={lastUnselectedIndex}
 					    previewMode={true}
 					/>
 					<HighlightItemDetails data={this.state.quickViewHighlights}/>
@@ -845,17 +917,23 @@ class SingleSearchRecipe extends React.Component {
 								this.props.clientId, this.props.user, result._index
 							);
 
+							const highlightData = this.state.collectionConfig.getHighlights(result["_source"], this.state.currentOutput.query.term);
+                            const dateField = result.query && result.query.dateRange ?
+	                                        result.query.dateRange.field : null
+                            const resultDetailData = this.state.collectionConfig.getItemDetailData(result, dateField);
+                            this.state.highlightData[resultDetailData['resourceId']] = highlightData; // Store for later use when we need switching quickviews
+
+
 	                        return (
 	                            <SearchHit
 	                                key={'saved__' + index}
 	                                result={result}
+	                                resultDetailData={resultDetailData}
 	                                bookmarked={null}
 	                                searchTerm={result.query ? result.query.term : ''} //for highlighting the search term
+	                                highlightData={highlightData}
 	                                onQuickView={this.showQuickViewModal.bind(this)} //for poping up the preview
-	                                dateField={
-	                                    result.query && result.query.dateRange ?
-	                                        result.query.dateRange.field : null
-	                                } //for displaying the right date field in the hits
+	                                dateField={dateField} //for displaying the right date field in the hits
 	                                collectionConfig={collectionConfig}
 	                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
 	                                isSelected={true}
