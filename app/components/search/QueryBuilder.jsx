@@ -123,8 +123,10 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 
 		//reset certain query properties
-		q.selectedFacets = {};
-		//q.dateRange = null;
+		if(this.state.totalHits <= 0) {
+			q.dateRange = null; // only reset when there are no results
+		}
+		q.selectedFacets = {}; //always reset the facets
 		q.offset = 0;
 		q.term = this.setSearchTerm.value;
 
@@ -669,8 +671,21 @@ class QueryBuilder extends React.Component {
 								<div className="form-group">
 									<div className="col-sm-6">
 										<div className="input-group">
-											<input type="text" className="form-control" onKeyPress={this.searchFormKeyPressed.bind(this)}
-                                                   id="search_term" defaultValue={typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''} ref={input => (this.setSearchTerm = input)} placeholder="Search"/>
+											<input
+												type="text"
+												id="search_term"
+												className="form-control"
+												placeholder="Search"
+												onKeyPress={
+													this.searchFormKeyPressed.bind(this)
+												}
+												defaultValue={
+													typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''
+												}
+												ref={
+													input => (this.setSearchTerm = input)
+												}
+											/>
 											<span className="input-group-addon btn-effect" onClick={this.newSearch.bind(this)}>
 												{searchIcon}
 											</span>
