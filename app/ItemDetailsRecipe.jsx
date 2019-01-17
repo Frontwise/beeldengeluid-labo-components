@@ -12,7 +12,7 @@ import FlexRouter from './util/FlexRouter';
 import ReactTooltip from 'react-tooltip';
 
 import MetadataTable from './components/search/MetadataTable';
-
+import JSONFormatter from 'json-formatter-js';
 import LDResourceViewer from './components/linkeddata/LDResourceViewer';
 
 import DocumentAPI from './api/DocumentAPI';
@@ -84,7 +84,8 @@ class ItemDetailsRecipe extends React.Component {
 
 			awaitingProcess : null,
 
-			collectionConfig : null
+			collectionConfig : null,
+            randomId : Math.floor((Math.random() * 100000) + 1)
 		};
 		this.tabListeners = false;
 		this.CLASS_PREFIX = 'rcp__id'
@@ -306,7 +307,7 @@ class ItemDetailsRecipe extends React.Component {
 		if(this.state.resourceAnnotations) {
 			const temp = this.state.resourceAnnotations.filter(
 				a => a.motivation !== 'bookmarking' && a.target.source === this.state.itemData.resourceId
-			)
+			);
 			annotation = temp.length > 0 ? temp[0] : null;
 		}
 		return annotation
@@ -966,6 +967,16 @@ class ItemDetailsRecipe extends React.Component {
         )
     }
 
+    renderAllDataBlock() {
+        return (
+            <FlexBox isVisible={false} title="All Data">
+                <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+                    <div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)}
+                         id={'rawdata_' + this.state.randomId}/>
+                </div>
+            </FlexBox>)
+    }
+
 	render() {
 		if(!this.state.itemData) {
            return <LoadingSpinner message="Loading resource..."/>;
@@ -1112,8 +1123,14 @@ class ItemDetailsRecipe extends React.Component {
 
 			//render the exploration block
             const exploreBlock = this.renderExploreBlock();
-            
-            
+
+            const allDataBlock = this.renderAllDataBlock();
+
+            if (this.state.itemData.rawData && document.getElementById('rawdata_' + this.state.randomId)) {
+                const formatter = new JSONFormatter(this.state.itemData.rawData);
+                formatter.openAtDepth(Infinity);
+                document.getElementById('rawdata_' + this.state.randomId).appendChild(formatter.render());
+            }
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1140,6 +1157,9 @@ class ItemDetailsRecipe extends React.Component {
 									</div>
                                     <div className="row">
                                         {exploreBlock}
+                                    </div>
+                                    <div className="row">
+                                        {allDataBlock}
                                     </div>
 								</div>
 								<div className="col-md-5">
