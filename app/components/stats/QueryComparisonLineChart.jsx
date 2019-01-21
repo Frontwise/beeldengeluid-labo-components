@@ -236,27 +236,20 @@ class QueryComparisonLineChart extends React.Component {
                     />
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
                 </span>
-                <ResponsiveContainer width="100%" height="50%">
+                <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <LineChart
                         width={1200}
                         height={200}
                         data={timelineData}
                         margin={{top: 5, right: 20, bottom: 5, left: 0}}>
-                        {lines[0]}
-                        {lines[1]}
-                        {lines[2]}
-                        {lines[3]}
-                        {lines[4]}
-                        {lines[5]}
-                        {lines[6]}
-                        {lines[7]}
+                        {lines}
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year"/>
                         <YAxis width={100} >
                             <Label
                                 value="Number of records"
                                 offset={10}
-                                position="insideLeft"
+                                position="insideBottomLeft"
                                 angle={-90}
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
                             />
@@ -312,7 +305,7 @@ class CustomLegend extends React.Component{
             payload = this.props.payload,
             that = this;
         let colours = [],
-            queryInfoBlocks;
+            queryInfoBlocks = null;
         payload.map(d => {
             colours[d.dataKey] = d.color
         });
@@ -401,7 +394,7 @@ class CustomLegend extends React.Component{
                     )
                 }
             }
-        )
+        );
         if (queryInfo) {
             return (
                 <div className="ms__custom-legend">
@@ -446,7 +439,7 @@ class CustomTooltip extends React.Component{
                         <div className="ms__custom-tooltip">
                             <h4>{this.props.viewMode} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
+                            <span>{labelPercentage}: <span className="rightAlign">{point}</span></span>
                         </div>
                     );
                 } else if (dataType === 'inspector') {

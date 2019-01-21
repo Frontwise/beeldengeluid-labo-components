@@ -14,4 +14,13 @@
 	.recharts-legend-wrapper {
 		position: relative;
 	}
+	.bg__comparative-graphs {
+		position: relative;
+
+		.bg__switch-type-btn {
+			position: absolute;
+			top: 0;
+			right: 0;
+		}
+	}
 }

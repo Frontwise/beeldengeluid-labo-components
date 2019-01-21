@@ -6,6 +6,7 @@ import FlexModal from './components/FlexModal';
 import IDUtil from './util/IDUtil';
 import ElasticsearchDataUtil from './util/ElasticsearchDataUtil';
 import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import ComparisonHistogram from './components/stats/ComparisonHistogram';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import ProjectQueriesTable from './components/workspace/projects/query/ProjectQueriesTable';
 import CollectionUtil from './util/CollectionUtil';
@@ -39,7 +40,9 @@ class QueryComparisonRecipe extends React.Component {
 
         this.state = {
             lineChartData: {},
+            barChartData: {},
             collections : collections,
+            chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
             data : null,
             pageSize : 10,
             selectedQueries : [],
@@ -64,7 +67,8 @@ class QueryComparisonRecipe extends React.Component {
             this.setState(
                 {
                     activeProject: data,
-                    lineChartData: null
+                    lineChartData: null,
+                    barChartData : null
                 },
                 () => {
                     this.onProjectChanged.call(this, data)
@@ -170,7 +174,8 @@ class QueryComparisonRecipe extends React.Component {
                     }
                 });
                 this.setState({
-                    lineChartData: queriesData
+                    lineChartData: queriesData,
+                    barChartData: dataPerQuery,
                 }, () => this.layout.classList.remove("spinner"))
             },
         )
@@ -185,6 +190,7 @@ class QueryComparisonRecipe extends React.Component {
             if(data.deleted === true && data.queryId) { //the query factory deleted a query
                 delete csr[data.queryId];
                 delete lineChartData[data.queryId];
+                delete barChartData[data.queryId];
             } else { //the data is the same stuff returned by a QueryBuilder
 
             }
@@ -230,6 +236,13 @@ class QueryComparisonRecipe extends React.Component {
         document.location.href = url;
     }
 
+    switchGraphType() {
+        this.setState({
+            chartType : this.state.chartType === 'lineChart' ? 'histogram' : 'lineChart'
+            }
+        )
+    }
+
     render() {
         const compareLink = {"label": "Combine queries ..."}
 
@@ -245,12 +258,15 @@ class QueryComparisonRecipe extends React.Component {
                     onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i className="fa fa-plus"/></button>
         );
 
-        let lineChart = null;
+        let chart = null;
         let aggregatedHits = null;
         let projectModal = null;
         let projectQueriesTable = null;
+        let graphTypeBtn = null;
 
         if(this.state.activeProject) {
+            const graphTypeText = this.state.chartType === 'lineChart' ? 'Histogram' : 'Line Chart';
+
             projectQueriesTable = (
                 <div className={IDUtil.cssClassName('project-queries-view')}>
                     <ProjectQueriesTable
@@ -263,13 +279,32 @@ class QueryComparisonRecipe extends React.Component {
             );
 
             if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
-                const ramdom = Math.floor(Math.random() * 1000000);
-                lineChart = (
-                    <QueryComparisonLineChart
-                        data={this.state.lineChartData}
-                        comparisonId={ramdom}
-                    />
-                );
+                graphTypeBtn = (
+                    <button
+                        onClick={this.switchGraphType.bind(this)}
+                        type="button"
+                        className="btn btn-primary btn-xs bg__switch-type-btn">
+                        {graphTypeText}
+                    </button>);
+
+                const random = Math.floor(Math.random() * 1000000);
+                if(this.state.chartType === 'lineChart') {
+                    chart = (
+                        <QueryComparisonLineChart
+                            data={this.state.lineChartData}
+                            key={random}
+                            selectedQueries={this.state.selectedQueries}
+                        />
+                    );
+                } else {
+                    chart = (
+                        <ComparisonHistogram
+                            data={this.state.barChartData}
+                            key={random}
+                            selectedQueries={this.state.selectedQueries}
+                        />
+                    );
+                }
             }
         }
 
@@ -286,20 +321,6 @@ class QueryComparisonRecipe extends React.Component {
                 </FlexModal>
             )
         }
-
-        //TODO only render when there is linechart data
-        if(this.props.recipe.ingredients.output === 'lineChart') {
-            if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
-                lineChart = (
-                    <QueryComparisonLineChart
-                        data={this.state.lineChartData}
-                        comparisonId={this.state.comparisonId}
-                        selectedQueries={this.state.selectedQueries}
-                    />
-                );
-            }
-        }
-
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
                 <div className="overlay"/>
@@ -311,8 +332,9 @@ class QueryComparisonRecipe extends React.Component {
                     {projectQueriesTable}
                 </div>
                 <div className="row">
-                    <div className="col-md-12">
-                        {lineChart}
+                    <div className="col-md-12 bg__comparative-graphs">
+                        {graphTypeBtn}
+                        {chart}
                     </div>
                 </div>
                 {aggregatedHits}
