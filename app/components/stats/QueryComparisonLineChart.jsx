@@ -432,14 +432,14 @@ class CustomTooltip extends React.Component{
                         valueLabel = payload.length > 1 ? 'Values' : 'Value',
                         point = payload.map(p => {
                             return (
-                                <p style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</p>
+                                <span style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</span>
                             )
                         });
                     return (
                         <div className="ms__custom-tooltip">
-                            <h4>{this.props.viewMode} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                            <span>{labelPercentage}: <span className="rightAlign">{point}</span></span>
+                            <h4>{dataType} {valueLabel}</h4>
+                            <p>Year: <span className="rightAlign">{label}</span></p>
+                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
                         </div>
                     );
                 } else if (dataType === 'inspector') {
@@ -467,8 +467,8 @@ class CustomTooltip extends React.Component{
 
                     return (
                         <div className="ms__custom-tooltip">
-                            <h4>{this.props.viewMode} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                            <h4>{dataType} {valueLabel}</h4>
+                            <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
                         </div>
                     );
