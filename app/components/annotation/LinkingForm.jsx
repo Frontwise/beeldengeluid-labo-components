@@ -92,7 +92,7 @@ class LinkingForm extends React.Component {
 					<li key={'com__' + index} className="list-group-item" title={link.url}>
 						<i className="fa fa-close interactive" onClick={this.removeLink.bind(this, index)}/>
 						&nbsp;
-						{link.label}
+						<a href={link.url} target="_new">{link.label}</a>
 					</li>
 				)
 			}, this);
