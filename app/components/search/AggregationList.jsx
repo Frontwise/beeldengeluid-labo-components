@@ -3,7 +3,6 @@ import FlexModal from '../FlexModal';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from "../../util/ComponentUtil";
 import ReactTooltip from 'react-tooltip';
-import {CSVLink, CSVDownload} from 'react-csv';
 
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationList extends React.Component {
@@ -314,37 +313,19 @@ class AggregationList extends React.Component {
                                 />
                             <label htmlFor={aggr.field} data-on="Excl" data-off="Incl"/></span>
                         </li>
-                        <li title="Alphanumeric descending" onClick={
-                            this.setSortingMode.bind(this, aggr.field, 'alpha', 'desc')
-                        }>
+                        <li title="Alphanumeric descending" onClick={this.setSortingMode.bind(this, aggr.field, 'alpha', 'desc')}>
                             <i className="fa fa-sort-alpha-desc fa-lg" aria-hidden="true"/>
                         </li>
-                        <li title="Alphanumeric ascending" onClick={
-                            this.setSortingMode.bind(this, aggr.field, 'alpha', 'asc')
-                        }>
-                            <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/> </li>
-                        <li title="Numeric Asceding" onClick={
-                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'asc')
-                        }>
-                            <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"/> </li>
-                        <li title="Numeric descending" onClick={
-                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'desc')
-                        }>
-                            <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"/> </li>
-
-                        <li title="Download as CSV" onClick={
-                            this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'desc')
-                        }>
-                            <CSVLink
-                                filename={aggr.title}
-                                headers={[
-                                    {label: 'Value', key: 'key'},
-                                    {label: 'Count', key: 'doc_count'}
-                                ]}
-                                data={this.props.aggregations[aggr.field]}>
-                                <i className="fa fa-download" aria-hidden="true"/>
-                            </CSVLink>
+                        <li title="Alphanumeric ascending" onClick={this.setSortingMode.bind(this, aggr.field, 'alpha', 'asc')}>
+                            <i className="fa fa-sort-alpha-asc fa-lg" aria-hidden="true"/>
                         </li>
+                        <li title="Numeric Asceding" onClick={this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'asc')}>
+                            <i className="fa fa-sort-numeric-asc fa-lg" aria-hidden="true"/>
+                        </li>
+                        <li title="Numeric descending" onClick={this.setSortingMode.bind(this, aggr.field, 'non-alpha', 'desc')}>
+                            <i className="fa fa-sort-numeric-desc fa-lg" aria-hidden="true"/>
+                        </li>
+
                     </ul>
                 </div>
                 <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
