@@ -14,7 +14,6 @@ import SearchAPI from "../../api/SearchAPI";
 import TimeUtil from "../../util/TimeUtil";
 import CKANAPI from "../../api/CKANAPI";
 
-//TODO add a bar for the dates that are out of range
 class ComparisonHistogram extends React.Component {
     constructor(props) {
         super(props);
@@ -25,6 +24,7 @@ class ComparisonHistogram extends React.Component {
             isSearching: false,
             collectionList : null
         };
+
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
     }
@@ -97,7 +97,7 @@ class ComparisonHistogram extends React.Component {
                     point[arr.query.id] = __getCount({
                         viewMode: this.state.viewMode,
                         count: dataRow.doc_count,
-                        countInState: relVal // change to state values after correcting
+                        countInState: relVal
                     });
                     return point;
                 }
@@ -122,7 +122,6 @@ class ComparisonHistogram extends React.Component {
         }
     }
 
-    //TODO better ID!! (include some unique part based on the query)
     render() {
         let prettifiedData = this.getPrettifiedData();
         const dataToGraph = [];
@@ -143,7 +142,7 @@ class ComparisonHistogram extends React.Component {
         const bars = prettifiedData.map((k, index) => {
             return (
                 <Bar
-                    dataKey={k[index]['queryId']} //is equal to the queryId
+                    dataKey={k[index]['queryId']}
                     fill={this.COLORS[index]}
                     stackId="a"
                     name = ""
@@ -166,10 +165,16 @@ class ComparisonHistogram extends React.Component {
                         <XAxis dataKey="date">
                         </XAxis>
                         <YAxis width={100} >
-                            <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
-                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+                            <Label
+                                value="Number of records"
+                                offset={10}
+                                position="insideBottomLeft"
+                                angle={-90}
+                                style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
-                        <Tooltip content={<CustomTooltip/>} viewMode={this.state.viewMode}/>
+                        <Tooltip
+                            content={<CustomTooltip/>}
+                            viewMode={this.state.viewMode}/>
                         <Legend
                             verticalAlign="bottom"
                             wrapperStyle={{ position: null }}
@@ -192,7 +197,6 @@ class ComparisonHistogram extends React.Component {
 export default ComparisonHistogram;
 
 class CustomLegend extends React.Component{
-
     stylings(p){
         return {
             color: p,
@@ -317,8 +321,8 @@ class CustomLegend extends React.Component{
         return null;
     }
 }
-class CustomTooltip extends React.Component{
 
+class CustomTooltip extends React.Component{
     stylings(p){
         return {
             color: p.color,
@@ -328,7 +332,6 @@ class CustomTooltip extends React.Component{
             padding: '0',
         }
     }
-
 
     render() {
         const {active} = this.props;
