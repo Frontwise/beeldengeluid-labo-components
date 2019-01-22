@@ -346,7 +346,7 @@ class CustomTooltip extends React.Component{
                         point = payload.map(p => <span style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</span>);
 
                     return (
-                        <div className="ms__custom-tooltip">
+                        <div className="ms__histogram-custom-tooltip">
                             <h4>{dataType} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
@@ -362,7 +362,7 @@ class CustomTooltip extends React.Component{
                         valueLabel = payload.length > 1 ? 'Values' : 'Value';
 
                     return (
-                        <div className="ms__custom-tooltip">
+                        <div className="ms__histogram-custom-tooltip">
                             <h4>{dataType} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
