@@ -112,7 +112,7 @@ class CollectionInspectorLineChart extends React.Component {
                         <Tooltip content={<CustomTooltip/>}/>
                         <Legend verticalAlign="top" onClick={this.toggleLine.bind(this)} height={36}/>
                         <Bar dataKey="present" stackId="a" fill="#468dcb" />
-                        <Bar dataKey="missing" stackId="b" fill="#f26c50" />
+                        <Bar dataKey="missing" stackId="a" fill="#f26c50" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
