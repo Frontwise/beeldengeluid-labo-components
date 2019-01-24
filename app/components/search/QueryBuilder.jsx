@@ -128,7 +128,7 @@ class QueryBuilder extends React.Component {
 		}
 		q.selectedFacets = {}; //always reset the facets
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || ''; // make sure the term is always a string, otherwise 0 results by default
 
         this.doSearch(q, true);
 	}
@@ -146,7 +146,7 @@ class QueryBuilder extends React.Component {
 		//reset certain query properties
 		q.searchLayers = searchLayers;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -161,7 +161,7 @@ class QueryBuilder extends React.Component {
 			q.desiredFacets = data.desiredFacets;
 			q.selectedFacets = data.selectedFacets;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 			this.doSearch(q, true);
 		} else if(componentClass === 'DateRangeSelector') {
 			//first delete the old selection from the desired facets
@@ -194,14 +194,14 @@ class QueryBuilder extends React.Component {
 			q.dateRange = data;
 			q.desiredFacets = df;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 
 			this.doSearch(q, true)
 		} else if(componentClass === 'FieldCategorySelector') {
 			const q = this.state.query;
 			q.fieldCategory = data;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 
 			this.doSearch(q, true)
 		}
@@ -213,7 +213,7 @@ class QueryBuilder extends React.Component {
 	gotoPage(pageNumber) {
 		const q = this.state.query;
 		q.offset = (pageNumber-1) * this.props.pageSize;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -223,7 +223,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.sort = sortParams;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -232,7 +232,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.dateRange = null;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
