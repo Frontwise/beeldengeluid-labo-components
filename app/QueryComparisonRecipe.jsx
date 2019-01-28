@@ -44,6 +44,7 @@ class QueryComparisonRecipe extends React.Component {
             collections : collections,
             chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
             data : null,
+            selectedQueriesId: null,
             pageSize : 10,
             selectedQueries : [],
             activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
@@ -154,6 +155,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     async processData(queries) {
+        const random = Math.floor(Math.random() * 1000) + 1;
         const promises = Object.keys(queries).map(this.getData.bind(this));
         let queriesData = {};
         await Promise.all(promises).then(
@@ -176,6 +178,7 @@ class QueryComparisonRecipe extends React.Component {
                 this.setState({
                     lineChartData: queriesData,
                     barChartData: dataPerQuery,
+                    selectedQueriesId : random
                 }, () => this.layout.classList.remove("spinner"))
             },
         )
@@ -194,20 +197,6 @@ class QueryComparisonRecipe extends React.Component {
             } else { //the data is the same stuff returned by a QueryBuilder
 
             }
-        }
-
-        if (this.state.viewMode !== 'relative') {
-            let relativeData = data.map(
-                dataSet => {
-                    if(dataSet.length > 0) {
-                        dataSet
-                    }
-                }
-            );
-            this.setState({
-                isSearching: false,
-                data: relativeData
-            });
         }
     }
 
@@ -244,15 +233,13 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     render() {
-        const compareLink = {"label": "Combine queries ..."}
-
+        const compareLink = {"label": "Combine queries ..."};
         const chooseProjectBtn = (
             <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
                 Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
             </button>
         );
-
-                //generates a tabbed pane with a search component for each collection + a collection browser
+        //generates a tabbed pane with a search component for each collection + a collection browser
         const searchComponent = (
             <button className="btn btn-primary"
                     onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i className="fa fa-plus"/></button>
@@ -287,12 +274,11 @@ class QueryComparisonRecipe extends React.Component {
                         {graphTypeText}
                     </button>);
 
-                const random = Math.floor(Math.random() * 1000000);
                 if(this.state.chartType === 'lineChart') {
                     chart = (
                         <QueryComparisonLineChart
                             data={this.state.lineChartData}
-                            key={random}
+                            key={this.state.selectedQueriesId}
                             selectedQueries={this.state.selectedQueries}
                         />
                     );
@@ -300,7 +286,7 @@ class QueryComparisonRecipe extends React.Component {
                     chart = (
                         <ComparisonHistogram
                             data={this.state.barChartData}
-                            key={random}
+                            key={this.state.selectedQueriesId}
                             selectedQueries={this.state.selectedQueries}
                         />
                     );

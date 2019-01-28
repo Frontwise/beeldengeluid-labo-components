@@ -19,12 +19,10 @@ class ComparisonHistogram extends React.Component {
         super(props);
         this.state = {
             viewMode: 'absolute', // Sets default view mode to absolute.
-            graphData: this.props.data,
             relData: null,
             isSearching: false,
             collectionList : null
         };
-
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
     }
@@ -33,6 +31,13 @@ class ComparisonHistogram extends React.Component {
         CKANAPI.listCollections((collections) => {
             this.setState({collectionList :  collections});
         });
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            nextProps.selectedQueries !== this.props.selectedQueries
+            || nextState.viewMode !== this.state.viewMode
+        );
     }
 
     async getData(key) {
@@ -142,6 +147,7 @@ class ComparisonHistogram extends React.Component {
         const bars = prettifiedData.map((k, index) => {
             return (
                 <Bar
+                    isAnimationActive={true}
                     dataKey={k[index]['queryId']}
                     fill={this.COLORS[index]}
                     stackId="a"
@@ -149,6 +155,7 @@ class ComparisonHistogram extends React.Component {
                 />);
         });
 
+        const random = Math.floor(Math.random() * 1000) + 1;
         return (
             <div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >
@@ -157,6 +164,7 @@ class ComparisonHistogram extends React.Component {
                 </span>
                 <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <BarChart
+                        key={random}
                         width={1200}
                         height={200}
                         data={dataToGraph}

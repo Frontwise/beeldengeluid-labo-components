@@ -39,6 +39,14 @@ class QueryComparisonLineChart extends React.Component {
         });
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            nextProps.data !== this.props.data
+            || nextState.viewMode !== this.state.viewMode
+            || this.state.isSearching !== nextState.isSearching
+        );
+    }
+
     toggleLine(event) {
         const dataKey = event.dataKey;
         let currentKeyValue = this.state.opacity[dataKey];
@@ -152,6 +160,7 @@ class QueryComparisonLineChart extends React.Component {
         } else {
             this.setState({
                     viewMode: 'relative',
+                    isSearching : true,
                     query: {
                         ...this.props.query,
                         term: ''
@@ -166,11 +175,13 @@ class QueryComparisonLineChart extends React.Component {
     //TODO better ID!! (include some unique part based on the query)
     render() {
         const lines = Object.keys(this.props.data).map((k, index) => {
+            const random = Math.floor(Math.random() * 1000) + 1;
             //fix onClick with this? https://github.com/recharts/recharts/issues/261
             return (
                 <Line
+                    key={random}
+                    isAnimationActive={true}
                     label={<LabelAsPoint/>} //the LabelAsPoint class handles the onclick of a dot
-                    activeDot={false}
                     name={this.props.data[k].label}
                     type="monotone"
                     onClick={this.showMeTheMoney.bind(this)}
@@ -178,7 +189,7 @@ class QueryComparisonLineChart extends React.Component {
                     stroke={this.COLORS[index]}
                     strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 2}}
-                    //activeDot={{stroke: this.COLORS[index], strokeWidth: 2, r: 1}}
+                    activeDot={{stroke: this.COLORS[index], strokeWidth: 6, r: 3}}
                 />);
         });
         //concatenate all the data for each query, because rechart likes it this way (TODO make nicer)
@@ -234,7 +245,7 @@ class QueryComparisonLineChart extends React.Component {
                         type="checkbox"
                         onClick={this.getRelativeValues.bind(this)}
                     />
-                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"></label>
+                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                 </span>
                 <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <LineChart
