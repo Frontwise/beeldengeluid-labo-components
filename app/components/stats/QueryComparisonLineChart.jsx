@@ -44,6 +44,7 @@ class QueryComparisonLineChart extends React.Component {
             nextProps.data !== this.props.data
             || nextState.viewMode !== this.state.viewMode
             || this.state.isSearching !== nextState.isSearching
+            || this.state.collectionList !== nextState.collectionList
         );
     }
 
