@@ -278,6 +278,10 @@ class ProjectTable extends React.PureComponent {
         return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
+    saveActiveProject(project){
+            ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+    }
+
     //Transforms a project to a row needed for the sort table
     //don't like this is passed as a function to the sort table... but let's see first
     getProjectRow(project) {
@@ -286,7 +290,7 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}
+            content: (<Link onClick={this.saveActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>{project.name}
                       </Link>)
         },
         {
