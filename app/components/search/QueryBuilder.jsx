@@ -13,7 +13,6 @@ import TimeUtil from '../../util/TimeUtil';
 //ui controls for assembling queries
 import FieldCategorySelector from './FieldCategorySelector';
 import DateRangeSelector from './DateRangeSelector';
-import AggregationBox from './AggregationBox';
 import AggregationList from './AggregationList';
 
 //visualisations
@@ -154,7 +153,7 @@ class QueryBuilder extends React.Component {
 	/*---------------------------------- FUNCTION THAT RECEIVES DATA FROM CHILD COMPONENTS --------------------------------------*/
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass === 'AggregationList' || componentClass === 'AggregationBox') {
+		if(componentClass === 'AggregationList') {
 			const q = this.state.query;
 
 			//reset the following query params
@@ -411,55 +410,30 @@ class QueryBuilder extends React.Component {
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
-					if(this.props.aggregationView === 'box') {
-						aggrView = (
-							<AggregationBox
-								searchId={this.state.searchId} //for determining when the component should rerender
-								queryId={this.state.query.id}
-								aggregations={this.state.aggregations} //part of the search results
-								desiredFacets={this.state.query.desiredFacets} //as obtained from the collection config
-								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-								collectionConfig={this.props.collectionConfig} //for the aggregation creator only
-								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-							/>
-						)
-					} else { //just show them as a conservative list
-						aggrView = (
-							<AggregationList
-								searchId={this.state.searchId} //for determining when the component should rerender
-								queryId={this.state.query.id} //TODO implement in the list component
-								aggregations={this.state.aggregations} //part of the search results
-                                desiredFacets={this.state.query.desiredFacets}
-								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-                                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
-								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-							/>
-						)
-					}
+					aggrView = (
+						<AggregationList
+							searchId={this.state.searchId} //for determining when the component should rerender
+							queryId={this.state.query.id} //TODO implement in the list component
+							aggregations={this.state.aggregations} //part of the search results
+                            desiredFacets={this.state.query.desiredFacets}
+							selectedFacets={this.state.query.selectedFacets}
+                            collectionConfig={this.props.collectionConfig} //for the aggregation creator only
+							onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
+						/>
+					)
 
-                    if (aggrView && this.props.aggregationView === 'box') {
-                        if(aggrView) {
-                            aggregationBox = (
-                                <div className="row">
-                                    <div className="col-md-12">
-                                        {aggrView}
-                                    </div>
-                                </div>
-                            )
-                        }
-                    } else {
-                        aggregationBox = (
-                            <div className="col-md-3 aggregation-list">
-                                {aggrView}
-                            </div>
-                        )
-                    }
+					aggregationBox = (
+						<div className="col-md-3 aggregation-list">
+                            {aggrView}
+                        </div>
+                    )
 
 					// Display the graph only if an option other than the default is selected
 					// and the length of the data is greater than 0.
 					//TODO fix the ugly if/else statements!!
 					if(this.state.query.dateRange && this.state.aggregations[this.state.query.dateRange.field] !== undefined) {
-						//draw a graph
+
+						//draw the time line
 						if(this.props.showTimeLine) {
 							if (this.state.aggregations[this.state.query.dateRange.field].length !== 0) {
 
@@ -506,7 +480,7 @@ class QueryBuilder extends React.Component {
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
 							    graph = MessageHelper.renderNoDocumentsWithDateFieldMessage();
 							}
-						}
+						} //END OF drawing the time line
 
 						//draw the summary stuff
 						if(this.state.aggregations && this.state.query.dateRange.field !== 'null_option') {
@@ -555,8 +529,9 @@ class QueryBuilder extends React.Component {
 									</div>
 		                    	)
 		                    }
-	            		}
-					}
+	            		} //END OF drawing the date range summery
+
+					} //END OF THE date range aggregation
 
                     if (this.props.dateRangeSelector && this.props.collectionConfig.getDateFields() != null) {
                     	//draw the date range selector
@@ -592,9 +567,9 @@ class QueryBuilder extends React.Component {
 			            		</div>
 			            	)
 			            }
+                    } //END OF date range selector rendering
 
-                    }
-                }
+                } //END OF the big code block of rendering aggregations
 
                 //draw the overall result statistics
                 const resultStats = (
@@ -607,44 +582,23 @@ class QueryBuilder extends React.Component {
                     </div>
                 );
 
-                if (this.props.aggregationView === 'box') {
-                    resultBlock = (
-                        <div>
-                            {resultStats}
-                            <div className="separator"/>
-                            {dateRangeCrumb}
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {dateRangeSelector}
-                                    {graph}
-                                </div>
-                            </div>
-                            <div className="separator"/>
-                            <div>
-                                <div className="col-md-12">
-                                    {aggregationBox}
-                                    <br/>
-                                </div>
+                //draw the result block
+                resultBlock = (
+                    <div>
+                        {resultStats}
+                        <div className="separator"/>
+                        {dateRangeCrumb}
+                        <div className="row">
+                            <div className="col-md-12">
+                                {dateRangeSelector}
+                                {graph}
                             </div>
                         </div>
-                    )
-                } else {
-                    resultBlock = (
-                        <div>
-                            {resultStats}
-                            <div className="separator"/>
-                            {dateRangeCrumb}
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {dateRangeSelector}
-                                    {graph}
-                                </div>
-                            </div>
-                            <div className="separator"/>
-                            {aggregationBox}
-                        </div>
-                    )
-                }
+                        <div className="separator"/>
+                        {aggregationBox}
+                    </div>
+                )
+
             //if hits is not greater than 0
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
                 resultBlock = (
