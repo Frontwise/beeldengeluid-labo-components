@@ -331,7 +331,7 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'actions' },
             content: project.canOpen(currentUserId) ? (
                 <div>
-                    <Link to={'/workspace/projects/' + project.id} className="btn">
+                    <Link onClick={this.saveActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id} className="btn">
                         Open
                     </Link>
 
