@@ -16,7 +16,7 @@ import AnnotationTimeline from '../annotation/AnnotationTimeline';
 import AnnotationSummary from '../../annotation/AnnotationSummary';
 
 import IDUtil from '../../../util/IDUtil';
-import TimeUtil from '../../../util/TimeUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 import AnnotationUtil from '../../../util/AnnotationUtil';
 import IconUtil from '../../../util/IconUtil';
 
@@ -72,8 +72,6 @@ class FlexPlayer extends React.Component {
 			segmentEnd : -1, //end point of the active ANNOTATION
 
 			paused : true,//FIXME call the player API instead (isPaused)?
-
-			fragmentMode : false, //only play the current fragment
 
 			annotations : [], //populated in onLoadAnnotations()
 			activeAnnotation : null,
@@ -218,10 +216,6 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
-	onGetDuration(value) {
-		this.setState({duration : value});
-	}
-
 	onPause(paused) {
         this.setState({paused : true});
         if(this.props.onPause) {
@@ -229,8 +223,20 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
+	//TODO test this well! (relative duration)
+	onGetDuration(value) {
+		//this.setState({duration : value});
+		this.setState({
+			duration : FlexPlayerUtil.onAirDuration(value, this.state.currentMediaObject)
+		})
+	}
+
+	//TODO test this well! (relative player pos)
 	onGetPosition(value) {
-	    this.setState({curPosition : value});
+	    //this.setState({curPosition : value});
+	    this.setState({
+	    	curPosition : FlexPlayerUtil.timeRelativeToOnAir(value, this.state.currentMediaObject)
+	    })
 	}
 
 	loadProgress(data) {
@@ -255,22 +261,32 @@ class FlexPlayer extends React.Component {
 
 	setManualStart(start) {
 		if(start > 0 && start <= this.state.duration) {
-		    this.setState({segmentStart : start}, this.state.playerAPI.seek(start));
+		    this.setState(
+		    	{segmentStart : start},
+		    	() => {
+		    		this.__doOnAirSeek(start)
+		    	}
+		    );
 		}
 	}
 
 	setManualEnd(end) {
 		if(end > 0 && end <= this.state.duration) {
-		    this.setState({segmentEnd : end}, this.state.playerAPI.seek(end));
+		    this.setState(
+		    	{segmentEnd : end},
+		    	() => {
+		    		this.__doOnAirSeek(end)
+		    	}
+		    );
 		}
 	}
 
 	playStart() {
-    	this.state.playerAPI.seek(this.state.segmentStart);
+		this.__doOnAirSeek(this.state.segmentStart)
 	}
 
 	playEnd() {
-    	this.state.playerAPI.seek(this.state.segmentEnd);
+    	this.__doOnAirSeek(this.state.segmentEnd)
 	}
 
 	setStart(start) {
@@ -311,25 +327,16 @@ class FlexPlayer extends React.Component {
 	}
 
 	rw(t) {
-		this.state.playerAPI.seek(this.state.curPosition - t);
+		this.__doOnAirSeek(this.state.curPosition - t)
 	}
 
 	ff(t) {
-		this.state.playerAPI.seek(this.state.curPosition + t);
+		this.__doOnAirSeek(this.state.curPosition + t)
 	}
 
-	//Note: for now the fragment mode only enables the user to inspect the current
-	//fragment in isolation (only the SegmentationTimeline is changed to show only the active segment)
-	switchMode() {
-		if(this.state.segmentStart != -1 && this.state.segmentEnd != -1) {
-			if(this.state.fragmentMode === false) {
-				this.playStart();
-				//TODO make it play after switching!
-			}
-			this.setState({fragmentMode : !this.state.fragmentMode});
-		} else {
-			alert('You can only switch to fragment mode when you have an active start & end point set');
-		}
+	//this is the central seek function of the FlexPlayer and makes sure all seeks take on air content into account
+	__doOnAirSeek(time) {
+		FlexPlayerUtil.seekRelativeToOnAir(this.state.playerAPI, time, this.state.currentMediaObject)
 	}
 
 	/************************************** Keyboard controls ***************************************/
@@ -396,13 +403,6 @@ class FlexPlayer extends React.Component {
 		    	this.checkFocus.call(this, this.editMediaObjectAnnotation);
 		    }.bind(this));
 	    }
-
-	    //only allow if it is enabled
-	    if(this.props.enableFragmentMode) {
-		    Mousetrap.bind('shift+z', function() {
-		    	this.checkFocus.call(this, this.switchMode);
-		    }.bind(this));
-		}
 
 	    //fast forward shortcuts (somehow cannot create these in a loop...)
 	    Mousetrap.bind('1', function() {
@@ -486,9 +486,9 @@ class FlexPlayer extends React.Component {
 				this.setActiveAnnotation(annotation);
 				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation.target);
 				if(frag) {
-					this.state.playerAPI.setActiveSegment(frag, true, true);
+					this.state.playerAPI.setActiveSegment(this.state.currentMediaObject, frag, true, true);
 				} else {
-					this.state.playerAPI.setActiveSegment(null, true, true);
+					this.state.playerAPI.setActiveSegment(this.state.currentMediaObject, null, true, true);
 				}
 			}
 		}
@@ -534,12 +534,16 @@ class FlexPlayer extends React.Component {
 
 	newSegmentFromLast() {
 		if(this.state.segmentEnd > 0) {
-			this.setState({
-				activeAnnotation : null,
-				segmentStart : this.state.segmentEnd,
-				segmentEnd : -1
-			},
-			this.state.playerAPI.seek(this.state.segmentEnd))
+			this.setState(
+				{
+					activeAnnotation : null,
+					segmentStart : this.state.segmentEnd,
+					segmentEnd : -1
+				},
+				() => {
+					this.__doOnAirSeek(this.state.segmentEnd)
+				}
+			)
 		} else {
 			this.newSegment();
 		}
@@ -646,7 +650,7 @@ class FlexPlayer extends React.Component {
 						start={this.state.segmentStart}
 						end={this.state.segmentEnd}
 						playerAPI={this.state.playerAPI}
-						fragmentMode={this.state.fragmentMode}/>
+					/>
 				);
 				annotationBar = (
 					<AnnotationTimeline
@@ -659,7 +663,7 @@ class FlexPlayer extends React.Component {
 						start={this.state.segmentStart}
 						end={this.state.segmentEnd}
 						playerAPI={this.state.playerAPI}
-						fragmentMode={this.state.fragmentMode}/>
+					/>
 				)
 				annotationControls = (<div className="row">
 					<div className="col-md-12">
@@ -866,8 +870,6 @@ FlexPlayer.PropTypes = {
 	}),
 
 	active: PropTypes.bool, // this reflects whether this component is visible, so the keyboard controls can be activated
-
-	fragmentMode : PropTypes.bool, //not properly supported anymore, should be removed later on
 
 	transcript : PropTypes.array, //audio transcript
 
