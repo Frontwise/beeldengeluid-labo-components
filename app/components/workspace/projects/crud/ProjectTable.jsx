@@ -278,7 +278,7 @@ class ProjectTable extends React.PureComponent {
         return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
-    saveActiveProject(project){
+    setActiveProject(project){
             ComponentUtil.storeJSONInLocalStorage('activeProject', project);
     }
 
@@ -290,7 +290,7 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link onClick={this.saveActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>{project.name}
+            content: (<Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>{project.name}
                       </Link>)
         },
         {
@@ -331,7 +331,7 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'actions' },
             content: project.canOpen(currentUserId) ? (
                 <div>
-                    <Link onClick={this.saveActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id} className="btn">
+                    <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id} className="btn">
                         Open
                     </Link>
 
