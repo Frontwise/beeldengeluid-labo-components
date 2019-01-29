@@ -295,7 +295,7 @@ class ProjectTable extends React.PureComponent {
         },
         {
             props: { className: 'description' },
-            content: (<p><Link to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
+            content: (<p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
         },
         {
             props: { className: 'number' },
