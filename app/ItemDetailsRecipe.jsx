@@ -637,7 +637,7 @@ class ItemDetailsRecipe extends React.Component {
 
 		//finally generate the mediaPanel
 		return (
-			<FlexBox title="Related media objects">
+			<FlexBox title="Media">
 				<ul className="nav nav-tabs">
 					{mediaTabs}
 				</ul>
