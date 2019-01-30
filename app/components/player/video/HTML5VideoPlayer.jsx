@@ -92,14 +92,14 @@ class HTML5VideoPlayer extends React.Component {
 			)
 		}
 		return (
-			<div>
+			<div className={IDUtil.cssClassName('html5-video-player')}>
 				<video
 					id="video-player"
 					width="100%"
 					muted
 					className={IDUtil.cssClassName('html5-video-player')}
-					controls
-					controlsList="nodownload"
+					//controls
+					//controlsList="nodownload"
 					crossOrigin={
 						this.props.useCredentials ? "use-credentials" : null
 				}>

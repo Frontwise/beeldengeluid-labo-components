@@ -4,33 +4,58 @@
 const FlexPlayerUtil = {
 
 	onAirDuration(realPlayerDuration, mediaObject) {
-		if(typeof(mediaObject.resourceStart) === 'number' && mediaObject.resourceStart > 0 && typeof(mediaObject.resourceEnd) === 'number') {
-			return realPlayerDuration - (realPlayerDuration - mediaObject.resourceEnd) - mediaObject.resourceStart
+		if(FlexPlayerUtil.containsOffAirContent(mediaObject)) {
+			let duration = realPlayerDuration;
+			if(FlexPlayerUtil.__containsOffAirStartOffset) {
+				duration -= mediaObject.resourceStart;
+			}
+			if(FlexPlayerUtil.__containsOffAirEndOffset) {
+				duration -= (realPlayerDuration - mediaObject.resourceEnd)
+			}
+			return duration
 		}
 		return realPlayerDuration
 	},
 
 	timeRelativeToOnAir(realPlayerTime, mediaObject) {
-		if(typeof(mediaObject.resourceStart) === 'number' && mediaObject.resourceStart > 0 && typeof(mediaObject.resourceEnd) === 'number') {
-			if(realPlayerTime >= mediaObject.resourceStart) {
-				if(realPlayerTime >= mediaObject.resourceEnd) {
+		if(FlexPlayerUtil.containsOffAirContent(mediaObject)) {
+			if(FlexPlayerUtil.__containsOffAirStartOffset && realPlayerTime >= mediaObject.resourceStart) {
+
+				if(FlexPlayerUtil.__containsOffAirEndOffset && realPlayerTime >= mediaObject.resourceEnd) {
 					return mediaObject.resourceEnd
 				} else {
 					return realPlayerTime - mediaObject.resourceStart
 				}
-			} else {
-				return 0
+			} else if(FlexPlayerUtil.__containsOffAirEndOffset && realPlayerTime >= mediaObject.resourceEnd) {
+				return mediaObject.resourceEnd
 			}
+			return 0
 		}
 		return realPlayerTime
 	},
 
 	seekRelativeToOnAir(playerAPI, relativeDurationPos, mediaObject) {
 		let time = relativeDurationPos;
-		if(typeof(mediaObject.resourceStart) === 'number' && mediaObject.resourceStart > 0 && typeof(mediaObject.resourceEnd) === 'number') {
+		if(FlexPlayerUtil.containsOffAirContent(mediaObject)) {
 			time = relativeDurationPos + mediaObject.resourceStart
 		}
 		playerAPI.seek(time);
+	},
+
+	isTimeAfterOnAir(realPlayerTime, mediaObject) {
+		return FlexPlayerUtil.__containsOffAirEndOffset && realPlayerTime >= mediaObject.resourceEnd
+	},
+
+	containsOffAirContent(mediaObject) {
+		return FlexPlayerUtil.__containsOffAirStartOffset || FlexPlayerUtil.__containsOffAirEndOffset
+	},
+
+	__containsOffAirStartOffset(mediaObject) {
+		return typeof(mediaObject.resourceStart) === 'number' && mediaObject.resourceStart > 0
+	},
+
+	__containsOffAirEndOffset(mediaObject) {
+		return typeof(mediaObject.resourceEnd) === 'number' && mediaObject.resourceEnd > 0
 	}
 
 }

@@ -1,8 +1,8 @@
 import PlayerAPI from '../PlayerAPI';
 import IDUtil from '../../../util/IDUtil';
 
-//See https://developers.google.com/youtube/iframe_api_reference
-
+//https://developers.google.com/youtube/iframe_api_reference
+//https://tutorialzine.com/2015/08/how-to-control-youtubes-video-player-with-javascript
 class YouTubePlayer extends React.Component {
 
 	constructor(props) {

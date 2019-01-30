@@ -1,0 +1,59 @@
+/* TODO full-screen controls styling:
+
+https://stackoverflow.com/questions/38134629/how-to-display-custom-video-controls-even-in-fullscreen
+https://css-tricks.com/custom-controls-in-html5-video-full-screen/
+https://www.w3schools.com/howto/howto_js_fullscreen_overlay.asp
+*/
+.bg__flex-controls {
+	z-index: 2147483648;
+	position: absolute;
+    top: 0%;
+    width: 100%;
+    height: 100%;
+
+    .toggle-play-overlay {
+    	position: absolute;
+    	z-index: 2147483649;
+    	top: 46%;
+    	right:46%;
+    	width:4%;
+    	height:4%;
+    }
+
+    .seekbar {
+        position: absolute;
+	    bottom: 2%;
+	    width: 98%;
+	    left: 1%;
+    }
+
+    .volume {
+    	position: absolute;
+    	bottom: 8%;
+	    width: 10%;
+	    left: 1%;
+    }
+
+    .buttons {
+    	position: absolute;
+    	bottom: 8%;
+	    width: 20%;
+	    left: 90%;
+	    button  {
+	    	width: 30px;
+		    height: 30px;
+		    background-color: transparent;
+		    border: none;
+		    color: white;
+		    cursor: pointer;
+	    }
+    }
+}
+
+video::-webkit-media-controls {
+  display:none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+  display:none !important;
+}

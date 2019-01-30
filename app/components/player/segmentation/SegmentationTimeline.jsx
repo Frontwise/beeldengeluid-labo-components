@@ -30,8 +30,7 @@ class SegmentationTimeline extends React.Component {
 	seek(event) {
 		const c = document.getElementById("timebar_canvas__" + this.props.mediaObject.id);
 		const mousePos = this.getMousePos(c, event);
-		const dur = this.props.duration;
-        const pos = dur / 100 * (mousePos.x / (c.width / 100));
+        const pos = this.props.duration / 100 * (mousePos.x / (c.width / 100));
         FlexPlayerUtil.seekRelativeToOnAir(this.props.playerAPI, pos, this.props.mediaObject)
 		this.updateCanvasDimensions();
 	}
@@ -41,17 +40,14 @@ class SegmentationTimeline extends React.Component {
 		if(c.width == 0 && c.height == 0) {
 			this.updateCanvasDimensions();
 		}
-		let dur = -1;
-		let elapsed = -1;
 		let t = this.props.curPosition;
         if(!t) {
             t = this.props.start;
         }
-        dur = this.props.duration;
         const formattedTime = TimeUtil.formatTime(t);
-        elapsed = c.width / 100 * (t / (dur / 100));
-        const startPoint = c.width / 100 * (this.props.start / (dur / 100));
-        const endPoint = c.width / 100 * (this.props.end / (dur / 100));
+        const elapsed = c.width / 100 * (t / (this.props.duration / 100));
+        const startPoint = c.width / 100 * (this.props.start / (this.props.duration / 100));
+        const endPoint = c.width / 100 * (this.props.end / (this.props.duration / 100));
         const ctx = c.getContext("2d");
         ctx.clearRect (0, 0, c.width, c.height);
         ctx.fillStyle = "#FF0000";
