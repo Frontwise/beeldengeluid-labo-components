@@ -113,6 +113,8 @@ class HTML5VideoPlayer extends React.Component {
 
 }
 
+//TODO implement volume & mute functions as well
+//TODO make sure the getPosition, getDuration and isPaused also supports direct returns accross all other players (check Vimeo)
 class HTML5VideoPlayerAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
@@ -135,16 +137,37 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 		}
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			return this.playerAPI.currentTime;
+		}
 		callback(this.playerAPI.currentTime);
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			return this.playerAPI.duration;
+		}
 		callback(this.playerAPI.duration);
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			return this.playerAPI.paused;
+		}
 		callback(this.playerAPI.paused);
+	}
+
+	setVolume(level) { //value between 0-1
+		this.playerAPI.volume = level;
+	}
+
+	toggleMute() {
+		this.playerAPI.muted = !this.playerAPI.muted
+	}
+
+	isMuted() {
+		return this.playerAPI.muted
 	}
 
 	/* ----------------------- non-essential player specific calls ----------------------- */

@@ -120,16 +120,37 @@ class JWPlayerAPI extends PlayerAPI {
 		this.playerAPI.seek(secs);
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getPosition();
+		}
 		callback(this.playerAPI.getPosition());
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getDuration();
+		}
 		callback(this.playerAPI.getDuration());
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getState() == 'paused';
+		}
 		callback(this.playerAPI.getState() == 'paused');
+	}
+
+	setVolume(volume) { //volume between 0-1, JW uses 0-100
+		this.playerAPI.setVolume(volume * 100);
+	}
+
+	toggleMute() {
+		this.playerAPI.setMute(!this.playerAPI.getMute());
+	}
+
+	isMuted() {
+		return this.playerAPI.getMute()
 	}
 
 	/* ----------------------- non-essential player specific calls ----------------------- */

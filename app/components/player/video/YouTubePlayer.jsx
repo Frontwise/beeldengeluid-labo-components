@@ -156,16 +156,41 @@ class YouTubeAPI extends PlayerAPI {
 		this.playerAPI.seekTo(secs);
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getCurrentTime()
+		}
 		callback(this.playerAPI.getCurrentTime());
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getDuration()
+		}
 		callback(this.playerAPI.getDuration());
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			return this.playerAPI.getPlayerState() == 2
+		}
 		callback(this.playerAPI.getPlayerState() == 2);
+	}
+
+	setVolume(volume) { //range between 0-1
+		this.playerAPI.setVolume(volume * 100); //range between 0-100
+	}
+
+	setMute(isMuted) {
+		if(this.playerAPI.isMuted()) {
+			this.playerAPI.mute();
+		} else {
+			this.playerAPI.unMute()
+		}
+	}
+
+	isMuted() {
+		return this.playerAPI.isMuted()
 	}
 
 }

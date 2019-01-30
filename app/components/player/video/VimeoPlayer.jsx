@@ -75,6 +75,8 @@ class VimeoAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
 		super(playerAPI);
+		this.lastVolume = -1;
+		this.isMuted = false; //there is no way to read the initial muted setting, so false by default...
 	}
 
 	/* ------------ Implemented API calls ------------- */
@@ -100,7 +102,11 @@ class VimeoAPI extends PlayerAPI {
 		});
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return -1;
+		}
 		this.playerAPI.getCurrentTime().then(function(seconds) {
 			callback(seconds);
 		}).catch(function(error) {
@@ -109,7 +115,11 @@ class VimeoAPI extends PlayerAPI {
 		});
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return -1;
+		}
 		this.playerAPI.getDuration().then(function(duration) {
     		callback(duration);
 		}).catch(function(error) {
@@ -118,13 +128,58 @@ class VimeoAPI extends PlayerAPI {
 		});
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return false;
+		}
 		this.playerAPI.getPaused().then(function(paused) {
 			callback(paused);
 		}).catch(function(error) {
 			console.error(error);
 			callback(false);
 		});
+	}
+
+	//TODO this function has never been tested!
+	setVolume(volume, callback=null) {
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return false
+		}
+		this.playerAPI.setVolume(volume).then(function(v) {
+		   callback(true)
+		}).catch(function(error) {
+		    switch (error.name) {
+		        case 'RangeError':
+		            callback(false);// the volume was less than 0 or greater than 1
+		            break;
+		        default:
+		        	callback(false);// some other error occurred
+		            break;
+		    }
+		});
+	}
+
+	//TODO this function has never been tested!
+	toggleMute(callback=null) { //this player has no function for mute, so set volume to 0
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return false
+		}
+		this.isMuted = !this.isMuted;
+		this.playerAPI.getVolume().then(function(volume) {
+			if(this.isMuted) {
+				this.lastVolume = volume;
+			}
+			this.setVolume(isMuted ? 0 : this.lastVolume, callback)
+		}).catch(function(error) {
+		    callback(false)
+		});
+	}
+
+	isMuted() {
+		return this.isMuted
 	}
 
 	/* ----------------------- non-essential player specific calls ----------------------- */
