@@ -64,7 +64,6 @@ class FlexPlayerControls extends React.Component {
 			},
 			() => {
 				if(!this.state.muted && this.props.api.getLastVolume() != -1) {
-					console.debug('resetting volume');
 					this.props.api.setVolume(this.props.api.getLastVolume());
 				} else {
 					this.props.api.setVolume(0);
@@ -84,12 +83,8 @@ class FlexPlayerControls extends React.Component {
 		this.props.api.setVolume(e.target.value);
 	}
 
-	//FIXME this function is not yet player agnostic and only works for the HTML5player API
-	//FIXME actually force the DIV encapsulating the video tag into full screen mode to avoid hacking the native controls
-	//https://stackoverflow.com/questions/7130397/how-do-i-make-a-div-full-screen
-	//https://www.w3schools.com/howto/howto_js_fullscreen_overlay.asp
+	//FIXME this function is not yet player agnostic (in the else statement) and only works for the HTML5player API
 	onToggleFullScreen() {
-		console.debug('toggling full screen')
 		if(this.props.toggleFullScreen) {
 			this.props.toggleFullScreen()
 		} else {

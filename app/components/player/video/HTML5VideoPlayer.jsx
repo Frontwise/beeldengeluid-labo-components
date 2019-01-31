@@ -32,7 +32,7 @@ class HTML5VideoPlayer extends React.Component {
 			vid.onloadedmetadata = this.onReady.bind(this, vid);
 		}
 		//needed until React will support the controlsList attribute of the video tag
-		vid.setAttribute("controlsList","nodownload");
+		vid.setAttribute("controlsList", "nodownload");
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -74,7 +74,7 @@ class HTML5VideoPlayer extends React.Component {
 		}
 
 		//skip to the on-air content
-		if(typeof(this.props.mediaObject.resourceStart) == "number" && this.props.mediaObject.resourceStart > 0) {
+		if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
 			this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
 		}
 
@@ -85,18 +85,17 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	toggleFullScreen() {
-		console.debug('got toggled')
 		this.setState({fullScreen : !this.state.fullScreen})
 	}
 
 	render() {
 		let controls = null;
-		if(this.state.playerAPI) {
+		if(this.state.playerAPI) { //load the controls when the player is ready
 			controls = (
 				<FlexPlayerControls
 					api={this.state.playerAPI}
 					mediaObject={this.props.mediaObject}
-					duration={FlexPlayerUtil.onAirDuration(this.state.playerAPI.getApi().duration, this.props.mediaObject)}
+					duration={FlexPlayerUtil.onAirDuration(this.state.playerAPI.getDuration(), this.props.mediaObject)}
 					toggleFullScreen={this.toggleFullScreen.bind(this)}
 				/>
 			)
@@ -108,7 +107,7 @@ class HTML5VideoPlayer extends React.Component {
 						id="video-player"
 						width="100%"
 						className={IDUtil.cssClassName('html5-video-player')}
-						muted
+						//muted
 						//controls
 						//controlsList="nodownload"
 						crossOrigin={

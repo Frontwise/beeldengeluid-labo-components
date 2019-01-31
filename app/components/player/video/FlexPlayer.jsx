@@ -225,15 +225,17 @@ class FlexPlayer extends React.Component {
 
 	//TODO test this well! (relative duration)
 	onGetDuration(value) {
-		//this.setState({duration : value});
-		this.setState({
-			duration : FlexPlayerUtil.onAirDuration(value, this.state.currentMediaObject)
-		})
+		if(!isNaN(value)) {
+			this.setState({
+				duration : FlexPlayerUtil.onAirDuration(value, this.state.currentMediaObject)
+			})
+		} else {
+			console.error('duration is NaN')
+		}
 	}
 
 	//TODO test this well! (relative player pos)
 	onGetPosition(value) {
-	    //this.setState({curPosition : value});
 	    this.setState({
 	    	curPosition : FlexPlayerUtil.timeRelativeToOnAir(value, this.state.currentMediaObject)
 	    })
