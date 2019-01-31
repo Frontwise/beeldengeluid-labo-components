@@ -38,7 +38,6 @@ const FlexPlayerUtil = {
 	seekRelativeToOnAir(playerAPI, relativeDurationPos, mediaObject) {
 		let time = relativeDurationPos;
 		if(FlexPlayerUtil.containsOffAirContent(mediaObject)) {
-			console.debug(mediaObject)
 			time = relativeDurationPos + mediaObject.resourceStart
 		}
 		playerAPI.seek(time);

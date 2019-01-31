@@ -102,7 +102,7 @@ class HTML5VideoPlayer extends React.Component {
 		}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
-				<div className={this.state.fullScreen ? 'full-screen' : 'default'}>
+				<div className={this.state.fullScreen ? 'full-screen' : 'default'} id={'__htmlvid__' + this.props.mediaObject.id}>
 					<video
 						id="video-player"
 						width="100%"
