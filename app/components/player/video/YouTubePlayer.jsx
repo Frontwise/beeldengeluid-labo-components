@@ -140,6 +140,7 @@ class YouTubeAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
 		super(playerAPI);
+		this.lastVolume = -1;
 	}
 
 	/* ------------ Implemented API calls ------------- */
@@ -181,11 +182,25 @@ class YouTubeAPI extends PlayerAPI {
 		this.playerAPI.setVolume(volume * 100); //range between 0-100
 	}
 
+	getVolume() {
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
+		return this.playerAPI.getVolume()
+	}
+
+	getLastVolume() {
+		return this.lastVolume
+	}
+
 	setMute(isMuted) {
 		if(this.playerAPI.isMuted()) {
 			this.playerAPI.mute();
 		} else {
 			this.playerAPI.unMute()
+		}
+		if(this.isMuted()) {
+			this.lastVolume = this.playerAPI.getVolume();
 		}
 	}
 

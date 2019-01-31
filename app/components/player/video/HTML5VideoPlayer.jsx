@@ -108,6 +108,7 @@ class HTML5VideoPlayer extends React.Component {
 						id="video-player"
 						width="100%"
 						className={IDUtil.cssClassName('html5-video-player')}
+						muted
 						//controls
 						//controlsList="nodownload"
 						crossOrigin={
@@ -130,6 +131,7 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
 		super(playerAPI);
+		this.lastVolume = this.playerAPI.volume;
 	}
 
 	/* ------------ Implemented API calls ------------- */
@@ -169,12 +171,26 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 		callback(this.playerAPI.paused);
 	}
 
-	setVolume(level) { //value between 0-1
-		this.playerAPI.volume = level;
+	setVolume(volume) { //value between 0-1
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
+		this.playerAPI.volume = volume;
+	}
+
+	getVolume() {
+		return this.playerAPI.volume;
+	}
+
+	getLastVolume() {
+		return this.lastVolume
 	}
 
 	toggleMute() {
 		this.playerAPI.muted = !this.playerAPI.muted
+		if(this.isMuted()) {
+			this.lastVolume = this.playerAPI.volume;
+		}
 	}
 
 	isMuted() {

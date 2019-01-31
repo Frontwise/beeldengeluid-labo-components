@@ -104,6 +104,7 @@ class JWPlayerAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
 		super(playerAPI);
+		this.lastVolume = -1;
 	}
 
 	/* ------------ Implemented API calls ------------- */
@@ -142,11 +143,26 @@ class JWPlayerAPI extends PlayerAPI {
 	}
 
 	setVolume(volume) { //volume between 0-1, JW uses 0-100
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
 		this.playerAPI.setVolume(volume * 100);
+	}
+
+	getVolume() {
+		return this.playerAPI.getVolume();
+	}
+
+	getLastVolume() {
+		return this.lastVolume;
 	}
 
 	toggleMute() {
 		this.playerAPI.setMute(!this.playerAPI.getMute());
+		if(this.isMuted()) {
+			this.lastVolume = this.playerAPI.getVolume();
+		}
+
 	}
 
 	isMuted() {

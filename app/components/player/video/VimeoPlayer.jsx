@@ -147,6 +147,9 @@ class VimeoAPI extends PlayerAPI {
 			console.error('you should provide a callback for this player')
 			return false
 		}
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
 		this.playerAPI.setVolume(volume).then(function(v) {
 		   callback(true)
 		}).catch(function(error) {
@@ -159,6 +162,22 @@ class VimeoAPI extends PlayerAPI {
 		            break;
 		    }
 		});
+	}
+
+	getVolume(callback=null) {
+		if(!callback) {
+			console.error('you should provide a callback for this player')
+			return -1
+		}
+		this.playerAPI.getVolume().then(function(volume) {
+			callback(volume)
+		}).catch(function(error) {
+		    callback(-1)
+		});
+	}
+
+	getLastVolume() {
+		return this.lastVolume
 	}
 
 	//TODO this function has never been tested!

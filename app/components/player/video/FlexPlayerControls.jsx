@@ -11,11 +11,12 @@ class FlexPlayerControls extends React.Component {
 
 	constructor(props) {
 		super(props);
-		console.debug(this.props.api.isPaused())
 		this.state = {
-			playBtnText : 'Pause'
+			muted : this.props.api.isMuted(),
+			paused : this.props.api.isPaused()
 		}
 		this.seekBarRef = React.createRef();//not using state for this, since media playback updates every second!
+		this.volumeRef = React.createRef();
 	}
 
 	componentDidMount() {
@@ -23,6 +24,10 @@ class FlexPlayerControls extends React.Component {
 		this.props.api.getApi().addEventListener('timeupdate', () => {
 	  		this.onPlayProgress();
 		});
+
+		this.props.api.getApi().addEventListener('volumechange', () => {
+			this.volumeRef.current.value = this.props.api.getVolume();
+		})
 	}
 
 	onPlayProgress() {
@@ -40,23 +45,34 @@ class FlexPlayerControls extends React.Component {
 	}
 
 	onTogglePlay() {
-		let buttonText = "Pause";
-		if (this.props.api.isPaused()) {
+		let paused = this.props.api.isPaused();
+		if (paused) {
 			this.props.api.play();
 		} else {
 			this.props.api.pause();
-			buttonText = "Play"
 		}
 		this.setState({
-			playBtnText : buttonText
+			paused : paused
 		})
 	}
 
 	onToggleMute() {
 		this.props.api.toggleMute();
-		this.setState({
-			muteBtnText : this.props.api.isMuted() ? "Unmute" : "Mute"
-		})
+		this.setState(
+			{
+				muted : this.props.api.isMuted()
+			},
+			() => {
+				if(!this.state.muted && this.props.api.getLastVolume() != -1) {
+					console.debug('resetting volume');
+					this.props.api.setVolume(this.props.api.getLastVolume());
+				} else {
+					this.props.api.setVolume(0);
+				}
+			}
+		)
+
+
 	}
 
 	onSeek(e) {
@@ -92,9 +108,9 @@ class FlexPlayerControls extends React.Component {
 	render() {
 		return (
 			<div className={IDUtil.cssClassName('flex-controls')}>
-				<div className="toggle-play-overlay">
-					<button type="button" onClick={this.onTogglePlay.bind(this)}>
-						<span className={'glyphicon' + (this.props.api.isPaused() ? ' glyphicon-play' : ' glyphicon-pause')}></span>
+				<div className="toggle-play-overlay" onClick={this.onTogglePlay.bind(this)}>
+					<button type="button">
+						<span className={'glyphicon' + (this.state.paused ? ' glyphicon-play' : ' glyphicon-pause')}></span>
 					</button>
 				</div>
 
@@ -102,7 +118,7 @@ class FlexPlayerControls extends React.Component {
 
 				<div className="buttons">
 					<button type="button" onClick={this.onToggleMute.bind(this)}>
-						<span className={'glyphicon' + (this.props.api.isMuted() ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
+						<span className={'glyphicon' + (this.state.muted ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
 					</button>
 					<input className="volume" type="range" ref={this.volumeRef}
 						min="0" max="1" step="0.1" defaultValue="1" onChange={this.onVolumeChange.bind(this)}

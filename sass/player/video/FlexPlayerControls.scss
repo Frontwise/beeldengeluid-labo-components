@@ -31,27 +31,112 @@
 
     .seekbar {
         position: absolute;
-	    bottom: 28px;
+	    bottom: 38px;
 	    width: 98%;
 	    left: 1%;
     }
 
     .buttons {
     	position: absolute;
-    	bottom: 4px;
+    	bottom: 6px;
 	    right: 10px;
         .volume {
             width: 80px;
-            margin-top: 6px;
+            margin-top: 5px;
             display: inline;
         }
 	    button  {
-	    	width: 30px;
-		    height: 30px;
+	    	width: 32px;
+		    height: 32px;
 		    background-color: transparent;
 		    border: none;
 		    color: white;
 		    cursor: pointer;
 	    }
+    }
+
+    input[type=range] {
+        /*removes default webkit styles*/
+        -webkit-appearance: none;
+
+        /*fix for FF unable to apply focus style bug */
+        border: 1px solid white;
+        height: 5px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+        height: 5px;
+        background: #fff;
+        border: none;
+        border-radius: 3px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border: 1px solid #fff;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #bbb;
+        margin-top: -5px;
+    }
+    input[type=range]:focus {
+        outline: none;
+    }
+    input[type=range]:focus::-webkit-slider-runnable-track {
+        background: #ccc;
+    }
+
+    input[type=range]::-moz-range-track {
+        height: 5px;
+        background: #fff;
+        border: 1px solid #fff;
+        border-radius: 3px;
+    }
+    input[type=range]::-moz-range-thumb {
+        border: 1px solid #fff;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #bbb;
+    }
+
+    /*hide the outline behind the border*/
+    input[type=range]:-moz-focusring{
+        outline: 1px solid white;
+        outline-offset: -1px;
+    }
+
+    input[type=range]::-ms-track {
+        height: 5px;
+
+        /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+        background: transparent;
+
+        /*leave room for the larger thumb to overflow with a transparent border */
+        border-color: transparent;
+        border-width: 6px 0;
+
+        /*remove default tick marks*/
+        color: transparent;
+    }
+    input[type=range]::-ms-fill-lower {
+        background: #fff;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-fill-upper {
+        background: #fff;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-thumb {
+        border: 1px solid #fff;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #bbb;
+    }
+    input[type=range]:focus::-ms-fill-lower {
+        background: #fff;
+    }
+    input[type=range]:focus::-ms-fill-upper {
+        background: #fff;
     }
 }
