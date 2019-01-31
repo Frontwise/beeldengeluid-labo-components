@@ -15,7 +15,8 @@ class HTML5VideoPlayer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			playerAPI : null
+			playerAPI : null,
+			fullScreen : false
 		}
 	}
 
@@ -36,6 +37,9 @@ class HTML5VideoPlayer extends React.Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
 		if(nextState.playerAPI != null && this.state.playerAPI == null) { //rerender when the player is ready
+			return true
+		}
+		if(nextState.fullScreen != this.state.fullScreen) { //rerender when full screen is toggled
 			return true
 		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) { //but only rerender when the media object changed
@@ -80,6 +84,11 @@ class HTML5VideoPlayer extends React.Component {
 		}
 	}
 
+	toggleFullScreen() {
+		console.debug('got toggled')
+		this.setState({fullScreen : !this.state.fullScreen})
+	}
+
 	render() {
 		let controls = null;
 		if(this.state.playerAPI) {
@@ -88,25 +97,27 @@ class HTML5VideoPlayer extends React.Component {
 					api={this.state.playerAPI}
 					mediaObject={this.props.mediaObject}
 					duration={FlexPlayerUtil.onAirDuration(this.state.playerAPI.getApi().duration, this.props.mediaObject)}
+					toggleFullScreen={this.toggleFullScreen.bind(this)}
 				/>
 			)
 		}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
-				<video
-					id="video-player"
-					width="100%"
-					muted
-					className={IDUtil.cssClassName('html5-video-player')}
-					//controls
-					//controlsList="nodownload"
-					crossOrigin={
-						this.props.useCredentials ? "use-credentials" : null
-				}>
-					<source src={this.props.mediaObject.url}></source>
-					Your browser does not support the video tag
-				</video>
-				{controls}
+				<div className={this.state.fullScreen ? 'full-screen' : 'default'}>
+					<video
+						id="video-player"
+						width="100%"
+						className={IDUtil.cssClassName('html5-video-player')}
+						//controls
+						//controlsList="nodownload"
+						crossOrigin={
+							this.props.useCredentials ? "use-credentials" : null
+					}>
+						<source src={this.props.mediaObject.url}></source>
+						Your browser does not support the video tag
+					</video>
+					{controls}
+				</div>
 			</div>
 		)
 	}

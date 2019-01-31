@@ -73,13 +73,19 @@ class FlexPlayerControls extends React.Component {
 	//https://stackoverflow.com/questions/7130397/how-do-i-make-a-div-full-screen
 	//https://www.w3schools.com/howto/howto_js_fullscreen_overlay.asp
 	onToggleFullScreen() {
-		const api = this.props.api.getApi();
-		if (api.requestFullscreen) {
-			api.requestFullscreen();
-		} else if (api.mozRequestFullScreen) {
-			api.mozRequestFullScreen(); // Firefox
-		} else if (api.webkitRequestFullscreen) {
-			api.webkitRequestFullscreen(); // Chrome and Safari
+		console.debug('toggling full screen')
+		if(this.props.toggleFullScreen) {
+			this.props.toggleFullScreen()
+		} else {
+			console.debug('toggling the HTML5 full screen')
+			const api = this.props.api.getApi();
+			if (api.requestFullscreen) {
+				api.requestFullscreen();
+			} else if (api.mozRequestFullScreen) {
+				api.mozRequestFullScreen(); // Firefox
+			} else if (api.webkitRequestFullscreen) {
+				api.webkitRequestFullscreen(); // Chrome and Safari
+			}
 		}
 	}
 
@@ -87,18 +93,20 @@ class FlexPlayerControls extends React.Component {
 		return (
 			<div className={IDUtil.cssClassName('flex-controls')}>
 				<div className="toggle-play-overlay">
-					<button type="button" onClick={this.onTogglePlay.bind(this)}>{this.state.playBtnText}</button>
+					<button type="button" onClick={this.onTogglePlay.bind(this)}>
+						<span className={'glyphicon' + (this.props.api.isPaused() ? ' glyphicon-play' : ' glyphicon-pause')}></span>
+					</button>
 				</div>
 
-
 				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek.bind(this)}/>
-
-				<input className="volume" type="range" ref={this.volumeRef} min="0" max="1" step="0.1" defaultValue="1" onChange={this.onVolumeChange.bind(this)}/>
 
 				<div className="buttons">
 					<button type="button" onClick={this.onToggleMute.bind(this)}>
 						<span className={'glyphicon' + (this.props.api.isMuted() ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
 					</button>
+					<input className="volume" type="range" ref={this.volumeRef}
+						min="0" max="1" step="0.1" defaultValue="1" onChange={this.onVolumeChange.bind(this)}
+					/>
 					<button type="button" onClick={this.onToggleFullScreen.bind(this)}>
 						<span className="glyphicon glyphicon-fullscreen"/>
 					</button>
