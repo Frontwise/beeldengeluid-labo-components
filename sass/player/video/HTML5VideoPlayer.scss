@@ -1,7 +1,7 @@
 //https://www.w3schools.com/howto/howto_js_fullscreen_overlay.asp
 .bg__html5-video-player {
 	position: relative;
-	z-index: 699999;
+	z-index: 400;
 
 	.default {
 		/* no default stuff yet */
@@ -11,12 +11,18 @@
 		height: 100%;
 		width: 100%;
 		position: fixed;
+		display:flex;
 		left: 0;
 		top: 0;
 		background-color: rgb(0,0,0); /* Black fallback color */
 		background-color: rgba(0,0,0, 0.9); /* Black w/opacity */
 		overflow-x: hidden; /* Disable horizontal scroll */
+		overflow-y: hidden; /* Disable horizontal scroll */
 		transition: 0.5s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+
+		video {
+			object-fit: fill;
+		}
 	}
 
 }
