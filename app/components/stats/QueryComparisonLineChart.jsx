@@ -26,7 +26,8 @@ class QueryComparisonLineChart extends React.Component {
             opacity: {},
             viewMode: this.props.data.total ? 'inspector' : 'absolute',
             isSearching: false,
-            data: this.props.data || null,
+            absData : null,
+            relData : null,
             collectionList : null
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
@@ -34,8 +35,12 @@ class QueryComparisonLineChart extends React.Component {
     }
 
     componentDidMount() {
+        const timelineData = this.getJoinedData(this.props.data);
         CKANAPI.listCollections((collections) => {
-            this.setState({collectionList :  collections});
+            this.setState({
+                collectionList :  collections,
+                absData : timelineData
+            });
         });
     }
 
@@ -72,45 +77,40 @@ class QueryComparisonLineChart extends React.Component {
         // console.debug('Dikke scheet');
     }
 
-    onOutput(data) {
-        if (this.state.viewMode === 'relative') {
-            let relativeData = [];
-            data.map(
-                dataSet => {
-                    if (dataSet.length > 0) {
-                        relativeData.push(this.commonData(dataSet, this.props.data, Object.keys(dataSet[0])[1]))
+    onOutput(relData) {
+        const relativeValues = this.getRelValues(this.state.absData, relData);
+        this.setState({
+                viewMode: 'relative',
+                isSearching: false,
+                relData: relativeValues
+            }, () => {
+                this.layout.classList.remove("spinner")
+            }
+        );
+    }
+
+    getRelValues(absoluteValues, relativeValues) {
+        let points = [];
+        absoluteValues.forEach(point => {
+            let relPoint = {"year": point["year"]};
+
+            Object.keys(point).forEach(propt => {
+                    if (propt !== 'year') {
+                        let tt = relativeValues[`${propt}`].find(obj => {
+                            return obj.year === point.year
+                        });
+
+                        relPoint[`${propt}`] = (tt[`${propt}`] === 0 || point[`${propt}`] === 0
+                            ? 0
+                            : point[`${propt}`] / tt[`${propt}`] * 100
+                        );
                     }
                 }
             );
-            this.getRelValues(relativeData);
-            this.setState({
-                isSearching: false,
-                data: relativeData
-            }, () =>  this.layout.classList.remove("spinner")
-        );
-        }
-    }
+            points.push(relPoint)
 
-    commonData(relative, absolute, key) {
-        return absolute[key].data.map((x, y) => {
-            return relative.find(function (element) {
-                return element.year === x.year;
-            })
-        })
-    }
-
-    getRelValues(relData) {
-        const that = this.props.data; // absolute values
-        Object.keys(that).map(function (queryID) {
-            relData.map(
-                item => {
-                    item.map((val, index) => {
-                        return val[queryID] = (val && val[queryID])
-                            ? (that[queryID].data[index][queryID]/val[queryID])*100 : 0;
-                    })
-                }
-            );
-        })
+        });
+        return points
     }
 
     async getData(key) {
@@ -122,13 +122,8 @@ class QueryComparisonLineChart extends React.Component {
             ...that.props.data[key].query,
                 term: '',
                 selectedFacets: {},
-                dateRange: {
-                    ...that.props.data[key].query.dateRange,
-                    end:null,
-                    start: (that.props.data[key].collectionConfig && that.props.data[key].collectionConfig.getMinimunYear()) || null
-                }
+                fieldCategory: []
             };
-
             SearchAPI.search(
                 query,
                 that.props.data[key].collectionConfig,
@@ -138,40 +133,89 @@ class QueryComparisonLineChart extends React.Component {
         })
     }
 
-    async processData(data) {
+    async processData() {
+        const data = this.props.data || null;
         const promises = Object.keys(data).map(this.getData.bind(this));
         await Promise.all(promises).catch(d => console.log(d)).then(
             (dataPerQuery) => {
-                let formattedData = [];
-                dataPerQuery.map( data => {
-                    formattedData.push(ElasticsearchDataUtil.searchResultsToTimeLineData(
+                let relValues = {};
+                dataPerQuery.forEach( data => {
+                    relValues[data.query.id] = ElasticsearchDataUtil.searchResultsToTimeLineData(
                         data.query,
                         data.aggregations,
-                    ));
+                    );
                 });
-                this.onOutput(formattedData);
+                this.onOutput(relValues);
             });
     }
 
     getRelativeValues() {
         if (this.state.viewMode === 'relative') {
             this.setState({
-                    viewMode: 'absolute'
-                })
+                viewMode: 'absolute'
+            })
         } else {
             this.setState({
-                    viewMode: 'relative',
-                    isSearching : true,
-                    query: {
-                        ...this.props.query,
-                        term: ''
-                    }
+                    isSearching: true,
+                    viewMode: 'relative'
                 }, () => {
-                    this.processData(this.props.data, false);
+                if (this.state.relData === null) {
+                        this.processData();
                     this.layout.classList.add("spinner");
+
                 }
-            )}
+                }
+            )
+        }
     }
+
+    getJoinedData = dataSet => {
+        /*
+            Function to return the min/max when an array of query arrays is given
+            as parameter with the shape [Array[12], Array[23],...]
+            with year as a the name of the object property to search within.
+            Call as endYear(absValuesArray, Math.min/Math.max) returning either min/max values (years)
+             @args : array and Math method, either Math.min or Math.max
+         */
+        const __endYear = (arrQueryResults, end) => {
+            // returns an array with 1 array per query with the years only
+            let arrYearsPerQuery = arrQueryResults.map(arr => arr.map(item => item.year)).map(arr => end(...arr));
+            return end(...arrYearsPerQuery);
+        };
+        /*
+            Gets an object with query info with queryId as key.
+            Every object has the data as an array {queryId: 'xxx', year: 'xxxx'}
+        */
+        const __getGraphData = dataSet => Object.keys(dataSet).map(k => {
+            return dataSet[k].data
+        });
+
+        /*  @returns a year's range.
+        // @params: starting year and number of years until the end
+        */
+        const __getValidRange = (min, max) => Array.from(new Array(max - min + 1),(val,index)=>index+min);
+        const relGraphData = __getGraphData(dataSet);
+        const minYear = __endYear(relGraphData, Math.min);
+        const maxYear = __endYear(relGraphData, Math.max);
+        const validRange = __getValidRange(minYear, maxYear);
+        let dataForGraph = [];
+
+        validRange.forEach(year => {
+            let tempObj = {};
+
+            relGraphData.forEach(set => {
+                const matchData = set.find(it => it.year === year);
+                if(matchData !== undefined) {
+                    tempObj = {...tempObj, ...matchData};
+                }
+
+            });
+            dataForGraph.push(tempObj);
+        });
+
+        return dataForGraph;
+    };
+
 
     //TODO better ID!! (include some unique part based on the query)
     render() {
@@ -193,49 +237,14 @@ class QueryComparisonLineChart extends React.Component {
                     activeDot={{stroke: this.COLORS[index], strokeWidth: 6, r: 3}}
                 />);
         });
-        //concatenate all the data for each query, because rechart likes it this way (TODO make nicer)
-        const temp = {};
+
+        let timelineData = null;
         if (this.state.viewMode === 'relative') {
-            Object.keys(this.state.data).forEach(
-                (k) => {
-                    if (Array.isArray(this.state.data[k])) {
-                        this.state.data[k].forEach(
-                            item => {
-                                if (temp[item.year]) {
-                                    let parId = Object.keys(item)[1];
-                                    temp[item.year][parId] = item[parId];
-                                } else {
-                                    let t = {},
-                                        parYear = 'year',
-                                        parId = Object.keys(item)[1];
-                                    t[parYear] = item.year;
-                                    t[parId] = item[parId];
-                                    temp[item.year] = t;
-                                }
-                            }
-                        )
-                    }
-                }
-            )
+            timelineData = this.state.relData;
         } else {
-            Object.keys(this.props.data).forEach((k) => {
-                this.props.data[k].data.forEach((d) => {
-                    if (temp[d.year]) {
-                        temp[d.year][k] = d[k];
-                    } else {
-                        let t = {};
-                        t[k] = d[k];
-                        temp[d.year] = t;
-                    }
-                })
-            });
+            timelineData = this.state.absData;
         }
 
-        const timelineData = Object.keys(temp).map((k) => {
-            let d = temp[k];
-            d.year = k;
-            return d;
-        });
         //TODO fix the stupid manual multiple lines
         return (
             <div className={IDUtil.cssClassName('query-comparison-line-chart')}>
@@ -421,7 +430,6 @@ class CustomLegend extends React.Component{
 // Custom tooltip.
 // TODO: Make it a separated component more customizable.
 class CustomTooltip extends React.Component{
-
     stylings(p){
         return {
             color: p.color,
@@ -433,6 +441,7 @@ class CustomTooltip extends React.Component{
     }
 
     render() {
+
         const {active} = this.props;
         if (active) {
             const {payload, label} = this.props;
@@ -494,7 +503,7 @@ class CustomTooltip extends React.Component{
 CustomTooltip.propTypes = {
     dataType: PropTypes.string,
     payload: PropTypes.array,
-    label: PropTypes.string
+    label: PropTypes.number
 };
 
 export class LabelAsPoint extends React.Component {
