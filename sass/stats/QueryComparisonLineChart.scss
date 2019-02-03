@@ -3,6 +3,10 @@
 .bg__query-comparison-line-chart {
 	@include lineChartBase();
 
+	.recharts-responsive-container {
+		margin-top: 20px
+	}
+
 	.ms__custom-legend {
 		color: #f3f3f3;
 		margin: 4rem 0;

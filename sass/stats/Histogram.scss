@@ -1,3 +1,7 @@
 .bg__histogram {
 	@include chartBase();
+
+	.recharts-responsive-container {
+		margin-top: 20px
+	}
 }

@@ -178,7 +178,14 @@ class ComparisonHistogram extends React.Component {
                 viewMode: 'absolute'
             })
         } else {
-            this.processData(this.props.data, false);
+            if(this.state.relData === null) {
+                this.processData(this.props.data);
+                this.layout.classList.add("spinner");
+            } else {
+                this.setState({
+                    viewMode: 'relative'
+                })
+            }
         }
     }
 
