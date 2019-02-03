@@ -20,6 +20,8 @@ class ComparisonHistogram extends React.Component {
         this.state = {
             viewMode: 'absolute', // Sets default view mode to absolute.
             relData: null,
+            absData: this.getJoinedData(this.props.data) || null,
+            queriesIds: this.getQueriesIds(this.props.data) || null,
             isSearching: false,
             collectionList : null
         };
@@ -29,7 +31,9 @@ class ComparisonHistogram extends React.Component {
 
     componentDidMount() {
         CKANAPI.listCollections((collections) => {
-            this.setState({collectionList :  collections});
+            this.setState({
+                collectionList :  collections
+            });
         });
     }
 
@@ -49,11 +53,7 @@ class ComparisonHistogram extends React.Component {
                 ...that.props.data[key].query,
                 term: '',
                 selectedFacets: {},
-                dateRange: {
-                    ...that.props.data[key].query.dateRange,
-                    end:null,
-                    start: (that.props.data[key].collectionConfig && that.props.data[key].collectionConfig.getMinimunYear()) || null
-                }
+                fieldCategory: []
             };
             SearchAPI.search(
                 query,
@@ -64,50 +64,105 @@ class ComparisonHistogram extends React.Component {
         })
     }
 
-    onOutput(data) {
+    getQueriesIds = dataSets => dataSets.map(set => set.query.id);
+
+    /*
+        Gets an object with query info with queryId as key.
+        Every object has the data as an array {queryId: 'xxx', year: 'xxxx'}
+    */
+    __getGraphData = (dataSet, returnedType) => {
+        let dataArr = [];
+        let dataObj = {};
+        dataSet.forEach(k => {
+            let tempDataSet = k.aggregations[k.query.dateRange.field];
+            tempDataSet.forEach(point => {
+                point[`${k.query.id}`] = point.doc_count;
+                point['date'] = new Date(point.date_millis).getFullYear();
+            });
+           if(returnedType === 'arr') {
+               dataArr.push(tempDataSet)
+           } else {
+               dataObj[`${k.query.id}`] = tempDataSet
+           }
+        });
+        return returnedType === 'arr' ? dataArr : dataObj;
+    };
+
+    getJoinedData = dataSet => {
+        /*
+            Function to return the min/max when an array of query arrays is given
+            as parameter with the shape [Array[12], Array[23],...]
+            with year as a the name of the object property to search within.
+            Call as endYear(absValuesArray, Math.min/Math.max) returning either min/max values (years)
+             @args : array and Math method, either Math.min or Math.max
+         */
+        const __endYear = (arrQueryResults, end) => {
+            // returns an array with 1 array per query with the years only
+            let arrYearsPerQuery = arrQueryResults.map(arr => arr.map(item => item.date_millis)).map(arr => end(...arr));
+            return end(...arrYearsPerQuery);
+        };
+
+        /*  @returns a year's range.
+        // @params: starting year and number of years until the end
+        */
+        const __getValidRange = (min, max) => Array.from(new Array(max - min + 1),(val,index)=>index+min);
+
+        const relGraphData = this.__getGraphData(dataSet, 'arr');
+        const minYear = new Date(__endYear(relGraphData, Math.min)).getFullYear();
+        const maxYear = new Date(__endYear(relGraphData, Math.max)).getFullYear();
+        const validRange = __getValidRange(minYear, maxYear);
+        let dataForGraph = [];
+
+        validRange.forEach(year => {
+            let tempObj = {};
+
+            relGraphData.forEach(set => {
+                const matchData = set.find(it => new Date(it.date_millis).getFullYear() === year);
+                if(matchData !== undefined) {
+                    tempObj = {...tempObj, ...matchData};
+                }
+
+            });
+            dataForGraph.push(tempObj);
+        });
+        return dataForGraph;
+    };
+
+    getRelValues(absoluteValues, relativeValues) {
+        const relVals = this.__getGraphData(relativeValues, 'obj');
+        let points = [];
+
+        absoluteValues.forEach(point => {
+            let relPoint = {"date": point["date"]};
+
+            Object.keys(point).forEach(propt => {
+                    if (propt !== 'date' && propt !== 'key' && propt !== 'date_millis' && propt !== 'key_as_string' && propt !== 'doc_count') {
+                        let tt = relVals[`${propt}`].find(obj => {
+                            return obj.date === point.date
+                        });
+
+                        relPoint[`${propt}`] = (tt[`${propt}`] === 0 || point[`${propt}`] === 0
+                                ? 0
+                                : point[`${propt}`] / tt[`${propt}`] * 100
+                        );
+                    }
+                }
+            );
+            points.push(relPoint)
+
+        });
+        return points
+    }
+    onOutput(relData) {
+        const relativeValues = this.getRelValues(this.state.absData, relData);
         this.setState({
                 viewMode: 'relative',
                 isSearching: false,
-                relData: data
+                relData: relativeValues
             }, () => {
                 this.layout.classList.remove("spinner")
             }
         );
-    }
-
-    getPrettifiedData() {
-        const __getCount = (point) => {
-            if (point.viewMode === 'absolute') {
-                return point.count
-            } else {
-                return point.count && point.countInState.doc_count !== 0
-                    ? ((point.count / point.countInState.doc_count) * 100)
-                    : 0;
-            }
-        };
-
-        return this.props.data.map(arr => {
-            const indexVal = this.state.relData ? this.state.relData.findIndex(item => item.query.id === arr.query.id) : null;
-            return arr.aggregations[arr.query.dateRange.field].map((dataRow, i) => {
-                    let relVal = null;
-                    if (this.state.viewMode === 'relative') {
-                        const ind = this.state.relData[indexVal].aggregations[this.state.relData[indexVal].query.dateRange.field]
-                            .findIndex(item => item.date_millis === dataRow.date_millis);
-                        relVal = this.state.relData[indexVal].aggregations[this.state.relData[indexVal].query.dateRange.field][ind];
-                    }
-                    const point = {};
-                    point["queryId"] = arr.query.id;
-                    point["dataType"] = this.state.viewMode;
-                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point[arr.query.id] = __getCount({
-                        viewMode: this.state.viewMode,
-                        count: dataRow.doc_count,
-                        countInState: relVal
-                    });
-                    return point;
-                }
-            );
-        });
     }
 
     async processData(data) {
@@ -127,35 +182,30 @@ class ComparisonHistogram extends React.Component {
         }
     }
 
+    getStackBars = dataKeys => dataKeys.map((id, index) => (
+        <Bar
+            isAnimationActive={true}
+            dataKey={id}
+            fill={this.COLORS[index]}
+            stackId="a"
+            name=""
+        />)
+    );
+
     render() {
-        let prettifiedData = this.getPrettifiedData();
-        const dataToGraph = [];
-        prettifiedData.forEach(arr => {
-            arr.forEach(item => {
-                const index = dataToGraph.findIndex( function( ele ) {
-                    return ele.date === item.date;
-                } );
-
-                if (index > 0) {
-                    dataToGraph[index] = Object.assign({}, dataToGraph[index], item);
-                } else {
-                    dataToGraph.push(item)
-                }
-            } )
-        });
-
-        const bars = prettifiedData.map((k, index) => {
-            return (
-                <Bar
-                    isAnimationActive={true}
-                    dataKey={k[index]['queryId']}
-                    fill={this.COLORS[index]}
-                    stackId="a"
-                    name = ""
-                />);
-        });
-
         const random = Math.floor(Math.random() * 1000) + 1;
+        let bars = null;
+        let dataToPrint = null;
+
+        if (this.state.queriesIds) {
+            bars = this.getStackBars(this.state.queriesIds);
+        }
+        if(this.state.viewMode === 'relative') {
+            dataToPrint = this.state.relData;
+        } else {
+            dataToPrint = this.state.absData;
+        }
+
         return (
             <div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >
@@ -167,7 +217,7 @@ class ComparisonHistogram extends React.Component {
                         key={random}
                         width={1200}
                         height={200}
-                        data={dataToGraph}
+                        data={dataToPrint}
                         margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         <CartesianGrid strokeDasharray="3 3"/>
                         <XAxis dataKey="date">
