@@ -131,7 +131,7 @@ class SearchSnippet extends React.Component {
         if(date !== ""){
             subHeading += " | ";
         }
-        subHeading += highlights + " match(es) |";
+        subHeading += highlights + " match(es) in metadata |";
 
         return (
 			<div className={classNames.join(' ')}>
