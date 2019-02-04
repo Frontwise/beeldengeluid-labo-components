@@ -290,12 +290,19 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>{project.name}
-                      </Link>)
+            content: (
+                <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>
+                    {project.name}
+                </Link>
+            )
         },
         {
             props: { className: 'description' },
-            content: (<p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
+            content: (
+                <p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>
+                    {this.trunc(project.description, 140)}
+                </Link></p>
+            )
         },
         {
             props: { className: 'number' },
@@ -325,7 +332,6 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'smaller' },
             content: project.created.substring(0, 10)
         },
-
 
         {
             props: { className: 'actions' },
