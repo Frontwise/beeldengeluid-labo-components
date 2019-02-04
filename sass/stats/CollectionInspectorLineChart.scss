@@ -1,4 +1,9 @@
 .bg__collection-inspector-line-chart {
 	margin-top: 30px;
 	@include lineChartBase();
+	.bg__porcentage_container {
+		font-size: 90%;
+		font-weight: bold;
+		margin-right: 12px;
+	}
 }

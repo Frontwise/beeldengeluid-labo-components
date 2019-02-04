@@ -89,8 +89,7 @@ class CollectionInspectorLineChart extends React.Component {
             return d;
         });
 
-        const fieldLabel = this.props.analysisField ? this.props.analysisField.title : '';
-
+        const fieldLabel = this.props.dateField ? this.props.dateField : '';
         //TODO fix the stupid manual multiple lines
         return (
             <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
@@ -129,6 +128,12 @@ class CustomTooltip extends React.Component{
             if(payload && payload.length > 0) {
                 const relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0;
                 const dataType = payload[0].payload.dataType;
+                const presentPerc = (payload[0].payload['present'] !== 0 || payload[0].payload['total'] !== 0)
+                    ?  <span className="bg__porcentage_container"> ({((payload[0].payload['present']/payload[0].payload['total'])*100).toFixed(2)}%) </span>
+                    : <span>0%</span>;
+                const missingPerc = (payload[0].payload['missing'] !== 0 || payload[0].payload['total'] !== 0)
+                    ?  <span className="bg__porcentage_container">({((payload[0].payload['missing']/payload[0].payload['total'])*100).toFixed(2)}%)</span>
+                    : <span> '0%' </span>;
                 if (dataType === 'relative') {
                     return (
                         <div className="ms__custom-tooltip">
@@ -142,8 +147,8 @@ class CustomTooltip extends React.Component{
                         <div className="ms__custom-tooltip">
                             <h4>Field Completeness</h4>
                             <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                            <p>Present: <span className="rightAlign">{payload[0].payload['present']}</span></p>
-                            <p>Missing: <span className="rightAlign">{payload[0].payload['missing']}</span></p>
+                            <p>Present: <span className="rightAlign">{presentPerc} {payload[0].payload['present']}</span></p>
+                            <p>Missing: <span className="rightAlign">{missingPerc} {payload[0].payload['missing']}</span></p>
                             <p>Total: <span className="rightAlign">{payload[0].payload['total']}</span></p>
                         </div>
                     );
