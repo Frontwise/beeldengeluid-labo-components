@@ -13,7 +13,7 @@ import CollectionUtil from './util/CollectionUtil';
 
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
-import { initHelp } from './components/workspace/helpers/helpDoc';
+import {initHelp} from './components/workspace/helpers/helpDoc';
 
 /*
 Notes about this component:
@@ -82,7 +82,7 @@ class QueryComparisonRecipe extends React.Component {
     ------------------------------- SEARCH RELATED FUNCTIONS --------------------
     ------------------------------------------------------------------------------- */
     onProjectChanged(project) {
-        ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+        ComponentUtil.storeJSONInLocalStorage('activeProject', project);
         ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
             if(this.state.awaitingProcess) {
                 switch(this.state.awaitingProcess) {
@@ -93,15 +93,15 @@ class QueryComparisonRecipe extends React.Component {
         });
     }
 
-    async getData(key) {
+    async getData(singleQuery) {
         const that = this,
-              collectionId = that.state.selectedQueries[key].query.collectionId,
+              collectionId = singleQuery.query.collectionId,
               clientId = that.props.clientId,
               user = that.props.user;
 
         return new Promise(function(resolve, reject) {
             CollectionUtil.generateCollectionConfig(clientId, user, collectionId, (collectionConfig) => {
-                const desiredFacets = that.state.selectedQueries[key].query.desiredFacets,
+                const desiredFacets = singleQuery.query.desiredFacets,
                     field = collectionConfig.getPreferredDateField() || null;
                 if(field !== null) {
                     desiredFacets.push({
@@ -112,27 +112,11 @@ class QueryComparisonRecipe extends React.Component {
                     });
                 }
 
-                const currentTime = new Date().getTime();
+                const query = QueryModel.ensureQuery(singleQuery.query, collectionConfig);
 
-                //remove the query ID so they are all unique
-                if(that.state.selectedQueries[key].query && that.state.selectedQueries[key].query.id) {
-                    that.state.selectedQueries[key].query.id = null;
-                }
-                const query = QueryModel.ensureQuery(that.state.selectedQueries[key].query, collectionConfig)
-
-                query.dateRange = {
-                    field: that.state.selectedQueries[key].query.dateRange ?
-                        that.state.selectedQueries[key].query.dateRange.field :
-                        collectionConfig.getPreferredDateField(),
-                    end: that.state.selectedQueries[key].query.dateRange ?
-                        that.state.selectedQueries[key].query.dateRange.end : currentTime,
-                    start: that.state.selectedQueries[key].query.dateRange ?
-                        that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
-                };
                 query.fragmentFields = null;
                 query.fragmentPath = null;
                 query.desiredFacets = desiredFacets;
-
                 // TODO : remove call to CKANAPI since the title for the collection is in the collectionConfig
                 SearchAPI.search(
                     query,
@@ -156,7 +140,7 @@ class QueryComparisonRecipe extends React.Component {
 
     async processData(queries) {
         const random = Math.floor(Math.random() * 1000) + 1;
-        const promises = Object.keys(queries).map(this.getData.bind(this));
+        const promises = queries.map(query => this.getData(query));
         let queriesData = {};
         await Promise.all(promises).then(
             (dataPerQuery) => {
@@ -200,17 +184,9 @@ class QueryComparisonRecipe extends React.Component {
         }
     }
 
-    compareQueries() {
-        const checkedBoxes = Array.from(document.querySelectorAll(".bg__sort-table > table > tbody input"));
-        this.layout.classList.add("spinner");
-        let queries = [];
-        Object.keys(checkedBoxes).forEach((item, index) => {
-            if (checkedBoxes[item].checked && this.state.activeProject) {
-                queries.push(this.state.activeProject.queries[index])
-            }
-        });
+    compareQueries(selection) {
         this.setState({
-            selectedQueries : queries
+            selectedQueries : selection
         }, () => this.processData(this.state.selectedQueries))
     }
 
@@ -221,8 +197,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     goToSingleSearch() {
-        let url = this.__getBaseUrl() + '/tool/single-search';
-        document.location.href = url;
+        document.location.href = this.__getBaseUrl() + '/tool/single-search';
     }
 
     switchGraphType() {
