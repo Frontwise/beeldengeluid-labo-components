@@ -133,7 +133,7 @@ class CustomTooltip extends React.Component{
                     : <span>0%</span>;
                 const missingPerc = (payload[0].payload['missing'] !== 0 || payload[0].payload['total'] !== 0)
                     ?  <span className="bg__porcentage_container">({((payload[0].payload['missing']/payload[0].payload['total'])*100).toFixed(2)}%)</span>
-                    : <span> '0%' </span>;
+                    : <span> 0% </span>;
                 if (dataType === 'relative') {
                     return (
                         <div className="ms__custom-tooltip">
