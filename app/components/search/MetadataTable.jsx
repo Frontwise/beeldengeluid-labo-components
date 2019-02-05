@@ -1,20 +1,11 @@
-import JSONFormatter from 'json-formatter-js'
 import IDUtil from '../../util/IDUtil';
 import ReactTooltip from 'react-tooltip';
-
-//See: https://github.com/mohsen1/json-formatter-js
 
 class MetadataTable extends React.Component {
 
 	constructor(props) {
 		super(props);
 		this.CLASS_PREFIX = 'mdt';
-	}
-
-	componentDidMount() {
-		const formatter = new JSONFormatter(this.props.data.rawData);
-		formatter.openAtDepth(Infinity);
-		document.getElementById('__rawdata_' + IDUtil.hashCode(this.props.data.resourceId)).appendChild(formatter.render());
 	}
 
 	render() {
@@ -98,12 +89,6 @@ class MetadataTable extends React.Component {
 						</tr>
 						{source}
 						{specialProperties}
-						<tr>
-							<td><label>All data</label></td>
-							<td>
-								<div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)} id={'__rawdata_' + IDUtil.hashCode(this.props.data.resourceId)}></div>
-							</td>
-						</tr>
 					</tbody>
 				</table>
 				<ReactTooltip id={'__ci_tooltip'}/>

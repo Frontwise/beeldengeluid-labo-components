@@ -49,7 +49,11 @@ const SearchAPI = {
 			xhr.send(JSON.stringify(query));
 		} else {
 			console.debug('Currently the search engine cannot look beyond this point, please narrow your search terms');
-			callback({pagingOutOfBounds : true})
+			callback({
+				query : query,
+				collectionConfig : collectionConfig,
+				pagingOutOfBounds : true
+			})
 		}
 	}
 };

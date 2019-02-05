@@ -21,7 +21,7 @@ class CollectionTable extends React.PureComponent {
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
             { field: '', content: '', sortable: false },
-            { field: '', content: '', sortable: false },
+            //{ field: '', content: '', sortable: false },
             { field: '', content: '', sortable: false }
         ];
 
@@ -244,6 +244,7 @@ class CollectionTable extends React.PureComponent {
                         Delete
                     </a>) : ('')
             },
+            /*
             {
                 content: (
                     <select onChange={this.enrichCollection.bind(this, collection)}>
@@ -251,7 +252,7 @@ class CollectionTable extends React.PureComponent {
                     <option value="ASR">ASR</option>
                     </select>
                 )
-            },
+            },*/
             {
                 content: collection.canOpen(currentUserId) ? (
                     <Link to={'/workspace/collections/' + collection.id + '/edit'} className="btn">
