@@ -2,9 +2,10 @@
 	margin-top: 30px;
 	@include lineChartBase();
 
-	.bg__collection_inspector_no-data {
+	.no-data {
 		margin-top: 12px;
-  }
+	}
+
 	.percentage {
 		font-size: 90%;
 		font-weight: bold;
