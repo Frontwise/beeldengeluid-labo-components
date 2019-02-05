@@ -35,6 +35,20 @@ const MessageHelper = {
 		)
 	},
 
+	renderPagingOutOfBoundsMessage : function(resetSearchFunction) {
+		return (
+			<div>
+				<strong>Note:</strong> Currently the search engine cannot look as far as the selected page.
+				Narrowing down your search parameters to reduce the amount of results avoids this restriction.
+				<br/><br/>
+				Back to initial search result page&nbsp;
+				<button className="btn btn-primary btn-xs" type="button" onClick={() => resetSearchFunction()}>
+					Reset page
+				</button>
+			</div>
+		)
+	},
+
 	/* -------------------------------- PARTIAL RENDERING FUNCTIONS --------------------------- */
 
 	__renderQuery : function(query) {

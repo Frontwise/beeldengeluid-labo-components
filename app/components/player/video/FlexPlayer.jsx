@@ -25,6 +25,8 @@ import FlexBox from '../../FlexBox';
 import AppAnnotationStore from '../../../flux/AnnotationStore';
 import AnnotationActions from '../../../flux/AnnotationActions';
 
+//TODO test out media fragments to shield off "off-air content"
+
 /*
 This class receives a (generic) playerAPI from the implementing player component.
 Currently VimeoPlayer, JWPlayer, HTML5VideoPlayer, HTML5AudioPlayer and YouTubePlayer have implemented this API.
