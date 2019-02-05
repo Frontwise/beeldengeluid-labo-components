@@ -1,4 +1,8 @@
 .bg__collection-inspector-line-chart {
 	margin-top: 30px;
 	@include lineChartBase();
+
+	.bg__collection_inspector_no-data {
+		margin-top: 12px;
+	}
 }

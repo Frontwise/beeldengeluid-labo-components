@@ -53,6 +53,16 @@ class CollectionInspectorLineChart extends React.Component {
 
     //TODO better ID!! (include some unique part based on the query)
     render() {
+        const data = this.props.data;
+        if (data.missing.data.length === 0 && data.present.data.length === 0 && data.total.data.length === 0) {
+            return (
+                <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
+                    <div className="bg__collection_inspector_no-data alert alert-danger">
+                        No data available for date field: {this.props.dateField}
+                    </div>
+                </div>
+            )
+        }
         const lines = Object.keys(this.props.data).map((k, index) => {
             //fix onClick with this? https://github.com/recharts/recharts/issues/261
             return (
