@@ -92,23 +92,25 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	toggleControls(e) {
-		if(!this.alreadyShowing) {
-			this.controlsRef.current.setVisible(true);
-			this.alreadyShowing = true;
-		}
+		if(this.controlsRef.current) {
+			if(!this.alreadyShowing) {
+				this.controlsRef.current.setVisible(true);
+				this.alreadyShowing = true;
+			}
 
-        if (this.alertTimerId == null) {
-            this.alertTimerId = setTimeout(() => {
-            	this.alreadyShowing = false;
-				this.controlsRef.current.setVisible(false);
-            }, 2000);
-        } else {
-            clearTimeout(this.alertTimerId);
-            this.alertTimerId = setTimeout(() => {
-            	this.alreadyShowing = false;
-                this.controlsRef.current.setVisible(false);
-            }, 2000);
-        }
+	        if (this.alertTimerId == null) {
+	            this.alertTimerId = setTimeout(() => {
+	            	this.alreadyShowing = false;
+					this.controlsRef.current.setVisible(false);
+	            }, 2000);
+	        } else {
+	            clearTimeout(this.alertTimerId);
+	            this.alertTimerId = setTimeout(() => {
+	            	this.alreadyShowing = false;
+	                this.controlsRef.current.setVisible(false);
+	            }, 2000);
+	        }
+	    }
 	}
 
 	render() {
