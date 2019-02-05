@@ -61,6 +61,20 @@ class CollectionInspectorLineChart extends React.Component {
 }
 
 class CustomTooltip extends React.Component{
+
+    calcPresentPercentage(data) {
+        if(data['present'] !== 0 || data['total'] !== 0) {
+            return ((data['present'] / data['total']) * 100).toFixed(2)
+        }
+        return 0
+    }
+
+    calcMissingPercentage(data) {
+        if(data['missing'] !== 0 || data['total'] !== 0) {
+            return ((data['missing'] / data['total']) * 100).toFixed(2)
+        }
+    }
+
     render() {
         const {active} = this.props;
         if (active) {
@@ -68,12 +82,8 @@ class CustomTooltip extends React.Component{
             if(payload && payload.length > 0) {
                 const relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0;
                 const dataType = payload[0].payload.dataType;
-                const presentPerc = (payload[0].payload['present'] !== 0 || payload[0].payload['total'] !== 0)
-                    ?  <span className="bg__porcentage_container"> ({((payload[0].payload['present']/payload[0].payload['total'])*100).toFixed(2)}%) </span>
-                    : <span>0%</span>;
-                const missingPerc = (payload[0].payload['missing'] !== 0 || payload[0].payload['total'] !== 0)
-                    ?  <span className="bg__porcentage_container">({((payload[0].payload['missing']/payload[0].payload['total'])*100).toFixed(2)}%)</span>
-                    : <span> 0% </span>;
+                const presentPerc = this.calcPresentPercentage(payload[0].payload);
+                const missingPerc = this.calcMissingPercentage(payload[0].payload);
                 if (dataType === 'relative') {
                     return (
                         <div className="ms__custom-tooltip">
@@ -86,10 +96,28 @@ class CustomTooltip extends React.Component{
                     return (
                         <div className="ms__custom-tooltip">
                             <h4>Field Completeness</h4>
-                            <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                            <p>Present: <span className="rightAlign">{presentPerc} {payload[0].payload['present']}</span></p>
-                            <p>Missing: <span className="rightAlign">{missingPerc} {payload[0].payload['missing']}</span></p>
-                            <p>Total: <span className="rightAlign">{payload[0].payload['total']}</span></p>
+                            <p>
+                                Year:
+                                <span className="rightAlign">{`${label}`}</span>
+                            </p>
+                            <p>
+                                Present:
+                                <span className="rightAlign">
+                                    <span className="percentage">{presentPerc}%</span>
+                                    {payload[0].payload['present']}
+                                    </span>
+                            </p>
+                            <p>
+                                Missing:
+                                <span className="rightAlign">
+                                    <span className="percentage">{missingPerc}%</span>
+                                    {payload[0].payload['missing']}
+                                </span>
+                            </p>
+                            <p>
+                                Total:
+                                <span className="rightAlign">{payload[0].payload['total']}</span>
+                            </p>
                         </div>
                     );
                 }
