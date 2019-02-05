@@ -21,6 +21,7 @@ class Transcriber extends React.PureComponent {
         const transcriptWindow = document.getElementById(this.GUID);
         const searchHitscontainer = document.querySelector('.numberOfMatches');
 
+        //TODO rewrite to proper React
         if (transcriptWindow) {
             transcriptWindow.onscroll = (e) => {
                 if (this.alertTimerId == null) {

@@ -17,6 +17,8 @@ class FlexPlayerControls extends React.Component {
 		}
 		this.seekBarRef = React.createRef();//not using state for this, since media playback updates every second!
 		this.volumeRef = React.createRef();
+		this.buttonsRef = React.createRef();
+		this.overlayRef = React.createRef();
 	}
 
 	componentDidMount() {
@@ -70,8 +72,13 @@ class FlexPlayerControls extends React.Component {
 				}
 			}
 		)
+	}
 
-
+	//this function is call directly by the parent (HTML5Player)
+	setVisible(visible) {
+		this.seekBarRef.current.style.display = visible ? 'block' : 'none';
+		this.buttonsRef.current.style.display = visible ? 'block' : 'none';
+		this.overlayRef.current.style.display = visible ? 'block' : 'none';
 	}
 
 	onSeek(e) {
@@ -103,7 +110,7 @@ class FlexPlayerControls extends React.Component {
 	render() {
 		return (
 			<div className={IDUtil.cssClassName('flex-controls')}>
-				<div className="toggle-play-overlay" onClick={this.onTogglePlay.bind(this)}>
+				<div className="toggle-play-overlay" onClick={this.onTogglePlay.bind(this)} ref={this.overlayRef}>
 					<button type="button">
 						<span className={'glyphicon' + (this.state.paused ? ' glyphicon-play' : ' glyphicon-pause')}></span>
 					</button>
@@ -111,7 +118,7 @@ class FlexPlayerControls extends React.Component {
 
 				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek.bind(this)}/>
 
-				<div className="buttons">
+				<div className="buttons" ref={this.buttonsRef}>
 					<button type="button" onClick={this.onToggleMute.bind(this)}>
 						<span className={'glyphicon' + (this.state.muted ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
 					</button>

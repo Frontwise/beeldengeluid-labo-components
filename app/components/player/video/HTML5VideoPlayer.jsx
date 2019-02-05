@@ -18,6 +18,9 @@ class HTML5VideoPlayer extends React.Component {
 			playerAPI : null,
 			fullScreen : false
 		}
+		this.controlsRef = React.createRef();
+		this.alreadyShowing = true;
+		this.alertTimerId = null;
 	}
 
 	componentDidMount() {
@@ -88,11 +91,32 @@ class HTML5VideoPlayer extends React.Component {
 		this.setState({fullScreen : !this.state.fullScreen})
 	}
 
+	toggleControls(e) {
+		if(!this.alreadyShowing) {
+			this.controlsRef.current.setVisible(true);
+			this.alreadyShowing = true;
+		}
+
+        if (this.alertTimerId == null) {
+            this.alertTimerId = setTimeout(() => {
+            	this.alreadyShowing = false;
+				this.controlsRef.current.setVisible(false);
+            }, 2000);
+        } else {
+            clearTimeout(this.alertTimerId);
+            this.alertTimerId = setTimeout(() => {
+            	this.alreadyShowing = false;
+                this.controlsRef.current.setVisible(false);
+            }, 2000);
+        }
+	}
+
 	render() {
 		let controls = null;
 		if(this.state.playerAPI) { //load the controls when the player is ready
 			controls = (
 				<FlexPlayerControls
+					ref={this.controlsRef}
 					api={this.state.playerAPI}
 					mediaObject={this.props.mediaObject}
 					duration={FlexPlayerUtil.onAirDuration(this.state.playerAPI.getDuration(), this.props.mediaObject)}
@@ -102,12 +126,16 @@ class HTML5VideoPlayer extends React.Component {
 		}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
-				<div className={this.state.fullScreen ? 'full-screen' : 'default'} id={'__htmlvid__' + this.props.mediaObject.id}>
+				<div
+					className={this.state.fullScreen ? 'full-screen' : 'default'}
+					id={'__htmlvid__' + this.props.mediaObject.id}
+					onMouseMove={this.toggleControls.bind(this)}
+				>
 					<video
 						id="video-player"
 						width="100%"
 						className={IDUtil.cssClassName('html5-video-player')}
-						//muted
+						muted
 						//controls
 						//controlsList="nodownload"
 						crossOrigin={
