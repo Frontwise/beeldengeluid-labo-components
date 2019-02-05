@@ -14,6 +14,7 @@ import CollectionUtil from './util/CollectionUtil';
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
 import {initHelp} from './components/workspace/helpers/helpDoc';
+import CustomLegend from './components/stats/CustomLegend';
 
 /*
 Notes about this component:
@@ -52,6 +53,7 @@ class QueryComparisonRecipe extends React.Component {
             awaitingProcess : null, //which process is awaiting the output of the project selector
         };
         this.layout = document.querySelector("body");
+        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
     }
 
     componentDidMount(){
@@ -94,11 +96,9 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     async getData(singleQuery) {
-        const that = this,
-              collectionId = singleQuery.query.collectionId,
-              clientId = that.props.clientId,
-              user = that.props.user;
-
+        const collectionId = singleQuery.query.collectionId,
+              clientId = this.props.clientId,
+              user = this.props.user;
         return new Promise(function(resolve, reject) {
             CollectionUtil.generateCollectionConfig(clientId, user, collectionId, (collectionConfig) => {
                 const desiredFacets = singleQuery.query.desiredFacets,
@@ -117,7 +117,7 @@ class QueryComparisonRecipe extends React.Component {
                 query.fragmentFields = null;
                 query.fragmentPath = null;
                 query.desiredFacets = desiredFacets;
-                // TODO : remove call to CKANAPI since the title for the collection is in the collectionConfig
+
                 SearchAPI.search(
                     query,
                     collectionConfig,
@@ -144,6 +144,16 @@ class QueryComparisonRecipe extends React.Component {
         let queriesData = {};
         await Promise.all(promises).then(
             (dataPerQuery) => {
+                let selectedQueriesWithConfig = [];
+                queries.forEach(singleQuery => {
+                    return dataPerQuery.forEach(querySet => {
+                        if(querySet.query.id === singleQuery.query.id){
+                            let tempObj = {...singleQuery};
+                            tempObj.collectionConfig = querySet.collectionConfig;
+                            selectedQueriesWithConfig.push(tempObj);
+                        }
+                    })
+                });
                 dataPerQuery.map(data => {
                     if(data && data.query) {
                         let queryObj = {};
@@ -162,7 +172,8 @@ class QueryComparisonRecipe extends React.Component {
                 this.setState({
                     lineChartData: queriesData,
                     barChartData: dataPerQuery,
-                    selectedQueriesId : random
+                    selectedQueriesId : random,
+                    selectedQueries : selectedQueriesWithConfig
                 }, () => this.layout.classList.remove("spinner"))
             },
         )
@@ -185,9 +196,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     compareQueries(selection) {
-        this.setState({
-            selectedQueries : selection
-        }, () => this.processData(this.state.selectedQueries))
+        this.processData(selection)
     }
 
     __getBaseUrl() {
@@ -221,6 +230,7 @@ class QueryComparisonRecipe extends React.Component {
         );
 
         let chart = null;
+        let queryCollectionDetails = null;
         let aggregatedHits = null;
         let projectModal = null;
         let projectQueriesTable = null;
@@ -266,6 +276,11 @@ class QueryComparisonRecipe extends React.Component {
                         />
                     );
                 }
+                queryCollectionDetails = <CustomLegend
+                    selectedQueries={this.state.selectedQueries}
+                    lineColour={this.COLORS}
+                    external={external}
+                />;
             }
         }
 
@@ -296,6 +311,7 @@ class QueryComparisonRecipe extends React.Component {
                     <div className="col-md-12 bg__comparative-graphs">
                         {graphTypeBtn}
                         {chart}
+                        {queryCollectionDetails}
                     </div>
                 </div>
                 {aggregatedHits}

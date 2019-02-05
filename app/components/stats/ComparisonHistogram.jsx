@@ -11,8 +11,7 @@ import {
     Legend
 } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
-import TimeUtil from "../../util/TimeUtil";
-import CKANAPI from "../../api/CKANAPI";
+import CustomLegend from './CustomLegend';
 
 class ComparisonHistogram extends React.Component {
     constructor(props) {
@@ -27,14 +26,6 @@ class ComparisonHistogram extends React.Component {
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
-    }
-
-    componentDidMount() {
-        CKANAPI.listCollections((collections) => {
-            this.setState({
-                collectionList :  collections
-            });
-        });
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -260,132 +251,6 @@ class ComparisonHistogram extends React.Component {
     }
 }
 export default ComparisonHistogram;
-
-class CustomLegend extends React.Component{
-    stylings(p){
-        return {
-            color: p,
-            listStyle: 'none',
-            padding: '10px 20px'
-        }
-    }
-
-    getCollectionTitle(collectionId) {
-        if(collectionId ) {
-            const that= this;
-            Object.keys(this.props.labelData).map(function(collection) {
-                if (that.props.labelData[collection].index === collectionId) {
-                    return that.props.labelData[collection].title
-                }
-            });
-        }
-    }
-
-    render() {
-        const selectedQueries = this.props.selectedQueries,
-            payload = this.props.payload,
-            that = this;
-        let colours = [],
-            queryInfoBlocks = null;
-        payload.map(d => {
-            colours[d.dataKey] = d.color
-        });
-
-        let queryInfo = selectedQueries.map(
-            () => {
-                const collectionInfo = that.props.labelData || null,
-                    selectedQueries = that.props.selectedQueries;
-                let queryDetails = [];
-                if (collectionInfo && selectedQueries) {
-                    selectedQueries.map((query, index) => {
-                        collectionInfo.map(collection => {
-                            if (query.query.collectionId === collection.index) {
-                                queryDetails.push({
-                                    "savedQueryName": query.name,
-                                    "collectionTitle": collection.title,
-                                    "queryTerm": query.query.term,
-                                    "dateRange": query.query.dateRange,
-                                    "selectedFacets": query.query.selectedFacets,
-                                    "fieldCategory": query.query.fieldCategory,
-                                    "lineColour": that.props.lineColour[index]
-                                })
-                            }
-                        })
-                    })
-                }
-                if(queryDetails.length > 0) {
-                    let fieldCategoryList = null,
-                        fieldClusterHeader = null,
-                        dateRangeHeader = null,
-                        dateRangeFields = null,
-                        dateField = null,
-                        dateStart = null,
-                        dateEnd = null;
-
-                    queryInfoBlocks = queryDetails.map(
-                        item =>{
-                            if(item.fieldCategory && item.fieldCategory.length > 0) {
-                                fieldCategoryList = item.fieldCategory.map(field => {
-                                    return (<li>{field.label} </li>);
-                                })
-                            }
-
-                            if(item.dateRange) {
-                                dateRangeFields = Object.keys(item.dateRange).map(dateObj => {
-                                    switch (dateObj) {
-                                        case 'field':
-                                            dateField = item.dateRange[dateObj];
-                                            break;
-                                        case 'start':
-                                            dateStart = TimeUtil.UNIXTimeToPrettyDate(item.dateRange[dateObj]);
-                                            break;
-                                        case 'end':
-                                            dateEnd = TimeUtil.UNIXTimeToPrettyDate(item.dateRange[dateObj]);
-                                            break;
-                                    }
-                                    if(dateField && dateStart && dateEnd) {
-                                        return (
-                                            <ul>
-                                                <li><u>Selected date field:</u> {dateField}</li>
-                                                <li><u>Initial date:</u> {dateStart}</li>
-                                                <li><u>End date:</u> {dateEnd}</li>
-                                            </ul>
-                                        )
-                                    }
-
-                                })
-
-                            }
-                            if(dateRangeFields) {
-                                dateRangeHeader = <p><b>Date Range:</b></p>
-                            }
-                            if(fieldCategoryList) {
-                                fieldClusterHeader = <p><b>Field cluster:</b></p>
-                            }
-                            return (<div className="bg__comparative_histogram" onClick={this.toggleLine}>
-                                <h4 style={this.stylings(item.lineColour)}>Query title: {item.savedQueryName}</h4>
-                                <p><b>Collection name:</b> {item.collectionTitle}</p>
-                                <p><b>Query term (Search term):</b> {item.queryTerm}</p>
-                                {fieldClusterHeader}
-                                <ul>{fieldCategoryList}</ul>
-                                {dateRangeHeader}
-                                {dateRangeFields}
-                            </div>)
-                        }
-                    )
-                }
-            }
-        );
-        if (queryInfo) {
-            return (
-                <div className="ms__custom-legend">
-                    {queryInfoBlocks}
-                </div>
-            );
-        }
-        return null;
-    }
-}
 
 class CustomTooltip extends React.Component{
     stylings(p){
