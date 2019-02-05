@@ -11,8 +11,14 @@ class CollectionInspectorLineChart extends React.Component {
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
     }
 
-    render() {
-        //concatenate all the data for each query, because rechart likes it this way (TODO make nicer)
+    hasNoDataForChart() {
+        return this.props.data.missing.data.length === 0 &&
+            this.props.data.present.data.length === 0 &&
+            this.props.data.total.data.length === 0
+    }
+
+    generateChartData() {
+        //concatenate all the data for each query, because rechart likes it this way
         const temp = {};
         Object.keys(this.props.data).forEach((k) => {
             this.props.data[k].data.forEach((d) => {
@@ -26,11 +32,25 @@ class CollectionInspectorLineChart extends React.Component {
             })
 
         });
-        const timelineData = Object.keys(temp).map((k) => {
+
+        return Object.keys(temp).map((k) => {
             const d = temp[k];
             d.year = k;
             return d;
         });
+    }
+
+    render() {
+        if (this.hasNoDataForChart()) {
+            return (
+                <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
+                    <div className="no-data alert alert-danger">
+                        No data available for date field: {this.props.dateField}
+                    </div>
+                </div>
+            )
+        }
+        const timelineData = this.generateChartData();
 
         const fieldLabel = this.props.dateField ? this.props.dateField : '';
         return (
