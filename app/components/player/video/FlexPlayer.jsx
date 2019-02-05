@@ -739,9 +739,17 @@ class FlexPlayer extends React.Component {
 		//if there is a transcript and a ready player API, draw the transcriber
 		if(this.props.transcript && this.state.playerAPI) { //player API must be ready!
 			//only pass the part belonging to the current media object!
-			const transcript = this.props.transcript.filter(
-				t => t.carrierId == this.state.currentMediaObject.assetId
-			)
+			const transcript = this.props.transcript.filter(t => {
+				//first make sure the transcript only includes the active carrier/track
+				if(t.carrierId == this.state.currentMediaObject.assetId) {
+					//then make sure the transcript does not contain off-air lines
+					if(!FlexPlayerUtil.isTimeBeforeOnAir(t.start / 1000, this.state.currentMediaObject) &&
+						!FlexPlayerUtil.isTimeAfterOnAir(t.end / 1000, this.state.currentMediaObject)) {
+						return true;
+					}
+				}
+				return false
+			})
 			if(transcript.length > 0) {
 				//completely redraw whenever the media object changes (FIXME change the transcriber)
 				transcriber = (
@@ -751,6 +759,7 @@ class FlexPlayer extends React.Component {
 						transcript={transcript}
 						curPosition={this.state.curPosition}
 						playerAPI={this.state.playerAPI}
+						//mediaObject={this.state.currentMediaObject}
 					/>
 				)
 			}

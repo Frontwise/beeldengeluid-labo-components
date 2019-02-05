@@ -1,5 +1,6 @@
 import IDUtil from '../../../util/IDUtil';
 import TimeUtil from "../../../util/TimeUtil";
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 
 //TODO replace all the css javascript selection and replace with pure React
 class Transcriber extends React.PureComponent {
@@ -165,7 +166,6 @@ class Transcriber extends React.PureComponent {
                         }
                     }
                 );
-
             }
         }
     }

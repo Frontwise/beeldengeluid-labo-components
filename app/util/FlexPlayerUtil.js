@@ -43,6 +43,10 @@ const FlexPlayerUtil = {
 		playerAPI.seek(time);
 	},
 
+	isTimeBeforeOnAir(realPlayerTime, mediaObject) {
+		return FlexPlayerUtil.containsOffAirEndOffset(mediaObject) && realPlayerTime <= mediaObject.resourceStart
+	},
+
 	isTimeAfterOnAir(realPlayerTime, mediaObject) {
 		return FlexPlayerUtil.containsOffAirEndOffset(mediaObject) && realPlayerTime >= mediaObject.resourceEnd
 	},
