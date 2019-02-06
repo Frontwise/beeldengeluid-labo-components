@@ -1,7 +1,6 @@
 import CollectionAPI from '../../api/CollectionAPI';
 import MetadataSchemaUtil from '../../util/MetadataSchemaUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
-import CollectionUtil from '../../util/CollectionUtil';
 import RegexUtil from '../../util/RegexUtil';
 
 /*
@@ -478,23 +477,24 @@ class CollectionConfig {
 
     // maxWords is not always honored. When a searchterm with quotes is longer than maxWords the whole quoted match will be returned.
     // maxWords is used as a "number of words to the left and right" of the matched term
-	findMatchesInString(fieldValue, searchTerm, maxWords=4){
-	    var regex = null;
+	findMatchesInString(fieldValue, searchTerm, maxWords=4) {
+		const snippets = [];
+	    let regex = null;
+	    let matches = null;
         fieldValue = fieldValue.toString().replace(/\r?\n|\r/g, " ");
-        var snippets = [];
         if(searchTerm && fieldValue) {
             regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
-            var matches = fieldValue.match(regex);
+            matches = fieldValue.match(regex);
         }
-        if(matches){
-            var startIndex = 0;
-            for (var i = 0; i < matches.length; i++){
-                var foundIndex = fieldValue.indexOf(matches[i], startIndex);
+        if(matches) {
+            let startIndex = 0;
+            matches.forEach(match => {
+            	const foundIndex = fieldValue.indexOf(match, startIndex);
                 if (foundIndex !== -1){
                     //Determine snippet
-                    var begin = RegexUtil.nthIndexRight(fieldValue, " ", maxWords+1, foundIndex); // Searches for the maxWords' space before the match
-                    var end = RegexUtil.nthIndex(fieldValue, " ", maxWords, foundIndex+matches[i].length); // Searches for the maxWords' space after the match
-                    var snippet = "";
+                    let begin = RegexUtil.nthIndexRight(fieldValue, " ", maxWords + 1, foundIndex); // Searches for the maxWords' space before the match
+                    let end = RegexUtil.nthIndex(fieldValue, " ", maxWords, foundIndex + match.length); // Searches for the maxWords' space after the match
+                    let snippet = "";
 
                     if(begin === -1){
                         begin = 0;
@@ -502,12 +502,11 @@ class CollectionConfig {
                     if(end === -1){
                         end = fieldValue.length;
                     }
-
                     if(begin > 0){
                         snippet += "(...)";
                     }
                     snippet += fieldValue.substring(begin, end);
-                    if(end < fieldValue.length){
+                    if(end < fieldValue.length) {
                         snippet += " (...)";
                     }
 
@@ -515,43 +514,38 @@ class CollectionConfig {
                     snippets.push(snippet);
 
                     // We can continue searching from here instead of taking the whole array again...
-                    startIndex = foundIndex+1;
+                    startIndex = foundIndex + 1;
                 }
-            }
+            })
 	    }
 	    return snippets;
 	}
 
+	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
 	getHighlights(result, searchTerm, snippetsForFields=null, baseField = null) {
-        var highlights = 0;
-        var highlightData = {};
+        let highlights = 0;
 
         if(!snippetsForFields){
             snippetsForFields = {};
         }
 
-        for(var field in result) {
-            if( result.hasOwnProperty(field) && field !== "bg:carriers" && field !== "bg:publications" && field !== "bg:context" && field !== "dcterms:isPartOf") {
-                var value = result[field];
-                var snippets = [];
+        for(let field in result) {
+            if(result.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) == -1) {
+                const value = result[field];
+                let snippets = [];
                 if (Array.isArray(value)) {
-                    var highlightData = this.getHighlights(value, searchTerm, snippetsForFields=snippetsForFields, baseField=field); // <- recursive call
+                    const highlightData = this.getHighlights(value, searchTerm, snippetsForFields, field); // <- recursive call
                     highlights += highlightData[0];
                 } else if (typeof value === 'object') {
-                    var highlightData = this.getHighlights(value, searchTerm, snippetsForFields=snippetsForFields, baseField=null); // <- recursive call
+                    const highlightData = this.getHighlights(value, searchTerm, snippetsForFields, null); // <- recursive call
                     highlights += highlightData[0];
                 } else {
                     snippets = this.findMatchesInString(value, searchTerm);
                     highlights += snippets.length;
                 }
 
-                if(baseField){
-                    var keyField = baseField;
-                } else {
-                    var keyField = field;
-                }
-
                 // Save the snippets in a dictionary
+                const keyField = baseField ? baseField : field;
                 if(Array.isArray(snippets)){
                     if(snippets.length > 0){
                         if(!(keyField in snippetsForFields)){
