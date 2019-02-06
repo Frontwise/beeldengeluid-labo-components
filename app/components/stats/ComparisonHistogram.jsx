@@ -7,11 +7,10 @@ import {
     Tooltip,
     ResponsiveContainer,
     BarChart,
-    Bar,
-    Legend
+    Bar
 } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
-import CustomLegend from './CustomLegend';
+import CustomTooltip from './helpers/CustomTooltip';
 
 class ComparisonHistogram extends React.Component {
     constructor(props) {
@@ -21,8 +20,7 @@ class ComparisonHistogram extends React.Component {
             relData: null,
             absData: this.getJoinedData(this.props.data) || null,
             queriesIds: this.getQueriesIds(this.props.data) || null,
-            isSearching: false,
-            collectionList : null
+            isSearching: false
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
@@ -231,18 +229,6 @@ class ComparisonHistogram extends React.Component {
                         <Tooltip
                             content={<CustomTooltip/>}
                             viewMode={this.state.viewMode}/>
-                        <Legend
-                            verticalAlign="bottom"
-                            wrapperStyle={{ position: null }}
-                            height={39}
-                            content={
-                                <CustomLegend
-                                    selectedQueries={this.props.selectedQueries}
-                                    lineColour={this.COLORS}
-                                    labelData={this.state.collectionList}
-                                />
-                            }
-                        />
                         {bars}
                     </BarChart>
                 </ResponsiveContainer>
@@ -252,56 +238,4 @@ class ComparisonHistogram extends React.Component {
 }
 export default ComparisonHistogram;
 
-class CustomTooltip extends React.Component{
-    stylings(p){
-        return {
-            color: p.color,
-            display: 'block',
-            right: '0',
-            margin: '0',
-            padding: '0',
-        }
-    }
-
-    render() {
-        const {active} = this.props;
-        if (active) {
-            const {payload, label} = this.props;
-            const dataType = this.props.viewMode;
-
-            if(payload && label) {
-                if (dataType === 'relative') {
-                    const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value',
-                        point = payload.map(p => <span style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</span>);
-
-                    return (
-                        <div className="ms__histogram-custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{label}</span></p>
-                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
-                        </div>
-                    );
-                } else {
-                    const point = payload.map(p => {
-                            return (
-                                <span style={this.stylings(p)}>{p.value ? p.value : 0}</span>
-                            )
-                        }),
-                        labelTotals = payload.length > 1 ? 'Totals' : 'Total',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value';
-
-                    return (
-                        <div className="ms__histogram-custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{label}</span></p>
-                            <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
-                        </div>
-                    );
-                }
-            }
-        }
-        return null;
-    }
-}
 

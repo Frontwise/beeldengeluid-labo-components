@@ -1,4 +1,4 @@
-import TimeUtil from '../../util/TimeUtil';
+import TimeUtil from '../../../util/TimeUtil';
 
 export default class CustomLegend extends React.Component {
     stylings(p) {
@@ -30,7 +30,7 @@ export default class CustomLegend extends React.Component {
                 }
                 if (queryDetails.length > 0) {
                     queryInfoBlocks = queryDetails.map(
-                        item => {
+                        (item, index) => {
                             let fieldCategoryList = null,
                                 fieldClusterHeader = null,
                                 dateRangeHeader = null,
@@ -76,7 +76,7 @@ export default class CustomLegend extends React.Component {
                             }
                             return (
                                 <div className="bg__query-details" onClick={this.toggleLine}>
-                                    <h4 style={this.stylings(item.lineColour)}>Query title: {item.savedQueryName}</h4>
+                                    <h4 style={this.stylings(item.lineColour)}>Query #{index+1}: {item.savedQueryName}</h4>
                                     <p><b>Collection name:</b> {item.collectionTitle}</p>
                                     <p><b>Query term (Search term):</b> {item.queryTerm}</p>
                                     {fieldClusterHeader}

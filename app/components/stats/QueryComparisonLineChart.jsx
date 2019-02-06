@@ -2,8 +2,7 @@ import IDUtil from '../../util/IDUtil';
 import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
 import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
-import PropTypes from 'prop-types';
-import CKANAPI from "../../api/CKANAPI";
+import CustomTooltip from './helpers/CustomTooltip';
 /*
 See:
 	- http://rawgraphs.io/
@@ -25,22 +24,11 @@ class QueryComparisonLineChart extends React.Component {
             opacity: {},
             viewMode: this.props.data.total ? 'inspector' : 'absolute',
             isSearching: false,
-            absData : null,
-            relData : null,
-            collectionList : null
+            absData : this.getJoinedData(this.props.data),
+            relData : null
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
-    }
-
-    componentDidMount() {
-        const timelineData = this.getJoinedData(this.props.data);
-        CKANAPI.listCollections((collections) => {
-            this.setState({
-                collectionList :  collections,
-                absData : timelineData
-            });
-        });
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -48,7 +36,6 @@ class QueryComparisonLineChart extends React.Component {
             nextProps.data !== this.props.data
             || nextState.viewMode !== this.state.viewMode
             || this.state.isSearching !== nextState.isSearching
-            || this.state.collectionList !== nextState.collectionList
         );
     }
 
@@ -83,7 +70,7 @@ class QueryComparisonLineChart extends React.Component {
                 isSearching: false,
                 relData: relativeValues
             }, () => {
-                this.layout.classList.remove("spinner")
+                this.layout.classList.remove("spinner");
             }
         );
     }
@@ -283,85 +270,6 @@ class QueryComparisonLineChart extends React.Component {
 }
 
 export default QueryComparisonLineChart;
-
-// Custom tooltip.
-// TODO: Make it a separated component more customizable.
-class CustomTooltip extends React.Component{
-    stylings(p){
-        return {
-            color: p.color,
-            display: 'block',
-            right: '0',
-            margin: '0',
-            padding: '0'
-        }
-    }
-
-    render() {
-
-        const {active} = this.props;
-        if (active) {
-            const {payload, label} = this.props;
-            const dataType = this.props.viewMode;
-
-            if(payload && label) {
-                if (dataType === 'relative') {
-                    const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value',
-                        point = payload.map(p => {
-                            return (
-                                <span style={this.stylings(p)}>{p.value ? p.value.toFixed(2) : 0}%</span>
-                            )
-                        });
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{label}</span></p>
-                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
-                        </div>
-                    );
-                } else if (dataType === 'inspector') {
-                    const point = payload.map((p, i) => {
-                            return (
-                                <span>
-                                    {this.props.payload[i].name}: <span className="rightAlign"><span style={this.stylings(p)}>{p.value ? p.value : 0}</span></span>
-                                </span>
-                            )
-                        });
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>Values for year: {`${label}`}</h4>
-                            {point}
-                        </div>
-                    );
-                } else {
-                    const point = payload.map(p => {
-                            return (
-                                <span style={this.stylings(p)}>{p.value ? p.value : 0}</span>
-                            )
-                        }),
-                        labelTotals = payload.length > 1 ? 'Totals' : 'Total',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value';
-
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
-                            <p>Year: <span className="rightAlign">{label}</span></p>
-                            <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
-                        </div>
-                    );
-                }
-            }
-        }
-        return null;
-    }
-}
-
-CustomTooltip.propTypes = {
-    dataType: PropTypes.string,
-    payload: PropTypes.array,
-    label: PropTypes.number
-};
 
 export class LabelAsPoint extends React.Component {
     constructor(props) {

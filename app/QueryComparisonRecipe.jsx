@@ -14,7 +14,7 @@ import CollectionUtil from './util/CollectionUtil';
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
 import {initHelp} from './components/workspace/helpers/helpDoc';
-import CustomLegend from './components/stats/CustomLegend';
+import CustomLegend from './components/stats/helpers/CustomLegend';
 
 /*
 Notes about this component:
