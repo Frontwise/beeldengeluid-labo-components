@@ -37,12 +37,6 @@ class SortTable extends React.PureComponent {
         }
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if(prevState.selection !== this.state.selection) {
-            this.props.onSelectQuery(this.state.selection);
-        }
-    }
-
     //sort data based on the given field
     sort(field) {
         const sort = {
