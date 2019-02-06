@@ -62,36 +62,39 @@ class DateFieldSelector extends React.Component {
 
         // For each fieldname request the completeness and store it to the state and sessionstorage
         fieldNames.forEach((field)=>{
-                // retrieve from local storage
-                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
-                if (completeness !== null){
-                    completeness = JSON.parse(completeness);
+            // retrieve from local storage
+            let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
+            if (completeness !== null){
+                completeness = JSON.parse(completeness);
+                this.setState((state, props) => {
+                    const fieldData = {};
+                    fieldData[field] = completeness;
+                    return {
+                        completeness: Object.assign({}, state.completeness, fieldData),
+                    }
+                });
+            } else {
+                this.previewAnalysis(field, (data)=> {
+                    const completeness = {
+                        value: data.doc_stats.total > 0 ? (
+                            ((data.doc_stats.total - data.doc_stats.no_analysis_field) / data.doc_stats.total) * 100).toFixed(2) : 0,
+                        total: data.doc_stats.total,
+                        withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
+                    }
+
+                    // store to sessionStorage
+                    window.sessionStorage.setItem(
+                        this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness)
+                    );
+
+                    // update state
                     this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),
-                            }
-                        });
-                } else{
-                    this.previewAnalysis(field, (data)=>{
-                        const completeness = {
-                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
-                            total: data.doc_stats.total,
-                            withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
+                        const fieldData = {};
+                        fieldData[data.analysis_field] = completeness;
+                        return {
+                            completeness: Object.assign({}, state.completeness, fieldData),
                         }
-
-                        // store to sessionStorage
-                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
-
-                        // update state
-                        this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[data.analysis_field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),
-                            }
-                        });
+                    });
                 });
             }
         });
@@ -153,7 +156,12 @@ class DateFieldSelector extends React.Component {
                     </div>
                 );
             } else{
-                dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This collection doesn't contain any date fields. This means no timeline chart could be generated.</p>
+                dateFieldBlock = (
+                    <p>
+                        <i className="fa fa-exclamation-triangle"/>
+                        This collection doesn't contain any date fields. This means no timeline chart could be generated.
+                    </p>
+                )
             }
         }
 

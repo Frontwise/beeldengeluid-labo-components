@@ -118,67 +118,6 @@ const QueryModel = {
 		return null;
 	},
 
-	/* --------------------------------- FOR SHOWING A QUERY IN A TOOLTIP ---------------------------------- */
-
-    queryDetailsTooltip(query) {
-        if (query) {
-            const queryDetailsHeader = "<h3>Query details</h3>",
-                queryName = query.name ? "<div class='bg_queryDetails-wrapper'><p><u>Name:</u> " + query.name + "</p></div>" : '',
-                dateFieldName = query.query.dateRange && query.query.dateRange.field
-                    ? "<li>Name: " + query.query.dateRange.field + "</li>" : "",
-                startDate = query.query.dateRange && query.query.dateRange.start
-                    ? "<li>Start: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.start) + "</li>" : "",
-                endDate = query.query.dateRange && query.query.dateRange.end
-                    ? "<li>End: " + TimeUtil.UNIXTimeToPrettyDate(query.query.dateRange.end) + "</li>" : "",
-                date = dateFieldName || startDate || endDate
-                    ? "<div class='bg_queryDetails-wrapper'><p><u>Date Field: </u></p><ul>" + dateFieldName + startDate + endDate + "</ul></div>"
-                    : "",
-                searchTerm = query.query.term
-                    ? "<div class='bg_queryDetails-wrapper'><p><u>Search Term:</u> " + query.query.term + "</p></div>" : "",
-                selectedFacets = query.query.selectedFacets ? QueryModel.__getSelectedFacets(query.query.selectedFacets) : "",
-                fieldCategory = query.query.fieldCategory && query.query.fieldCategory.length > 0
-                    ? QueryModel.__getFieldsCategory(query.query.fieldCategory) : "",
-                copyToClipBoardMsn = "<div class='bg__copyToClipboardMSN'>On click copy to clipboard</div>";
-            return queryDetailsHeader + queryName + searchTerm + date + fieldCategory + selectedFacets + copyToClipBoardMsn;
-        } else {
-            return null;
-        }
-    },
-
-	__getSelectedFacets(selectedFacets) {
-        const header = "<div class='bg_queryDetails-wrapper'><p><u>Selected category</u></p><div class='bg__selectedFacet-list'>";
-        let fieldsCategory = null;
-
-        if (selectedFacets) {
-            if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
-                fieldsCategory = header;
-                const keys = Object.keys(selectedFacets);
-                keys.map(k => {
-                    fieldsCategory += "<p>Facet name: " + k + " </p><ul>";
-                    selectedFacets[k].map(facet => {
-                        fieldsCategory += "<li>" + facet + "</li>";
-                    });
-                    fieldsCategory += "</ul>";
-                });
-                fieldsCategory += "</div></div>";
-                return fieldsCategory;
-            }
-            return "";
-        }
-    },
-
-	__getFieldsCategory(fieldCategories) {
-        const header = "<p><u>Fields category</u></p>";
-        let fieldsCategory = null;
-        if (fieldCategories) {
-            fieldsCategory = header + "<ul>";
-            fieldCategories.map(item => fieldsCategory += "<li>" + item.label + "</li>")
-            fieldsCategory += "</ul>";
-            return fieldsCategory;
-        }
-        return null;
-    },
-
     /* --------------------------------- FOR COPYING A QUERY TO THE CLIPBOARD ---------------------------------- */
 
     queryDetailsToClipboard(query) {
@@ -206,37 +145,30 @@ const QueryModel = {
     },
 
     __getSelectedFacetsToClipboard(selectedFacets) {
-        const header = "Selected category\r";
-        let fieldsCategory = null;
-
-        if (selectedFacets) {
-            if(Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
-                fieldsCategory = header;
-                const keys = Object.keys(selectedFacets);
-                keys.map(k => {
-                    fieldsCategory += "Facet name: " + k + " \r";
-                    selectedFacets[k].map(facet => {
-                        fieldsCategory += " " + facet + "\r";
-                    });
-                    fieldsCategory += "\r";
+        if (selectedFacets && Object.keys(selectedFacets).length > 0 && selectedFacets.constructor === Object) {
+        	let text = "Selected facets\r";
+            const keys = Object.keys(selectedFacets);
+            keys.forEach(k => {
+                text += "Facet name: " + k + " \r";
+                selectedFacets[k].map(facet => {
+                    text += " " + facet + "\r";
                 });
-                fieldsCategory += "\r";
-                return fieldsCategory;
-            }
-            return "";
+                text += "\r";
+            });
+            text += "\r";
+            return text;
         }
+        return ''
     },
 
 	__getFieldsCategoryToClipboard(fieldCategories) {
-        const header = "Fields category\r";
-        let fieldsCategory = null;
         if (fieldCategories) {
-            fieldsCategory = header;
-            fieldCategories.map(item => fieldsCategory += " " + item.label + "\r")
-            fieldsCategory += "\r";
-            return fieldsCategory;
+        	let text = "Selected field categories\r";
+            fieldCategories.forEach(item => text += " " + item.label + "\r")
+            text += "\r";
+            return text;
         }
-        return null;
+        return ''
     }
 
 };

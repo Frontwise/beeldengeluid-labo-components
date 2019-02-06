@@ -26,9 +26,12 @@ import HighlightItemDetails from './components/search/HighlightItemDetails';
 import Paging from './components/search/Paging';
 import Sorting from './components/search/Sorting';
 
-import PropTypes from 'prop-types';
 import { initHelp } from './components/workspace/helpers/helpDoc';
+
+import MessageHelper from './components/helpers/MessageHelper';
 import LoadingSpinner from './components/helpers/LoadingSpinner';
+
+import PropTypes from 'prop-types';
 
 class SingleSearchRecipe extends React.Component {
 	constructor(props) {
@@ -81,7 +84,7 @@ class SingleSearchRecipe extends React.Component {
 				//if the query should be taken from cache, load from there
 				initialQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
 				collectionId = initialQuery ? initialQuery.collectionId : null;
-			} else if (this.props.params.queryId.indexOf('__') !== -1 && this.state.activeProject) {
+			} else if (this.props.params.queryId.indexOf('__') !== -1) {
 				loadingFromWorkSpace = true;
 				const tmp = this.props.params.queryId.split('__');
 				if(tmp.length === 2) {
@@ -246,7 +249,8 @@ class SingleSearchRecipe extends React.Component {
         this.setState({
             selectedRows : this.getAlreadySelectedRows(data),
             allRowsSelected: this.areAllRowsSelected(),
-            isSearching: false
+            isSearching: false,
+            isPagingOutOfBounds : data.pagingOutOfBounds === true
         })
 	}
 
@@ -320,12 +324,12 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	//FIXME this function is tied to the function returned by the search component (which is kind of weird, but works)
-	//TODO hiermee verder gaan morgen
+	//FIXME queryId wordt niet meer gebruikt
 	gotoPage(queryId, pageNumber) {
         this.setState({
             isSearching : true
         }, () => {
-            if(this.state.currentOutput) {
+            if(this.state.currentOutput && this.state.currentOutput.query) {
                 const sr = this.state.currentOutput;
 
                 sr.query.offset = (pageNumber-1) * this.state.pageSize;
@@ -1044,6 +1048,16 @@ class SingleSearchRecipe extends React.Component {
 		if(this.state.isSearching) {
 		    loadingMessage = <LoadingSpinner message="Loading results..."/>;
         }
+
+        if(this.state.isPagingOutOfBounds) {
+			resultList = (
+				<div className="col-md-9">
+					<div className="alert alert-danger">
+	            		{MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
+	            	</div>
+	            </div>
+            )
+		}
 
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>

@@ -13,7 +13,6 @@ import TimeUtil from '../../util/TimeUtil';
 //ui controls for assembling queries
 import FieldCategorySelector from './FieldCategorySelector';
 import DateRangeSelector from './DateRangeSelector';
-import AggregationBox from './AggregationBox';
 import AggregationList from './AggregationList';
 
 //visualisations
@@ -22,6 +21,7 @@ import QuerySingleLineChart from '../stats/QuerySingleLineChart';
 
 //simple visual component
 import ReadMoreLink from '../helpers/ReadMoreLink';
+import MessageHelper from '../helpers/MessageHelper';
 
 //third party
 import ReactTooltip from 'react-tooltip';
@@ -122,10 +122,12 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 
 		//reset certain query properties
-		q.selectedFacets = {};
-		//q.dateRange = null;
+		if(this.state.totalHits <= 0) {
+			q.dateRange = null; // only reset when there are no results
+		}
+		q.selectedFacets = {}; //always reset the facets
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || ''; // make sure the term is always a string, otherwise 0 results by default
 
         this.doSearch(q, true);
 	}
@@ -143,7 +145,7 @@ class QueryBuilder extends React.Component {
 		//reset certain query properties
 		q.searchLayers = searchLayers;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -151,14 +153,14 @@ class QueryBuilder extends React.Component {
 	/*---------------------------------- FUNCTION THAT RECEIVES DATA FROM CHILD COMPONENTS --------------------------------------*/
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass === 'AggregationList' || componentClass === 'AggregationBox') {
+		if(componentClass === 'AggregationList') {
 			const q = this.state.query;
 
 			//reset the following query params
 			q.desiredFacets = data.desiredFacets;
 			q.selectedFacets = data.selectedFacets;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 			this.doSearch(q, true);
 		} else if(componentClass === 'DateRangeSelector') {
 			//first delete the old selection from the desired facets
@@ -191,14 +193,14 @@ class QueryBuilder extends React.Component {
 			q.dateRange = data;
 			q.desiredFacets = df;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 
 			this.doSearch(q, true)
 		} else if(componentClass === 'FieldCategorySelector') {
 			const q = this.state.query;
 			q.fieldCategory = data;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value;
+			q.term = this.setSearchTerm.value || '';
 
 			this.doSearch(q, true)
 		}
@@ -210,7 +212,7 @@ class QueryBuilder extends React.Component {
 	gotoPage(pageNumber) {
 		const q = this.state.query;
 		q.offset = (pageNumber-1) * this.props.pageSize;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -220,7 +222,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.sort = sortParams;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -229,7 +231,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.dateRange = null;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value;
+		q.term = this.setSearchTerm.value || '';
 
 		this.doSearch(q, true);
 	}
@@ -408,55 +410,30 @@ class QueryBuilder extends React.Component {
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
-					if(this.props.aggregationView === 'box') {
-						aggrView = (
-							<AggregationBox
-								searchId={this.state.searchId} //for determining when the component should rerender
-								queryId={this.state.query.id}
-								aggregations={this.state.aggregations} //part of the search results
-								desiredFacets={this.state.query.desiredFacets} //as obtained from the collection config
-								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-								collectionConfig={this.props.collectionConfig} //for the aggregation creator only
-								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-							/>
-						)
-					} else { //just show them as a conservative list
-						aggrView = (
-							<AggregationList
-								searchId={this.state.searchId} //for determining when the component should rerender
-								queryId={this.state.query.id} //TODO implement in the list component
-								aggregations={this.state.aggregations} //part of the search results
-                                desiredFacets={this.state.query.desiredFacets}
-								selectedFacets={this.state.query.selectedFacets} //via AggregationBox or AggregationList
-                                collectionConfig={this.props.collectionConfig} //for the aggregation creator only
-								onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-							/>
-						)
-					}
+					aggrView = (
+						<AggregationList
+							searchId={this.state.searchId} //for determining when the component should rerender
+							queryId={this.state.query.id} //TODO implement in the list component
+							aggregations={this.state.aggregations} //part of the search results
+                            desiredFacets={this.state.query.desiredFacets}
+							selectedFacets={this.state.query.selectedFacets}
+                            collectionConfig={this.props.collectionConfig} //for the aggregation creator only
+							onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
+						/>
+					)
 
-                    if (aggrView && this.props.aggregationView === 'box') {
-                        if(aggrView) {
-                            aggregationBox = (
-                                <div className="row">
-                                    <div className="col-md-12">
-                                        {aggrView}
-                                    </div>
-                                </div>
-                            )
-                        }
-                    } else {
-                        aggregationBox = (
-                            <div className="col-md-3 aggregation-list">
-                                {aggrView}
-                            </div>
-                        )
-                    }
+					aggregationBox = (
+						<div className="col-md-3 aggregation-list">
+                            {aggrView}
+                        </div>
+                    )
 
 					// Display the graph only if an option other than the default is selected
 					// and the length of the data is greater than 0.
 					//TODO fix the ugly if/else statements!!
 					if(this.state.query.dateRange && this.state.aggregations[this.state.query.dateRange.field] !== undefined) {
-						//draw a graph
+
+						//draw the time line
 						if(this.props.showTimeLine) {
 							if (this.state.aggregations[this.state.query.dateRange.field].length !== 0) {
 
@@ -501,14 +478,9 @@ class QueryBuilder extends React.Component {
 	                                );
 	                            }
 							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-							    graph = (
-									 <div>
-										 <br/>
-										 <div className="alert alert-danger">No data found for this Date Type Field</div>
-									 </div>
-							    )
+							    graph = MessageHelper.renderNoDocumentsWithDateFieldMessage();
 							}
-						}
+						} //END OF drawing the time line
 
 						//draw the summary stuff
 						if(this.state.aggregations && this.state.query.dateRange.field !== 'null_option') {
@@ -557,8 +529,9 @@ class QueryBuilder extends React.Component {
 									</div>
 		                    	)
 		                    }
-	            		}
-					}
+	            		} //END OF drawing the date range summery
+
+					} //END OF THE date range aggregation
 
                     if (this.props.dateRangeSelector && this.props.collectionConfig.getDateFields() != null) {
                     	//draw the date range selector
@@ -594,9 +567,9 @@ class QueryBuilder extends React.Component {
 			            		</div>
 			            	)
 			            }
+                    } //END OF date range selector rendering
 
-                    }
-                }
+                } //END OF the big code block of rendering aggregations
 
                 //draw the overall result statistics
                 const resultStats = (
@@ -609,54 +582,28 @@ class QueryBuilder extends React.Component {
                     </div>
                 );
 
-                if (this.props.aggregationView === 'box') {
-                    resultBlock = (
-                        <div>
-                            {resultStats}
-                            <div className="separator"/>
-                            {dateRangeCrumb}
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {dateRangeSelector}
-                                    {graph}
-                                </div>
-                            </div>
-                            <div className="separator"/>
-                            <div>
-                                <div className="col-md-12">
-                                    {aggregationBox}
-                                    <br/>
-                                </div>
+                //draw the result block
+                resultBlock = (
+                    <div>
+                        {resultStats}
+                        <div className="separator"/>
+                        {dateRangeCrumb}
+                        <div className="row">
+                            <div className="col-md-12">
+                                {dateRangeSelector}
+                                {graph}
                             </div>
                         </div>
-                    )
-                } else {
-                    resultBlock = (
-                        <div>
-                            {resultStats}
-                            <div className="separator"/>
-                            {dateRangeCrumb}
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {dateRangeSelector}
-                                    {graph}
-                                </div>
-                            </div>
-                            <div className="separator"/>
-                            {aggregationBox}
-                        </div>
-                    )
-                }
+                        <div className="separator"/>
+                        {aggregationBox}
+                    </div>
+                )
+
             //if hits is not greater than 0
 			} else if(this.state.searchId != null && this.state.isSearching === false) {
                 resultBlock = (
                     <div className="alert alert-danger">
-                        <span data-for={'__no-query-results'}
-                              data-tip={QueryModel.queryDetailsTooltip(this.state)}
-                              data-html={true}>
-                            There are no results for your search parameters <i className="fa fa-info-circle"/>
-                        </span>
-                        <ReactTooltip place="bottom" id={'__no-query-results'}/>
+                    	{MessageHelper.renderNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
                     </div>
                 );
 			}
@@ -678,8 +625,21 @@ class QueryBuilder extends React.Component {
 								<div className="form-group">
 									<div className="col-sm-6">
 										<div className="input-group">
-											<input type="text" className="form-control" onKeyPress={this.searchFormKeyPressed.bind(this)}
-                                                   id="search_term" defaultValue={typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''} ref={input => (this.setSearchTerm = input)} placeholder="Search"/>
+											<input
+												type="text"
+												id="search_term"
+												className="form-control"
+												placeholder="Search"
+												onKeyPress={
+													this.searchFormKeyPressed.bind(this)
+												}
+												defaultValue={
+													typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''
+												}
+												ref={
+													input => (this.setSearchTerm = input)
+												}
+											/>
 											<span className="input-group-addon btn-effect" onClick={this.newSearch.bind(this)}>
 												{searchIcon}
 											</span>
