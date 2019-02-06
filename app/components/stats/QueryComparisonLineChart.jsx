@@ -82,13 +82,13 @@ class QueryComparisonLineChart extends React.Component {
 
             Object.keys(point).forEach(propt => {
                     if (propt !== 'year') {
-                        let tt = relativeValues[`${propt}`].find(obj => {
+                        let relVal = relativeValues[`${propt}`].find(obj => {
                             return obj.year === point.year
                         });
 
-                        relPoint[`${propt}`] = (tt[`${propt}`] === 0 || point[`${propt}`] === 0
+                        relPoint[`${propt}`] = (relVal[`${propt}`] === 0 || point[`${propt}`] === 0
                             ? 0
-                            : point[`${propt}`] / tt[`${propt}`] * 100
+                            : point[`${propt}`] / relVal[`${propt}`] * 100
                         );
                     }
                 }
@@ -123,7 +123,7 @@ class QueryComparisonLineChart extends React.Component {
         const data = this.props.data || null;
         const promises = Object.keys(data).map(this.getData.bind(this));
         await Promise.all(promises).catch(d => console.log(d)).then(
-            (dataPerQuery) => {
+            dataPerQuery => {
                 let relValues = {};
                 dataPerQuery.forEach( data => {
                     relValues[data.query.id] = ElasticsearchDataUtil.searchResultsToTimeLineData(
@@ -145,15 +145,23 @@ class QueryComparisonLineChart extends React.Component {
                     isSearching: true,
                     viewMode: 'relative'
                 }, () => {
-                if (this.state.relData === null) {
+                    if (this.state.relData === null) {
                         this.processData();
-                    this.layout.classList.add("spinner");
-
-                }
+                        this.layout.classList.add("spinner");
+                    }
                 }
             )
         }
     }
+    getColorIndexes = dataSet => {
+        let indexes = [];
+        Object.keys(dataSet).forEach((k, index) => {
+            if (dataSet[k].data.length > 0) {
+                indexes.push(index)
+            }
+        });
+        return indexes
+    };
 
     getJoinedData = dataSet => {
         /*
@@ -165,16 +173,17 @@ class QueryComparisonLineChart extends React.Component {
          */
         const __endYear = (arrQueryResults, end) => {
             // returns an array with 1 array per query with the years only
-            let arrYearsPerQuery = arrQueryResults.map(arr => arr.map(item => item.year)).map(arr => end(...arr));
+            let arrYearsPerQuery = arrQueryResults[0] === null ? []
+                : arrQueryResults.map(arr => arr.map(item => item.year)).map(arr => end(...arr));
             return end(...arrYearsPerQuery);
         };
         /*
             Gets an object with query info with queryId as key.
             Every object has the data as an array {queryId: 'xxx', year: 'xxxx'}
         */
-        const __getGraphData = dataSet => Object.keys(dataSet).map(k => {
-            return dataSet[k].data
-        });
+        const __getGraphData = dataSet => Object.keys(dataSet)
+            .filter(query => (dataSet[query].data.length !== 0))
+            .map(k => dataSet[k].data);
 
         /*  @returns a year's range.
         // @params: starting year and number of years until the end
@@ -225,6 +234,11 @@ class QueryComparisonLineChart extends React.Component {
         });
 
         let timelineData = null;
+        let colorIndexes = null;
+
+        if(this.props.data) {
+            colorIndexes = this.getColorIndexes(this.props.data);
+        }
         if (this.state.viewMode === 'relative') {
             timelineData = this.state.relData;
         } else {
@@ -261,7 +275,7 @@ class QueryComparisonLineChart extends React.Component {
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
                             />
                         </YAxis>
-                        <Tooltip content={<CustomTooltip  viewMode={this.state.viewMode}/>}/>
+                        <Tooltip content={<CustomTooltip  colorIndexes={colorIndexes} viewMode={this.state.viewMode}/>}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>

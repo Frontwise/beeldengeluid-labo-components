@@ -142,17 +142,12 @@ class QueryComparisonRecipe extends React.Component {
         const random = Math.floor(Math.random() * 1000) + 1;
         const promises = queries.map(query => this.getData(query));
         let queriesData = {};
+        let selectedQueriesWithConfig = [];
         await Promise.all(promises).then(
-            (dataPerQuery) => {
-                let selectedQueriesWithConfig = [];
+            dataPerQuery => {
                 queries.forEach(singleQuery => {
-                    return dataPerQuery.forEach(querySet => {
-                        if(querySet.query.id === singleQuery.query.id){
-                            let tempObj = {...singleQuery};
-                            tempObj.collectionConfig = querySet.collectionConfig;
-                            selectedQueriesWithConfig.push(tempObj);
-                        }
-                    })
+                    singleQuery.collectionConfig = dataPerQuery.find(q => q.query.id === singleQuery.query.id);
+                    selectedQueriesWithConfig.push(singleQuery)
                 });
                 dataPerQuery.map(data => {
                     if(data && data.query) {

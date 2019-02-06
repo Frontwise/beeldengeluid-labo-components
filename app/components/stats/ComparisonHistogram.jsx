@@ -178,6 +178,16 @@ class ComparisonHistogram extends React.Component {
         }
     }
 
+    getColorIndexes = dataSet => {
+        let indexes = [];
+        dataSet.forEach((k, index) => {
+            if (k.aggregations[k.query.dateRange.field].length > 0) {
+                indexes.push(index)
+            }
+        });
+        return indexes
+    };
+
     getStackBars = dataKeys => dataKeys.map((id, index) => (
         <Bar
             isAnimationActive={true}
@@ -192,9 +202,12 @@ class ComparisonHistogram extends React.Component {
         const random = Math.floor(Math.random() * 1000) + 1;
         let bars = null;
         let dataToPrint = null;
-
+        let colorIndexes = null;
         if (this.state.queriesIds) {
             bars = this.getStackBars(this.state.queriesIds);
+        }
+        if(this.props.data) {
+            colorIndexes = this.getColorIndexes(this.props.data);
         }
         if(this.state.viewMode === 'relative') {
             dataToPrint = this.state.relData;
@@ -227,7 +240,7 @@ class ComparisonHistogram extends React.Component {
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
                         <Tooltip
-                            content={<CustomTooltip/>}
+                            content={<CustomTooltip colorIndexes={colorIndexes}/>}
                             viewMode={this.state.viewMode}/>
                         {bars}
                     </BarChart>

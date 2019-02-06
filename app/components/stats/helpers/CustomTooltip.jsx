@@ -33,7 +33,7 @@ export default class CustomTooltip extends React.Component{
                 } else {
                     const point = payload.map((p,index) => {
                             return (
-                                <span style={this.stylings(p)}>Query#{index+1} {p.value ? p.value : 0}</span>
+                                <span style={this.stylings(p)}>Query#{this.props.colorIndexes[index]+1} {p.value ? p.value : 0}</span>
                             )
                         }),
                         labelTotals = payload.length > 1 ? 'Totals' : 'Total',

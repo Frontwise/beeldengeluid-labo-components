@@ -19,7 +19,7 @@ export default class CustomLegend extends React.Component {
                     selectedQueries.map((query, index) => {
                                 queryDetails.push({
                                     "savedQueryName": query.name,
-                                    "collectionTitle": query.collectionConfig.collectionInfo.title,
+                                    "collectionTitle": query.collectionConfig.collectionInfo ? query.collectionConfig.collectionInfo.title : null,
                                     "queryTerm": query.query.term,
                                     "dateRange": query.query.dateRange,
                                     "selectedFacets": query.query.selectedFacets,
