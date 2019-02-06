@@ -427,38 +427,6 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	selectedQuickViewResult(resourceId, selected){
-        var currentSelection = ComponentUtil.getJSONFromLocalStorage("selectedRows") || [];
-        var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
-        for(var i = 0; i < currentSelection.length; i++){
-            if(currentSelection[i]._id === resourceId){
-                foundIndex = i;
-            }
-        }
-        var selectedRows = this.state.selectedRows;
-
-        if(selected && foundIndex === -1){
-            //Case selected (add)
-            var selectionObj = this.state.quickViewFullResult;
-            selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage("user-last-query");
-            currentSelection.push(selectionObj);
-            selectedRows[resourceId] = selected;
-        } else {
-            //Case unselected (remove)
-            if(foundIndex!==-1){
-                currentSelection.splice(foundIndex,1); //Remove the item if it exists
-            }
-            delete selectedRows[resourceId];
-        }
-
-        ComponentUtil.storeJSONInLocalStorage("selectedRows", currentSelection);
-        if(currentSelection.length === 0){
-            this.clearSelectedResources()
-        } else {
-            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
-        }
-	}
-
 	selectBookmarkGroup() {
 		this.setState({
 			showBookmarkModal : true,
@@ -526,6 +494,13 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
+	//called after onComponentOutput of QueryEditor
+	onQuerySaved(project) {
+		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
+			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+		});
+	}
+
 	showBookmarkedItems(){
         this.setState({
             showBookmarkedItems : !this.state.showBookmarkedItems
@@ -547,6 +522,10 @@ class SingleSearchRecipe extends React.Component {
 			awaitingProcess : null
 		});
 	}
+
+	/* ------------------------------------------------------------------------------
+	------------------------------- QUICKVIEW FUNCTIONS --------------------
+	------------------------------------------------------------------------------- */
 
 	showQuickViewModal(result, highlightData, fullResult=null) {
 	    if(!fullResult){
@@ -602,12 +581,12 @@ class SingleSearchRecipe extends React.Component {
 	    this.showQuickViewModal(resultDetailData, highlightData, fullResult=fullResult);
 	}
 
-	onKeyPressedInQuickView(keyCode){
-	    var searchResults = [];
-	    var currentIndex = -1;
-	    var resourceId = null;
-	    var nextResource = null;
-	    var isLastHit = false;
+	onKeyPressedInQuickView(keyCode) {
+	    let searchResults = [];
+	    let currentIndex = -1;
+	    let resourceId = null;
+	    let nextResource = null;
+	    let isLastHit = false;
 	    if(this.state.showBookmarkedItems){
             searchResults = ComponentUtil.getJSONFromLocalStorage('selectedRows');
             currentIndex = searchResults.findIndex(elem => elem._id === this.state.quickViewResult.resourceId);
@@ -615,63 +594,85 @@ class SingleSearchRecipe extends React.Component {
                 currentIndex = this.state.lastUnselectedIndex;
                 resourceId = this.state.lastUnselectedResource;
 
-                nextResource = (searchResults.length) > currentIndex ?
-        	    searchResults[currentIndex] : false;
-
-        	    isLastHit = (currentIndex === searchResults.length)
+                nextResource = searchResults.length > currentIndex ? searchResults[currentIndex] : false;
+        	    isLastHit = currentIndex === searchResults.length;
             } else {
                 resourceId = searchResults[currentIndex]._id;
-                isLastHit = (currentIndex === searchResults.length-1)
+                isLastHit = currentIndex === searchResults.length - 1;
             }
 	    } else {
 	        searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
 	        currentIndex = searchResults.findIndex(elem => elem.resourceId === this.state.quickViewResult.resourceId);
 	        resourceId = searchResults[currentIndex].resourceId;
 
-	        const nextResource = (searchResults.length - 1) > currentIndex ?
-        	searchResults[currentIndex+1] : false;
-        	isLastHit = (currentIndex === searchResults.length-1)
+	        nextResource = searchResults.length - 1 > currentIndex ? searchResults[currentIndex + 1] : false;
+        	isLastHit = currentIndex === searchResults.length - 1
 	    }
 
-	    if(!nextResource){
-	        nextResource = (searchResults.length - 1) > currentIndex ?
-        	    searchResults[currentIndex+1] : false;
+	    if(!nextResource) {
+	        nextResource = searchResults.length - 1 > currentIndex ? searchResults[currentIndex+1] : false;
 	    }
 
     	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
     	const prevResource = currentIndex > 0 ? searchResults[currentIndex-1] : false;
+		const isFirstResource = currentIndex === 0;
 
-		const isFirstResource = (currentIndex === 0);
-
-	    if(keyCode === 39) {
-	        //Next
-	        if(!isLastHit){
+	    if(keyCode === 39) { //Next
+	        if(!isLastHit) {
 	            this.switchQuickViewResult(nextResource);
 	        }
 	    }
-	    if(keyCode === 37) {
-            //Previous
-            if(!isFirstResource){
+	    if(keyCode === 37) { //Previous
+            if(!isFirstResource) {
                 this.switchQuickViewResult(prevResource);
             }
 	    }
-	    if(keyCode === 83) {
-	        //S(elected)
+	    if(keyCode === 83) { //Selected
 	        var currentSelection = this.state.selectedRows;
 	        var selected = true;
-	        if (resourceId in currentSelection){
+	        if (resourceId in currentSelection) {
 	            selected = false;
 	        }
 	        this.selectedQuickViewResult(resourceId, selected);
 	    }
 	}
 
-	//called after onComponentOutput of QueryEditor
-	onQuerySaved(project) {
-		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
-		});
+	//FIXME this relies heavily on the local storage and not so much the state
+	selectedQuickViewResult(resourceId, selected) {
+        var currentSelection = ComponentUtil.getJSONFromLocalStorage("selectedRows") || [];
+        var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
+        for(var i = 0; i < currentSelection.length; i++){
+            if(currentSelection[i]._id === resourceId){
+                foundIndex = i;
+            }
+        }
+        //var selectedRows = this.state.selectedRows;
+
+        if(selected && foundIndex === -1){
+            //Case selected (add)
+            var selectionObj = this.state.quickViewFullResult;
+            selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage("user-last-query");
+            currentSelection.push(selectionObj);
+            //selectedRows[resourceId] = selected;
+        } else {
+            //Case unselected (remove)
+            if(foundIndex!==-1){
+                currentSelection.splice(foundIndex,1); //Remove the item if it exists
+            }
+            //delete selectedRows[resourceId];
+        }
+
+        ComponentUtil.storeJSONInLocalStorage("selectedRows", currentSelection);
+        if(currentSelection.length === 0){
+            this.clearSelectedResources()
+        } else {
+            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
+        }
 	}
+
+	/* ------------------------------------------------------------------------------
+	------------------------------- FINALLY RENDER IT ALL ---------------------------
+	------------------------------------------------------------------------------- */
 
 	render() {
 		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
