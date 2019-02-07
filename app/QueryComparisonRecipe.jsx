@@ -191,6 +191,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     compareQueries(selection) {
+        this.layout.classList.add("spinner")
         this.processData(selection)
     }
 

@@ -24,7 +24,6 @@ class SortTable extends React.PureComponent {
             selection: [],
             sort: this.props.defaultSort
         };
-        this.onSelectQuery = this.props.onSelectQuery;
     }
 
     //update the state when receiving new props
@@ -34,6 +33,13 @@ class SortTable extends React.PureComponent {
                 items: this.props.onSort(nextProps.items, this.state.sort),
                 selection: []
             });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if(prevState.selection !== this.state.selection && this.props.onSelectQuery) {
+            console.log(this.props)
+            this.props.onSelectQuery(this.state.selection);
         }
     }
 
