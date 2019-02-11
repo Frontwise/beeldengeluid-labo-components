@@ -56,13 +56,13 @@ class SearchHit extends React.Component {
         	).join('')
         	html += '</ul>';
     	}
-    	let bodyCount = 0;    	
+    	let bodyCount = 0;
     	if(this.props.bookmark.annotations) {
     		bodyCount += this.props.bookmark.annotations.length
-    		
+
     	}
     	if(this.props.bookmark.segments) {
-    		this.props.bookmark.segments.forEach(segment => bodyCount += segment.annotations ? segment.annotations.length : 0)    		
+    		this.props.bookmark.segments.forEach(segment => bodyCount += segment.annotations ? segment.annotations.length : 0)
     	}
     	html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
         return html;
@@ -76,8 +76,14 @@ class SearchHit extends React.Component {
 
 	render() {
 		const result = this.props.resultDetailData;
+		//FIXME make sure that this snippet already contains the hightlight data!
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
-		snippet['highlights'] = this.props.highlightData[0];
+
+		//assign the highlight data to the snippet for the SearchSnippet component
+		snippet['highlights'] = {}
+		if(this.props.highlightData && this.props.highlightData[0]) {
+			snippet['highlights'] = this.props.highlightData[0];
+		}
 		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
