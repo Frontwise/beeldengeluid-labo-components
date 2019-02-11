@@ -522,6 +522,7 @@ class CollectionConfig {
 	}
 
 	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
+	//FIXME in some case this yields the duplicate highlights! (search for: "smakelijk eten", it occurs in the first 10 results)
 	getHighlights(result, searchTerm, snippetsForFields=null, baseField = null) {
         let highlights = 0;
 

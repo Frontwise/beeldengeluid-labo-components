@@ -22,7 +22,7 @@ import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
 import SearchHit from './components/search/SearchHit';
 import ItemDetails from './components/search/ItemDetails';
-import HighlightItemDetails from './components/search/HighlightItemDetails';
+import HighlightOverview from './components/search/HighlightOverview';
 import Paging from './components/search/Paging';
 import Sorting from './components/search/Sorting';
 
@@ -793,7 +793,7 @@ class SingleSearchRecipe extends React.Component {
 					    lastUnselectedIndex={lastUnselectedIndex}
 					    previewMode={true}
 					/>
-					<HighlightItemDetails data={this.state.quickViewHighlights}/>
+					<HighlightOverview data={this.state.quickViewHighlights}/>
 				</FlexModal>
 		    )
 		}

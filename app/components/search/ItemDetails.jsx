@@ -3,6 +3,7 @@ import MetadataTablePreview from './MetadataTablePreview';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 
+//FIXME remove the paging buttons from this component and check out the weird preview option
 class ItemDetails extends React.Component {
 
 	constructor(props) {
@@ -77,7 +78,7 @@ class ItemDetails extends React.Component {
 
         //{previousResourceBtn}&nbsp;{bookmarkBtn} Select result&nbsp;{nextResourceBtn}
         return (
-        	<form class="form-inline">
+        	<form className="form-inline">
         		<div className="navigation-bar">
 		            <div className="checkbox">
 						<label>
