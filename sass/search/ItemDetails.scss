@@ -1,7 +1,14 @@
 .bg__item-details { /* ItemDetails.jsx */
-	.bg__itd__media-player {
+	.media-player {
 		img {
 			max-width:100%;
+		}
+	}
+	.navigation-bar {
+		float:right;
+		margin: 0px 10px 20px 0px;
+		&> .checkbox, button {
+			margin-right:10px;
 		}
 	}
 }

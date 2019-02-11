@@ -35,17 +35,17 @@ class ItemDetails extends React.Component {
     		return null;
     	}
 
-    	var currentIndex = -1;
-    	var prevResource = false;
-    	var nextResource = false;
-    	var resourceId = null;
-    	var isLastHit = false;
+    	let currentIndex = -1;
+    	let prevResource = false;
+    	let nextResource = false;
+    	let resourceId = null;
+    	let isLastHit = false;
 
     	if(this.props.showSelection){
             //The user only sees his selection. Get the current, next and previous selected search result
             currentIndex = selectedRows.findIndex(elem => elem._id === this.props.data.resourceId);
 
-            if(currentIndex === -1){
+            if(currentIndex === -1) {
                 //In case the user deselected the current resource...
                 currentIndex = this.props.lastUnselectedIndex;
                 resourceId = this.props.lastUnselectedResource;
@@ -75,29 +75,24 @@ class ItemDetails extends React.Component {
     	}
         const isFirstResource = (currentIndex <= 0);
 
-        const previousResourceBtn = (
-            <button className="btn btn-primary" disabled={isFirstResource}
-                    onClick={this.gotoItemDetails.bind(this, prevResource)}>
-                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
-            </button>
-        );
-        const nextResourceBtn = (
-            <button className="btn btn-primary" disabled={isLastHit}
-                    onClick={this.gotoItemDetails.bind(this, nextResource)}>
-                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
-            </button>
-        );
-        const bookmarkBtn = (
-            <input type="checkbox"
-                className="btn btn-primary"
-                checked={this.props.selected}
-                onChange={this.gotoBookmark.bind(this)}
-                label="Control the bookmark groups this resource is associated with">
-            </input>
-		);
-
+        //{previousResourceBtn}&nbsp;{bookmarkBtn} Select result&nbsp;{nextResourceBtn}
         return (
-        	<span width="100%">{previousResourceBtn}&nbsp;{bookmarkBtn} Select result&nbsp;{nextResourceBtn}</span>
+        	<form class="form-inline">
+        		<div className="navigation-bar">
+		            <div className="checkbox">
+						<label>
+							<input type="checkbox" checked={this.props.selected} onChange={this.gotoBookmark.bind(this)}/>
+							&nbsp;Select item
+						</label>
+					</div>
+		            <button className="btn btn-primary"	disabled={isFirstResource} onClick={this.gotoItemDetails.bind(this, prevResource)}>
+		                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
+					</button>
+					<button className="btn btn-primary" disabled={isLastHit} onClick={this.gotoItemDetails.bind(this, nextResource)}>
+		                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
+		            </button>
+	        	</div>
+	        </form>
         )
     }
 
@@ -140,7 +135,7 @@ class ItemDetails extends React.Component {
 				}
 
 				return (
-					<div key={'media__' + index} className={IDUtil.cssClassName('media-player', this.CLASS_PREFIX)}>
+					<div key={'media__' + index} className="media-player">
 						{mediaPlayer}
 					</div>
 				);
@@ -155,13 +150,15 @@ class ItemDetails extends React.Component {
 			);
 		}
 		if(this.props.previewMode) {
-          return (
-                    <div className={IDUtil.cssClassName('item-details')}>
-                        <div className="col-md-12">{this.renderResultListPagingButtons()}</div><br></br>
-                        <h4>Metadata</h4>
-                        <MetadataTablePreview data={this.props.data}/>
-                    </div>
-          )
+			return (
+	            <div className={IDUtil.cssClassName('item-details')}>
+	                <div className="col-md-12">
+	                	{this.renderResultListPagingButtons()}
+	                </div>
+	                <h4>Metadata</h4>
+	                <MetadataTablePreview data={this.props.data}/>
+	            </div>
+          	)
 		}
 		return (
 			<div className={IDUtil.cssClassName('item-details')}>
