@@ -1,4 +1,5 @@
 //Generic functions for UI components
+import CollectionUtil from './CollectionUtil';
 
 const ComponentUtil = {
 
@@ -126,6 +127,35 @@ const ComponentUtil = {
             return number.toLocaleString()
         }
 		return number;
+    },
+
+    /*---------------------------------------------------------------------------------------
+    * ------------------------- CONVERTING RAW SEARCH RESULTS AND STORED SELECTED RESULTS ----
+    ------------------------------------------------------------------------------------------ */
+
+    convertRawSelectedData(rawSelectData, clientId, user) {
+		const collectionClass = CollectionUtil.getCollectionClass(
+			clientId, user, rawSelectData._index, true
+		);
+		const collectionConfig = new collectionClass(
+			clientId, user, rawSelectData._index
+		);
+		return ComponentUtil.convertRawSearchResult(rawSelectData, collectionConfig, rawSelectData.query)
+    },
+
+    convertRawSearchResult(rawData, collectionConfig, query) {
+    	const searchTerm = query ? query.term : '';
+        const highlightData = collectionConfig.getHighlights(rawData["_source"], searchTerm);
+        const dateField = query && query.dateRange ? query.dateRange.field : null;
+		const formattedData = collectionConfig.getItemDetailData(rawData, dateField);
+		return {
+			rawData : rawData,
+			formattedData : formattedData,
+			searchTerm : searchTerm,
+			dateField : dateField,
+			highlightData : highlightData,
+			collectionConfig : collectionConfig
+		}
     }
 
 };

@@ -13,8 +13,10 @@ class ItemDetails extends React.Component {
 		};
 	}
 
-	gotoItemDetails(resource) {
-	    this.props.onSwitchQuickViewResult(resource, this.props.highlightData);
+	moveQuickViewResource(moveNext) {
+		if(this.props.moveQuickViewResource && typeof this.props.moveQuickViewResource === 'function') {
+			this.props.moveQuickViewResource(moveNext);
+		}
 	}
 
 	//FIXME there is a bug that you have to click twice on the checkbox for it to work
@@ -28,54 +30,8 @@ class ItemDetails extends React.Component {
 
 	//only render when coming from the single search recipe (checking this.props.param.bodyClass == noHeader)
     renderResultListPagingButtons() {
-        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
-    	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
-    	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
-    	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
-
-    	if(!userLastQuery || !searchResults || !queryOutput) {
-    		return null;
-    	}
-
-    	let currentIndex = -1;
-    	let prevResource = false;
-    	let nextResource = false;
-    	let resourceId = null;
-    	let isLastHit = false;
-
-    	if(this.props.showSelection){
-            //The user only sees his selection. Get the current, next and previous selected search result
-            currentIndex = selectedRows.findIndex(elem => elem._id === this.props.data.resourceId);
-
-            if(currentIndex === -1) {
-                //In case the user deselected the current resource...
-                currentIndex = this.props.lastUnselectedIndex;
-                resourceId = this.props.lastUnselectedResource;
-
-                nextResource = (selectedRows.length) > currentIndex ?
-                    selectedRows[currentIndex] : false;
-
-                isLastHit = (currentIndex === selectedRows.length);
-            } else {
-                resourceId = selectedRows[currentIndex].resourceId;
-                nextResource = (selectedRows.length - 1) > currentIndex ?
-                selectedRows[currentIndex+1] : false;
-                isLastHit = (currentIndex === selectedRows.length-1);
-            }
-            prevResource = currentIndex > 0 ? selectedRows[currentIndex-1] : false;
-
-    	} else {
-    	    //Just get the current, next and previous search result
-    	    currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.data.resourceId);
-
-    	    resourceId = searchResults[currentIndex].resourceId;
-            prevResource = currentIndex > 0 ? searchResults[currentIndex-1] : false;
-            nextResource = (searchResults.length - 1) > currentIndex ?
-                searchResults[currentIndex+1] : false;
-
-            isLastHit = (currentIndex === searchResults.length-1);
-    	}
-        const isFirstResource = (currentIndex <= 0);
+     	let isFirstResource = false; //TODO fill these variables
+     	let isLastHit = false; //TODO fill these variables
 
         return (
     		<div className="navigation-bar">
@@ -85,10 +41,10 @@ class ItemDetails extends React.Component {
 						&nbsp;Select item
 					</label>
 				</div>
-	            <button className="btn btn-primary"	disabled={isFirstResource} onClick={this.gotoItemDetails.bind(this, prevResource)}>
+	            <button className="btn btn-primary"	disabled={isFirstResource} onClick={this.moveQuickViewResource.bind(this, false)}>
 	                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
 				</button>
-				<button className="btn btn-primary" disabled={isLastHit} onClick={this.gotoItemDetails.bind(this, nextResource)}>
+				<button className="btn btn-primary" disabled={isLastHit} onClick={this.moveQuickViewResource.bind(this, true)}>
 	                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
 	            </button>
         	</div>
@@ -128,9 +84,6 @@ class ItemDetails extends React.Component {
 							Your browser does not support the video element
 						</video>
 					)
-					//deze zou video moeten hebben:
-					//https://easy.dans.knaw.nl/oai/?verb=GetRecord&identifier=oai:easy.dans.knaw.nl:easy-dataset:60508&uniqueMetadataPrefix=oai_dc
-					//in ES: nederlandse-oud-gevangenen-van-kamp-buchenwald
 				}
 
 				return (

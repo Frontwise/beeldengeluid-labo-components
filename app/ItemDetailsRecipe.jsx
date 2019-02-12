@@ -804,28 +804,46 @@ class ItemDetailsRecipe extends React.Component {
 		return null;
 	}
 
-    saveResultsDetailsData(data, sr, nextResultSet) {
+    saveResultsDetailsData(data, query, nextResultSet) {
+    	//store the RAW search results in the local storage...
         ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', data);
+
+        //also make sure the last query is stored...
         ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query);
-        const detailResults = data.results.map((result, index) => {
-            return this.state.collectionConfig.getItemDetailData(data.results[index],
-                sr.dateRange && sr.dateField
-                    ? sr.dateRange.dateField : null);
+
+        //store all of the FORMATTED search results in the local storage...
+        const formattedResults = data.results.map((result, index) => {
+            return this.state.collectionConfig.getItemDetailData(
+            	data.results[index],
+                query.dateRange && query.dateField ? query.dateRange.dateField : null
+			);
         });
-        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
-        const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', formattedResults);
+
+
+        //FIXME this does not make any sense, this data is already available in formattedResults
+        //const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
         if(nextResultSet) {
-            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[0], this.props.params.st);
+            FlexRouter.gotoItemDetails(
+            	this.props.recipe.url.substr(1), formattedResults[0], this.props.params.st
+            );
         } else {
-            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[result.length-1], this.props.params.st);
+			FlexRouter.gotoItemDetails(
+				this.props.recipe.url.substr(1), formattedResults[formattedResults.length - 1], this.props.params.st
+			);
         }
     }
 
     getResource(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
         if(currentQueryOutput) {
-            const sr = lastQuery;
-            sr.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
-            SearchAPI.search(sr, this.state.collectionConfig, data => this.saveResultsDetailsData(data, sr, nextResourceSet), true)
+            const query = lastQuery;
+            query.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
+            SearchAPI.search(
+            	query,
+            	this.state.collectionConfig,
+            	data => this.saveResultsDetailsData(data, query, nextResourceSet),
+            	true
+            )
         }
     }
 

@@ -12,8 +12,8 @@ class HighlightOverview extends React.Component {
 
 	render() {
 	    let table = (<p>No highlights in metadata</p>);
-	    if(this.props.data) {
-            const rows = Object.keys(this.props.data).map((key) => {
+	    if(this.props.data && typeof this.props.data === 'object' && Object.keys(this.props.data).length > 0) {
+    		const rows = Object.keys(this.props.data).map((key) => {
             	return this.props.data[key].map(highlight => {
             		return (
             			<tr>

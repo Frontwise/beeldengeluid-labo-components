@@ -36,8 +36,8 @@ class SearchHit extends React.Component {
 		e.stopPropagation();
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
-				resourceId : this.props.result._id,
-				resource : this.props.result,
+				resourceId : this.props.rawResult._id,
+				resource : this.props.rawResult, //this is the raw resource
 				selected : !this.props.isSelected,
 				collectionConfig : this.props.collectionConfig
 			})
@@ -68,9 +68,9 @@ class SearchHit extends React.Component {
         return html;
     }
 
-    onQuickView(){
-        if(this.props.onQuickView){
-            this.props.onQuickView(this.props.resultDetailData, this.props.highlightData);
+    onQuickView() {
+        if(this.props.onQuickView) {
+            this.props.onQuickView(this.props.rawResult);
         }
     }
 
@@ -88,7 +88,6 @@ class SearchHit extends React.Component {
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
 		const modalID = this.safeModalId(result.resourceId);
-		//let modal = null;
 		let bookmarkIcon = null;
 
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
@@ -126,7 +125,7 @@ class SearchHit extends React.Component {
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
-		if(visitedItems && visitedItems.find(item => item === this.props.result._id)) {
+		if(visitedItems && visitedItems.find(item => item === this.props.rawResult._id)) {
             classNames.push('visitedItem')
 		}
 
