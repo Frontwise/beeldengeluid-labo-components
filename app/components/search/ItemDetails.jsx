@@ -8,20 +8,21 @@ class ItemDetails extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.CLASS_PREFIX = 'itd';
-
 		this.state = {
 		    selected: this.props.initialSelected
 		};
 	}
 
-	gotoItemDetails(resource){
+	gotoItemDetails(resource) {
 	    this.props.onSwitchQuickViewResult(resource, this.props.highlightData);
 	}
 
-	gotoBookmark(){
+	//FIXME there is a bug that you have to click twice on the checkbox for it to work
+	gotoBookmark() {
 	    var selected = !this.state.selected;
-        this.props.onSelected(this.props.data.resourceId, selected)
+	    if(this.props.onSelected && typeof this.props.onSelected === 'function') {
+        	this.props.onSelected(this.props.data.resourceId, selected)
+        }
 	    this.setState({selected: selected});
 	}
 
@@ -76,24 +77,21 @@ class ItemDetails extends React.Component {
     	}
         const isFirstResource = (currentIndex <= 0);
 
-        //{previousResourceBtn}&nbsp;{bookmarkBtn} Select result&nbsp;{nextResourceBtn}
         return (
-        	<form className="form-inline">
-        		<div className="navigation-bar">
-		            <div className="checkbox">
-						<label>
-							<input type="checkbox" checked={this.props.selected} onChange={this.gotoBookmark.bind(this)}/>
-							&nbsp;Select item
-						</label>
-					</div>
-		            <button className="btn btn-primary"	disabled={isFirstResource} onClick={this.gotoItemDetails.bind(this, prevResource)}>
-		                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
-					</button>
-					<button className="btn btn-primary" disabled={isLastHit} onClick={this.gotoItemDetails.bind(this, nextResource)}>
-		                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
-		            </button>
-	        	</div>
-	        </form>
+    		<div className="navigation-bar">
+	            <div className="checkbox">
+					<label>
+						<input type="checkbox" checked={this.props.selected} onChange={this.gotoBookmark.bind(this)}/>
+						&nbsp;Select item
+					</label>
+				</div>
+	            <button className="btn btn-primary"	disabled={isFirstResource} onClick={this.gotoItemDetails.bind(this, prevResource)}>
+	                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
+				</button>
+				<button className="btn btn-primary" disabled={isLastHit} onClick={this.gotoItemDetails.bind(this, nextResource)}>
+	                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
+	            </button>
+        	</div>
         )
     }
 

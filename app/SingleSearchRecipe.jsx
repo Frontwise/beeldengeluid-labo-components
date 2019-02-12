@@ -529,7 +529,7 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	showQuickViewModal(result, highlightData, fullResult=null) {
-	    if(!fullResult){
+	    if(!fullResult) {
 	        var currentQueryOutput = ComponentUtil.getJSONFromLocalStorage("currentQueryOutput");
 
             for(var i = 0; i < currentQueryOutput.results.length; i++){
@@ -566,6 +566,33 @@ class SingleSearchRecipe extends React.Component {
 			);
 	    }
 	    this.showQuickViewModal(resultDetailData, highlightData, fullResult);
+	}
+
+	selectedQuickViewResult(resourceId, selected) {
+        var currentSelection = ComponentUtil.getJSONFromLocalStorage("selectedRows") || [];
+        var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
+        for(var i = 0; i < currentSelection.length; i++){
+            if(currentSelection[i]._id === resourceId){
+                foundIndex = i;
+            }
+        }
+
+        if(selected && foundIndex === -1) { //Case selected (add)
+            var selectionObj = this.state.quickViewFullResult;
+            selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage("user-last-query");
+            currentSelection.push(selectionObj);
+        } else { //Case unselected (remove)
+            if(foundIndex!==-1 ){
+                currentSelection.splice(foundIndex,1); //Remove the item if it exists
+            }
+        }
+
+        ComponentUtil.storeJSONInLocalStorage("selectedRows", currentSelection);
+        if(currentSelection.length === 0) {
+            this.clearSelectedResources()
+        } else {
+            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
+        }
 	}
 
 	onKeyPressedInQuickView(keyCode) {
@@ -622,33 +649,6 @@ class SingleSearchRecipe extends React.Component {
 	        }
 	        this.selectedQuickViewResult(resourceId, selected);
 	    }
-	}
-
-	selectedQuickViewResult(resourceId, selected) {
-        var currentSelection = ComponentUtil.getJSONFromLocalStorage("selectedRows") || [];
-        var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
-        for(var i = 0; i < currentSelection.length; i++){
-            if(currentSelection[i]._id === resourceId){
-                foundIndex = i;
-            }
-        }
-
-        if(selected && foundIndex === -1) { //Case selected (add)
-            var selectionObj = this.state.quickViewFullResult;
-            selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage("user-last-query");
-            currentSelection.push(selectionObj);
-        } else { //Case unselected (remove)
-            if(foundIndex!==-1 ){
-                currentSelection.splice(foundIndex,1); //Remove the item if it exists
-            }
-        }
-
-        ComponentUtil.storeJSONInLocalStorage("selectedRows", currentSelection);
-        if(currentSelection.length === 0) {
-            this.clearSelectedResources()
-        } else {
-            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
-        }
 	}
 
 	/* ------------------------------------------------------------------------------

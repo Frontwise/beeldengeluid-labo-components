@@ -1,5 +1,60 @@
 const RegexUtil = {
 
+    highlightText(text, searchTerm) {
+        if(text === null || !searchTerm) {
+            return text;
+        }
+        return text.replace(
+            RegexUtil.generateRegexForSearchTerm(searchTerm), (term) => "<span class='highLightText'>" + term + "</span>"
+        )
+    },
+
+    // maxWords is not always honored. When a searchterm with quotes is longer than maxWords the whole quoted match will be returned.
+    // maxWords is used as a "number of words to the left and right" of the matched term
+    // FIXME if there are multiple matches, but all in a single phrase, this should only return one snippet per phrase!
+    generateHighlightedText(text, searchTerm, maxWords=4) {
+        const snippets = [];
+        let regex = null;
+        let matches = null;
+        text = text.toString().replace(/\r?\n|\r/g, " "); //dit haalt enters eruit neem ik aan?
+        if(searchTerm && text) {
+            regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
+            matches = text.match(regex);
+        }
+        if(matches) {
+            let startIndex = 0;
+            matches.forEach(match => {
+                const foundIndex = text.indexOf(match, startIndex);
+                if (foundIndex !== -1) {
+                    //Determine snippet
+                    let begin = RegexUtil.nthIndexRight(text, " ", maxWords + 1, foundIndex); // Searches for the maxWords' space before the match
+                    let end = RegexUtil.nthIndex(text, " ", maxWords, foundIndex + match.length); // Searches for the maxWords' space after the match
+                    let snippet = "";
+
+                    if(begin === -1) {
+                        begin = 0;
+                    }
+                    if(end === -1) {
+                        end = text.length;
+                    }
+                    if(begin > 0) {
+                        snippet += "(...)";
+                    }
+                    snippet += text.substring(begin, end);
+                    if(end < text.length) {
+                        snippet += " (...)";
+                    }
+
+                    snippets.push(RegexUtil.highlightText(snippet, searchTerm));
+
+                    // We can continue searching from here instead of taking the whole array again...
+                    startIndex = foundIndex + 1;
+                }
+            })
+        }
+        return snippets;
+    },
+
     // When updating this please also update _isSmartQuery() in LayeredSearchHandler.py! To exclude these from highlighting!
     generateRegexForSearchTerm(term) {
         let searchTerm = term;
@@ -30,6 +85,32 @@ const RegexUtil = {
         }
         // Join the terms together in an OR, so each term gets highlighted when appearing
         return new RegExp(splitTerms.join("|"), 'gi');
+    },
+
+    //for pruning long descriptions; makes sure to return the snippet that contains the search term
+    //FIXME this function should be merged or removed
+    findFirstHighlightInText(text, searchTerm=null, maxWords=35) {
+        if(!text) {
+            return null;
+        }
+        if(Array.isArray(text)) {
+            text = text.join('\n');
+        }
+        let index = 0;
+        if(searchTerm) {
+            index = text.toLowerCase().search(
+                RegexUtil.generateRegexForSearchTerm(searchTerm)
+            );
+        }
+        index = index > 50 ? index - 50 : 0;
+        text = text.substring(index);
+        let words = text.split(' ');
+        if(words.length > maxWords) {
+            words = words.slice(index == 0 ? 0 : 1, maxWords);
+        } else if(index != 0) {
+            words.splice(0,1);
+        }
+        return words.join(' ')
     },
 
     escapeRegExp(text) {

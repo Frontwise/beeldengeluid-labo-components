@@ -475,52 +475,6 @@ class CollectionConfig {
 		return null
 	}
 
-    // maxWords is not always honored. When a searchterm with quotes is longer than maxWords the whole quoted match will be returned.
-    // maxWords is used as a "number of words to the left and right" of the matched term
-	findMatchesInString(fieldValue, searchTerm, maxWords=4) {
-		const snippets = [];
-	    let regex = null;
-	    let matches = null;
-        fieldValue = fieldValue.toString().replace(/\r?\n|\r/g, " ");
-        if(searchTerm && fieldValue) {
-            regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
-            matches = fieldValue.match(regex);
-        }
-        if(matches) {
-            let startIndex = 0;
-            matches.forEach(match => {
-            	const foundIndex = fieldValue.indexOf(match, startIndex);
-                if (foundIndex !== -1){
-                    //Determine snippet
-                    let begin = RegexUtil.nthIndexRight(fieldValue, " ", maxWords + 1, foundIndex); // Searches for the maxWords' space before the match
-                    let end = RegexUtil.nthIndex(fieldValue, " ", maxWords, foundIndex + match.length); // Searches for the maxWords' space after the match
-                    let snippet = "";
-
-                    if(begin === -1){
-                        begin = 0;
-                    }
-                    if(end === -1){
-                        end = fieldValue.length;
-                    }
-                    if(begin > 0){
-                        snippet += "(...)";
-                    }
-                    snippet += fieldValue.substring(begin, end);
-                    if(end < fieldValue.length) {
-                        snippet += " (...)";
-                    }
-
-                    snippet = snippet.replace(regex, (term) => "<span class='highLightText'>" + term + "</span>");
-                    snippets.push(snippet);
-
-                    // We can continue searching from here instead of taking the whole array again...
-                    startIndex = foundIndex + 1;
-                }
-            })
-	    }
-	    return snippets;
-	}
-
 	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
 	//FIXME in some case this yields the duplicate highlights! (search for: "smakelijk eten", it occurs in the first 10 results)
 	getHighlights(result, searchTerm, snippetsForFields=null, baseField = null) {
@@ -541,7 +495,7 @@ class CollectionConfig {
                     const highlightData = this.getHighlights(value, searchTerm, snippetsForFields, null); // <- recursive call
                     highlights += highlightData[0];
                 } else {
-                    snippets = this.findMatchesInString(value, searchTerm);
+                    snippets = RegexUtil.generateHighlightedText(value, searchTerm);
                     highlights += snippets.length;
                 }
 
@@ -559,6 +513,7 @@ class CollectionConfig {
         }
         return [highlights, snippetsForFields];
 	}
+
 }
 
 export default CollectionConfig;

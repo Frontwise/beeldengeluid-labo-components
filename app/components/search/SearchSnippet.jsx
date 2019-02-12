@@ -23,25 +23,6 @@ class SearchSnippet extends React.Component {
 		return mediaTypes
 	}
 
-    highlightSearchedTerm(text) {
-		if(text === null) {
-		 	return text;
-		}
-		if(this.props.searchTerm){
-            let regex = RegexUtil.generateRegexForSearchTerm(this.props.searchTerm);
-            return text.replace(regex, (term) => "<span class='highLightText'>" + term + "</span>");
-		} else {
-		    return text;
-		}
-	}
-
-//    stripQuotes(str) {
-//    	if(str.startsWith('"') && str.endsWith('"') && str.length > 2) {
-//			return str.substring(1, str.length -1)
-//		}
-//		return str
-//    }
-
     static createMarkup(text){
 		return {__html: text}
 	}
@@ -128,7 +109,7 @@ class SearchSnippet extends React.Component {
         const highlights = this.props.data.highlights;
 
         var subHeading = date;
-        if(date !== ""){
+        if(date !== "") {
             subHeading += " | ";
         }
         subHeading += highlights + " match(es) in metadata |";
@@ -140,15 +121,21 @@ class SearchSnippet extends React.Component {
 				</div>
 				<div  className="media-body">
 					<h4 className="media-heading custom-pointer" title={this.props.data.id}>
-						<span dangerouslySetInnerHTML={SearchSnippet.createMarkup(this.highlightSearchedTerm(title))}/>
+						<span dangerouslySetInnerHTML={SearchSnippet.createMarkup(
+							RegexUtil.highlightText(title, this.props.searchTerm)
+						)}/>
 					</h4>
                     <span className="icons-snippet">{subHeading}
                         &nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}</span>
                     <br />
-					<span className="snippet_description" dangerouslySetInnerHTML={SearchSnippet.createMarkup(
-                        this.highlightSearchedTerm(CollectionUtil.highlightSearchTermInDescription(
-                            this.props.data.description, this.props.searchTerm, 35))
-					)} />
+					<span className="snippet_description" dangerouslySetInnerHTML={
+						SearchSnippet.createMarkup(
+                        	RegexUtil.highlightText(
+                        		RegexUtil.findFirstHighlightInText(this.props.data.description, this.props.searchTerm, 35),
+                        		this.props.searchTerm
+                        	)
+						)
+					}/>
 					{fragmentInfo}
 					{tags}
 				</div>
