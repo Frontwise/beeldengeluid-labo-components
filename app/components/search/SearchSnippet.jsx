@@ -106,13 +106,12 @@ class SearchSnippet extends React.Component {
         const classNames = ['media', IDUtil.cssClassName('search-snippet')];
         const title = this.props.data.title ? this.props.data.title + ' ' : '';
         const date = this.props.data.date ? '(' + this.props.data.date + ')' : '';
-        const highlights = this.props.data.highlights;
 
         var subHeading = date;
         if(date !== "") {
             subHeading += " | ";
         }
-        subHeading += highlights + " match(es) in metadata |";
+        subHeading += this.props.data.numHighlights + " match(es) in metadata |";
 
         return (
 			<div className={classNames.join(' ')}>

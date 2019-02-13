@@ -12,6 +12,7 @@ const RegexUtil = {
     // maxWords is not always honored. When a searchterm with quotes is longer than maxWords the whole quoted match will be returned.
     // maxWords is used as a "number of words to the left and right" of the matched term
     // FIXME if there are multiple matches, but all in a single phrase, this should only return one snippet per phrase!
+    // FIXME in some case this yields the duplicate highlights! (search for: "smakelijk eten", it occurs in the first 10 results)
     generateHighlightedText(text, searchTerm, maxWords=4) {
         const snippets = [];
         let regex = null;

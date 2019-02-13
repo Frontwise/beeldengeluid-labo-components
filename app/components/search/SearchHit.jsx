@@ -80,10 +80,8 @@ class SearchHit extends React.Component {
 		const snippet = this.props.collectionConfig.getResultSnippetData(result);
 
 		//assign the highlight data to the snippet for the SearchSnippet component
-		snippet['highlights'] = {}
-		if(this.props.highlightData && this.props.highlightData[0]) {
-			snippet['highlights'] = this.props.highlightData[0];
-		}
+		snippet['numHighlights'] = this.props.numHighlights;
+
 		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');

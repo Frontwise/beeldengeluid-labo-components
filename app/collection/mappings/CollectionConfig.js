@@ -483,38 +483,30 @@ class CollectionConfig {
 	}
 
 	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
-	//FIXME in some case this yields the duplicate highlights! (search for: "smakelijk eten", it occurs in the first 10 results)
-	//FIXME this returns two things in an array, which is not pure/transparent
-	getHighlights(result, searchTerm, snippetsForFields={}, baseField = null) {
-        let numHighLights = 0;
-        for(let field in result) {
-            if(result.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) === -1) {
-                const value = result[field];
+	getHighlights(obj, searchTerm, aggregatedHighlights={}, baseField = null) {
+        for(let field in obj) {
+            if(obj.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) === -1) {
                 let snippets = [];
-                if (Array.isArray(value)) { // in case the value is a list
-                    const highlightData = this.getHighlights(value, searchTerm, snippetsForFields, field); // <- recursive call
-                    numHighLights += highlightData[0];
-                } else if (typeof value === 'object') { // in case the value is an object
-                    const highlightData = this.getHighlights(value, searchTerm, snippetsForFields, null); // <- recursive call
-                    numHighLights += highlightData[0];
+                if (Array.isArray(obj[field])) { // in case the value is a list
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, field); // <- recursive call
+                } else if (typeof obj[field] === 'object') { // in case the value is an object
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, null); // <- recursive call
                 } else { // finally it's possible to add some snippets
-                    snippets = RegexUtil.generateHighlightedText(value, searchTerm);
-                    numHighLights += snippets.length;
+                    snippets = RegexUtil.generateHighlightedText(obj[field], searchTerm);
                 }
 
-                // Save the snippets in a dictionary
+                //Save the snippets in the aggregatedHighlights object, which is eventually returned to the caller
                 const keyField = baseField ? baseField : field;
-                if(Array.isArray(snippets)) {
-                    if(snippets.length > 0) {
-                        if(!(keyField in snippetsForFields)) {
-                            snippetsForFields[keyField] = [];
-                        }
-                        snippetsForFields[keyField] = snippetsForFields[keyField].concat(snippets);
+                if(snippets.length > 0) {
+                    if(!(keyField in aggregatedHighlights)) {
+                        aggregatedHighlights[keyField] = [];
                     }
+                    aggregatedHighlights[keyField] = aggregatedHighlights[keyField].concat(snippets);
                 }
+
             }
         }
-        return [numHighLights, snippetsForFields];
+        return aggregatedHighlights
 	}
 
 }

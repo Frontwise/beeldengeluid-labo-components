@@ -154,6 +154,7 @@ const ComponentUtil = {
 			searchTerm : searchTerm,
 			dateField : dateField,
 			highlightData : highlightData,
+			numHighlights : Object.keys(highlightData).length !== 0 ? Object.keys(highlightData).reduce((acc, cur) => acc += highlightData[cur].length, 0) : 0,
 			collectionConfig : collectionConfig
 		}
     }

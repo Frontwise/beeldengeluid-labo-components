@@ -528,11 +528,13 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- QUICKVIEW FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
+
+	//TODO just put the quickViewData in the state and remove all the other state properties
 	openQuickViewModal(quickViewData) {
 	    this.setState({
 	        quickViewResult: quickViewData.formattedData, //this is a FORMATTED result
 	        quickViewFullResult: quickViewData.rawData, //this is the RAW result
-	        quickViewHighlights: quickViewData.highlightData[1], //this is an object: (key=field ID, value=list of highlighted snippets)
+	        quickViewHighlights: quickViewData.highlightData, //this is an object: (key=field ID, value=list of highlighted snippets)
 	        showQuickViewModal : true
 	    });
 	}
@@ -882,7 +884,7 @@ class SingleSearchRecipe extends React.Component {
 	                                rawResult={searchHitData.rawData} //contains the RAW data
 	                                resultDetailData={searchHitData.formattedData} //contains the FORMATTED data
 	                                searchTerm={searchHitData.searchTerm} //for highlighting the search term
-	                                highlightData={searchHitData.highlightData}
+	                                numHighlights={searchHitData.numHighlights}
 	                                dateField={searchHitData.dateField} //for displaying the right date field in the hits
 	                                collectionConfig={searchHitData.collectionConfig}
 
@@ -959,7 +961,7 @@ class SingleSearchRecipe extends React.Component {
 								rawResult={searchHitData.rawData}
 								resultDetailData={searchHitData.formattedData}
 								searchTerm={searchHitData.searchTerm} //for highlighting the search term
-								highlightData={searchHitData.highlightData}
+								numHighlights={searchHitData.numHighlights}
 								dateField={searchHitData.dateField}//for displaying the right date field in the hits
 								collectionConfig={searchHitData.collectionConfig}
 
