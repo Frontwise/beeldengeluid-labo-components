@@ -145,7 +145,7 @@ const ComponentUtil = {
 
     convertRawSearchResult(rawData, collectionConfig, query) {
     	const searchTerm = query ? query.term : '';
-        const highlightData = collectionConfig.getHighlights(rawData["_source"], searchTerm);
+        const highlights = collectionConfig.getHighlights(rawData["_source"], searchTerm);
         const dateField = query && query.dateRange ? query.dateRange.field : null;
 		const formattedData = collectionConfig.getItemDetailData(rawData, dateField);
 		return {
@@ -153,8 +153,8 @@ const ComponentUtil = {
 			formattedData : formattedData,
 			searchTerm : searchTerm,
 			dateField : dateField,
-			highlightData : highlightData,
-			numHighlights : Object.keys(highlightData).length !== 0 ? Object.keys(highlightData).reduce((acc, cur) => acc += highlightData[cur].length, 0) : 0,
+			highlights : highlights,
+			numHighlights : Object.keys(highlights).length !== 0 ? Object.keys(highlights).reduce((acc, cur) => acc += highlights[cur].length, 0) : 0,
 			collectionConfig : collectionConfig
 		}
     }

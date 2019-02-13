@@ -532,9 +532,7 @@ class SingleSearchRecipe extends React.Component {
 	//TODO just put the quickViewData in the state and remove all the other state properties
 	openQuickViewModal(quickViewData) {
 	    this.setState({
-	        quickViewResult: quickViewData.formattedData, //this is a FORMATTED result
-	        quickViewFullResult: quickViewData.rawData, //this is the RAW result
-	        quickViewHighlights: quickViewData.highlightData, //this is an object: (key=field ID, value=list of highlighted snippets)
+	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult
 	        showQuickViewModal : true
 	    });
 	}
@@ -561,8 +559,8 @@ class SingleSearchRecipe extends React.Component {
             }
         }
 
-        if(selected && foundIndex === -1) { //Case selected (add)
-            var selectionObj = this.state.quickViewFullResult;
+        if(this.state.quickViewData && selected && foundIndex === -1) { //Case selected (add)
+            var selectionObj = this.state.quickViewData.rawData;
             selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage('user-last-query'); //FIXME why is the query added?????
             currentSelection.push(selectionObj);
         } else { //Case unselected (remove)
@@ -588,7 +586,7 @@ class SingleSearchRecipe extends React.Component {
 	    let isLastHit = false;
 	    if(this.state.showBookmarkedItems) {
             resourceList = ComponentUtil.getJSONFromLocalStorage('selectedRows'); //contains RAW results
-            currentIndex = resourceList.findIndex(elem => elem._id === this.state.quickViewResult.resourceId);
+            currentIndex = resourceList.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId);
             if(currentIndex === -1){
                 currentIndex = this.state.lastUnselectedIndex;
                 resourceId = this.state.lastUnselectedResource;
@@ -601,7 +599,7 @@ class SingleSearchRecipe extends React.Component {
             }
 	    } else {
 	        resourceList = this.state.currentOutput.results; //contains RAW results
-	        currentIndex = resourceList.findIndex(searchResult => searchResult._id === this.state.quickViewResult.resourceId);
+	        currentIndex = resourceList.findIndex(searchResult => searchResult._id === this.state.quickViewData.formattedData.resourceId);
 	        resourceId = resourceList[currentIndex]._id;
 
 	        nextResource = resourceList.length - 1 > currentIndex ? resourceList[currentIndex + 1] : false;
@@ -762,7 +760,7 @@ class SingleSearchRecipe extends React.Component {
 
 		//Modal that shows the quickview of the search result
 		if(this.state.showQuickViewModal) {
-		    const selected = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewResult.resourceId) >= 0;
+		    const selected = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId) >= 0;
 		    const lastUnselectedIndex = this.state.lastUnselectedIndex !== undefined ? this.state.lastUnselectedIndex : -1;
 		    quickViewModal = (
 		        <FlexModal
@@ -770,17 +768,17 @@ class SingleSearchRecipe extends React.Component {
 					stateVariable="showQuickViewModal"
 					owner={this}
 					size="large"
-					title={this.state.quickViewResult.title}
+					title={this.state.quickViewData.formattedData.title}
 					onKeyPressed={this.onKeyPressedInQuickView.bind(this)}>
 					<ItemDetails
 					    moveQuickViewResource={this.moveQuickViewResource.bind(this)}
-					    data={this.state.quickViewResult}// this is a FORMATTED result, so no RAW data
-					    initialSelected={this.state.selectedRows.hasOwnProperty(this.state.quickViewResult.resourceId)}
+					    data={this.state.quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
+					    initialSelected={this.state.selectedRows.hasOwnProperty(this.state.quickViewData.formattedData.resourceId)}
 					    selected={selected} // if the current quick view result is in the stored rows
 					    onSelected={this.onSelectQuickViewResult.bind(this)}
 					    previewMode={true}
 					/>
-					<HighlightOverview data={this.state.quickViewHighlights}/>
+					<HighlightOverview data={this.state.quickViewData.highlights}/>
 				</FlexModal>
 		    )
 		}
