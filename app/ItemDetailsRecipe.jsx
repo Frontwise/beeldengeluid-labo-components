@@ -848,11 +848,12 @@ class ItemDetailsRecipe extends React.Component {
     }
 
     gotoItemDetails(resourceId) {
-        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
-            userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
-            currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput'),
-            pageNumber = currentQueryOutput.currentPage,
-            result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+        const currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+        const pageNumber = currentQueryOutput.currentPage;
+		const result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+
         if (!resourceId) {
             const indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
             if (indexCurrentResource === resultDetailsData.length - 1) {

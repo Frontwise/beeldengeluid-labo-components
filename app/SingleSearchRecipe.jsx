@@ -221,18 +221,6 @@ class SingleSearchRecipe extends React.Component {
 	//TODO figure out if it's bad to update the state
 	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
 	onSearched(data, paging) {
-
-		/*
-        const detailResults = this.state.currentOutput.results.map( (result, index) => {
-            return this.state.collectionConfig.getItemDetailData(
-            	this.state.currentOutput.results[index], //RAW results
-                this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
-                //this.state.currentOutput.query.dateRange ? this.state.currentOutput.query.dateRange.field : null
-			);
-        });
-        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
-        */
-
         const enrichedSearchResults = data.results.map( (result, index) => {
         	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
         })
@@ -309,7 +297,7 @@ class SingleSearchRecipe extends React.Component {
 
 					//just add the formatted search result in the local storage (it is still needed, but should be removed later)
 					//TODO test this!
-        			ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', desiredState.currentResults.filter(er => er.formattedData));
+        			ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', desiredState.currentResults.map(er => er.formattedData));
 
 					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
 				} else if(desiredState.currentOutput == null) {
