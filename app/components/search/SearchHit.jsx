@@ -36,8 +36,8 @@ class SearchHit extends React.Component {
 		e.stopPropagation();
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
-				resourceId : this.props.data.formattedResult.resourceId,
-				resource : this.props.data.rawResult,
+				resourceId : this.props.data.formattedData.resourceId,
+				resource : this.props.data.rawData,
 				selected : !this.props.isSelected
 			})
 		}

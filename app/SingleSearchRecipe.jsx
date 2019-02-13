@@ -221,8 +221,25 @@ class SingleSearchRecipe extends React.Component {
 	//TODO figure out if it's bad to update the state
 	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
 	onSearched(data, paging) {
+
+		/*
+        const detailResults = this.state.currentOutput.results.map( (result, index) => {
+            return this.state.collectionConfig.getItemDetailData(
+            	this.state.currentOutput.results[index], //RAW results
+                this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
+                //this.state.currentOutput.query.dateRange ? this.state.currentOutput.query.dateRange.field : null
+			);
+        });
+        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
+        */
+
+        const enrichedSearchResults = data.results.map( (result, index) => {
+        	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
+        })
+
 		const desiredState = {
 			currentOutput: data,
+			currentResults : enrichedSearchResults, //TODO currently testing this new state variable
             showBookmarkedItems : false
 		};
 		// if search is not the result of paging then clear selectedRows.
@@ -289,6 +306,11 @@ class SingleSearchRecipe extends React.Component {
 					//if there was a valid query, set it in the cache for happy browsing
                     ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', desiredState.currentOutput);
 					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query);
+
+					//just add the formatted search result in the local storage (it is still needed, but should be removed later)
+					//TODO test this!
+        			ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', desiredState.currentResults.filter(er => er.formattedData));
+
 					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
 				} else if(desiredState.currentOutput == null) {
 					//the search was cleared in the query builder, so cache the default query for this collection
@@ -530,7 +552,7 @@ class SingleSearchRecipe extends React.Component {
 
 	openQuickViewModal(quickViewData) {
 	    this.setState({
-	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult
+	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult (or convertRawSelectedData)
 	        showQuickViewModal : true
 	    });
 	}
@@ -924,30 +946,16 @@ class SingleSearchRecipe extends React.Component {
 					</div>
 				);
 
-
-				//FIXME this should be executed after the currentOutput was changed
-				//FIXME also test the more accurate code that is now commented out
-                const detailResults = this.state.currentOutput.results.map( (result, index) => {
-                    return this.state.collectionConfig.getItemDetailData(
-                    	this.state.currentOutput.results[index], //RAW results
-                        this.state.initialQuery.dateRange && this.state.initialQuery.dateRange.dateField ? this.state.initialQuery.dateRange.dateField : null
-                        //this.state.currentOutput.query.dateRange ? this.state.currentOutput.query.dateRange.field : null
-					);
-                });
-
-                ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
-
 				//populate the list of search results
 				if(!this.state.showBookmarkedItems) {
-					searchHits = this.state.currentOutput.results.map((result, index) => {
-						const searchHitData = ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, this.state.currentOutput.query);
-						const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result._id) : null;
-	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result._id) !== undefined;
+					searchHits = this.state.currentResults.map((result, index) => {
+						const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result.formattedData.resourceId) : null;
+	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result.formattedData.resourceId) !== undefined;
 
 						return (
 							<SearchHit
 								key={'__' + index}
-								data={searchHitData}
+								data={result}
 
 								itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
 
