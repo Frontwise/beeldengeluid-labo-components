@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 import FlexRouter from '../../util/FlexRouter';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
@@ -144,6 +146,30 @@ class SearchHit extends React.Component {
 			</div>
 		);
 	}
+}
+
+SearchHit.PropTypes = {
+	//this data is loaded via ComponentUtil.convertRawSearchResult and eventually passed to this component
+	data: PropTypes.shape({
+	    rawData: PropTypes.object.isRequired,
+	    formattedData: PropTypes.object.isRequired,
+	    searchTerm: PropTypes.string.isRequired,
+	    dateField: PropTypes.string.isRequired,
+	    highlights: PropTypes.object.isRequired,
+	    numHighlights: PropTypes.number.isRequired,
+	    collectionConfig: PropTypes.object.isRequired
+	}).isRequired,
+
+	itemDetailsPath : PropTypes.string.isRequired, //which page should the user be directed after clicking this search hit
+
+	bookmark : PropTypes.object, //the bookmark object, containing all information for drawing the bookmark icon & icon tooltip
+
+	isSelected : PropTypes.bool, //whether this hit is selected or not
+
+	onQuickView : PropTypes.func, //what to do when the user clicks the clickview item
+
+	onOutput: PropTypes.func //outputs data to the owner after the user selectes or deselects
+
 }
 
 export default SearchHit;

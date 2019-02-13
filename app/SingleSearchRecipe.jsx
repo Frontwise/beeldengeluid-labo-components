@@ -55,7 +55,7 @@ class SingleSearchRecipe extends React.Component {
 			initialQuery : null, //yikes this is only used for storing the initial query
 
 			//for doing actions on the search results
-			selectedRows : {}, // key = resourceId, value = true/false
+			selectedOnPage : {}, // key = resourceId, value = true/false
 			allRowsSelected : false, // are all search results selected
 			highlightData: {}
 		};
@@ -164,7 +164,7 @@ class SingleSearchRecipe extends React.Component {
 	//this function receives all output of components that generate output and orchestrates where
 	//to pass it to based on the ingredients of the recipe
 	//TODO change this, so it knows what to do based on the recipe
-	onComponentOutput(componentClass, data) {
+	onComponentOutput = (componentClass, data) => {
 		if(componentClass === 'QueryBuilder') {
 			this.onSearched(data);
         } else if (componentClass === 'CollectionSelector') {
@@ -181,12 +181,12 @@ class SingleSearchRecipe extends React.Component {
         } else if(componentClass === 'SearchHit') {
 			if(data) {
 				//get the selected rows on the current page
-                const selectedRows = this.state.selectedRows;
+                const selectedOnPage = this.state.selectedOnPage;
 				//check if the search hit was selected and update the selected rows accordingly
                 if(data.selected) {
-                    selectedRows[data.resourceId] = true;
+                    selectedOnPage[data.resourceId] = true;
                 } else {
-                    delete selectedRows[data.resourceId]
+                    delete selectedOnPage[data.resourceId]
                 }
 
 				// make sure to update the list of stored bookmarks with the changed selection
@@ -196,7 +196,7 @@ class SingleSearchRecipe extends React.Component {
                 const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
 
 				this.setState({
-                    selectedRows : selectedRows,
+                    selectedOnPage : selectedOnPage,
 					allRowsSelected : data.selected ? this.areAllRowsSelected() : false,
                     showBookmarkedItems : selRowsInLocalStorage.length > 0 ? this.state.showBookmarkedItems : false,
 				});
@@ -230,8 +230,8 @@ class SingleSearchRecipe extends React.Component {
 			currentResults : enrichedSearchResults, //TODO currently testing this new state variable
             showBookmarkedItems : false
 		};
-		// if search is not the result of paging then clear selectedRows.
-        !paging ? desiredState.selectedRows = {} : desiredState;
+		// if search is not the result of paging then clear selectedOnPage.
+        !paging ? desiredState.selectedOnPage = {} : desiredState;
 
 		//reset the poster images to the placeholder
 		const imgDefer = document.getElementsByTagName('img');
@@ -253,7 +253,7 @@ class SingleSearchRecipe extends React.Component {
 			this.onLoadPlayoutAccess(true, desiredState);
 		}
         this.setState({
-            selectedRows : this.getAlreadySelectedRows(data),
+            selectedOnPage : this.getAlreadySelectedRows(data),
             allRowsSelected: this.areAllRowsSelected(),
             isSearching: false,
             isPagingOutOfBounds : data.pagingOutOfBounds === true
@@ -296,7 +296,6 @@ class SingleSearchRecipe extends React.Component {
 					ComponentUtil.storeJSONInLocalStorage('user-last-query', desiredState.currentOutput.query);
 
 					//just add the formatted search result in the local storage (it is still needed, but should be removed later)
-					//TODO test this!
         			ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', desiredState.currentResults.map(er => er.formattedData));
 
 					FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
@@ -370,7 +369,7 @@ class SingleSearchRecipe extends React.Component {
 
 	toggleRows(e) {
 		e.preventDefault();
-		let rows = this.state.selectedRows;
+		let rows = this.state.selectedOnPage;
     	const rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
 
         if(this.state.allRowsSelected) {
@@ -392,11 +391,11 @@ class SingleSearchRecipe extends React.Component {
 		}
 		this.setState({
 			allRowsSelected : !this.state.allRowsSelected,
-			selectedRows : rows
+			selectedOnPage : rows
 		});
 	}
 
-    onStartSearch() {
+    onStartSearch = () => {
         this.setState({
             isSearching : true
         })
@@ -427,7 +426,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	//this will first check if a project was selected. Then either bookmarks or opens the project selector first
-	bookmark() {
+	bookmark = () => {
 		if(this.state.activeProject === null) {
 			this.setState({
 				showProjectModal : true,
@@ -484,7 +483,7 @@ class SingleSearchRecipe extends React.Component {
 	onSaveBookmarks() {
 	    this.saveBookmarksToLocalStorage();
 		this.setState({
-			selectedRows : {},
+			selectedOnPage : {},
 			allRowsSelected : false,
             showBookmarkedItems : false
 		}, () => {
@@ -493,7 +492,7 @@ class SingleSearchRecipe extends React.Component {
 		})
 	}
 
-	saveQuery() {
+	saveQuery = () => {
 		if(this.state.activeProject == null) {
 			this.setState({
 				showProjectModal : true,
@@ -512,16 +511,16 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	showBookmarkedItems(){
+	showBookmarkedItems = () => {
         this.setState({
             showBookmarkedItems : !this.state.showBookmarkedItems
         });
     }
 
-    clearSelectedResources() {
+    clearSelectedResources = () => {
 		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows')
         this.setState({
-        	selectedRows : {},
+        	selectedOnPage : {},
         	allRowsSelected : false,
         	showBookmarkedItems : false,
     	});
@@ -538,7 +537,7 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- QUICKVIEW FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-	openQuickViewModal(quickViewData) {
+	openQuickViewModal = quickViewData => {
 	    this.setState({
 	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult (or convertRawSelectedData)
 	        showQuickViewModal : true
@@ -557,7 +556,7 @@ class SingleSearchRecipe extends React.Component {
 
 	//when a user selects a result for the quick view pop-up
 	//TODO also check that this can be simplified
-	onSelectQuickViewResult(resourceId, selected) {
+	onSelectQuickViewResult = (resourceId, selected) => {
         var currentSelection = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
         var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
         for(var i = 0; i < currentSelection.length; i++) {
@@ -580,12 +579,12 @@ class SingleSearchRecipe extends React.Component {
         if(currentSelection.length === 0) {
             this.clearSelectedResources();
         } else {
-            this.setState({selectedRows: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
+            this.setState({selectedOnPage: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
         }
 	}
 
 	//TODO this should also be simplified!! (reading from two different lists)
-	moveQuickViewResource(moveNext) {
+	moveQuickViewResource = moveNext => {
 		let resourceList = [];
 	    let currentIndex = -1;
 	    let resourceId = null;
@@ -629,7 +628,7 @@ class SingleSearchRecipe extends React.Component {
 	    }
 	}
 
-	onKeyPressedInQuickView(keyCode) {
+	onKeyPressedInQuickView = keyCode => {
 	    if(keyCode === 39) { //Next
 	        this.moveQuickViewResource(true);
 	    }
@@ -637,7 +636,7 @@ class SingleSearchRecipe extends React.Component {
             this.moveQuickViewResource(false);
 	    }
 	    if(keyCode === 83) { //Selected
-	        var currentSelection = this.state.selectedRows;
+	        var currentSelection = this.state.selectedOnPage;
 	        var selected = true;
 	        if (resourceId in currentSelection) {
 	            selected = false;
@@ -646,20 +645,221 @@ class SingleSearchRecipe extends React.Component {
 	    }
 	}
 
-	/* ------------------------------------------------------------------------------
-	------------------------------- FINALLY RENDER IT ALL ---------------------------
-	------------------------------------------------------------------------------- */
+	/* -------------------------------- RENDER THE MODALS --------------------------*/
+
+	renderCollectionModal = () => {
+		return (
+			<FlexModal
+				elementId="collection__modal"
+				stateVariable="showModal"
+				owner={this}
+				size="large"
+				title="Choose a collection">
+					<CollectionSelector
+						clientId={this.props.clientId}
+						user={this.props.user}
+						onOutput={this.onComponentOutput}
+						showSelect={true}
+						showBrowser={true}/>
+			</FlexModal>
+		)
+	}
+
+	renderQuickViewModal = () => {
+		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+		const selected = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId) >= 0;
+	    //const lastUnselectedIndex = this.state.lastUnselectedIndex !== undefined ? this.state.lastUnselectedIndex : -1;
+	    return (
+	        <FlexModal
+				elementId="quickview__modal"
+				stateVariable="showQuickViewModal"
+				owner={this}
+				size="large"
+				title={this.state.quickViewData.formattedData.title}
+				onKeyPressed={this.onKeyPressedInQuickView}>
+				<ItemDetails
+				    moveQuickViewResource={this.moveQuickViewResource}
+				    data={this.state.quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
+				    initialSelected={this.state.selectedOnPage.hasOwnProperty(this.state.quickViewData.formattedData.resourceId)}
+				    selected={selected} // if the current quick view result is in the stored rows
+				    onSelected={this.onSelectQuickViewResult}
+				    previewMode={true}
+				/>
+				<HighlightOverview data={this.state.quickViewData.highlights}/>
+			</FlexModal>
+		)
+	}
+
+	renderProjectModal = () => {
+		return (
+			<FlexModal
+				elementId="project__modal"
+				stateVariable="showProjectModal"
+				owner={this}
+				size="large"
+				title="Set the active project">
+					<ProjectSelector onOutput={this.onComponentOutput} user={this.props.user}/>
+			</FlexModal>
+		)
+	}
+
+	renderQueryModal = () => {
+		return (
+			<FlexModal
+				elementId="query__modal"
+				stateVariable="showQueryModal"
+				owner={this}
+				size="large"
+				title="Enter a name for your query">
+					<QueryEditor
+						query={this.state.currentOutput.query}
+						user={this.props.user}
+						project={this.state.activeProject}
+						onOutput={this.onComponentOutput}/>
+			</FlexModal>
+		)
+	}
+
+	renderBookmarkModal = () => {
+		return (
+			<FlexModal
+				elementId="bookmark__modal"
+				stateVariable="showBookmarkModal"
+				owner={this}
+				size="large"
+				title="Select one or more bookmark groups for your selection of resources">
+					<BookmarkSelector
+						onOutput={this.onComponentOutput}
+						user={this.props.user}
+						project={this.state.activeProject}
+						collectionId={this.state.collectionConfig.collectionId}
+						/>
+			</FlexModal>
+		)
+	}
+
+	/* --------------------------- RENDERING LISTS -------------------------------*/
+
+	renderSelectedItems = (result, index) => {
+        const searchHitData = ComponentUtil.convertRawSelectedData(result, this.props.clientId, this.props.user);
+        return (
+            <SearchHit
+                key={'saved__' + index}
+                data={searchHitData}
+                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+                bookmarked={null}
+                isSelected={true}
+                onQuickView={this.openQuickViewModal}
+                onOutput={this.onComponentOutput}
+			/>
+        )
+    }
+
+	renderSearchResults = (result, index) => {
+		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
+		const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result.formattedData.resourceId) : null;
+        const isSelectedItem = storedSelectedRows.find(item => item._id === result.formattedData.resourceId) !== undefined;
+		return (
+			<SearchHit
+				key={'__' + index}
+				data={result}
+				itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
+				bookmark={bookmark}
+				isSelected={isSelectedItem}
+				onQuickView={this.openQuickViewModal}
+				onOutput={this.onComponentOutput}
+			/>
+		)
+	}
+
+	/* ---------------------------- RENDER ACTION BUTTONS ------------------------- */
+
+	renderActionButtons = (storedSelectedRows) => {
+		const actions = [];
+		if(storedSelectedRows && storedSelectedRows.length > 0) {
+            actions.push(
+                <div className="dropdown bookmark-dropdown-menu">
+                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
+                            data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
+                    </button>
+                    <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
+                        <button className="dropdown-item" type="button"
+                            onClick={this.showBookmarkedItems}>
+								{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
+						</button>
+                        <button className="dropdown-item" type="button" onClick={this.bookmark}>
+                        	Bookmark selection
+                        </button>
+                        <button
+							className="dropdown-item"
+							type="button"
+							onClick={this.clearSelectedResources}>
+								Clear selection
+						</button>
+                    </div>
+                </div>
+            );
+		}
+		//always add the save query button
+		actions.push(
+            <button
+                type="button"
+                className="btn btn-primary"
+                onClick={this.saveQuery}
+                title="Save current query to the active project">
+                &nbsp;
+                <i className="fa fa-save" style={{color: 'white'}}/>
+                &nbsp;
+            </button>
+        );
+
+		return (
+			<div className={IDUtil.cssClassName('table-actions', this.CLASS_PREFIX)}>
+				{actions}
+			</div>
+		);
+	}
+
+	/* ---------------------------- RENDER QUERY BUILDER -------------------------- */
+
+	renderQueryBuilder = (collectionId, collectionConfig, initialQuery) => {
+		if(collectionId && collectionConfig) {
+			return (
+				<QueryBuilder
+					key={collectionId} //for resetting all the states held within after selecting a new collection
+					header={true}
+					aggregationView={this.props.recipe.ingredients.aggregationView}
+					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
+					showTimeLine={true}
+					query={initialQuery || QueryModel.ensureQuery(null, collectionConfig) }
+					collectionConfig={collectionConfig}
+					onStartSearch={this.onStartSearch}
+					onOutput={this.onComponentOutput}
+				/>
+			);
+		}
+		return null
+	}
+
+	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
 
 	render() {
 		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
         const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
+
+        // all the different modals
+        const quickViewModal = this.state.showQuickViewModal ? this.renderQuickViewModal() : null;
+        const projectModal = this.state.showProjectModal ? this.renderProjectModal() : null;
+        const queryModal = this.state.showQueryModal ? this.renderQueryModal() : null;
+        const bookmarkModal = this.state.showBookmarkModal ? this.renderBookmarkModal() : null;
+        const collectionModal = this.state.showModal ? this.renderCollectionModal() : null;
+
+		const searchComponent = this.renderQueryBuilder(this.state.collectionId, this.state.collectionConfig, this.state.initialQuery);
+
 		let chooseCollectionBtn = null; // for changing the collection
-		let collectionModal = null; //modal that holds the collection selector
-		let projectModal = null;
-		let quickViewModal = null;
-		let bookmarkModal = null;
-		let queryModal = null;
-		let searchComponent = null; //single search, comparative search or combined search
 
 		//search results, paging and sorting
 		let resultList = null;
@@ -670,9 +870,7 @@ class SingleSearchRecipe extends React.Component {
 		let searchHits = null;
         let loadingMessage = null;
 
-		//for containing the action buttons
-		const actions = [];
-		let actionButtons = null;
+		let actionButtons = this.renderActionButtons(storedSelectedRows);
 		let bookmarkDropDownMenu = null; //added to action buttons, in case there are active selections
 
         if(this.props.recipe.ingredients.collectionSelector) {
@@ -686,25 +884,6 @@ class SingleSearchRecipe extends React.Component {
 					})
 				</button>
 			);
-
-			//collection modal
-			if(this.state.showModal) {
-				collectionModal = (
-					<FlexModal
-						elementId="collection__modal"
-						stateVariable="showModal"
-						owner={this}
-						size="large"
-						title="Choose a collection">
-							<CollectionSelector
-								clientId={this.props.clientId}
-								user={this.props.user}
-								onOutput={this.onComponentOutput.bind(this)}
-								showSelect={true}
-								showBrowser={true}/>
-					</FlexModal>
-				)
-			}
 		}
 
 		// for changing the active project
@@ -714,102 +893,8 @@ class SingleSearchRecipe extends React.Component {
 			</button>
 		);
 
-		//project modal
-		if(this.state.showProjectModal) {
-			projectModal = (
-				<FlexModal
-					elementId="project__modal"
-					stateVariable="showProjectModal"
-					owner={this}
-					size="large"
-					title="Set the active project">
-						<ProjectSelector onOutput={this.onComponentOutput.bind(this)} user={this.props.user}/>
-				</FlexModal>
-			)
-		}
-
-		//bookmark modal
-		if(this.state.showBookmarkModal) {
-			bookmarkModal = (
-				<FlexModal
-					elementId="bookmark__modal"
-					stateVariable="showBookmarkModal"
-					owner={this}
-					size="large"
-					title="Select one or more bookmark groups for your selection of resources">
-						<BookmarkSelector
-							onOutput={this.onComponentOutput.bind(this)}
-							user={this.props.user}
-							project={this.state.activeProject}
-							collectionId={this.state.collectionConfig.collectionId}
-							/>
-				</FlexModal>
-			)
-		}
-
-		//query name modal where the user should enter the name of the query to be saved
-		if(this.state.showQueryModal) {
-			queryModal = (
-				<FlexModal
-					elementId="query__modal"
-					stateVariable="showQueryModal"
-					owner={this}
-					size="large"
-					title="Enter a name for your query">
-						<QueryEditor
-							query={this.state.currentOutput.query}
-							user={this.props.user}
-							project={this.state.activeProject}
-							onOutput={this.onComponentOutput.bind(this)}/>
-				</FlexModal>
-			)
-		}
-
-		//Modal that shows the quickview of the search result
-		if(this.state.showQuickViewModal) {
-		    const selected = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId) >= 0;
-		    const lastUnselectedIndex = this.state.lastUnselectedIndex !== undefined ? this.state.lastUnselectedIndex : -1;
-		    quickViewModal = (
-		        <FlexModal
-					elementId="quickview__modal"
-					stateVariable="showQuickViewModal"
-					owner={this}
-					size="large"
-					title={this.state.quickViewData.formattedData.title}
-					onKeyPressed={this.onKeyPressedInQuickView.bind(this)}>
-					<ItemDetails
-					    moveQuickViewResource={this.moveQuickViewResource.bind(this)}
-					    data={this.state.quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
-					    initialSelected={this.state.selectedRows.hasOwnProperty(this.state.quickViewData.formattedData.resourceId)}
-					    selected={selected} // if the current quick view result is in the stored rows
-					    onSelected={this.onSelectQuickViewResult.bind(this)}
-					    previewMode={true}
-					/>
-					<HighlightOverview data={this.state.quickViewData.highlights}/>
-				</FlexModal>
-		    )
-		}
-
 		//only draw when a collection config is properly loaded
-		if(this.state.collectionId && this.state.collectionConfig) { // && this.state.initialQuery
-
-			//this components outputs: search results, aggregations & sorting & paging functions!
-			searchComponent = (
-				<QueryBuilder
-					key={this.state.collectionId} //for resetting all the states held within after selecting a new collection
-					//UI options not relevant for querying
-					header={true}
-					aggregationView={this.props.recipe.ingredients.aggregationView}
-					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
-					showTimeLine={true}
-
-					query={this.state.initialQuery || QueryModel.ensureQuery(null, this.state.collectionConfig) }
-					collectionConfig={this.state.collectionConfig}
-
-					onStartSearch={this.onStartSearch.bind(this)}
-					onOutput={this.onComponentOutput.bind(this)}/>
-			);
-
+		if(this.state.collectionId && this.state.collectionConfig) {
 
 			//draw the search hits in here, so it's possible to put the linechart in between the search box and the results
 			if(this.state.currentOutput && this.state.currentOutput.results && this.state.currentOutput.results.length > 0) {
@@ -833,7 +918,7 @@ class SingleSearchRecipe extends React.Component {
 						}/>
 				}
 
-				const currentSelectedRows = this.state.selectedRows ? Object.keys(this.state.selectedRows) : []
+				const currentSelectedRows = this.state.selectedOnPage ? Object.keys(this.state.selectedOnPage) : []
 				const currentPage = this.state.currentOutput.results;
                 const allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id));
                 const isChecked = allChecked.findIndex(item => item === -1) === -1;
@@ -850,56 +935,8 @@ class SingleSearchRecipe extends React.Component {
 				//now render the stuff for bookmarking
 				if(storedSelectedRows && storedSelectedRows.length > 0) {
 
-					//render the bookmark dropdown menu
-                    bookmarkDropDownMenu = (
-                            <div className="dropdown bookmark-dropdown-menu">
-                                <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
-                                </button>
-                                <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
-                                    <button className="dropdown-item" type="button"
-                                        onClick={this.showBookmarkedItems.bind(this)}>
-											{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
-									</button>
-                                    <button className="dropdown-item" type="button" onClick={this.bookmark.bind(this)}>Bookmark selection</button>
-                                    <button
-										className="dropdown-item"
-										type="button"
-										onClick={this.clearSelectedResources.bind(this)}>
-											Clear selection
-									</button>
-                                </div>
-                            </div>
-
-                    );
-                    actions.push(bookmarkDropDownMenu);
-
 					//if the user wants to see the selection list, instead of the search results
                     if (this.state.showBookmarkedItems) {
-						//populate the list of selected bookmarks/resources
-	                    const selectedSearchHits = storedSelectedRows.map((result, index) => {
-                            const searchHitData = ComponentUtil.convertRawSelectedData(result, this.props.clientId, this.props.user);
-
-	                        return (
-	                            <SearchHit
-	                                key={'saved__' + index}
-
-	                                data={searchHitData}
-
-	                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-
-	                                bookmarked={null}
-	                                isSelected={true}
-
-	                                onQuickView={this.openQuickViewModal.bind(this)}
-	                                onOutput={this.onComponentOutput.bind(this)}
-
-								/>
-	                        )
-	                    }, this);
-
                         bookmarkingContainer = (
                             <div
                                 className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
@@ -908,53 +945,16 @@ class SingleSearchRecipe extends React.Component {
                                     <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
                                 </h4>
                                 <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
-                                    {selectedSearchHits}
+                                    {storedSelectedRows.map(this.renderSelectedItems)}
                                 </div>
                             </div>
                         );
                     }
 				}
 
-                //always add the save query button
-                actions.push(
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={this.saveQuery.bind(this)}
-                        title="Save current query to the active project">
-                        &nbsp;
-                        <i className="fa fa-save" style={{color: 'white'}}/>
-                        &nbsp;
-                    </button>
-                );
-
-				actionButtons = (
-					<div className={IDUtil.cssClassName('table-actions', this.CLASS_PREFIX)}>
-						{actions}
-					</div>
-				);
-
 				//populate the list of search results
 				if(!this.state.showBookmarkedItems) {
-					searchHits = this.state.currentResults.map((result, index) => {
-						const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result.formattedData.resourceId) : null;
-	                    const isSelectedItem = storedSelectedRows.find(item => item._id === result.formattedData.resourceId) !== undefined;
-
-						return (
-							<SearchHit
-								key={'__' + index}
-								data={result}
-
-								itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
-
-								bookmark={bookmark}
-								isSelected={isSelectedItem}
-
-								onQuickView={this.openQuickViewModal.bind(this)}
-								onOutput={this.onComponentOutput.bind(this)}
-							/>
-						)
-					}, this)
+					searchHits = this.state.currentResults.map(this.renderSearchResults);
 				}
 
                 resultList = (
