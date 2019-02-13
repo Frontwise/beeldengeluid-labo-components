@@ -19,10 +19,10 @@ class SearchHit extends React.Component {
 	//eventually this should simply handle persistent (media fragment) URIs, instead of these silly params
 
 	//this function works with search snippet data (consulted the related config.getResultSnippetData())
-	gotoItemDetails(result, e) {
-		if(this.props.itemDetailsPath && result.resourceId) {
-            ComponentUtil.pushItemToLocalStorage('visitedHits', result.resourceId);
-            FlexRouter.gotoItemDetails(this.props.itemDetailsPath, result, this.props.searchTerm);
+	gotoItemDetails() {
+		if(this.props.itemDetailsPath && this.props.data.formattedData.resourceId) {
+            ComponentUtil.pushItemToLocalStorage('visitedHits', this.props.data.formattedData.resourceId);
+            FlexRouter.gotoItemDetails(this.props.itemDetailsPath, this.props.data.formattedData, this.props.data.searchTerm);
 		} else {
 			this.setState({showModal: true})
 		}
@@ -36,10 +36,9 @@ class SearchHit extends React.Component {
 		e.stopPropagation();
 		if(this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
-				resourceId : this.props.rawResult._id,
-				resource : this.props.rawResult, //this is the raw resource
-				selected : !this.props.isSelected,
-				collectionConfig : this.props.collectionConfig
+				resourceId : this.props.data.formattedResult.resourceId,
+				resource : this.props.data.rawResult,
+				selected : !this.props.isSelected
 			})
 		}
 	}
@@ -70,22 +69,21 @@ class SearchHit extends React.Component {
 
     onQuickView() {
         if(this.props.onQuickView) {
-            this.props.onQuickView(this.props.rawResult);
+            this.props.onQuickView(this.props.data);
         }
     }
 
 	render() {
-		const result = this.props.resultDetailData;
 		//FIXME make sure that this snippet already contains the hightlight data!
-		const snippet = this.props.collectionConfig.getResultSnippetData(result);
+		const snippet = this.props.data.collectionConfig.getResultSnippetData(this.props.data.formattedData);
 
 		//assign the highlight data to the snippet for the SearchSnippet component
-		snippet['numHighlights'] = this.props.numHighlights;
+		snippet['numHighlights'] = this.props.data.numHighlights;
 
-		const collectionMediaTypes = this.props.collectionConfig.getCollectionMediaTypes();
+		const collectionMediaTypes = this.props.data.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
-		const modalID = this.safeModalId(result.resourceId);
+		const modalID = this.safeModalId(this.props.data.formattedData.resourceId);
 		let bookmarkIcon = null;
 
 		//draw the checkbox using the props.isSelected to determine whether it is selected or not
@@ -123,7 +121,7 @@ class SearchHit extends React.Component {
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
 		}
-		if(visitedItems && visitedItems.find(item => item === this.props.rawResult._id)) {
+		if(visitedItems && visitedItems.find(item => item === this.props.data.formattedData.resourceId)) {
             classNames.push('visitedItem')
 		}
 
@@ -136,11 +134,11 @@ class SearchHit extends React.Component {
 					</button>
 				</div>
                 {bookmarkIcon}
-                <div onClick={this.gotoItemDetails.bind(this, result)}>
+                <div onClick={this.gotoItemDetails.bind(this)}>
 					<SearchSnippet
 						data={snippet}
 						collectionMediaTypes={collectionMediaTypes}
-						searchTerm={this.props.searchTerm}
+						searchTerm={this.props.data.searchTerm}
 					/>
 				</div>
 			</div>

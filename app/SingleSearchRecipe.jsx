@@ -528,8 +528,6 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- QUICKVIEW FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-
-	//TODO just put the quickViewData in the state and remove all the other state properties
 	openQuickViewModal(quickViewData) {
 	    this.setState({
 	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult
@@ -537,7 +535,6 @@ class SingleSearchRecipe extends React.Component {
 	    });
 	}
 
-	//FIXME this only should receive a single type of result, now it can be both FORMATTED or RAW
 	showResourceInQuickView(rawResult) {
 	    let quickViewData = null;
 	    if(this.state.showBookmarkedItems) {
@@ -553,8 +550,8 @@ class SingleSearchRecipe extends React.Component {
 	onSelectQuickViewResult(resourceId, selected) {
         var currentSelection = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
         var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
-        for(var i = 0; i < currentSelection.length; i++){
-            if(currentSelection[i]._id === resourceId){
+        for(var i = 0; i < currentSelection.length; i++) {
+            if(currentSelection[i]._id === resourceId) {
                 foundIndex = i;
             }
         }
@@ -879,19 +876,14 @@ class SingleSearchRecipe extends React.Component {
 	                            <SearchHit
 	                                key={'saved__' + index}
 
-	                                rawResult={searchHitData.rawData} //contains the RAW data
-	                                resultDetailData={searchHitData.formattedData} //contains the FORMATTED data
-	                                searchTerm={searchHitData.searchTerm} //for highlighting the search term
-	                                numHighlights={searchHitData.numHighlights}
-	                                dateField={searchHitData.dateField} //for displaying the right date field in the hits
-	                                collectionConfig={searchHitData.collectionConfig}
+	                                data={searchHitData}
 
 	                                itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
 
 	                                bookmarked={null}
 	                                isSelected={true}
 
-	                                onQuickView={this.showResourceInQuickView.bind(this)} //for poping up the preview
+	                                onQuickView={this.openQuickViewModal.bind(this)}
 	                                onOutput={this.onComponentOutput.bind(this)}
 
 								/>
@@ -955,20 +947,14 @@ class SingleSearchRecipe extends React.Component {
 						return (
 							<SearchHit
 								key={'__' + index}
-
-								rawResult={searchHitData.rawData}
-								resultDetailData={searchHitData.formattedData}
-								searchTerm={searchHitData.searchTerm} //for highlighting the search term
-								numHighlights={searchHitData.numHighlights}
-								dateField={searchHitData.dateField}//for displaying the right date field in the hits
-								collectionConfig={searchHitData.collectionConfig}
+								data={searchHitData}
 
 								itemDetailsPath={this.props.recipe.ingredients.itemDetailsPath}
 
 								bookmark={bookmark}
 								isSelected={isSelectedItem}
 
-								onQuickView={this.showResourceInQuickView.bind(this)} //for poping up the preview
+								onQuickView={this.openQuickViewModal.bind(this)}
 								onOutput={this.onComponentOutput.bind(this)}
 							/>
 						)
