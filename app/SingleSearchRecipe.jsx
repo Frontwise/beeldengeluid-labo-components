@@ -112,18 +112,6 @@ class SingleSearchRecipe extends React.Component {
 			this.onReloadQueryData(collectionId, initialQuery);
 		}
 	}
-    // current bookmarks per project
-	saveBookmarksToLocalStorage() {
-        this.state.activeProject && this.state.activeProject.id ?
-            AnnotationAPI.getBookmarks(
-                this.props.user.id,
-                this.state.activeProject.id,
-                (data) => {
-                	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
-                }
-            ) :
-            false;
-    }
 
 	onReloadQueryData(collectionId, initialQuery) {
 		//load the collection config and finally
@@ -215,76 +203,6 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	//this is updated via the query builder, but it does not update the state.query...
-	//TODO figure out if it's bad to update the state
-	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
-	onSearched(data, paging) {
-        const enrichedSearchResults = data.results.map( (result, index) => {
-        	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
-        })
-
-		const desiredState = {
-			currentOutput: data,
-			currentResults : enrichedSearchResults, //TODO currently testing this new state variable
-            showBookmarkedItems : false
-		};
-		// if search is not the result of paging then clear selectedOnPage.
-        !paging ? desiredState.selectedOnPage = {} : desiredState;
-
-		//reset the poster images to the placeholder
-		const imgDefer = document.getElementsByTagName('img');
-		for (let i=0; i<imgDefer.length; i++) {
-			if(imgDefer[i].getAttribute('data-src')) {
-				imgDefer[i].setAttribute('src', '/static/images/placeholder.2b77091b.svg');
-			}
-		}
-
-		//request access for the thumbnails if needed
-		if (this.state.collectionConfig.requiresPlayoutAccess() && this.state.collectionConfig.getThumbnailContentServerId()) {
-			PlayoutAPI.requestAccess(
-				this.state.collectionConfig.getThumbnailContentServerId(),
-				'thumbnails',
-				desiredState,
-				this.onLoadPlayoutAccess.bind(this)
-			)
-		} else {
-			this.onLoadPlayoutAccess(true, desiredState);
-		}
-        this.setState({
-            selectedOnPage : this.getAlreadySelectedRows(data),
-            allRowsSelected: this.areAllRowsSelected(),
-            isSearching: false,
-            isPagingOutOfBounds : data.pagingOutOfBounds === true
-        })
-	}
-
-	//checks if the search results contain resources that were already selected in another query
-	getAlreadySelectedRows(searchData) {
-		if(!searchData || !searchData.results) {
-			return {};
-		}
-		const rowsInStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-		const selRows = {};
-		searchData.results.forEach(item => rowsInStorage.filter(obj => {
-			if(obj._id === item._id) {
-				selRows[item._id] = true;
-			}}
-		));
-		return selRows;
-	}
-
-	//TODO check this function
-	areAllRowsSelected() {
-		const storeSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows')
-		if(!storeSelectedRows || !(this.state.currentOutput && this.state.currentOutput.results)) {
-			return false;
-		}
-		return this.state.currentOutput.results.every(
-			itemOnPage => storeSelectedRows.find(j => j._id === itemOnPage._id)
-		);
-	}
-
-
 	onLoadPlayoutAccess(accessApproved, desiredState) {
 		this.setState(
 			desiredState, () => {
@@ -327,9 +245,72 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	/* ------------------------------------------------------------------------------
-	------------------------------- SEARCH RELATED FUNCTIONS --------------------
-	------------------------------------------------------------------------------- */
+	/* ------------------------------- PROJECT RELATED FUNCTION ----------------------- */
+
+
+	onProjectChanged(project) {
+		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+        this.saveBookmarksToLocalStorage();
+		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
+			if(this.state.awaitingProcess) {
+				switch(this.state.awaitingProcess) {
+					case 'bookmark' : this.selectBookmarkGroup(); break;
+					case 'saveQuery' : this.showQueryModal(); break;
+				}
+			}
+		});
+	}
+
+	/* ------------------------------- SEARCH RELATED FUNCTIONS ----------------------- */
+
+	onStartSearch = () => {
+        this.setState({
+            isSearching : true
+        })
+    }
+
+    //this is updated via the query builder, but it does not update the state.query...
+	//TODO figure out if it's bad to update the state
+	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
+	onSearched(data, paging) {
+        const enrichedSearchResults = data.results.map( (result, index) => {
+        	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
+        })
+
+		const desiredState = {
+			currentOutput: data,
+			currentResults : enrichedSearchResults, //TODO currently testing this new state variable
+            showBookmarkedItems : false
+		};
+		// if search is not the result of paging then clear selectedOnPage.
+        !paging ? desiredState.selectedOnPage = {} : desiredState;
+
+		//reset the poster images to the placeholder
+		const imgDefer = document.getElementsByTagName('img');
+		for (let i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src')) {
+				imgDefer[i].setAttribute('src', '/static/images/placeholder.2b77091b.svg');
+			}
+		}
+
+		//request access for the thumbnails if needed
+		if (this.state.collectionConfig.requiresPlayoutAccess() && this.state.collectionConfig.getThumbnailContentServerId()) {
+			PlayoutAPI.requestAccess(
+				this.state.collectionConfig.getThumbnailContentServerId(),
+				'thumbnails',
+				desiredState,
+				this.onLoadPlayoutAccess.bind(this)
+			)
+		} else {
+			this.onLoadPlayoutAccess(true, desiredState);
+		}
+        this.setState({
+            selectedOnPage : this.getAlreadySelectedRows(data),
+            allRowsSelected: this.areAllRowsSelected(),
+            isSearching: false,
+            isPagingOutOfBounds : data.pagingOutOfBounds === true
+        })
+	}
 
 	//FIXME this function is tied to the function returned by the search component (which is kind of weird, but works)
 	//FIXME queryId wordt niet meer gebruikt
@@ -361,9 +342,43 @@ class SingleSearchRecipe extends React.Component {
         })
     }
 
-	/* ------------------------------------------------------------------------------
-	------------------------------- TABLE ACTION FUNCTIONS --------------------
-	------------------------------------------------------------------------------- */
+
+	/* ------------------------------- TABLE ACTION FUNCTIONS ----------------------- */
+
+	//checks if the search results contain resources that were already selected in another query
+	getAlreadySelectedRows(searchData) {
+		if(!searchData || !searchData.results) {
+			return {};
+		}
+		const rowsInStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+		const selRows = {};
+		searchData.results.forEach(item => rowsInStorage.filter(obj => {
+			if(obj._id === item._id) {
+				selRows[item._id] = true;
+			}}
+		));
+		return selRows;
+	}
+
+	//TODO check this function, it is a bit duplicate, similar code is also in ...
+	areAllRowsSelected() {
+		const storeSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows')
+		if(!storeSelectedRows || !(this.state.currentOutput && this.state.currentOutput.results)) {
+			return false;
+		}
+		return this.state.currentOutput.results.every(
+			itemOnPage => storeSelectedRows.find(j => j._id === itemOnPage._id)
+		);
+	}
+
+	clearSelectedResources = () => {
+		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows')
+        this.setState({
+        	selectedOnPage : {},
+        	allRowsSelected : false,
+        	showBookmarkedItems : false,
+    	});
+    }
 
 	toggleRows = (e) => {
 		e.preventDefault();
@@ -393,10 +408,12 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-    onStartSearch = () => {
+	/* ------------------------------- BOOKMARK RELATED FUNCTIONS ----------------------- */
+
+	showBookmarkedItems = () => {
         this.setState({
-            isSearching : true
-        })
+            showBookmarkedItems : !this.state.showBookmarkedItems
+        });
     }
 
 	updateStoredBookmarkList(resource, select) {
@@ -410,18 +427,18 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onProjectChanged(project) {
-		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
-        this.saveBookmarksToLocalStorage();
-		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
-			if(this.state.awaitingProcess) {
-				switch(this.state.awaitingProcess) {
-					case 'bookmark' : this.selectBookmarkGroup(); break;
-					case 'saveQuery' : this.showQueryModal(); break;
-				}
-			}
-		});
-	}
+	// current bookmarks per project
+	saveBookmarksToLocalStorage() {
+        this.state.activeProject && this.state.activeProject.id ?
+            AnnotationAPI.getBookmarks(
+                this.props.user.id,
+                this.state.activeProject.id,
+                (data) => {
+                	ComponentUtil.storeJSONInLocalStorage('activeBookmarks', data)
+                }
+            ) :
+            false;
+    }
 
 	//this will first check if a project was selected. Then either bookmarks or opens the project selector first
 	bookmark = () => {
@@ -490,6 +507,8 @@ class SingleSearchRecipe extends React.Component {
 		})
 	}
 
+	/* ------------------------------- QUERY SAVING RELATED FUNCTIONS ----------------------- */
+
 	saveQuery = () => {
 		if(this.state.activeProject == null) {
 			this.setState({
@@ -509,21 +528,6 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	showBookmarkedItems = () => {
-        this.setState({
-            showBookmarkedItems : !this.state.showBookmarkedItems
-        });
-    }
-
-    clearSelectedResources = () => {
-		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows')
-        this.setState({
-        	selectedOnPage : {},
-        	allRowsSelected : false,
-        	showBookmarkedItems : false,
-    	});
-    }
-
 	showQueryModal() {
 		this.setState({
 			showQueryModal : true,
@@ -531,9 +535,7 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	/* ------------------------------------------------------------------------------
-	------------------------------- QUICKVIEW FUNCTIONS --------------------
-	------------------------------------------------------------------------------- */
+	/* ------------------------------- QUICKVIEW FUNCTIONS -------------------------- */
 
 	openQuickViewModal = (quickViewData, isFirstResource, isLastResource) => {
 	    this.setState({
