@@ -21,8 +21,7 @@ import BookmarkSelector from './components/bookmark/BookmarkSelector';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
 import SearchHit from './components/search/SearchHit';
-import ItemDetails from './components/search/ItemDetails';
-import HighlightOverview from './components/search/HighlightOverview';
+import QuickViewer from './components/search/QuickViewer';
 import Paging from './components/search/Paging';
 import Sorting from './components/search/Sorting';
 
@@ -536,36 +535,38 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- QUICKVIEW FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-	openQuickViewModal = quickViewData => {
+	openQuickViewModal = (quickViewData, isFirstResource, isLastResource) => {
 	    this.setState({
 	        quickViewData: quickViewData, //this is the object returned by ComponentUtil.convertRawSearchResult (or convertRawSelectedData)
+	        isFirstResource : isFirstResource,
+	        isLastResource : isLastResource,
 	        showQuickViewModal : true
 	    });
 	}
 
-	showResourceInQuickView(rawResult) {
+	showResourceInQuickView(rawResult, isFirstResource, isLastResource) {
 	    let quickViewData = null;
 	    if(this.state.showBookmarkedItems) {
 	    	quickViewData = ComponentUtil.convertRawSelectedData(rawResult, this.props.clientId, this.props.user)
 	    } else {
 	    	quickViewData = ComponentUtil.convertRawSearchResult(rawResult, this.state.collectionConfig, this.state.currentOutput.query);
 	    }
-	    this.openQuickViewModal(quickViewData);
+	    this.openQuickViewModal(quickViewData, isFirstResource, isLastResource);
 	}
 
 	//when a user selects a result for the quick view pop-up
 	//TODO also check that this can be simplified
 	onSelectQuickViewResult = (resourceId, selected) => {
-        var currentSelection = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-        var foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
-        for(var i = 0; i < currentSelection.length; i++) {
+        const currentSelection = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+        let foundIndex = -1; // Lookup the index of the current newly selected/deselected resource
+        for(let i = 0; i < currentSelection.length; i++) {
             if(currentSelection[i]._id === resourceId) {
                 foundIndex = i;
             }
         }
 
         if(this.state.quickViewData && selected && foundIndex === -1) { //Case selected (add)
-            var selectionObj = this.state.quickViewData.rawData;
+            const selectionObj = this.state.quickViewData.rawData;
             selectionObj["query"] = ComponentUtil.getJSONFromLocalStorage('user-last-query'); //FIXME why is the query added?????
             currentSelection.push(selectionObj);
         } else { //Case unselected (remove)
@@ -578,7 +579,7 @@ class SingleSearchRecipe extends React.Component {
         if(currentSelection.length === 0) {
             this.clearSelectedResources();
         } else {
-            this.setState({selectedOnPage: currentSelection, lastUnselectedIndex: foundIndex, lastUnselectedResource: resourceId});
+            this.setState({selectedOnPage: currentSelection, lastUnselectedIndex: foundIndex});
         }
 	}
 
@@ -586,44 +587,35 @@ class SingleSearchRecipe extends React.Component {
 	moveQuickViewResource = moveNext => {
 		let resourceList = [];
 	    let currentIndex = -1;
-	    let resourceId = null;
 	    let nextResource = null;
-	    let isLastHit = false;
+	    let isLastResource = false;
 	    if(this.state.showBookmarkedItems) {
             resourceList = ComponentUtil.getJSONFromLocalStorage('selectedRows'); //contains RAW results
             currentIndex = resourceList.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId);
-            if(currentIndex === -1){
+            if(currentIndex === -1) {
                 currentIndex = this.state.lastUnselectedIndex;
-                resourceId = this.state.lastUnselectedResource;
-
-                nextResource = resourceList.length > currentIndex ? resourceList[currentIndex] : false;
-        	    isLastHit = currentIndex === resourceList.length;
+                nextResource = resourceList.length > currentIndex ? resourceList[currentIndex] : null;
+        	    isLastResource = currentIndex === resourceList.length;
             } else {
-                resourceId = resourceList[currentIndex]._id;
-                isLastHit = currentIndex === resourceList.length - 1;
+                isLastResource = currentIndex === resourceList.length - 1;
             }
 	    } else {
 	        resourceList = this.state.currentOutput.results; //contains RAW results
 	        currentIndex = resourceList.findIndex(searchResult => searchResult._id === this.state.quickViewData.formattedData.resourceId);
-	        resourceId = resourceList[currentIndex]._id;
-
-	        nextResource = resourceList.length - 1 > currentIndex ? resourceList[currentIndex + 1] : false;
-        	isLastHit = currentIndex === resourceList.length - 1
+	        nextResource = resourceList.length - 1 > currentIndex ? resourceList[currentIndex + 1] : null;
+        	isLastResource = currentIndex === resourceList.length - 1
 	    }
 
+	    const prevResource = currentIndex > 0 ? resourceList[currentIndex-1] : null;
 	    if(!nextResource) {
-	        nextResource = resourceList.length - 1 > currentIndex ? resourceList[currentIndex + 1] : false;
+	        nextResource = resourceList.length - 1 > currentIndex ? resourceList[currentIndex + 1] : null;
 	    }
 
-    	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
-    	const prevResource = currentIndex > 0 ? resourceList[currentIndex-1] : false;
-		const isFirstResource = currentIndex === 0;
-
-	    if(moveNext && !isLastHit) {
-			this.showResourceInQuickView(nextResource);
+	    if(moveNext && !isLastResource) {
+			this.showResourceInQuickView(nextResource, resourceList.length === 1, currentIndex === resourceList.length - 2);
 	    }
-	    if(!moveNext && !isFirstResource) {
-			this.showResourceInQuickView(prevResource);
+	    if(!moveNext && currentIndex !== 0) {
+			this.showResourceInQuickView(prevResource, currentIndex === 1, resourceList.length === 1);
 	    }
 	}
 
@@ -635,12 +627,10 @@ class SingleSearchRecipe extends React.Component {
             this.moveQuickViewResource(false);
 	    }
 	    if(keyCode === 83) { //Selected
-	        var currentSelection = this.state.selectedOnPage;
-	        var selected = true;
-	        if (resourceId in currentSelection) {
-	            selected = false;
-	        }
-	        this.onSelectQuickViewResult(resourceId, selected);
+	        this.onSelectQuickViewResult(
+	        	this.state.quickViewData.formattedData.resourceId,
+	        	!this.state.quickViewData.formattedData.resourceId in this.state.selectedOnPage
+	        );
 	    }
 	}
 
@@ -674,15 +664,14 @@ class SingleSearchRecipe extends React.Component {
 				size="large"
 				title={quickViewData.formattedData.title}
 				onKeyPressed={this.onKeyPressedInQuickView}>
-				<ItemDetails
-				    moveQuickViewResource={this.moveQuickViewResource}
-				    data={quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
-				    initialSelected={selectedOnPage.hasOwnProperty(quickViewData.formattedData.resourceId)}
+				<QuickViewer
+				    data={quickViewData}// this is a FORMATTED result, so no RAW data
 				    selected={selected} // if the current quick view result is in the stored rows
 				    onSelected={this.onSelectQuickViewResult}
-				    previewMode={true}
+				    moveQuickViewResource={this.moveQuickViewResource}
+				    isFirstResource={this.state.isFirstResource}
+				    isLastResource={this.state.isLastResource}
 				/>
-				<HighlightOverview data={quickViewData.highlights}/>
 			</FlexModal>
 		)
 	}

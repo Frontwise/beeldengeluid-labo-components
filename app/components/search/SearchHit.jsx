@@ -4,9 +4,7 @@ import FlexRouter from '../../util/FlexRouter';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import SearchSnippet from './SearchSnippet';
-import ItemDetails from './ItemDetails';
 import ReactTooltip from 'react-tooltip';
-import CollectionUtil from '../../util/CollectionUtil';
 
 class SearchHit extends React.Component {
 	constructor(props) {
@@ -71,7 +69,7 @@ class SearchHit extends React.Component {
 
     onQuickView() {
         if(this.props.onQuickView) {
-            this.props.onQuickView(this.props.data);
+            this.props.onQuickView(this.props.data, false, false);//FIXME the booleans for first & last quickview hit should be calculated!
         }
     }
 

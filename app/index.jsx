@@ -118,7 +118,7 @@ export {default as CollectionAnalyser} from './components/collection/CollectionA
 export {default as QueryFactory} from './components/search/QueryFactory';
 export {default as QueryBuilder} from './components/search/QueryBuilder';
 export {default as SearchSnippet} from './components/search/SearchSnippet';
-export {default as ItemDetails} from './components/search/ItemDetails';
+export {default as QuickViewer} from './components/search/QuickViewer';
 export {default as SearchHit} from './components/search/SearchHit';
 
 //data visualisation components
