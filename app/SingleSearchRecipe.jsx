@@ -59,7 +59,6 @@ class SingleSearchRecipe extends React.Component {
 			allRowsSelected : false, // are all search results selected
 			highlightData: {}
 		};
-		this.CLASS_PREFIX = 'rcp__ss'
 	}
 
 	componentWillUnmount() {
@@ -335,7 +334,7 @@ class SingleSearchRecipe extends React.Component {
 
 	//FIXME this function is tied to the function returned by the search component (which is kind of weird, but works)
 	//FIXME queryId wordt niet meer gebruikt
-	gotoPage(queryId, pageNumber) {
+	gotoPage = (queryId, pageNumber) => {
         this.setState({
             isSearching : true
         }, () => {
@@ -350,7 +349,7 @@ class SingleSearchRecipe extends React.Component {
 
 	//the sortMode is translated to sort params inside the QueryBuilder component
 	//sortMode = {type : date/rel, order : desc/asc}
-    sortResults(queryId, sortParams) {
+    sortResults = (queryId, sortParams) => {
 	    this.setState({
             isSearching : true
         }, () => {
@@ -367,7 +366,7 @@ class SingleSearchRecipe extends React.Component {
 	------------------------------- TABLE ACTION FUNCTIONS --------------------
 	------------------------------------------------------------------------------- */
 
-	toggleRows(e) {
+	toggleRows = (e) => {
 		e.preventDefault();
 		let rows = this.state.selectedOnPage;
     	const rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
@@ -665,27 +664,25 @@ class SingleSearchRecipe extends React.Component {
 		)
 	}
 
-	renderQuickViewModal = () => {
-		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-		const selected = storedSelectedRows.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId) >= 0;
-	    //const lastUnselectedIndex = this.state.lastUnselectedIndex !== undefined ? this.state.lastUnselectedIndex : -1;
+	renderQuickViewModal = (storedSelectedRows, selectedOnPage, quickViewData) => {
+		const selected = storedSelectedRows.findIndex(elem => elem._id === quickViewData.formattedData.resourceId) >= 0;
 	    return (
 	        <FlexModal
 				elementId="quickview__modal"
 				stateVariable="showQuickViewModal"
 				owner={this}
 				size="large"
-				title={this.state.quickViewData.formattedData.title}
+				title={quickViewData.formattedData.title}
 				onKeyPressed={this.onKeyPressedInQuickView}>
 				<ItemDetails
 				    moveQuickViewResource={this.moveQuickViewResource}
-				    data={this.state.quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
-				    initialSelected={this.state.selectedOnPage.hasOwnProperty(this.state.quickViewData.formattedData.resourceId)}
+				    data={quickViewData.formattedData}// this is a FORMATTED result, so no RAW data
+				    initialSelected={selectedOnPage.hasOwnProperty(quickViewData.formattedData.resourceId)}
 				    selected={selected} // if the current quick view result is in the stored rows
 				    onSelected={this.onSelectQuickViewResult}
 				    previewMode={true}
 				/>
-				<HighlightOverview data={this.state.quickViewData.highlights}/>
+				<HighlightOverview data={quickViewData.highlights}/>
 			</FlexModal>
 		)
 	}
@@ -703,7 +700,7 @@ class SingleSearchRecipe extends React.Component {
 		)
 	}
 
-	renderQueryModal = () => {
+	renderQueryModal = (currentOutput, activeProject) => {
 		return (
 			<FlexModal
 				elementId="query__modal"
@@ -712,15 +709,15 @@ class SingleSearchRecipe extends React.Component {
 				size="large"
 				title="Enter a name for your query">
 					<QueryEditor
-						query={this.state.currentOutput.query}
+						query={currentOutput.query}
 						user={this.props.user}
-						project={this.state.activeProject}
+						project={activeProject}
 						onOutput={this.onComponentOutput}/>
 			</FlexModal>
 		)
 	}
 
-	renderBookmarkModal = () => {
+	renderBookmarkModal = (collectionConfig, activeProject) => {
 		return (
 			<FlexModal
 				elementId="bookmark__modal"
@@ -731,14 +728,111 @@ class SingleSearchRecipe extends React.Component {
 					<BookmarkSelector
 						onOutput={this.onComponentOutput}
 						user={this.props.user}
-						project={this.state.activeProject}
-						collectionId={this.state.collectionConfig.collectionId}
+						project={activeProject}
+						collectionId={collectionConfig.collectionId}
 						/>
 			</FlexModal>
 		)
 	}
 
+	/* --------------------------- RENDER SELECTION BUTTONS --------------------- */
+
+
+	renderSelectionButtons = (activeProject, collectionConfig, showCollectionSelector = true) => {
+		let collectionBtn = null;
+		const projectBtn = (
+			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
+				Set project ({activeProject ? activeProject.name : 'none selected'})
+			</button>
+		);
+
+		if(showCollectionSelector) {
+			//show the button to open the modal
+			collectionBtn = (
+				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
+					Set collection ({collectionConfig ? collectionConfig.getCollectionTitle() : 'none selected'})
+				</button>
+			);
+		}
+
+		return (
+			<div>{collectionBtn}&nbsp;{projectBtn}</div>
+		)
+	}
+
+
+	/* --------------------------- RENDER RESULT LIST ----------------------------*/
+
+	renderResultTable = (state, storedSelectedRows) => {
+		//only render when there is a collectionConfig and searchAPI output
+		if(!(
+			state.collectionId &&
+			state.collectionConfig &&
+			state.currentOutput &&
+			state.currentOutput.results &&
+			state.currentOutput.results.length > 0
+		)) {
+			return null
+		}
+
+		//if the search API returned a paging out of bounds error, return a helpful message for the user
+		if(state.isPagingOutOfBounds) {
+			return (
+				<div className="col-md-9">
+					<div className="alert alert-danger">
+	            		{MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
+	            	</div>
+	            </div>
+            )
+		}
+
+		let listComponent = null;
+
+		if (state.showBookmarkedItems) {//storedSelectedRows && storedSelectedRows.length > 0
+			listComponent = this.renderSelectionOverview(storedSelectedRows)
+		} else {
+			//populate the list of search results
+			listComponent = state.currentResults.map(this.renderSearchResults);
+		}
+
+		const tableHeader = this.renderTableHeader(
+			state.currentOutput,
+			state.collectionConfig,
+			storedSelectedRows,
+			state.showBookmarkedItems,
+			state.selectedOnPage,
+			state.pageSize
+		);
+
+		const tableFooter = this.renderTableFooter(
+			state.currentOutput,
+			state.pageSize
+		);
+
+        return (
+            <div className="col-md-9 result-list">
+                {tableHeader}
+                {listComponent}
+                {tableFooter}
+            </div>
+        )
+	}
+
 	/* --------------------------- RENDERING LISTS -------------------------------*/
+
+	renderSelectionOverview = (storedSelectedRows) => {
+		return (
+            <div className="table-actions-header bookmarked-results">
+                <h4 className="header-selected-items">
+                    Selected items
+                    <i className="fa fa-remove" onClick={this.showBookmarkedItems}/>
+                </h4>
+                <div className="selected-items">
+                    {storedSelectedRows.map(this.renderSelectedItems)}
+                </div>
+            </div>
+        );
+	}
 
 	renderSelectedItems = (result, index) => {
         const searchHitData = ComponentUtil.convertRawSelectedData(result, this.props.clientId, this.props.user);
@@ -773,9 +867,72 @@ class SingleSearchRecipe extends React.Component {
 		)
 	}
 
-	/* ---------------------------- RENDER ACTION BUTTONS ------------------------- */
+	/* ---------------------------- RENDER THE TABLE ------------------------- */
 
-	renderActionButtons = (storedSelectedRows) => {
+	renderPagingButtons = (currentPage, totalHits, pageSize) => {
+		if(currentPage <= 0) {
+			return null;
+		}
+		return (
+			<Paging
+				currentPage={currentPage}
+				numPages={Math.ceil(totalHits / pageSize)}
+				gotoPage={this.gotoPage}
+			/>
+		)
+	}
+
+	renderSortButtons = (collectionConfig, query) => {
+		if(!query.sort) {
+			return null;
+		}
+		return (
+			<Sorting
+				sortResults={this.sortResults}
+				sortParams={query.sort}
+				collectionConfig={collectionConfig}
+				dateField={query.dateRange ? query.dateRange.field : null}
+			/>
+		)
+	}
+
+	//FIXME the ugly HTML & lack of proper class names
+	renderTableHeader = (currentOutput, collectionConfig, storedSelectedRows, showBookmarkedItems, selectedOnPage, pageSize) => {
+		return (
+			<div className="table-actions-header">
+                {this.renderTableSelectAll(currentOutput, selectedOnPage)}
+                {this.renderActionButtons(storedSelectedRows, showBookmarkedItems)}
+                <div style={{textAlign: 'center'}}>
+                    {this.renderPagingButtons(currentOutput.currentPage, currentOutput.totalHits, pageSize)}
+                    <div style={{float: 'right'}}>
+                        {this.renderSortButtons(collectionConfig, currentOutput.query)}
+                    </div>
+                </div>
+            </div>
+		)
+	}
+
+	renderTableFooter = (currentOutput, pageSize) => {
+		return (
+			<div className="table-actions-footer">
+				{this.renderPagingButtons(currentOutput.currentPage, currentOutput.totalHits, pageSize)}
+			</div>
+		)
+	}
+
+	renderTableSelectAll = (currentOutput, selectedOnPage) => {
+		const currentSelectedIds = this.state.selectedOnPage ? Object.keys(this.state.selectedOnPage) : []
+		const allChecked = currentOutput.results.map(item => currentSelectedIds.findIndex(it => it === item._id));
+		const isChecked = allChecked.findIndex(item => item === -1) === -1;
+		return (
+            <div onClick={this.toggleRows} className="select-all">
+                <input type="checkbox" defaultChecked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
+                <label htmlFor={'cb__select-all'}><span/></label>
+            </div>
+        );
+	}
+
+	renderActionButtons = (storedSelectedRows, showBookmarkedItems) => {
 		const actions = [];
 		if(storedSelectedRows && storedSelectedRows.length > 0) {
             actions.push(
@@ -786,9 +943,8 @@ class SingleSearchRecipe extends React.Component {
                         <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
                     </button>
                     <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
-                        <button className="dropdown-item" type="button"
-                            onClick={this.showBookmarkedItems}>
-								{this.state.showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
+                        <button className="dropdown-item" type="button" onClick={this.showBookmarkedItems}>
+							{showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
 						</button>
                         <button className="dropdown-item" type="button" onClick={this.bookmark}>
                         	Bookmark selection
@@ -797,7 +953,7 @@ class SingleSearchRecipe extends React.Component {
 							className="dropdown-item"
 							type="button"
 							onClick={this.clearSelectedResources}>
-								Clear selection
+							Clear selection
 						</button>
                     </div>
                 </div>
@@ -817,7 +973,7 @@ class SingleSearchRecipe extends React.Component {
         );
 
 		return (
-			<div className={IDUtil.cssClassName('table-actions', this.CLASS_PREFIX)}>
+			<div className="table-actions">
 				{actions}
 			</div>
 		);
@@ -825,9 +981,12 @@ class SingleSearchRecipe extends React.Component {
 
 	/* ---------------------------- RENDER QUERY BUILDER -------------------------- */
 
-	renderQueryBuilder = (collectionId, collectionConfig, initialQuery) => {
+	renderSearchComponent = (collectionId, collectionConfig, initialQuery, isSearching) => {
+		let loadingMessage = null;
+		let queryBuilder = null;
+
 		if(collectionId && collectionConfig) {
-			return (
+			queryBuilder = (
 				<QueryBuilder
 					key={collectionId} //for resetting all the states held within after selecting a new collection
 					header={true}
@@ -841,177 +1000,76 @@ class SingleSearchRecipe extends React.Component {
 				/>
 			);
 		}
-		return null
+
+		if(isSearching) {
+		    loadingMessage = <LoadingSpinner message="Loading results..."/>;
+        }
+
+		return (
+			<div className="search-component">
+            	{loadingMessage}
+            	{queryBuilder}
+        	</div>
+        )
 	}
 
 	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
 
 	render() {
 		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
 
         // all the different modals
-        const quickViewModal = this.state.showQuickViewModal ? this.renderQuickViewModal() : null;
-        const projectModal = this.state.showProjectModal ? this.renderProjectModal() : null;
-        const queryModal = this.state.showQueryModal ? this.renderQueryModal() : null;
-        const bookmarkModal = this.state.showBookmarkModal ? this.renderBookmarkModal() : null;
         const collectionModal = this.state.showModal ? this.renderCollectionModal() : null;
 
-		const searchComponent = this.renderQueryBuilder(this.state.collectionId, this.state.collectionConfig, this.state.initialQuery);
+        const quickViewModal = this.state.showQuickViewModal ? this.renderQuickViewModal(
+        	storedSelectedRows,
+        	this.state.selectedOnPage,
+        	this.state.quickViewData
+        ) : null;
 
-		let chooseCollectionBtn = null; // for changing the collection
+        const projectModal = this.state.showProjectModal ? this.renderProjectModal() : null;
 
-		//search results, paging and sorting
-		let resultList = null;
-		let tableActionControls = null;
-		let paging = null;
-		let sortButtons = null;
-        let bookmarkingContainer = null;
-		let searchHits = null;
-        let loadingMessage = null;
+        const queryModal = this.state.showQueryModal ? this.renderQueryModal(
+        	this.state.currentOutput,
+        	this.state.activeProject
+        ) : null;
 
-		let actionButtons = this.renderActionButtons(storedSelectedRows);
-		let bookmarkDropDownMenu = null; //added to action buttons, in case there are active selections
+        const bookmarkModal = this.state.showBookmarkModal ? this.renderBookmarkModal(
+        	this.state.collectionConfig,
+        	this.state.activeProject
+        ) : null;
 
-        if(this.props.recipe.ingredients.collectionSelector) {
-			//show the button to open the modal
-			chooseCollectionBtn = (
-				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
-					Set collection ({
-						this.state.collectionConfig ?
-							this.state.collectionConfig.getCollectionTitle() :
-							'none selected'
-					})
-				</button>
-			);
-		}
+        const selectionButtons = this.renderSelectionButtons(
+        	this.state.activeProject,
+        	this.state.collectionConfig,
+        	this.props.recipe.ingredients.collectionSelector
+        )
 
-		// for changing the active project
-		const chooseProjectBtn = (
-			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
-				Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
-			</button>
+        //the query builder & loading message
+		const searchComponent = this.renderSearchComponent(
+			this.state.collectionId,
+			this.state.collectionConfig,
+			this.state.initialQuery,
+			this.state.isSearching
 		);
 
-		//only draw when a collection config is properly loaded
-		if(this.state.collectionId && this.state.collectionConfig) {
-
-			//draw the search hits in here, so it's possible to put the linechart in between the search box and the results
-			if(this.state.currentOutput && this.state.currentOutput.results && this.state.currentOutput.results.length > 0) {
-				//populate the paging buttons
-				if(this.state.currentOutput.currentPage > 0) {
-					paging = <Paging
-						currentPage={this.state.currentOutput.currentPage}
-						numPages={Math.ceil(this.state.currentOutput.totalHits / this.state.pageSize)}
-						gotoPage={this.gotoPage.bind(this)}/>
-				}
-
-				if(this.state.currentOutput.query.sort) {
-					//draw the sorting buttons
-					sortButtons = <Sorting
-						sortResults={this.sortResults.bind(this)}
-						sortParams={this.state.currentOutput.query.sort}
-						collectionConfig={this.state.collectionConfig}
-						dateField={
-							this.state.currentOutput.query.dateRange ?
-								this.state.currentOutput.query.dateRange.field : null
-						}/>
-				}
-
-				const currentSelectedRows = this.state.selectedOnPage ? Object.keys(this.state.selectedOnPage) : []
-				const currentPage = this.state.currentOutput.results;
-                const allChecked = currentPage.map(item => currentSelectedRows.findIndex(it => it === item._id));
-                const isChecked = allChecked.findIndex(item => item === -1) === -1;
-
-                tableActionControls = (
-                    <div onClick={this.toggleRows.bind(this)} className={IDUtil.cssClassName('select', this.CLASS_PREFIX)}>
-                        <input type="checkbox"
-                               defaultChecked={isChecked ? 'checked' : ''}
-                               id={'cb__select-all'}/>
-                        <label htmlFor={'cb__select-all'}><span/></label>
-                    </div>
-                );
-
-				//now render the stuff for bookmarking
-				if(storedSelectedRows && storedSelectedRows.length > 0) {
-
-					//if the user wants to see the selection list, instead of the search results
-                    if (this.state.showBookmarkedItems) {
-                        bookmarkingContainer = (
-                            <div
-                                className={IDUtil.cssClassName('table-actions-header bookmarked-results', this.CLASS_PREFIX)}>
-                                <h4 className={IDUtil.cssClassName('header-selected-items', this.CLASS_PREFIX)}>
-                                    Selected items
-                                    <i className="fa fa-remove" onClick={this.showBookmarkedItems.bind(this)}/>
-                                </h4>
-                                <div className={IDUtil.cssClassName('selected-items', this.CLASS_PREFIX)}>
-                                    {storedSelectedRows.map(this.renderSelectedItems)}
-                                </div>
-                            </div>
-                        );
-                    }
-				}
-
-				//populate the list of search results
-				if(!this.state.showBookmarkedItems) {
-					searchHits = this.state.currentResults.map(this.renderSearchResults);
-				}
-
-                resultList = (
-                    <div className="col-md-9 result-list">
-                        <div className={IDUtil.cssClassName('table-actions-header', this.CLASS_PREFIX)}>
-                            {tableActionControls}
-                            {actionButtons}
-                            <div style={{textAlign: 'center'}}>
-                                {paging}
-                                <div style={{float: 'right'}}>
-                                    {sortButtons}
-                                </div>
-                            </div>
-                        </div>
-                        {bookmarkingContainer}
-                        {searchHits}
-                        <div className={IDUtil.cssClassName('table-actions-footer', this.CLASS_PREFIX)}>
-                            {paging}
-                        </div>
-                    </div>
-                )
-
-			}
-		}
-
-		if(this.state.isSearching) {
-		    loadingMessage = <LoadingSpinner message="Loading results..."/>;
-        }
-
-        if(this.state.isPagingOutOfBounds) {
-			resultList = (
-				<div className="col-md-9">
-					<div className="alert alert-danger">
-	            		{MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
-	            	</div>
-	            </div>
-            )
-		}
+		//search result table with paging, sorting and ability to toggle a list of selected items
+		const resultList = this.renderResultTable(this.state, storedSelectedRows);
 
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
 					<div className="col-md-12">
-						{chooseCollectionBtn}&nbsp;{chooseProjectBtn}
-						{collectionModal}
-						{projectModal}
-						{queryModal}
-						{bookmarkModal}
-						{quickViewModal}
-
-						<div className="search-component">
-                            {loadingMessage}
-                            {searchComponent}
-                        </div>
+						{selectionButtons}
+						{searchComponent}
                         {resultList}
 					</div>
 				</div>
+				{collectionModal}
+				{projectModal}
+				{queryModal}
+				{bookmarkModal}
+				{quickViewModal}
 			</div>
 		);
 	}
