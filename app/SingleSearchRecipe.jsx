@@ -1072,7 +1072,21 @@ SingleSearchRecipe.propTypes = {
 
     user: PropTypes.shape({
         id: PropTypes.string.isRequired
-    })
+    }),
+
+    params: PropTypes.shape({
+    	queryId: PropTypes.string.isRequired
+    }).isRequired,
+
+    recipe: PropTypes.shape({
+    	ingredients: PropTypes.shape({
+    		itemDetailsPath: PropTypes.string.isRequired,
+    		collection: PropTypes.string,
+    		collectionSelector: PropTypes.bool,
+    		dateRangeSelector: PropTypes.bool,
+    		aggregationView: PropTypes.string
+    	}).isRequired
+    }).isRequired
 
 };
 
