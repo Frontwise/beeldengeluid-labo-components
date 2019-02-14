@@ -273,9 +273,9 @@ class SingleSearchRecipe extends React.Component {
 	//TODO figure out if it's bad to update the state
 	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
 	onSearched(data, paging) {
-        const enrichedSearchResults = data.results.map( (result, index) => {
+        const enrichedSearchResults = data ? data.results.map( (result, index) => {
         	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
-        })
+        }) : [];
 
 		const desiredState = {
 			currentOutput: data,
