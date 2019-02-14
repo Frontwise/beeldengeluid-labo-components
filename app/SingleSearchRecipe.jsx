@@ -752,7 +752,7 @@ class SingleSearchRecipe extends React.Component {
 
 	/* --------------------------- RENDER RESULT LIST ----------------------------*/
 
-	renderResultTable = (state, storedSelectedRows) => {
+	renderResultTable = (state, storedSelectedRows, activeBookmarks) => {
 		//only render when there is a collectionConfig and searchAPI output
 		if(!(
 			state.collectionId &&
@@ -781,7 +781,9 @@ class SingleSearchRecipe extends React.Component {
 			listComponent = this.renderSelectionOverview(storedSelectedRows)
 		} else {
 			//populate the list of search results
-			listComponent = state.currentResults.map(this.renderSearchResults);
+			listComponent = state.currentResults.map(
+				(result, index) => this.renderSearchResults(result, index, storedSelectedRows, activeBookmarks)
+			);
 		}
 
 		const tableHeader = this.renderTableHeader(
@@ -838,9 +840,7 @@ class SingleSearchRecipe extends React.Component {
         )
     }
 
-	renderSearchResults = (result, index) => {
-		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
+	renderSearchResults = (result, index, storedSelectedRows, activeBookmarks) => {
 		const bookmark = activeBookmarks ? activeBookmarks.find(item => item.resourceId === result.formattedData.resourceId) : null;
         const isSelectedItem = storedSelectedRows.find(item => item._id === result.formattedData.resourceId) !== undefined;
 		return (
@@ -1006,6 +1006,7 @@ class SingleSearchRecipe extends React.Component {
 
 	render() {
 		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+        const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
 
         // all the different modals
         const collectionModal = this.state.showModal ? this.renderCollectionModal() : null;
@@ -1043,7 +1044,7 @@ class SingleSearchRecipe extends React.Component {
 		);
 
 		//search result table with paging, sorting and ability to toggle a list of selected items
-		const resultList = this.renderResultTable(this.state, storedSelectedRows);
+		const resultList = this.renderResultTable(this.state, storedSelectedRows, activeBookmarks);
 
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
