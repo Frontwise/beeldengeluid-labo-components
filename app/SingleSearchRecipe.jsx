@@ -1075,7 +1075,7 @@ SingleSearchRecipe.propTypes = {
     }),
 
     params: PropTypes.shape({
-    	queryId: PropTypes.string.isRequired
+    	queryId: PropTypes.string
     }).isRequired,
 
     recipe: PropTypes.shape({
