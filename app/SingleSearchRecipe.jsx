@@ -36,27 +36,27 @@ class SingleSearchRecipe extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showModal : false, //for the collection selector
-            showBookmarkedItems : false,
+			showCollectionModal : false, //for the collection selector
 			showProjectModal : false, //for the project selector
 			showBookmarkModal : false, //for the bookmark group selector
 			showQuickViewModal : false, //for the quickview result preview
 
+			showBookmarkedItems : false, //show the selected items, instead of the search results
+
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
+
 			awaitingProcess : null, //which process is awaiting the output of the project selector
-            currentOutput: null,
-			collectionId : null,
-            isSearching : false,
+
+            isSearching : false, //awaiting the search API
 			pageSize : 20, //amount of search results on page
 
-			//use for a lot TODO write proper reasons
+			collectionId : null,
 			collectionConfig : null, //loaded after mounting, without it nothing works
+			currentOutput: null, //contains the current search results
 			initialQuery : null, //yikes this is only used for storing the initial query
 
-			//for doing actions on the search results
 			selectedOnPage : {}, // key = resourceId, value = true/false
-			allRowsSelected : false, // are all search results selected
-			highlightData: {}
+			allRowsSelected : false // are all search results selected
 		};
 	}
 
@@ -137,8 +137,8 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	hideModalAndChangeHistory(collectionConfig) {
-		ComponentUtil.hideModal(this, 'showModal', 'collection__modal', true);
+	hideCollectionModalAndChangeHistory(collectionConfig) {
+		ComponentUtil.hideModal(this, 'showCollectionModal', 'collection__modal', true);
 
 		//TODO maybe this is not necessary, since it is already set
 		ComponentUtil.storeJSONInLocalStorage(
@@ -162,7 +162,7 @@ class SingleSearchRecipe extends React.Component {
                     currentOutput: null,
                     showBookmarkedItems: false
                 },
-                this.hideModalAndChangeHistory(data)
+                this.hideCollectionModalAndChangeHistory(data)
             );
         } else if(componentClass === 'SearchHit') {
 			if(data) {
@@ -642,7 +642,7 @@ class SingleSearchRecipe extends React.Component {
 		return (
 			<FlexModal
 				elementId="collection__modal"
-				stateVariable="showModal"
+				stateVariable="showCollectionModal"
 				owner={this}
 				size="large"
 				title="Choose a collection">
@@ -740,7 +740,7 @@ class SingleSearchRecipe extends React.Component {
 		if(showCollectionSelector) {
 			//show the button to open the modal
 			collectionBtn = (
-				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
+				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}>
 					Set collection ({collectionConfig ? collectionConfig.getCollectionTitle() : 'none selected'})
 				</button>
 			);
@@ -1011,7 +1011,7 @@ class SingleSearchRecipe extends React.Component {
         const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
 
         // all the different modals
-        const collectionModal = this.state.showModal ? this.renderCollectionModal() : null;
+        const collectionModal = this.state.showCollectionModal ? this.renderCollectionModal() : null;
 
         const quickViewModal = this.state.showQuickViewModal ? this.renderQuickViewModal(
         	storedSelectedRows,
