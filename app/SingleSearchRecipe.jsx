@@ -133,7 +133,7 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onReloadQueryData(collectionId, initialQuery) {
+	onReloadQueryData = (collectionId, initialQuery) => {
 		//load the collection config and finally
 		if(collectionId) {
 			CollectionUtil.generateCollectionConfig(
@@ -157,7 +157,7 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onLoadPlayoutAccess(accessApproved, desiredState) {
+	onLoadPlayoutAccess = (accessApproved, desiredState) => {
 		this.setState(
 			desiredState, () => {
 				if(desiredState.currentOutput && desiredState.currentOutput.query && desiredState.currentOutput.updateUrl) {
@@ -315,7 +315,7 @@ class SingleSearchRecipe extends React.Component {
 				this.state.collectionConfig.getThumbnailContentServerId(),
 				'thumbnails',
 				desiredState,
-				this.onLoadPlayoutAccess.bind(this)
+				this.onLoadPlayoutAccess
 			)
 		} else {
 			this.onLoadPlayoutAccess(true, desiredState);
@@ -478,7 +478,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
     // makes sure that all selected resources are ADDED to the selected groups
-	bookmarkToGroupInProject(allGroups, selectedGroups) {
+	bookmarkToGroupInProject = (allGroups, selectedGroups) => {
         const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
         	let saveCount = 0;
@@ -511,7 +511,7 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	onSaveBookmarks() {
+	onSaveBookmarks = () => {
 	    this.saveBookmarksToLocalStorage();
 		this.setState({
 			selectedOnPage : {},
@@ -537,7 +537,7 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	showQueryModal() {
+	showQueryModal = () => {
 		this.setState({
 			showQueryModal : true,
 			awaitingProcess : null
@@ -555,7 +555,7 @@ class SingleSearchRecipe extends React.Component {
 	    });
 	}
 
-	showResourceInQuickView(rawResult, isFirstResource, isLastResource) {
+	showResourceInQuickView = (rawResult, isFirstResource, isLastResource) => {
 	    let quickViewData = null;
 	    if(this.state.showSelectionOverview) {
 	    	quickViewData = ComponentUtil.convertRawSelectedData(rawResult, this.props.clientId, this.props.user)
@@ -594,7 +594,7 @@ class SingleSearchRecipe extends React.Component {
         }
 	}
 
-	//TODO this should also be simplified!! (reading from two different lists)
+	//FIXME eventually this should be moved to the QuickViewer, so it becomes an independant component
 	moveQuickViewResource = moveNext => {
 		let resourceList = [];
 	    let currentIndex = -1;
