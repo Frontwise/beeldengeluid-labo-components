@@ -201,10 +201,11 @@
 	}
 
 	.ms__custom-tooltip {
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: rgba(0, 0, 0, 0.8);
 		border-radius: 8px;
 		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
 		color: #f3f3f3;
+		min-width: 280px;
 		padding: 1rem 3rem;
 		text-transform: capitalize;
 		.rightAlign {

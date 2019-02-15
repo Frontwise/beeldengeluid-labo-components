@@ -142,31 +142,6 @@ const CollectionUtil = {
 			}
 		}
 		return label;
-	},
-
-	//for pruning long descriptions; makes sure to return the snippet that contains the search term
-	highlightSearchTermInDescription(text, searchTerm=null, maxWords=35) {
-		if(text) {
-		    if(Array.isArray(text)) {
-		        text = text.join('\n');
-		    }
-			let index = 0;
-			if(searchTerm) {
-				//const regex = new RegExp(searchTerm.toLowerCase(), 'gi');
-				const regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
-				index = text.toLowerCase().search(regex);
-			}
-			index = index > 50 ? index - 50 : 0;
-			text = text.substring(index);
-			let words = text.split(' ');
-			if(words.length > maxWords) {
-				words = words.slice(index == 0 ? 0 : 1, maxWords);
-			} else if(index != 0) {
-				words.splice(0,1);
-			}
-			return words.join(' ')
-		}
-		return null;
 	}
 
 }

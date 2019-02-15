@@ -11,6 +11,7 @@ const FlexRouter = {
 	},
 
 	//this is typically called from a search recipe after clicking a search result
+	//FIXME expects a FORMATTED searchResult
 	gotoItemDetails : function(itemDetailsRecipePath, searchResult, searchTerm) {
 		let url = FlexRouter.__getBaseUrl() + '/' + itemDetailsRecipePath + '?id=' + searchResult.resourceId;
 		url += '&cid=' + searchResult.index;

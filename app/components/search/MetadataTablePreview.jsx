@@ -1,17 +1,11 @@
-import JSONFormatter from 'json-formatter-js'
 import IDUtil from '../../util/IDUtil';
 
 //See: https://github.com/mohsen1/json-formatter-js
 
-class MetadataTable extends React.Component {
+class MetadataTablePreview extends React.Component {
 	constructor(props) {
 		super(props);
 		this.CLASS_PREFIX = 'mdt';
-	}
-
-	componentDidMount() {
-		const formatter = new JSONFormatter(this.props.data.rawData);
-		formatter.openAtDepth(Infinity);
 	}
 
 	render() {
@@ -76,4 +70,4 @@ class MetadataTable extends React.Component {
 
 }
 
-export default MetadataTable;
+export default MetadataTablePreview;

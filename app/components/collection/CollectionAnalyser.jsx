@@ -1,7 +1,7 @@
 import CollectionAPI from '../../api/CollectionAPI';
 import IDUtil from '../../util/IDUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import FieldSelector from './FieldSelector';
+import ComponentUtil from '../../util/ComponentUtil';
 
 //this component relies on the collection statistics as input
 class CollectionAnalyser extends React.Component {
@@ -75,7 +75,7 @@ class CollectionAnalyser extends React.Component {
                             value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
                             total: data.doc_stats.total,
                             withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
-                        }
+                        };
 
                         // store to sessionStorage
                         window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
@@ -168,7 +168,7 @@ class CollectionAnalyser extends React.Component {
 
         let field = null;
         this.state.fields.some((f)=>{
-            if (f.id == this.state.field){
+            if (f.id === this.state.field){
                 field = f;
                 return true;
             }
@@ -210,7 +210,7 @@ class CollectionAnalyser extends React.Component {
                                     {completeness ?
                                         <div>
                                             <span>{completeness.value}%</span>
-                                            <span className="total">{completeness.withValue} / {completeness.total}</span>
+                                            <span className="total">{ComponentUtil.formatNumber(completeness.withValue)} / {ComponentUtil.formatNumber(completeness.total)}</span>
                                         </div>
                                         : <i className="fa fa-circle-o-notch fa-spin"/>
                                     }
@@ -220,14 +220,13 @@ class CollectionAnalyser extends React.Component {
                     </table>
                 </div>
             ) : null;
-
             // create final analysis block
 			analysisBlock = (
 				<div className="analysis_field">
                     <button className="btn btn-primary" onClick={this.onShowFieldSelector.bind(this)}>Select field to analyse</button>
                     {currentField}
                 </div>
-            )
+            );
 
             fieldSelector = (
                 <FieldSelector

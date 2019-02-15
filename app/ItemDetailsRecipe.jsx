@@ -12,7 +12,6 @@ import FlexRouter from './util/FlexRouter';
 import ReactTooltip from 'react-tooltip';
 
 import MetadataTable from './components/search/MetadataTable';
-
 import LDResourceViewer from './components/linkeddata/LDResourceViewer';
 
 import DocumentAPI from './api/DocumentAPI';
@@ -32,6 +31,7 @@ import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
 import PropTypes from 'prop-types';
+import ReactJson from 'react-json-view'
 
 import { initHelp } from './components/workspace/helpers/helpDoc';
 import LoadingSpinner from "./components/helpers/LoadingSpinner";
@@ -306,7 +306,7 @@ class ItemDetailsRecipe extends React.Component {
 		if(this.state.resourceAnnotations) {
 			const temp = this.state.resourceAnnotations.filter(
 				a => a.motivation !== 'bookmarking' && a.target.source === this.state.itemData.resourceId
-			)
+			);
 			annotation = temp.length > 0 ? temp[0] : null;
 		}
 		return annotation
@@ -637,7 +637,7 @@ class ItemDetailsRecipe extends React.Component {
 
 		//finally generate the mediaPanel
 		return (
-			<FlexBox title="Related media objects">
+			<FlexBox title="Media">
 				<ul className="nav nav-tabs">
 					{mediaTabs}
 				</ul>
@@ -800,37 +800,56 @@ class ItemDetailsRecipe extends React.Component {
 		return null;
 	}
 
-    saveResultsDetailsData(data, sr, nextResultSet) {
+    saveResultsDetailsData(data, query, nextResultSet) {
+    	//store the RAW search results in the local storage...
         ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', data);
+
+        //also make sure the last query is stored...
         ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query);
-        const detailResults = data.results.map((result, index) => {
-            return this.state.collectionConfig.getItemDetailData(data.results[index],
-                sr.dateRange && sr.dateField
-                    ? sr.dateRange.dateField : null);
+
+        //store all of the FORMATTED search results in the local storage...
+        const formattedResults = data.results.map((result, index) => {
+            return this.state.collectionConfig.getItemDetailData(
+            	data.results[index],
+                query.dateRange && query.dateField ? query.dateRange.dateField : null
+			);
         });
-        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', detailResults);
-        const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', formattedResults);
+
+
+        //FIXME this does not make any sense, this data is already available in formattedResults
+        //const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
         if(nextResultSet) {
-            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[0], this.props.params.st);
+            FlexRouter.gotoItemDetails(
+            	this.props.recipe.url.substr(1), formattedResults[0], this.props.params.st
+            );
         } else {
-            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result[result.length-1], this.props.params.st);
+			FlexRouter.gotoItemDetails(
+				this.props.recipe.url.substr(1), formattedResults[formattedResults.length - 1], this.props.params.st
+			);
         }
     }
 
     getResource(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
         if(currentQueryOutput) {
-            const sr = lastQuery;
-            sr.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
-            SearchAPI.search(sr, this.state.collectionConfig, data => this.saveResultsDetailsData(data, sr, nextResourceSet), true)
+            const query = lastQuery;
+            query.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
+            SearchAPI.search(
+            	query,
+            	this.state.collectionConfig,
+            	data => this.saveResultsDetailsData(data, query, nextResourceSet),
+            	true
+            )
         }
     }
 
     gotoItemDetails(resourceId) {
-        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData'),
-            userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query'),
-            currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput'),
-            pageNumber = currentQueryOutput.currentPage,
-            result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+        const currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+        const pageNumber = currentQueryOutput.currentPage;
+		const result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+
         if (!resourceId) {
             const indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
             if (indexCurrentResource === resultDetailsData.length - 1) {
@@ -960,6 +979,21 @@ class ItemDetailsRecipe extends React.Component {
                 </div>
             </FlexBox>
         )
+    }
+
+    renderJSONDataBlock() {
+    	if (this.state.itemData.rawData) {
+            return (
+	            <FlexBox isVisible={false} title="All Data">
+	                <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+	                    <div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)}>
+							<ReactJson src={this.state.itemData.rawData} />
+						</div>
+	                </div>
+	            </FlexBox>
+            )
+        }
+        return null;
     }
 
 	render() {
@@ -1110,6 +1144,7 @@ class ItemDetailsRecipe extends React.Component {
             const exploreBlock = this.renderExploreBlock();
 
 
+            const jsonDataBlock = this.renderJSONDataBlock();
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -1136,6 +1171,9 @@ class ItemDetailsRecipe extends React.Component {
 									</div>
                                     <div className="row">
                                         {exploreBlock}
+                                    </div>
+                                    <div className="row">
+                                        {jsonDataBlock}
                                     </div>
 								</div>
 								<div className="col-md-5">
