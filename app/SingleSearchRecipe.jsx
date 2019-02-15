@@ -33,6 +33,7 @@ import LoadingSpinner from './components/helpers/LoadingSpinner';
 import PropTypes from 'prop-types';
 
 class SingleSearchRecipe extends React.Component {
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -41,7 +42,7 @@ class SingleSearchRecipe extends React.Component {
 			showBookmarkModal : false, //for the bookmark group selector
 			showQuickViewModal : false, //for the quickview result preview
 
-			showBookmarkedItems : false, //show the selected items, instead of the search results
+			showSelectionOverview : false, //show the selected items, instead of the search results
 
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
 
@@ -60,6 +61,22 @@ class SingleSearchRecipe extends React.Component {
 		};
 	}
 
+	static elementInViewport(el) {
+    	const rect = el.getBoundingClientRect();
+    	return (
+			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
+		)
+	}
+
+	static afterRenderingHits() {
+		const imgDefer = document.getElementsByTagName('img');
+		for (let i=0; i<imgDefer.length; i++) {
+			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
+				imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-src'));
+			}
+		}
+	}
+
 	componentWillUnmount() {
 		window.onscroll = null;
 	}
@@ -68,12 +85,15 @@ class SingleSearchRecipe extends React.Component {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
 		initHelp("Search", "/feature-doc/tools/single-search");
 
+		//makes sure that the images are loaded only when visible
 		window.onscroll = () => {SingleSearchRecipe.afterRenderingHits()};
 
-		//either loads the collectionID + initial query from
-		//1) localStorage
-		//2) workspace API
-		//3) the recipe config
+		/*
+			Loads the collectionID + initial query from either the:
+			1) localStorage
+			2) workspace API
+			3) the recipe config
+		*/
 		let collectionId = null;
 		let initialQuery = null;
 		let loadingFromWorkSpace = false;
@@ -104,7 +124,7 @@ class SingleSearchRecipe extends React.Component {
 			}
 		}
 
-		//always refresh the saved bookmarks on load, since they could have been updated in
+		//Always refresh the saved bookmarks on load, since they could have been updated in
 		//either the workspace or the resource viewer
 		this.saveBookmarksToLocalStorage();
 
@@ -129,7 +149,7 @@ class SingleSearchRecipe extends React.Component {
 						collectionConfig : config,
 						initialQuery : initialQuery,
 						currentOutput : null,
-                        showBookmarkedItems : false
+                        showSelectionOverview : false
 					});
 				},
 				true
@@ -163,22 +183,6 @@ class SingleSearchRecipe extends React.Component {
 		);
 	}
 
-	static elementInViewport(el) {
-    	const rect = el.getBoundingClientRect();
-    	return (
-			rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight)
-		)
-	}
-
-	static afterRenderingHits() {
-		const imgDefer = document.getElementsByTagName('img');
-		for (let i=0; i<imgDefer.length; i++) {
-			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
-				imgDefer[i].setAttribute('src',imgDefer[i].getAttribute('data-src'));
-			}
-		}
-	}
-
 	/* ------------------------------- CHILD COMPONENT CALLBACKS ----------------------- */
 
 	//NOTE: the original idea was to controle the output of all child components in this function and orchestrate what to do based on the recipe
@@ -192,9 +196,7 @@ class SingleSearchRecipe extends React.Component {
 		} else if(componentClass === 'SearchHit') {
 			this.onItemSelected(data);
 		} else if(componentClass === 'BookmarkSelector') {
-			if(data && data.allGroups && data.selectedGroups) {
-				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
-			}
+			this.onBookmarkGroupSelected(data);
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
 		}
@@ -208,7 +210,7 @@ class SingleSearchRecipe extends React.Component {
                 collectionConfig: collectionConfig,
                 initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, collectionConfig),
                 currentOutput: null,
-                showBookmarkedItems: false
+                showSelectionOverview: false
             },
 			() => {
 				ComponentUtil.hideModal(this, 'showCollectionModal', 'collection__modal', true);
@@ -220,7 +222,7 @@ class SingleSearchRecipe extends React.Component {
         );
 	}
 
-	onProjectSelected(project) {
+	onProjectSelected = (project) => {
 		this.setState(
 			{activeProject : project},
 			() => {
@@ -249,10 +251,10 @@ class SingleSearchRecipe extends React.Component {
             }
 
 			// make sure to update the list of stored bookmarks with the changed selection
-			this.updateStoredBookmarkList(item.resource, item.selected);
+			this.updateSelectedItems(item.resource, item.selected);
 
 			//determine whether the last selected item in the selection was selected, so we need to switch back to showing the result list
-			let showSelectionOverview = this.state.showBookmarkedItems;
+			let showSelectionOverview = this.state.showSelectionOverview;
 			if(showSelectionOverview) {
             	const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
             	showSelectionOverview = selRowsInLocalStorage.length > 0;
@@ -260,13 +262,19 @@ class SingleSearchRecipe extends React.Component {
 
 			this.setState({
                 selectedOnPage : selectedOnPage,
-				allRowsSelected : item.selected ? this.areAllRowsSelected() : false,
-                showBookmarkedItems : showSelectionOverview,
+				allRowsSelected : item.selected ? this.areAllItemsSelected() : false,
+                showSelectionOverview : showSelectionOverview,
 			});
 		}
 	}
 
-	onQuerySaved(project) {
+	onBookmarkGroupSelected = (data) => {
+		if(data && data.allGroups && data.selectedGroups) {
+			this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+		}
+	}
+
+	onQuerySaved = (project) => {
 		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
 			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
 		});
@@ -288,7 +296,7 @@ class SingleSearchRecipe extends React.Component {
 		const desiredState = {
 			currentOutput: data,
 			currentResults : enrichedSearchResults, //TODO currently testing this new state variable
-            showBookmarkedItems : false
+            showSelectionOverview : false
 		};
 		// if search is not the result of paging then clear selectedOnPage.
         !paging ? desiredState.selectedOnPage = {} : desiredState;
@@ -313,8 +321,8 @@ class SingleSearchRecipe extends React.Component {
 			this.onLoadPlayoutAccess(true, desiredState);
 		}
         this.setState({
-            selectedOnPage : this.getAlreadySelectedRows(data),
-            allRowsSelected: this.areAllRowsSelected(),
+            selectedOnPage : this.getAlreadySelectedItems(data),
+            allRowsSelected: this.areAllItemsSelected(),
             isSearching: false,
             isPagingOutOfBounds : data.pagingOutOfBounds === true
         })
@@ -352,8 +360,15 @@ class SingleSearchRecipe extends React.Component {
 
 	/* ------------------------------- TABLE ACTION FUNCTIONS ----------------------- */
 
+	//hides search results and shows all selected items
+	showSelectionOverview = () => {
+        this.setState({
+            showSelectionOverview : !this.state.showSelectionOverview
+        });
+    }
+
 	//checks if the search results contain resources that were already selected in another query
-	getAlreadySelectedRows(searchData) {
+	getAlreadySelectedItems(searchData) {
 		if(!searchData || !searchData.results) {
 			return {};
 		}
@@ -368,7 +383,7 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	//TODO check this function, it is a bit duplicate, similar code is also in ...
-	areAllRowsSelected() {
+	areAllItemsSelected() {
 		const storeSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows')
 		if(!storeSelectedRows || !(this.state.currentOutput && this.state.currentOutput.results)) {
 			return false;
@@ -378,16 +393,16 @@ class SingleSearchRecipe extends React.Component {
 		);
 	}
 
-	clearSelectedResources = () => {
+	clearSelectedItems = () => {
 		ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows')
         this.setState({
         	selectedOnPage : {},
         	allRowsSelected : false,
-        	showBookmarkedItems : false,
+        	showSelectionOverview : false,
     	});
     }
 
-	toggleAllRows = (e) => {
+	toggleSelectAllItems = (e) => {
 		e.preventDefault();
 		let rows = this.state.selectedOnPage;
     	const rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
@@ -405,7 +420,7 @@ class SingleSearchRecipe extends React.Component {
                 rows[result._id] = !this.state.allRowsSelected;
                 const isChecked = rowsOnLocalStorage ? rowsOnLocalStorage.findIndex(i => i._id === result._id) : -1;
                 if(isChecked === -1) {
-                    this.updateStoredBookmarkList(result, true);
+                    this.updateSelectedItems(result, true);
                 }
 			});
 		}
@@ -415,15 +430,7 @@ class SingleSearchRecipe extends React.Component {
 		});
 	}
 
-	/* ------------------------------- BOOKMARK RELATED FUNCTIONS ----------------------- */
-
-	showBookmarkedItems = () => {
-        this.setState({
-            showBookmarkedItems : !this.state.showBookmarkedItems
-        });
-    }
-
-	updateStoredBookmarkList(resource, select) {
+	updateSelectedItems(resource, select) {
 		if(select) {
 			resource.query = this.state.currentOutput.query;
 		}
@@ -433,6 +440,8 @@ class SingleSearchRecipe extends React.Component {
 			ComponentUtil.removeItemInLocalStorage('selectedRows', resource, '_id');
 		}
 	}
+
+	/* ------------------------------- BOOKMARK RELATED FUNCTIONS ----------------------- */
 
 	// current bookmarks per project
 	saveBookmarksToLocalStorage() {
@@ -448,7 +457,7 @@ class SingleSearchRecipe extends React.Component {
     }
 
 	//this will first check if a project was selected. Then either bookmarks or opens the project selector first
-	bookmark = () => {
+	bookmarkSelectedItems = () => {
 		if(this.state.activeProject === null) {
 			this.setState({
 				showProjectModal : true,
@@ -464,7 +473,7 @@ class SingleSearchRecipe extends React.Component {
 			showBookmarkModal : true,
 			awaitingProcess : null,
             showBookmarkItems : false,
-            showBookmarkedItems : false
+            showSelectionOverview : false
 		});
 	}
 
@@ -507,7 +516,7 @@ class SingleSearchRecipe extends React.Component {
 		this.setState({
 			selectedOnPage : {},
 			allRowsSelected : false,
-            showBookmarkedItems : false
+            showSelectionOverview : false
 		}, () => {
 			alert('Bookmarks were saved successfully');
             ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
@@ -521,7 +530,7 @@ class SingleSearchRecipe extends React.Component {
 			this.setState({
 				showProjectModal : true,
 				awaitingProcess : 'saveQuery',
-                showBookmarkedItems : false
+                showSelectionOverview : false
 			});
 		} else {
 			this.showQueryModal();
@@ -548,7 +557,7 @@ class SingleSearchRecipe extends React.Component {
 
 	showResourceInQuickView(rawResult, isFirstResource, isLastResource) {
 	    let quickViewData = null;
-	    if(this.state.showBookmarkedItems) {
+	    if(this.state.showSelectionOverview) {
 	    	quickViewData = ComponentUtil.convertRawSelectedData(rawResult, this.props.clientId, this.props.user)
 	    } else {
 	    	quickViewData = ComponentUtil.convertRawSearchResult(rawResult, this.state.collectionConfig, this.state.currentOutput.query);
@@ -579,7 +588,7 @@ class SingleSearchRecipe extends React.Component {
 
         ComponentUtil.storeJSONInLocalStorage('selectedRows', currentSelection);
         if(currentSelection.length === 0) {
-            this.clearSelectedResources();
+            this.clearSelectedItems();
         } else {
             this.setState({selectedOnPage: currentSelection, lastUnselectedIndex: foundIndex});
         }
@@ -591,7 +600,7 @@ class SingleSearchRecipe extends React.Component {
 	    let currentIndex = -1;
 	    let nextResource = null;
 	    let isLastResource = false;
-	    if(this.state.showBookmarkedItems) {
+	    if(this.state.showSelectionOverview) {
             resourceList = ComponentUtil.getJSONFromLocalStorage('selectedRows'); //contains RAW results
             currentIndex = resourceList.findIndex(elem => elem._id === this.state.quickViewData.formattedData.resourceId);
             if(currentIndex === -1) {
@@ -779,7 +788,7 @@ class SingleSearchRecipe extends React.Component {
 
 		let listComponent = null;
 
-		if (state.showBookmarkedItems) {//storedSelectedRows && storedSelectedRows.length > 0
+		if (state.showSelectionOverview) {//storedSelectedRows && storedSelectedRows.length > 0
 			listComponent = this.renderSelectionOverview(storedSelectedRows)
 		} else {
 			//populate the list of search results
@@ -792,7 +801,7 @@ class SingleSearchRecipe extends React.Component {
 			state.currentOutput,
 			state.collectionConfig,
 			storedSelectedRows,
-			state.showBookmarkedItems,
+			state.showSelectionOverview,
 			state.selectedOnPage,
 			state.pageSize
 		);
@@ -818,7 +827,7 @@ class SingleSearchRecipe extends React.Component {
             <div className="table-actions-header bookmarked-results">
                 <h4 className="header-selected-items">
                     Selected items
-                    <i className="fa fa-remove" onClick={this.showBookmarkedItems}/>
+                    <i className="fa fa-remove" onClick={this.showSelectionOverview}/>
                 </h4>
                 <div className="selected-items">
                     {storedSelectedRows.map(this.renderSelectedItems)}
@@ -888,11 +897,11 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	//FIXME the ugly HTML & lack of proper class names
-	renderTableHeader = (currentOutput, collectionConfig, storedSelectedRows, showBookmarkedItems, selectedOnPage, pageSize) => {
+	renderTableHeader = (currentOutput, collectionConfig, storedSelectedRows, showSelectionOverview, selectedOnPage, pageSize) => {
 		return (
 			<div className="table-actions-header">
                 {this.renderTableSelectAll(currentOutput, selectedOnPage)}
-                {this.renderActionButtons(storedSelectedRows, showBookmarkedItems)}
+                {this.renderTableDropdown(storedSelectedRows, showSelectionOverview)}
                 <div style={{textAlign: 'center'}}>
                     {this.renderPagingButtons(currentOutput.currentPage, currentOutput.totalHits, pageSize)}
                     <div style={{float: 'right'}}>
@@ -916,14 +925,14 @@ class SingleSearchRecipe extends React.Component {
 		const allChecked = currentOutput.results.map(item => currentSelectedIds.findIndex(it => it === item._id));
 		const isChecked = allChecked.findIndex(item => item === -1) === -1;
 		return (
-            <div onClick={this.toggleAllRows} className="select-all">
+            <div onClick={this.toggleSelectAllItems} className="select-all">
                 <input type="checkbox" defaultChecked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
                 <label htmlFor={'cb__select-all'}><span/></label>
             </div>
         );
 	}
 
-	renderActionButtons = (storedSelectedRows, showBookmarkedItems) => {
+	renderTableDropdown = (storedSelectedRows, showSelectionOverview) => {
 		const actions = [];
 		if(storedSelectedRows && storedSelectedRows.length > 0) {
             actions.push(
@@ -934,16 +943,16 @@ class SingleSearchRecipe extends React.Component {
                         <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
                     </button>
                     <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
-                        <button className="dropdown-item" type="button" onClick={this.showBookmarkedItems}>
-							{showBookmarkedItems ? 'Hide' : 'Show'} selected item(s)
+                        <button className="dropdown-item" type="button" onClick={this.showSelectionOverview}>
+							{showSelectionOverview ? 'Hide' : 'Show'} selected item(s)
 						</button>
-                        <button className="dropdown-item" type="button" onClick={this.bookmark}>
+                        <button className="dropdown-item" type="button" onClick={this.bookmarkSelectedItems}>
                         	Bookmark selection
                         </button>
                         <button
 							className="dropdown-item"
 							type="button"
-							onClick={this.clearSelectedResources}>
+							onClick={this.clearSelectedItems}>
 							Clear selection
 						</button>
                     </div>
