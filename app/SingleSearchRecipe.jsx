@@ -137,72 +137,6 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	hideCollectionModalAndChangeHistory(collectionConfig) {
-		ComponentUtil.hideModal(this, 'showCollectionModal', 'collection__modal', true);
-
-		//TODO maybe this is not necessary, since it is already set
-		ComponentUtil.storeJSONInLocalStorage(
-			'user-last-query',
-			QueryModel.ensureQuery({size : this.state.pageSize}, collectionConfig)
-		)
-	}
-
-	//this function receives all output of components that generate output and orchestrates where
-	//to pass it to based on the ingredients of the recipe
-	//TODO change this, so it knows what to do based on the recipe
-	onComponentOutput = (componentClass, data) => {
-		if(componentClass === 'QueryBuilder') {
-			this.onSearched(data);
-        } else if (componentClass === 'CollectionSelector') {
-            //set the default query for the selected collection; creates a new query builder
-            this.setState({
-                    collectionId: data.collectionId,
-                    collectionConfig: data,
-                    initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, data),
-                    currentOutput: null,
-                    showBookmarkedItems: false
-                },
-                this.hideCollectionModalAndChangeHistory(data)
-            );
-        } else if(componentClass === 'SearchHit') {
-			if(data) {
-				//get the selected rows on the current page
-                const selectedOnPage = this.state.selectedOnPage;
-				//check if the search hit was selected and update the selected rows accordingly
-                if(data.selected) {
-                    selectedOnPage[data.resourceId] = true;
-                } else {
-                    delete selectedOnPage[data.resourceId]
-                }
-
-				// make sure to update the list of stored bookmarks with the changed selection
-				this.updateStoredBookmarkList(data.resource, data.selected);
-
-				//now fetch which rows are still selected (in the local storage)
-                const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
-
-				this.setState({
-                    selectedOnPage : selectedOnPage,
-					allRowsSelected : data.selected ? this.areAllRowsSelected() : false,
-                    showBookmarkedItems : selRowsInLocalStorage.length > 0 ? this.state.showBookmarkedItems : false,
-				});
-			}
-		} else if(componentClass === 'ProjectSelector') {
-			this.setState(
-				{activeProject : data},
-				() => {
-					this.onProjectChanged.call(this, data)
-				}
-			);
-		} else if(componentClass === 'BookmarkSelector') {
-			if(data && data.allGroups && data.selectedGroups) {
-				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
-			}
-		} else if(componentClass === 'QueryEditor') {
-			this.onQuerySaved(data)
-		}
-	}
-
 	onLoadPlayoutAccess(accessApproved, desiredState) {
 		this.setState(
 			desiredState, () => {
@@ -245,19 +179,96 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	/* ------------------------------- PROJECT RELATED FUNCTION ----------------------- */
+	/* ------------------------------- CHILD COMPONENT CALLBACKS ----------------------- */
 
-
-	onProjectChanged(project) {
-		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
-        this.saveBookmarksToLocalStorage();
-		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
-			if(this.state.awaitingProcess) {
-				switch(this.state.awaitingProcess) {
-					case 'bookmark' : this.selectBookmarkGroup(); break;
-					case 'saveQuery' : this.showQueryModal(); break;
-				}
+	//NOTE: the original idea was to controle the output of all child components in this function and orchestrate what to do based on the recipe
+	onComponentOutput = (componentClass, data) => {
+		if(componentClass === 'QueryBuilder') {
+			this.onSearched(data);
+        } else if (componentClass === 'CollectionSelector') {
+            this.onCollectionSelected(data);
+        } else if(componentClass === 'ProjectSelector') {
+			this.onProjectSelected(data)
+		} else if(componentClass === 'SearchHit') {
+			this.onItemSelected(data);
+		} else if(componentClass === 'BookmarkSelector') {
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
 			}
+		} else if(componentClass === 'QueryEditor') {
+			this.onQuerySaved(data)
+		}
+	}
+
+	onCollectionSelected = (collectionConfig) => {
+		//set the default query for the selected collection; creates a new query builder
+        this.setState(
+        	{
+                collectionId: collectionConfig.collectionId,
+                collectionConfig: collectionConfig,
+                initialQuery: QueryModel.ensureQuery({size: this.state.pageSize}, collectionConfig),
+                currentOutput: null,
+                showBookmarkedItems: false
+            },
+			() => {
+				ComponentUtil.hideModal(this, 'showCollectionModal', 'collection__modal', true);
+				ComponentUtil.storeJSONInLocalStorage(
+					'user-last-query',
+					QueryModel.ensureQuery({size : this.state.pageSize}, collectionConfig)
+				)
+			}
+        );
+	}
+
+	onProjectSelected(project) {
+		this.setState(
+			{activeProject : project},
+			() => {
+				ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+		        this.saveBookmarksToLocalStorage();
+				ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
+					if(this.state.awaitingProcess) {
+						switch(this.state.awaitingProcess) {
+							case 'bookmark' : this.selectBookmarkGroup(); break;
+							case 'saveQuery' : this.showQueryModal(); break;
+						}
+					}
+				});
+			}
+		);
+	}
+
+	onItemSelected = (item) => {
+		if(item) {
+			//update the list of selected items (showing on the page)
+            const selectedOnPage = this.state.selectedOnPage;
+            if(item.selected) {
+                selectedOnPage[item.resourceId] = true;
+            } else {
+                delete selectedOnPage[item.resourceId]
+            }
+
+			// make sure to update the list of stored bookmarks with the changed selection
+			this.updateStoredBookmarkList(item.resource, item.selected);
+
+			//determine whether the last selected item in the selection was selected, so we need to switch back to showing the result list
+			let showSelectionOverview = this.state.showBookmarkedItems;
+			if(showSelectionOverview) {
+            	const selRowsInLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
+            	showSelectionOverview = selRowsInLocalStorage.length > 0;
+            }
+
+			this.setState({
+                selectedOnPage : selectedOnPage,
+				allRowsSelected : item.selected ? this.areAllRowsSelected() : false,
+                showBookmarkedItems : showSelectionOverview,
+			});
+		}
+	}
+
+	onQuerySaved(project) {
+		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
+			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
 		});
 	}
 
@@ -269,9 +280,6 @@ class SingleSearchRecipe extends React.Component {
         })
     }
 
-    //this is updated via the query builder, but it does not update the state.query...
-	//TODO figure out if it's bad to update the state
-	//TODO add the highlight data in the state here, so it does not have to be fetched from the render function
 	onSearched(data, paging) {
         const enrichedSearchResults = data ? data.results.map( (result, index) => {
         	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
@@ -312,7 +320,6 @@ class SingleSearchRecipe extends React.Component {
         })
 	}
 
-	//FIXME this function is tied to the function returned by the search component (which is kind of weird, but works)
 	//FIXME queryId wordt niet meer gebruikt
 	gotoPage = (queryId, pageNumber) => {
         this.setState({
@@ -327,7 +334,7 @@ class SingleSearchRecipe extends React.Component {
         })
 	}
 
-	//the sortMode is translated to sort params inside the QueryBuilder component
+	//NOTE: The sortMode is translated to sort params inside the QueryBuilder component
 	//sortMode = {type : date/rel, order : desc/asc}
     sortResults = (queryId, sortParams) => {
 	    this.setState({
@@ -380,7 +387,7 @@ class SingleSearchRecipe extends React.Component {
     	});
     }
 
-	toggleRows = (e) => {
+	toggleAllRows = (e) => {
 		e.preventDefault();
 		let rows = this.state.selectedOnPage;
     	const rowsOnLocalStorage = ComponentUtil.getJSONFromLocalStorage('selectedRows') || null;
@@ -519,13 +526,6 @@ class SingleSearchRecipe extends React.Component {
 		} else {
 			this.showQueryModal();
 		}
-	}
-
-	//called after onComponentOutput of QueryEditor
-	onQuerySaved(project) {
-		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
-		});
 	}
 
 	showQueryModal() {
@@ -916,7 +916,7 @@ class SingleSearchRecipe extends React.Component {
 		const allChecked = currentOutput.results.map(item => currentSelectedIds.findIndex(it => it === item._id));
 		const isChecked = allChecked.findIndex(item => item === -1) === -1;
 		return (
-            <div onClick={this.toggleRows} className="select-all">
+            <div onClick={this.toggleAllRows} className="select-all">
                 <input type="checkbox" defaultChecked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
                 <label htmlFor={'cb__select-all'}><span/></label>
             </div>
