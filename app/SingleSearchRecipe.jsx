@@ -289,7 +289,7 @@ class SingleSearchRecipe extends React.Component {
     }
 
 	onSearched(data, paging) {
-        const enrichedSearchResults = data ? data.results.map( (result, index) => {
+        const enrichedSearchResults = data && data.results ? data.results.map( (result, index) => {
         	return ComponentUtil.convertRawSearchResult(result, this.state.collectionConfig, data.query);
         }) : [];
 
