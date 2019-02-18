@@ -6,6 +6,8 @@ import CustomTooltip from './helpers/CustomTooltip';
 
 //implemented using recharts: http://recharts.org/en-US/examples
 
+//FIXME part of this code is duplicate with whatever is in the ComparisonHistogram!
+
 class QueryComparisonLineChart extends React.Component {
 
     constructor(props) {
@@ -35,7 +37,7 @@ class QueryComparisonLineChart extends React.Component {
                 isSearching: false,
                 relData: relativeValues
             }, () => {
-                this.layout.classList.remove("spinner");
+                this.layout.classList.remove("spinner")
             }
         );
     }
@@ -66,7 +68,7 @@ class QueryComparisonLineChart extends React.Component {
         //FIXME this is not right, fix this with the query model
         return new Promise(function(resolve, reject) {
             const query = {
-            ...that.props.data[key].query,
+                ...that.props.data[key].query,
                 term: '',
                 selectedFacets: {},
                 fieldCategory: []
@@ -116,6 +118,7 @@ class QueryComparisonLineChart extends React.Component {
     }
 
     getColorIndexes = dataSet => {
+        if(!dataSet) return null;
         const indexes = [];
         Object.keys(dataSet).forEach((k, index) => {
             if (dataSet[k].data.length > 0) {
@@ -195,7 +198,7 @@ class QueryComparisonLineChart extends React.Component {
     render() {
         const lines = this.renderLines();
         const timelineData = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
-        const colorIndexes = this.props.data ? this.getColorIndexes(this.props.data) : null;
+        const colorIndexes = this.getColorIndexes(this.props.data);
 
         return (
             <div className={IDUtil.cssClassName('query-comparison-line-chart')}>

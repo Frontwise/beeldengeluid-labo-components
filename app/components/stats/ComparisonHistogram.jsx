@@ -1,18 +1,14 @@
 import IDUtil from '../../util/IDUtil';
-import {
-    Label,
-    CartesianGrid,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    BarChart,
-    Bar
-} from 'recharts';
+import { Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
 import CustomTooltip from './helpers/CustomTooltip';
 
-class ComparisonHistogram extends React.Component {
+//implemented using recharts: http://recharts.org/en-US/examples
+
+//FIXME part of this code is duplicate with whatever is in the QueryComparisonLineChart!
+
+export default class ComparisonHistogram extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -53,7 +49,7 @@ class ComparisonHistogram extends React.Component {
         })
     }
 
-    getQueriesIds = dataSets => dataSets.map(set => set.query.id);
+    getQueriesIds = dataSets => dataSets.map(set => set.query.id)
 
     /*
         Gets an object with query info with queryId as key.
@@ -75,7 +71,7 @@ class ComparisonHistogram extends React.Component {
            }
         });
         return returnedType === 'arr' ? dataArr : dataObj;
-    };
+    }
 
     getJoinedData = dataSet => {
         /*
@@ -100,9 +96,8 @@ class ComparisonHistogram extends React.Component {
         const minYear = new Date(__endYear(relGraphData, Math.min)).getFullYear();
         const maxYear = new Date(__endYear(relGraphData, Math.max)).getFullYear();
         const validRange = __getValidRange(minYear, maxYear);
-        let dataForGraph = [];
 
-        validRange.forEach(year => {
+        return validRange.map(year => {
             let tempObj = {};
 
             relGraphData.forEach(set => {
@@ -112,37 +107,28 @@ class ComparisonHistogram extends React.Component {
                 }
 
             });
-            dataForGraph.push(tempObj);
+            return tempObj
         });
-        return dataForGraph;
-    };
-
-    getRelValues(absoluteValues, relativeValues) {
-        const relVals = this.__getGraphData(relativeValues, 'obj');
-        let points = [];
-
-        absoluteValues.forEach(point => {
-            let relPoint = {"date": point["date"]};
-
-            Object.keys(point).forEach(propt => {
-                    if (propt !== 'date' && propt !== 'key' && propt !== 'date_millis' && propt !== 'key_as_string' && propt !== 'doc_count') {
-                        let tt = relVals[`${propt}`].find(obj => {
-                            return obj.date === point.date
-                        });
-
-                        relPoint[`${propt}`] = (tt[`${propt}`] === 0 || point[`${propt}`] === 0
-                                ? 0
-                                : point[`${propt}`] / tt[`${propt}`] * 100
-                        );
-                    }
-                }
-            );
-            points.push(relPoint)
-
-        });
-        return points
     }
-    onOutput(relData) {
+
+    getRelValues = (absoluteValues, relativeValues) => {
+        const relVals = this.__getGraphData(relativeValues, 'obj');
+        return absoluteValues.map(point => {
+            const relPoint = {date: point["date"]};
+            Object.keys(point).forEach(prop => {
+                if (prop !== 'date' && prop !== 'key' && prop !== 'date_millis' && prop !== 'key_as_string' && prop !== 'doc_count') {
+                    const tt = relVals[prop].find(obj => obj.date === point.date);
+                    relPoint[prop] = (tt[prop] === 0 || point[prop] === 0
+                        ? 0
+                        : point[prop] / tt[prop] * 100
+                    );
+                }
+            });
+            return relPoint
+        })
+    }
+
+    onRelativeDataReceived = (relData) => {
         const relativeValues = this.getRelValues(this.state.absData, relData);
         this.setState({
                 viewMode: 'relative',
@@ -157,11 +143,12 @@ class ComparisonHistogram extends React.Component {
     async processData(data) {
         const promises = Object.keys(data).map(this.getData.bind(this));
         await Promise.all(promises).catch(d => console.log(d)).then(
-            (dataPerQuery) => this.onOutput(dataPerQuery));
+            (dataPerQuery) => this.onRelativeDataReceived(dataPerQuery)
+        );
     }
 
     // Get relatives values by resetting params
-    getRelativeValues() {
+    getRelativeValues = () => {
         if (this.state.viewMode === 'relative') {
             this.setState({
                 viewMode: 'absolute'
@@ -178,17 +165,18 @@ class ComparisonHistogram extends React.Component {
         }
     }
 
-    getColorIndexes = dataSet => {
-        let indexes = [];
+    getColorIndices = dataSet => {
+        if(!dataSet) return null;
+        const indexes = [];
         dataSet.forEach((k, index) => {
             if (k.aggregations[k.query.dateRange.field].length > 0) {
                 indexes.push(index)
             }
         });
         return indexes
-    };
+    }
 
-    getStackBars = dataKeys => dataKeys.map((id, index) => (
+    renderStackBars = dataKeys => dataKeys.map((id, index) => (
         <Bar
             isAnimationActive={true}
             dataKey={id}
@@ -196,29 +184,18 @@ class ComparisonHistogram extends React.Component {
             stackId="a"
             name=""
         />)
-    );
+    )
 
     render() {
         const random = Math.floor(Math.random() * 1000) + 1;
-        let bars = null;
-        let dataToPrint = null;
-        let colorIndexes = null;
-        if (this.state.queriesIds) {
-            bars = this.getStackBars(this.state.queriesIds);
-        }
-        if(this.props.data) {
-            colorIndexes = this.getColorIndexes(this.props.data);
-        }
-        if(this.state.viewMode === 'relative') {
-            dataToPrint = this.state.relData;
-        } else {
-            dataToPrint = this.state.absData;
-        }
+        const dataToPrint = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
+        const colorIndexes = this.getColorIndices(this.props.data);
+        const bars = this.state.queriesIds ? this.renderStackBars(this.state.queriesIds) : null;
 
         return (
             <div className={IDUtil.cssClassName('histogram')}>
 				<span className="ms_toggle_btn" >
-                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
+                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues}/>
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                 </span>
                 <ResponsiveContainer width="100%" minHeight="360px" height="40%">
@@ -249,6 +226,3 @@ class ComparisonHistogram extends React.Component {
         )
     }
 }
-export default ComparisonHistogram;
-
-
