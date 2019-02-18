@@ -115,7 +115,6 @@ class HTML5VideoPlayer extends React.Component {
 	renderCustomControls = (playerAPI, hideOffAirContent) => {
 		console.debug(hideOffAirContent)
 		if(playerAPI && hideOffAirContent) {
-			console.debug('got it!')
 			return (
 				<FlexPlayerControls
 					ref={this.controlsRef}
@@ -126,8 +125,7 @@ class HTML5VideoPlayer extends React.Component {
 				/>
 			)
 		}
-		console.debug('no controls?')
-		return null;
+		return null
 	}
 
 	render() {

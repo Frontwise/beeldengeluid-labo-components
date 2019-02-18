@@ -116,8 +116,6 @@ class FlexPlayerControls extends React.Component {
 					</button>
 				</div>
 
-				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek.bind(this)}/>
-
 				<div className="buttons" ref={this.buttonsRef}>
 					<button type="button" onClick={this.onToggleMute.bind(this)}>
 						<span className={'glyphicon' + (this.state.muted ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
@@ -129,6 +127,8 @@ class FlexPlayerControls extends React.Component {
 						<span className="glyphicon glyphicon-fullscreen"/>
 					</button>
 				</div>
+
+				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek.bind(this)}/>
 
 			</div>
 		)

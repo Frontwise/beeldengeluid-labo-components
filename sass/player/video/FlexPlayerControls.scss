@@ -1,4 +1,102 @@
+//this mixin is "local", since it's never re-used in any other component. Load it first, so the FlexPlayerControls component knows it's there (see below)
+/*
+    TODO style the sliders better, SEE TIPS:
+        http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html
+        https://www.cssportal.com/style-input-range/
+    FIXME
+        webkit & moz don't support separate colors for lower/upper (https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/)
+*/
+@mixin playerSlider($sliderHeight: 7px,  $sliderColor: #888, $sliderProgressColor: white, $sliderBorderColor : #888,
+    $thumbWidth: 14px, $thumbHeight: 14px, $thumbColor: white, $thumbBorderColor: #888) {
+
+    input[type=range] {
+        -webkit-appearance: none;
+        border: 1px solid $sliderBorderColor;
+        height: $sliderHeight;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+        height: $sliderHeight;
+        background: $sliderColor;
+        border: none;
+        border-radius: 3px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+        margin-top: -5px;
+    }
+    input[type=range]:focus {
+        outline: none;
+    }
+    input[type=range]:focus::-webkit-slider-runnable-track {
+        background: $sliderColor;
+    }
+
+    input[type=range]::-moz-range-track {
+        height: $sliderHeight;
+        background: $sliderColor;
+        border: 1px solid $sliderBorderColor;
+        border-radius: 3px;
+    }
+    input[type=range]::-moz-range-thumb {
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+    }
+
+    /*hide the outline behind the border*/
+    input[type=range]:-moz-focusring {
+        outline: 1px solid $sliderBorderColor;
+        outline-offset: -1px;
+    }
+
+    input[type=range]::-ms-track {
+        height: $sliderHeight;
+
+        /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+        background: transparent;
+
+        /*leave room for the larger thumb to overflow with a transparent border */
+        border-color: transparent;
+        border-width: 6px 0;
+
+        /*remove default tick marks*/
+        color: transparent;
+    }
+    input[type=range]::-ms-fill-lower {
+        background: $sliderProgressColor;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-fill-upper {
+        background: $sliderColor;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-thumb {
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+    }
+    input[type=range]:focus::-ms-fill-lower {
+        background: $sliderProgressColor;
+    }
+    input[type=range]:focus::-ms-fill-upper {
+        background: $sliderColor;
+    }
+
+}
+
 .bg__flex-controls {
+
+    @include playerSlider();
+
 	position: absolute;
     z-index:700000;
     top: 0%;
@@ -30,25 +128,16 @@
 
     }
 
-    .seekbar {
-        position: absolute;
-	    bottom: 50px;
-	    width: 98%;
-	    left: 1%;
-    }
-
     .buttons {
     	position: absolute;
-    	bottom: 6px;
-	    right: 10px;
+    	bottom: 28px;
+	    right: 1%;
         .volume {
             width: 80px;
             margin-top: 5px;
             display: inline;
         }
 	    button  {
-	    	width: 32px;
-		    height: 32px;
 		    background-color: transparent;
 		    border: none;
 		    color: white;
@@ -56,90 +145,10 @@
 	    }
     }
 
-    /*
-    TODO style the sliders better, SEE TIPS:
-        http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html
-        https://www.cssportal.com/style-input-range/
-    */
-    input[type=range] {
-        -webkit-appearance: none;
-        border: 1px solid white;
-        height: 5px;
-    }
-    input[type=range]::-webkit-slider-runnable-track {
-        height: 5px;
-        background: #fff;
-        border: none;
-        border-radius: 3px;
-    }
-    input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        border: 1px solid #fff;
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #bbb;
-        margin-top: -5px;
-    }
-    input[type=range]:focus {
-        outline: none;
-    }
-    input[type=range]:focus::-webkit-slider-runnable-track {
-        background: #ccc;
-    }
-
-    input[type=range]::-moz-range-track {
-        height: 5px;
-        background: #fff;
-        border: 1px solid #fff;
-        border-radius: 3px;
-    }
-    input[type=range]::-moz-range-thumb {
-        border: 1px solid #fff;
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #bbb;
-    }
-
-    /*hide the outline behind the border*/
-    input[type=range]:-moz-focusring{
-        outline: 1px solid white;
-        outline-offset: -1px;
-    }
-
-    input[type=range]::-ms-track {
-        height: 5px;
-
-        /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
-        background: transparent;
-
-        /*leave room for the larger thumb to overflow with a transparent border */
-        border-color: transparent;
-        border-width: 6px 0;
-
-        /*remove default tick marks*/
-        color: transparent;
-    }
-    input[type=range]::-ms-fill-lower {
-        background: #fff;
-        border-radius: 10px;
-    }
-    input[type=range]::-ms-fill-upper {
-        background: #fff;
-        border-radius: 10px;
-    }
-    input[type=range]::-ms-thumb {
-        border: 1px solid #fff;
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #bbb;
-    }
-    input[type=range]:focus::-ms-fill-lower {
-        background: #fff;
-    }
-    input[type=range]:focus::-ms-fill-upper {
-        background: #fff;
+    .seekbar {
+        position: absolute;
+        bottom: 8px;
+        width: 98%;
+        left: 1%;
     }
 }
