@@ -1,6 +1,7 @@
 import CollectionAPI from '../../api/CollectionAPI';
 import MetadataSchemaUtil from '../../util/MetadataSchemaUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
+import RegexUtil from '../../util/RegexUtil';
 
 /*
 TODO:
@@ -325,7 +326,7 @@ class CollectionConfig {
 	}
 
 	//TODO also fetch some data if there is no structured data
-	getItemDetailData(result, currentDateField) {
+	getItemDetailData(result, currentDateField=null) {
 		//first flatten the pure ES response
 		result = this.formatSearchResult(result);
 
@@ -384,8 +385,10 @@ class CollectionConfig {
 		return formattedResult
 	}
 
-	//the result object passed here was passed through getItemDetailData, so all possible data has already been extracted (bit ugly)
-	getResultSnippetData(result) {
+	//the result passed is a raw result and needs to be formatted first
+	getResultSnippetData(rawResult, currentDateField=null, searchTerm=null) {
+		//const result = this.getItemDetailData(rawResult, currentDateField);
+		const result = rawResult;
 	    const snippet = {
 			id : result.resourceId,
 			type : result.docType,
@@ -397,14 +400,19 @@ class CollectionConfig {
 			tags : result.tags ? result.tags : [],
 			mediaTypes : result.mediaTypes ? result.mediaTypes : []
 		}
-		if(result.docType == 'media_fragment' && result._source) {
-			result.start = result._source.start ? result._source.start : 0;
-			result.end = result._source.end ? result._source.end : -1;
+		//FIXME not sure if this is still used
+		if(result.docType == 'media_fragment' && result.rawData) {
+			result.start = result.rawData.start ? result.rawData.start : 0;
+			result.end = result.rawData.end ? result.rawData.end : -1;
 		}
-		if(result.playableContent && result.playableContent.length > 0){
+		if(result.playableContent && result.playableContent.length > 0) {
 		    snippet['playable'] = true;
-		} else
+		} else {
 		    snippet['playable']= false;
+		}
+		// if(searchTerm) {
+		// 	snippet['highlights'] = this.getHighlights(result.rawData, searchTerm);
+		// }
 		return snippet;
 	}
 
@@ -476,6 +484,33 @@ class CollectionConfig {
 
 	getFieldsToExclude() {
 		return null
+	}
+
+	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
+	getHighlights(obj, searchTerm, aggregatedHighlights={}, baseField = null) {
+        for(let field in obj) {
+            if(obj.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) === -1) {
+                let snippets = [];
+                if (Array.isArray(obj[field])) { // in case the value is a list
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, field); // <- recursive call
+                } else if (typeof obj[field] === 'object') { // in case the value is an object
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, null); // <- recursive call
+                } else { // finally it's possible to add some snippets
+                    snippets = RegexUtil.generateHighlightedText(obj[field], searchTerm);
+                }
+
+                //Save the snippets in the aggregatedHighlights object, which is eventually returned to the caller
+                const keyField = baseField ? baseField : field;
+                if(snippets.length > 0) {
+                    if(!(keyField in aggregatedHighlights)) {
+                        aggregatedHighlights[keyField] = [];
+                    }
+                    aggregatedHighlights[keyField] = aggregatedHighlights[keyField].concat(snippets);
+                }
+
+            }
+        }
+        return aggregatedHighlights
 	}
 
 }

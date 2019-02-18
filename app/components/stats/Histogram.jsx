@@ -110,33 +110,33 @@ class Histogram extends React.Component {
     //TODO better ID!! (include some unique part based on the query)
     render() {
         const strokeColors = ['#8884d8', 'green'];
-        let data = this.getGraphData();
+        const data = this.getGraphData();
         let dataPrettyfied = null;
-
-        if(this.props.data && this.state.viewMode === 'absolute') {
-            dataPrettyfied = this.props.data.map(function (dataRow, i) {
-                const point = {};
-                point["dataType"] = 'absolute';
-                point["strokeColor"] = strokeColors[0];
-                point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                point["count"] = dataRow.doc_count;
-                return point;
-            }, this);
-        } else {
-            dataPrettyfied = this.props.data.map(function (dataRow, i) {
-                const point = {};
-                point["dataType"] = 'relative';
-                point["strokeColor"] = strokeColors[1];
-                point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
-                    ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
-                    : 0;
-                return point;
-            }, this);
+        if(this.props.data) {
+            if(this.state.viewMode === 'absolute') {
+                dataPrettyfied = this.props.data.map((dataRow, i) => {
+                    const point = {};
+                    point["dataType"] = 'absolute';
+                    point["strokeColor"] = strokeColors[0];
+                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
+                    point["count"] = dataRow.doc_count;
+                    return point;
+                });
+            } else {
+                dataPrettyfied = this.props.data.map((dataRow, i) => {
+                    const point = {};
+                    point["dataType"] = 'relative';
+                    point["strokeColor"] = strokeColors[1];
+                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
+                    point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
+                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
+                        : 0;
+                    return point;
+                });
+            }
         }
 
-        let totalHitsPerQuery = 0;
-        data.map(item => totalHitsPerQuery += item.count);
+        const totalHitsPerQuery = data.reduce((acc, cur) => acc += cur.count, 0);
         const graphTitle = "Timeline chart of query results (" + ComponentUtil.formatNumber(totalHitsPerQuery) + ")";
         return (
         	<div className={IDUtil.cssClassName('histogram')}>

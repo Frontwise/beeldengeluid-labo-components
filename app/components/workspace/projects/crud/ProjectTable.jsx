@@ -278,6 +278,10 @@ class ProjectTable extends React.PureComponent {
         return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
+    setActiveProject(project){
+            ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+    }
+
     //Transforms a project to a row needed for the sort table
     //don't like this is passed as a function to the sort table... but let's see first
     getProjectRow(project) {
@@ -286,12 +290,19 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}
-                      </Link>)
+            content: (
+                <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>
+                    {project.name}
+                </Link>
+            )
         },
         {
             props: { className: 'description' },
-            content: (<p><Link to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
+            content: (
+                <p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>
+                    {this.trunc(project.description, 140)}
+                </Link></p>
+            )
         },
         {
             props: { className: 'number' },
@@ -322,12 +333,11 @@ class ProjectTable extends React.PureComponent {
             content: project.created.substring(0, 10)
         },
 
-
         {
             props: { className: 'actions' },
             content: project.canOpen(currentUserId) ? (
                 <div>
-                    <Link to={'/workspace/projects/' + project.id} className="btn">
+                    <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id} className="btn">
                         Open
                     </Link>
 
