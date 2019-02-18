@@ -53,6 +53,9 @@ import LoadingSpinner from "./components/helpers/LoadingSpinner";
 			- however the annotations are related to media fragments (also)
 			- distinguish loading of media fragment annotations & record/program annotations
 
+	OFF AIR CONTENT
+		http://localhost:5304/tool/default-item-details?id=4272263@program&cid=nisv-catalogue-aggr-full-18-158&st=%224272263@program%22
+
 */
 
 //TODO move most of the stuff to a new component called ResourceViewer
@@ -856,12 +859,10 @@ class ItemDetailsRecipe extends React.Component {
         return false;
     }
 
-    /* --------------------------------------------------------------------------------------
-	* -----------------------------RENDER FUNCTIONS -----------------------------------------
-    -------------------------------------------------------------------------------------- */
+    /* ------------------------------------ TOP BUTTON BAR ----------------------------- */
 
     //only render when coming from the single search recipe (checking this.props.param.bodyClass == noHeader)
-    renderResultListPagingButtons() {
+    renderResultListPagingButtons = () => {
     	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
     	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
     	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
@@ -909,7 +910,32 @@ class ItemDetailsRecipe extends React.Component {
         )
     }
 
-    renderExploreBlock() {
+
+    /* ------------------------------------ ALL THE MODALS ----------------------------- */
+
+    renderAnnotationModal = (showModal, activeProject, activeAnnotation, activeSubAnnotation) -> {
+    	if(showModal && activeAnnotation && activeAnnotation.target) {
+			return (
+				<FlexModal elementId="annotation__modal"
+					stateVariable="showModal"
+					float="right"
+					owner={this}
+					title={'Annotate: ' + activeAnnotation.target.source}>
+					<AnnotationBox
+						user={this.props.user} //current user
+						project={activeProject} //selected via ProjectSelector
+						annotation={activeAnnotation}
+						activeSubAnnotation={activeSubAnnotation}
+						annotationModes={this.props.recipe.ingredients.annotationModes}/>
+				</FlexModal>
+			);
+		}
+		return null
+    }
+
+    /* ----------------------------- EXPLORATION & RECOMMENDATION -------------------- */
+
+    renderExploreBlock = () => {
     	const exploreFields = {};
     	const orgNames = {};
 		this.state.collectionConfig.getKeywordFields().forEach((kw) => {
@@ -971,7 +997,13 @@ class ItemDetailsRecipe extends React.Component {
 			let annotationList = null;
 			let mediaPanel = null;
 
-			let annotationModal = null;
+			const annotationModal = this.renderAnnotationModal(
+				this.state.showModal,
+				this state.activeProject,
+				this.state.activeAnnotation,
+				this.state.activeSubAnnotation
+			);
+
 			let projectModal = null; //disabled when there is ingredients.disableProject = true
 			let bookmarkModal = null;
 
@@ -983,22 +1015,7 @@ class ItemDetailsRecipe extends React.Component {
 
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
-				if(this.state.showModal && this.state.activeAnnotation && this.state.activeAnnotation.target) {
-					annotationModal = (
-						<FlexModal elementId="annotation__modal"
-							stateVariable="showModal"
-							float="right"
-							owner={this}
-							title={'Annotate: ' + this.state.activeAnnotation.target.source}>
-							<AnnotationBox
-								user={this.props.user} //current user
-								project={this.state.activeProject} //selected via ProjectSelector
-								annotation={this.state.activeAnnotation}
-								activeSubAnnotation={this.state.activeSubAnnotation}
-								annotationModes={this.props.recipe.ingredients.annotationModes}/>
-						</FlexModal>
-					);
-				}
+
 
 				//draw the annotation list, which only shows annotations related to the active annotationTarget
 				if(this.state.annotationTarget) {
