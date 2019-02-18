@@ -668,6 +668,8 @@ class ItemDetailsRecipe extends React.Component {
 
                     useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 
+                    hideOffAirContent={this.state.collectionConfig.hideOffAirContent()}
+
 					user={this.props.user} //current user
 					project={this.state.activeProject} //selected via the ProjectSelector
 					resourceId={this.state.itemData.resourceId}
@@ -697,7 +699,6 @@ class ItemDetailsRecipe extends React.Component {
 					mediaType='audio'
 
 					transcript={this.state.itemData.rawData.layer__asr || null}
-
 					initialSearchTerm={this.props.params.st} //every player could interpret highlighting a search term
 
 					useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}

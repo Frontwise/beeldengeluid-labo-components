@@ -70,7 +70,6 @@ class HTML5VideoPlayer extends React.Component {
 
 	onSourceLoaded() {
 		//then seek to the starting point
-		//TODO hmm should this start be realitve to the resourceStart? :s :s :s
 		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
 		if(start > 0) {
 			this.state.playerAPI.seek(start / 1000);
@@ -113,19 +112,28 @@ class HTML5VideoPlayer extends React.Component {
 	    }
 	}
 
-	render() {
-		let controls = null;
-		if(this.state.playerAPI) { //load the controls when the player is ready
-			controls = (
+	renderCustomControls = (playerAPI, hideOffAirContent) => {
+		console.debug(hideOffAirContent)
+		if(playerAPI && hideOffAirContent) {
+			console.debug('got it!')
+			return (
 				<FlexPlayerControls
 					ref={this.controlsRef}
-					api={this.state.playerAPI}
+					api={playerAPI}
 					mediaObject={this.props.mediaObject}
-					duration={FlexPlayerUtil.onAirDuration(this.state.playerAPI.getDuration(), this.props.mediaObject)}
+					duration={FlexPlayerUtil.onAirDuration(playerAPI.getDuration(), this.props.mediaObject)}
 					toggleFullScreen={this.toggleFullScreen.bind(this)}
 				/>
 			)
 		}
+		console.debug('no controls?')
+		return null;
+	}
+
+	render() {
+		//only show the custom controls when absolutely necessary. They are not yet perfect
+		const customControls = this.renderCustomControls(this.state.playerAPI, this.props.hideOffAirContent);
+		const nativeControls = customControls ? null : {controls : true, controlsList : 'nodownload', muted : true}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
 				<div
@@ -137,16 +145,15 @@ class HTML5VideoPlayer extends React.Component {
 						id="video-player"
 						width="100%"
 						className={IDUtil.cssClassName('html5-video-player')}
-						muted
-						//controls
-						//controlsList="nodownload"
 						crossOrigin={
 							this.props.useCredentials ? "use-credentials" : null
-					}>
+						}
+						{...nativeControls}
+					>
 						<source src={this.props.mediaObject.url}></source>
 						Your browser does not support the video tag
 					</video>
-					{controls}
+					{customControls}
 				</div>
 			</div>
 		)

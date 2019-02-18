@@ -739,6 +739,7 @@ class FlexPlayer extends React.Component {
 						<HTML5VideoPlayer
 						mediaObject={this.state.currentMediaObject}
 						useCredentials={this.props.useCredentials}
+						hideOffAirContent={this.props.hideOffAirContent}
 						eventCallbacks={playerEventCallbacks}
 						onPlayerReady={this.onPlayerReady.bind(this)}/>
 					);
@@ -889,6 +890,10 @@ FlexPlayer.PropTypes = {
 	active: PropTypes.bool, // this reflects whether this component is visible, so the keyboard controls can be activated
 
 	transcript : PropTypes.array, //audio transcript
+	initialSearchTerm : PropTypes.string, //for jumping to the first matching line in the transcript
+
+	useCredentials : PropTypes.bool, //so the player sends all the required cookie information for the playout proxy
+	hideOffAirContent : PropTypes.bool, //in case the content has to be cut off at a certain start and/or end time
 
 	annotationLayers : PropTypes.array //for future implementation
 
