@@ -19,6 +19,7 @@ $border-radius: $border-radius-base; /* applying bootstrap variable */
 
 $hover-color: #3173ad !default;
 $highlight-color: #f26c50 !default;
+$highlight-color-snippets: #f26c50;
 $subdued-color: #888 !default;
 $subdued-hover-color: #efefef !default;
 $subdued-bg: #f8f8f8 !default;
@@ -27,6 +28,7 @@ $border-color: #e3e3e3 !default;
 $dark-text: #333 !default;
 $list-item-color: #333 !default;
 $visited-item: #6e7476;
+
 /* ---- Box shadow colors ---- */
 
 $shadow-subdued: $subdued-color !default;

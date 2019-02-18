@@ -8,18 +8,18 @@
 }
 
 .bg__single-search-recipe {
-	.bg__rcp__ss__select {
+	.select-all {
 		@include checkbox();
 		margin-top: 6px;
 	}
-	.bg__rcp__ss__table-actions-header {
+	.table-actions-header {
 		background-color: #2d343a;
 		border-radius: 6px;
 		margin: 5px;
 		min-height:53px;
 		min-width: 100%;
 		padding: 10px;
-		.bg__rcp__ss__table-actions {
+		.table-actions {
 			float:left;
 			.btn {
 				margin-right:2px;
@@ -36,7 +36,7 @@
 			margin: 0 0 0 6px;
 			padding: 0;
 			animation: .6s ease-in 0s 1 slideInFromLeft;
-			.bg__rcp__ss__header-selected-items {
+			.header-selected-items {
 				background-color: #468dcb;
 				color: white;
 				margin: 0;
@@ -52,14 +52,14 @@
 		}
 	}
 
-	.bg__rcp__ss__table-actions-footer {
+	.table-actions-footer {
 		padding: 10px;
 		text-align: center;
 	}
 	.result-list {
 		margin-top: 25px;
 	}
-	.bg__rcp__ss__table-actions > .bookmark-dropdown-menu {
+	.table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
 		margin-right: 5px;
 		button {
@@ -83,7 +83,7 @@
 			}
 		}
 	}
-	.bg__rcp__ss__selected-items {
+	.selected-items {
 		background-color: #efefef;
 		border-radius: 6px;
 		box-shadow: 0 6px 4px -6px #000;

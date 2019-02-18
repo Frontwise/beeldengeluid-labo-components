@@ -63,13 +63,13 @@ class CollectionForm extends React.PureComponent {
                     <input
                         type="checkbox"
                         name="private"
-                        defaultChecked={this.props.collection.isPrivate}
+                        disabled={true}
+                        defaultChecked={true}
                         id="project-private"
                         ref={elem => (this.isPrivate = elem)}/>
 
                     <label htmlFor="collection-private">
-                        This is a private collection that is only visible to you and your
-                        collaborators
+                        This is a private collection that is only visible to you
                     </label>
                 </div>
 
