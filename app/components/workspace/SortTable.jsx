@@ -38,7 +38,6 @@ class SortTable extends React.PureComponent {
 
     componentDidUpdate(prevProps, prevState) {
         if(prevState.selection !== this.state.selection && this.props.onSelectQuery) {
-            console.log(this.props)
             this.props.onSelectQuery(this.state.selection);
         }
     }

@@ -1,27 +1,16 @@
 import IDUtil from '../../util/IDUtil';
-import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip,ResponsiveContainer, Legend} from 'recharts';
+import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
 import CustomTooltip from './helpers/CustomTooltip';
-/*
-See:
-	- http://rawgraphs.io/
-	- https://bl.ocks.org/mbostock/3048450
-	- http://alignedleft.com/tutorials/d3/scales/
-	- https://github.com/d3/d3-scale/blob/master/README.md#time-scales
-	- http://www.d3noob.org/2012/12/setting-scales-domains-and-ranges-in.html
 
-	- https://github.com/d3/d3-selection/blob/master/README.md#selection_data
-	- https://bost.ocks.org/mike/join/
-
-	https://github.com/beeldengeluid/AVResearcherXL/blob/master/avresearcher/static/js/views/search/timeseries.js
-*/
+//implemented using recharts: http://recharts.org/en-US/examples
 
 class QueryComparisonLineChart extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
-            opacity: {},
             viewMode: this.props.data.total ? 'inspector' : 'absolute',
             isSearching: false,
             absData : this.getJoinedData(this.props.data),
@@ -39,31 +28,7 @@ class QueryComparisonLineChart extends React.Component {
         );
     }
 
-    toggleLine(event) {
-        const dataKey = event.dataKey;
-        let currentKeyValue = this.state.opacity[dataKey];
-        let opacity = this.state.opacity;
-
-        if (currentKeyValue === 1) {
-            currentKeyValue = 0;
-        } else if(currentKeyValue === 0){
-            currentKeyValue = 1;
-        } else { //if undefined
-        	currentKeyValue = 0;
-        }
-        opacity[dataKey] = currentKeyValue;
-        this.setState({
-            opacity : opacity
-        });
-    }
-
-    showMeTheMoney(event, index) {
-        // console.debug(event)
-        // console.debug(index)
-        // console.debug('Dikke scheet');
-    }
-
-    onOutput(relData) {
+    onRelativeDataReceived = (relData) => {
         const relativeValues = this.getRelValues(this.state.absData, relData);
         this.setState({
                 viewMode: 'relative',
@@ -75,28 +40,24 @@ class QueryComparisonLineChart extends React.Component {
         );
     }
 
-    getRelValues(absoluteValues, relativeValues) {
-        let points = [];
-        absoluteValues.forEach(point => {
-            let relPoint = {"year": point["year"]};
+    getRelValues = (absoluteValues, relativeValues) => {
+        return absoluteValues.map(point => {
+            const relPoint = {"year": point["year"]};
 
-            Object.keys(point).forEach(propt => {
-                    if (propt !== 'year') {
-                        let relVal = relativeValues[`${propt}`].find(obj => {
-                            return obj.year === point.year
-                        });
+            Object.keys(point).forEach(prop => {
+                if (prop !== 'year') {
+                    const relVal = relativeValues[prop].find(obj => {
+                        return obj.year === point.year
+                    });
 
-                        relPoint[`${propt}`] = (relVal[`${propt}`] === 0 || point[`${propt}`] === 0
-                            ? 0
-                            : point[`${propt}`] / relVal[`${propt}`] * 100
-                        );
-                    }
+                    relPoint[prop] = (relVal[prop] === 0 || point[prop] === 0
+                        ? 0
+                        : point[prop] / relVal[prop] * 100
+                    );
                 }
-            );
-            points.push(relPoint)
-
+            });
+            return relPoint
         });
-        return points
     }
 
     async getData(key) {
@@ -124,14 +85,14 @@ class QueryComparisonLineChart extends React.Component {
         const promises = Object.keys(data).map(this.getData.bind(this));
         await Promise.all(promises).catch(d => console.log(d)).then(
             dataPerQuery => {
-                let relValues = {};
+                const relValues = {};
                 dataPerQuery.forEach( data => {
                     relValues[data.query.id] = ElasticsearchDataUtil.searchResultsToTimeLineData(
                         data.query,
                         data.aggregations,
                     );
                 });
-                this.onOutput(relValues);
+                this.onRelativeDataReceived(relValues);
             });
     }
 
@@ -153,15 +114,16 @@ class QueryComparisonLineChart extends React.Component {
             )
         }
     }
+
     getColorIndexes = dataSet => {
-        let indexes = [];
+        const indexes = [];
         Object.keys(dataSet).forEach((k, index) => {
             if (dataSet[k].data.length > 0) {
                 indexes.push(index)
             }
         });
         return indexes
-    };
+    }
 
     getJoinedData = dataSet => {
         /*
@@ -193,11 +155,9 @@ class QueryComparisonLineChart extends React.Component {
         const minYear = __endYear(relGraphData, Math.min);
         const maxYear = __endYear(relGraphData, Math.max);
         const validRange = __getValidRange(minYear, maxYear);
-        let dataForGraph = [];
 
-        validRange.forEach(year => {
+        const dataForGraph = validRange.map(year => {
             let tempObj = {};
-
             relGraphData.forEach(set => {
                 const matchData = set.find(it => it.year === year);
                 if(matchData !== undefined) {
@@ -205,18 +165,15 @@ class QueryComparisonLineChart extends React.Component {
                 }
 
             });
-            dataForGraph.push(tempObj);
+            return tempObj
         });
 
         return dataForGraph;
-    };
+    }
 
-
-    //TODO better ID!! (include some unique part based on the query)
-    render() {
-        const lines = Object.keys(this.props.data).map((k, index) => {
+    renderLines = () => {
+        return Object.keys(this.props.data).map((k, index) => {
             const random = Math.floor(Math.random() * 1000) + 1;
-            //fix onClick with this? https://github.com/recharts/recharts/issues/261
             return (
                 <Line
                     key={random}
@@ -224,28 +181,22 @@ class QueryComparisonLineChart extends React.Component {
                     label={<LabelAsPoint/>} //the LabelAsPoint class handles the onclick of a dot
                     name={this.props.data[k].label}
                     type="monotone"
-                    onClick={this.showMeTheMoney.bind(this)}
                     dataKey={k} //is equal to the queryId
                     stroke={this.COLORS[index]}
-                    strokeOpacity={this.state.opacity[k] !== undefined ? this.state.opacity[k] : 1}
                     dot={{stroke: this.COLORS[index], strokeWidth: 2}}
                     activeDot={{stroke: this.COLORS[index], strokeWidth: 6, r: 3}}
-                />);
-        });
+                />
+            );
+        })
+    }
 
-        let timelineData = null;
-        let colorIndexes = null;
 
-        if(this.props.data) {
-            colorIndexes = this.getColorIndexes(this.props.data);
-        }
-        if (this.state.viewMode === 'relative') {
-            timelineData = this.state.relData;
-        } else {
-            timelineData = this.state.absData;
-        }
+    //TODO better ID!! (include some unique part based on the query)
+    render() {
+        const lines = this.renderLines();
+        const timelineData = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
+        const colorIndexes = this.props.data ? this.getColorIndexes(this.props.data) : null;
 
-        //TODO fix the stupid manual multiple lines
         return (
             <div className={IDUtil.cssClassName('query-comparison-line-chart')}>
 				<span className="ms_toggle_btn">
@@ -275,7 +226,7 @@ class QueryComparisonLineChart extends React.Component {
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
                             />
                         </YAxis>
-                        <Tooltip content={<CustomTooltip  colorIndexes={colorIndexes} viewMode={this.state.viewMode}/>}/>
+                        <Tooltip content={<CustomTooltip colorIndexes={colorIndexes} viewMode={this.state.viewMode}/>}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>

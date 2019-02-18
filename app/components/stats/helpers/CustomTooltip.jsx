@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 
 export default class CustomTooltip extends React.Component{
-    stylings(p){
+
+    getStyle(p) {
         return {
             color: p.color,
             display: 'block',
@@ -15,33 +16,35 @@ export default class CustomTooltip extends React.Component{
         const {active} = this.props;
         if (active) {
             const {payload, label} = this.props;
-            const dataType = this.props.viewMode;
-
             if(payload && label) {
-                if (dataType === 'relative') {
-                    const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value',
-                        point = payload.map((p, index) => <span style={this.stylings(p)}>Query#{index+1} {p.value ? p.value.toFixed(2) : 0}%</span>);
+                if (this.props.viewMode === 'relative') {
+                    const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage';
+                    const valueLabel = payload.length > 1 ? 'Values' : 'Value';
+                    const point = payload.map(
+                        (p, index) => <span style={this.getStyle(p)}>Query#{index+1} {p.value ? p.value.toFixed(2) : 0}%</span>
+                    );
 
                     return (
                         <div className="ms__histogram-custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
+                            <h4>{this.props.viewMode} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
-                            <p>{labelPercentage}: <span className="rightAlign">{point}</span></p>
+                            <p>{labelPercentage}:&nbsp;<span className="rightAlign">{point}</span></p>
                         </div>
                     );
                 } else {
                     const point = payload.map((p,index) => {
-                            return (
-                                <span style={this.stylings(p)}>Query#{this.props.colorIndexes[index]+1} {p.value ? p.value : 0}</span>
-                            )
-                        }),
-                        labelTotals = payload.length > 1 ? 'Totals' : 'Total',
-                        valueLabel = payload.length > 1 ? 'Values' : 'Value';
+                        return (
+                            <span style={this.getStyle(p)}>
+                                Query#{this.props.colorIndexes[index]+1} {p.value ? p.value : 0}
+                            </span>
+                        )
+                    })
+                    const labelTotals = payload.length > 1 ? 'Totals' : 'Total';
+                    const valueLabel = payload.length > 1 ? 'Values' : 'Value';
 
                     return (
                         <div className="ms__histogram-custom-tooltip">
-                            <h4>{dataType} {valueLabel}</h4>
+                            <h4>{this.props.viewMode} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelTotals}: <span className="rightAlign">{point}</span></p>
                         </div>
@@ -52,8 +55,14 @@ export default class CustomTooltip extends React.Component{
         return null;
     }
 }
+
 CustomTooltip.propTypes = {
-    dataType: PropTypes.string,
-    payload: PropTypes.array,
-    label: PropTypes.number
+    //default props from Recharts
+    active: PropTypes.bool.isRequired, //is this tooltip active or not (only show when active)
+    payload: PropTypes.array.isRequired, //the data for the active y coordinate
+    label: PropTypes.number, //the label/value of the active y coordinate
+
+    //custom props
+    viewMode: PropTypes.string, //relative or absolute
+    colorIndexes: PropTypes.array //array of colors to match with the colors of the lines drawn in the line/bar chart
 };
