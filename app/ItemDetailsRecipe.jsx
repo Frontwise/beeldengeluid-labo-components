@@ -1168,7 +1168,6 @@ class ItemDetailsRecipe extends React.Component {
 
             const jsonDataBlock = this.renderJSONDataBlock();
 
-
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
 					{annotationModal}
