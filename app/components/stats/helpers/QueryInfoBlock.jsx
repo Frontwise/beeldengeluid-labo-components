@@ -1,6 +1,7 @@
 import TimeUtil from '../../../util/TimeUtil';
+import IDUtil from '../../../util/IDUtil';
 
-export default class CustomLegend extends React.Component {
+export default class QueryInfoBlock extends React.Component {
 
     getStyle = (p) => {
         return {
@@ -76,7 +77,7 @@ export default class CustomLegend extends React.Component {
             }
 
             return (
-                <div className="bg__query-details" onClick={this.toggleLine}>
+                <div className="query-details" onClick={this.toggleLine}>
                     <h4 style={this.getStyle(item.lineColour)}>Query #{index+1}: {item.savedQueryName}</h4>
                     <p><b>Collection name:</b> {item.collectionTitle}</p>
                     <p><b>Query term (Search term):</b> {item.queryTerm}</p>
@@ -93,7 +94,7 @@ export default class CustomLegend extends React.Component {
         const queryInfoData = this.toQueryInfoData(this.props.selectedQueries);
         if (queryInfoData) {
             return (
-                <div className="bg__ms__custom-legend">
+                <div className={IDUtil.cssClassName('query-info-block')}>
                     {this.renderQueryInfoBlocks(queryInfoData)}
                 </div>
             );

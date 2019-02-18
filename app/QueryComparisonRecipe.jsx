@@ -14,7 +14,7 @@ import CollectionUtil from './util/CollectionUtil';
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
 import {initHelp} from './components/workspace/helpers/helpDoc';
-import CustomLegend from './components/stats/helpers/CustomLegend';
+import QueryInfoBlock from './components/stats/helpers/QueryInfoBlock';
 
 /*
 
@@ -264,7 +264,7 @@ class QueryComparisonRecipe extends React.Component {
                         />
                     );
                 }
-                queryCollectionDetails = <CustomLegend
+                queryCollectionDetails = <QueryInfoBlock
                     selectedQueries={this.state.selectedQueries}
                     lineColour={this.COLORS}
                     external={external}
