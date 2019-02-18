@@ -17,16 +17,9 @@ import {initHelp} from './components/workspace/helpers/helpDoc';
 import CustomLegend from './components/stats/helpers/CustomLegend';
 
 /*
-Notes about this component:
 
-- Top component receiving the URL parameters
-- Generates search components based on the configured search recipe
-- Passes the URL parameters to search components, who already have implemented the search history
-	- Each search component (e.g. facet search, fragment search) implements its own way of persisting search history
-- FIXME temporarily draws an 'Export' button that hooks up to the annotation export functionality of the recipe
-	- This should be in the user space
-- Holds the annotation box that can be triggered from underlying (search) components
-- Holds the line chart that can be triggered from underlying components
+FIXME: the queries in this component should all be validated using the QueryModel!
+
 */
 
 class QueryComparisonRecipe extends React.Component {
@@ -227,7 +220,6 @@ class QueryComparisonRecipe extends React.Component {
 
         let chart = null;
         let queryCollectionDetails = null;
-        let aggregatedHits = null;
         let projectModal = null;
         let projectQueriesTable = null;
         let graphTypeBtn = null;
@@ -310,7 +302,6 @@ class QueryComparisonRecipe extends React.Component {
                         {queryCollectionDetails}
                     </div>
                 </div>
-                {aggregatedHits}
             </div>
         );
     }

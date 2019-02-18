@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 export default class CustomTooltip extends React.Component{
 
-    getStyle(p) {
+    getStyle = (p) => {
         return {
             color: p.color,
             display: 'block',
