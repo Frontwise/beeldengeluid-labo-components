@@ -64,7 +64,7 @@ class ItemDetailsRecipe extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showModal : false, //triggered by the media players whenever an annotation needs to be edited
+			showAnnotationModal : false, //triggered by the media players whenever an annotation needs to be edited
 			showProjectModal : false, //showing the project selector
 			showBookmarkModal : false, //showing the bookmark selector
 
@@ -255,13 +255,13 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	onSaveAnnotation(annotation) {
-		ComponentUtil.hideModal(this, 'showModal' , 'annotation__modal', true);
+		ComponentUtil.hideModal(this, 'showAnnotationModal' , 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
 		this.refreshResourceAnnotations();
 	}
 
 	onDeleteAnnotation(annotation) {
-		ComponentUtil.hideModal(this, 'showModal', 'annotation__modal', true);
+		ComponentUtil.hideModal(this, 'showAnnotationModal', 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
 		this.refreshResourceAnnotations();
 	}
@@ -320,7 +320,7 @@ class ItemDetailsRecipe extends React.Component {
 	editAnnotation(annotation, subAnnotation) {
 		if(annotation.target) {
 			this.setState({
-				showModal: true,
+				showAnnotationModal: true,
 				annotationTarget: annotation.target,
 				activeAnnotation: annotation,
 				activeSubAnnotation : subAnnotation
@@ -847,7 +847,7 @@ class ItemDetailsRecipe extends React.Component {
         if (this.props.recipe.url && resourceId) {
             FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result, this.props.params.st);
         } else {
-            this.setState({showModal: true})
+            this.setState({showAnnotationModal: true})
         }
     }
 
@@ -913,11 +913,27 @@ class ItemDetailsRecipe extends React.Component {
 
     /* ------------------------------------ ALL THE MODALS ----------------------------- */
 
-    renderAnnotationModal = (showModal, activeProject, activeAnnotation, activeSubAnnotation) -> {
+    renderProjectModal = (showProjectModal) => {
+    	if(showProjectModal) {
+			return (
+				<FlexModal
+					elementId="project__modal"
+					stateVariable="showProjectModal"
+					owner={this}
+					size="large"
+					title="Select a project">
+						<ProjectSelector onOutput={this.onComponentOutput.bind(this)} user={this.props.user}/>
+				</FlexModal>
+			)
+		}
+		return null
+    }
+
+    renderAnnotationModal = (showModal, activeProject, activeAnnotation, activeSubAnnotation) => {
     	if(showModal && activeAnnotation && activeAnnotation.target) {
 			return (
 				<FlexModal elementId="annotation__modal"
-					stateVariable="showModal"
+					stateVariable="showAnnotationModal"
 					float="right"
 					owner={this}
 					title={'Annotate: ' + activeAnnotation.target.source}>
@@ -929,6 +945,28 @@ class ItemDetailsRecipe extends React.Component {
 						annotationModes={this.props.recipe.ingredients.annotationModes}/>
 				</FlexModal>
 			);
+		}
+		return null
+    }
+
+    renderBookmarkModal = (showBookmarkModal, activeProject, itemData) => {
+    	if(showBookmarkModal) {
+			return (
+				<FlexModal
+					elementId="bookmark__modal"
+					stateVariable="showBookmarkModal"
+					owner={this}
+					size="large"
+					title="Select one or more bookmark groups to associate the current resource with">
+						<BookmarkSelector
+							onOutput={this.onComponentOutput.bind(this)}
+							user={this.props.user}
+							project={activeProject}
+							collectionId={itemData.index}
+							resourceId={itemData.resourceId}
+							/>
+				</FlexModal>
+			)
 		}
 		return null
     }
@@ -997,15 +1035,16 @@ class ItemDetailsRecipe extends React.Component {
 			let annotationList = null;
 			let mediaPanel = null;
 
+			//FIXME there is something wrong with the arrow functions, bind() is still required!
 			const annotationModal = this.renderAnnotationModal(
-				this.state.showModal,
-				this state.activeProject,
+				this.state.showAnnotationModal,
+				this.state.activeProject,
 				this.state.activeAnnotation,
 				this.state.activeSubAnnotation
 			);
 
-			let projectModal = null; //disabled when there is ingredients.disableProject = true
-			let bookmarkModal = null;
+			const projectModal = this.renderProjectModal(this.state.showProjectModal); //disabled when there is ingredients.disableProject = true
+			const bookmarkModal = this.renderBookmarkModal(this.state.showBookmarkModal, this.state.activeProject, this.state.itemData);
 
 			let projectSelectorBtn = null;
 			let bookmarkIcon = null;
@@ -1045,39 +1084,6 @@ class ItemDetailsRecipe extends React.Component {
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
-				//project modal
-				if(this.state.showProjectModal) {
-					projectModal = (
-						<FlexModal
-							elementId="project__modal"
-							stateVariable="showProjectModal"
-							owner={this}
-							size="large"
-							title="Select a project">
-								<ProjectSelector onOutput={this.onComponentOutput.bind(this)} user={this.props.user}/>
-						</FlexModal>
-					)
-				}
-
-				//bookmark modal
-				if(this.state.showBookmarkModal) {
-					bookmarkModal = (
-						<FlexModal
-							elementId="bookmark__modal"
-							stateVariable="showBookmarkModal"
-							owner={this}
-							size="large"
-							title="Select one or more bookmark groups to associate the current resource with">
-								<BookmarkSelector
-									onOutput={this.onComponentOutput.bind(this)}
-									user={this.props.user}
-									project={this.state.activeProject}
-									collectionId={this.state.itemData.index}
-									resourceId={this.state.itemData.resourceId}
-									/>
-						</FlexModal>
-					)
-				}
 
 				//project selector button
 				projectSelectorBtn = (
