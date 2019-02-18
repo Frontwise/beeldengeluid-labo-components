@@ -221,12 +221,6 @@
 	}
 }
 
-@mixin switchBtn() {
-    .ms_toggle_btn {
-        @include switchButton();
-    }
-}
-
 @mixin lineChartBase() {
 	.axis path,	.axis line { /* overridden d3 class */
 		fill: none;

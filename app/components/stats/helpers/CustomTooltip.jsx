@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 
+import IDUtil from '../../../util/IDUtil';
+
 export default class CustomTooltip extends React.Component{
 
     getStyle = (p) => {
@@ -25,7 +27,7 @@ export default class CustomTooltip extends React.Component{
                     );
 
                     return (
-                        <div className="ms__histogram-custom-tooltip">
+                        <div className={IDUtil.cssClassName('custom-tooltip')}>
                             <h4>{this.props.viewMode} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelPercentage}:&nbsp;<span className="rightAlign">{point}</span></p>
@@ -43,7 +45,7 @@ export default class CustomTooltip extends React.Component{
                     const valueLabel = payload.length > 1 ? 'Values' : 'Value';
 
                     return (
-                        <div className="ms__histogram-custom-tooltip">
+                        <div className={IDUtil.cssClassName('custom-tooltip')}>
                             <h4>{this.props.viewMode} {valueLabel}</h4>
                             <p>Year: <span className="rightAlign">{label}</span></p>
                             <p>{labelTotals}: <span className="rightAlign">{point}</span></p>

@@ -1,52 +1,8 @@
-@include spinner();
-@include lineChartBase();
+.bg__query-comparison-histogram {
+    @include chartBase();
 
-  .ms__custom-legend {
-    color: #f3f3f3;
-    display: flex;
-    flex-flow: row wrap;
-    margin: 4rem 0;
-    padding: 1rem 0;
-    text-transform: capitalize;
-
-    .bg__comparative_histogram {
-      background-color: #fefefe;
-      border: 1px solid #DEDEDA;
-      border-radius: 6px;
-      box-shadow: 1px 1px 1px 0 #999;
-      display: inline-block;
-      flex-wrap: wrap;
-      flex: initial;
-      margin: 1rem 10px 1rem 0;
-      padding: 15px;
-      vertical-align: top;
-      width: 48%;
-
-      p{
-        color: #2D343A;
-        line-height: 1.2rem;
-        padding: 0 20px;
-      }
-      li {
-        color: #2D343A;
-        list-style-type: none;
-      }
+    .recharts-responsive-container {
+        margin-top: 20px
     }
-  }
-.ms__histogram-custom-tooltip {
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .8);
-  color: #f3f3f3;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  padding: 1rem 3rem;
-  text-transform: capitalize;
 
-  p {
-    .rightAlign {
-      float: right;
-    }
-  }
 }

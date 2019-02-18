@@ -193,7 +193,7 @@ export default class ComparisonHistogram extends React.Component {
         const bars = this.state.queriesIds ? this.renderStackBars(this.state.queriesIds) : null;
 
         return (
-            <div className={IDUtil.cssClassName('histogram')}>
+            <div className={IDUtil.cssClassName('query-comparison-histogram')}>
 				<span className="ms_toggle_btn" >
                     <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues}/>
                     <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
