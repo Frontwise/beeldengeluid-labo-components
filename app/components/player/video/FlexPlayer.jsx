@@ -7,6 +7,7 @@ import HTML5VideoPlayer from './HTML5VideoPlayer';
 import VimeoPlayer from './VimeoPlayer';
 import YouTubePlayer from './YouTubePlayer';
 
+import PlayList from '../segmentation/PlayList';
 import SegmentationTimeline from '../segmentation/SegmentationTimeline';
 import SegmentationControls from '../segmentation/SegmentationControls';
 
@@ -74,7 +75,6 @@ class FlexPlayer extends React.Component {
 			activeAnnotationIndex : -1,
 			mediaObjectAnnotation : null //populated in onLoadAnnotations(), there should only be one per user!
 		}
-		this.CLASS_PREFIX = 'fxp'
 	}
 
 	//TODO make sure to offer support for rendering different players, now it's just Vimeo (ArtTube needs this)
@@ -578,25 +578,6 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
-	playTrack(index) {
-		this.setState(
-			{
-				currentMediaObject : this.props.mediaObjects[index],
-				playerAPI : null,
-				activeAnnotation : null,
-				segmentStart : -1,
-				segmentEnd : -1
-			},
-			() => {
-				//make sure to load the annotations of the selected track
-				this.loadAnnotations(null);
-
-				//communicate the selected track back to the details page
-				this.onOutput(this.props.mediaObjects[index])
-			}
-		)
-	}
-
 	/* ----------------- inter component communication --------------------- */
 
 	onOutput(mediaObject) {
@@ -713,28 +694,32 @@ class FlexPlayer extends React.Component {
 
 	/* ----------------- RENDER THE TRACKLIST ------------------------------------------------ */
 
+	playTrack(mediaObject) {
+		this.setState(
+			{
+				currentMediaObject : mediaObject,
+				playerAPI : null,
+				activeAnnotation : null,
+				segmentStart : -1,
+				segmentEnd : -1
+			},
+			() => {
+				//make sure to load the annotations of the selected track
+				this.loadAnnotations(null);
+
+				//communicate the selected track back to the details page
+				this.onOutput(mediaObject)
+			}
+		)
+	}
+
 	//FIXME make this a nice coherant list, instead of the horrible abomination it is now
 	renderPlayList = (playList) => {
 		if(!(playList && playList.length > 1)) return null;
 
-		const trackOptions = playList.map((t, index) => {
-			return (
-				<div
-					className={IDUtil.cssClassName('track-item', this.CLASS_PREFIX)}
-					onClick={this.playTrack.bind(this, index)}
-					title={'Carrier ID: ' + t.assetId}
-				>
-					{'Track ' + (index+1)}
-				</div>
-			)
-		})
-
 		return (
-			<div className={IDUtil.cssClassName('track-list', this.CLASS_PREFIX)}>
-				{trackOptions}
-			</div>
+			<PlayList mediaObjects={playList} onSelect={this.playTrack.bind(this)}/>
 		)
-
 	}
 
 	/* ----------------- MAIN RENDER --------------------------------------------------------- */
@@ -774,7 +759,6 @@ class FlexPlayer extends React.Component {
 
 		//render the play list
 		const playList = this.renderPlayList(this.props.mediaObjects);
-
 
 		const playerEventCallbacks = {
 		    playProgress : this.playProgress.bind(this),
@@ -830,7 +814,7 @@ class FlexPlayer extends React.Component {
 			<div className={IDUtil.cssClassName('flex-player')}>
 				<div className="row">
 					<div className="col-md-7" style={{overflowX : 'auto'}}>
-						<div className={IDUtil.cssClassName('track-title', this.CLASS_PREFIX)}>
+						<div className="item-title">
 							Playing: {this.state.currentMediaObject.assetId}
 						</div>
 						{player}
