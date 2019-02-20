@@ -132,6 +132,12 @@ class ProjectQueriesTable extends React.PureComponent {
         }
     }
 
+    onSelectQuery(item){
+        this.setState({
+            selectedQueries: item
+        })
+    }
+
     sortQueries(queries, sort) {
         const sorted = queries;
         switch (sort.field) {
@@ -146,7 +152,7 @@ class ProjectQueriesTable extends React.PureComponent {
     render() {
         const bulkActions = this.props.handleCompareLink
             ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
-            { title: 'Compare', onApply: this.props.handleCompareLink.bind(this)}]
+            { title: 'Compare', onApply: () => this.props.handleCompareLink(this.state.selectedQueries)}]
             : [{ title: 'Delete', onApply: this.deleteQueries.bind(this) }];
 
         return (
@@ -204,6 +210,7 @@ class ProjectQueriesTable extends React.PureComponent {
                             )
                         }
                     ]}
+                    onSelectQuery={this.onSelectQuery.bind(this)}
                     onSort={this.sortQueries.bind(this)}
                     loading={this.state.loading}
                     bulkActions={bulkActions}

@@ -203,23 +203,22 @@
 	.ms__custom-tooltip {
 		background-color: rgba(0, 0, 0, 0.8);
 		border-radius: 8px;
-		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .7);
+		box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, .8);
 		color: #f3f3f3;
-		min-width: 280px;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		/*min-width: 280px;*/
 		padding: 1rem 3rem;
 		text-transform: capitalize;
-		.rightAlign {
-			float: right;
-			margin-left: 10px;
-			right: 0;
+
+		p {
+			.rightAlign {
+				float: right;
+			}
 		}
 	}
-}
-
-@mixin switchBtn() {
-    .ms_toggle_btn {
-        @include switchButton();
-    }
 }
 
 @mixin lineChartBase() {
