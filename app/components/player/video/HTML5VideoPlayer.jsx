@@ -72,23 +72,26 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	onSourceLoaded() {
-		console.debug('loading new media source')
-		//then seek to the starting point
-		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
-		if(start > 0) {
-			this.state.playerAPI.seek(start / 1000);
-		}
+		if(this.state.playerAPI) {
+			//then seek to the starting point
+			const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
+			if(start > 0) {
+				this.state.playerAPI.seek(start / 1000);
+			}
 
-		//skip to the on-air content
-		if(this.props.segment) {
-			this.state.playerAPI.seek(this.props.segment.start);
-		} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
-			this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
-		}
+			//skip to the on-air content
+			if(this.props.segment) {
+				this.state.playerAPI.seek(this.props.segment.start);
+			} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
+				this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
+			}
 
-		//notify the owner
-		if(this.props.onPlayerReady) {
-			this.props.onPlayerReady(this.state.playerAPI);
+			//notify the owner
+			if(this.props.onPlayerReady) {
+				this.props.onPlayerReady(this.state.playerAPI);
+			}
+		} else {
+			console.error('No player API? (too many renders?)');
 		}
 	}
 
@@ -236,9 +239,6 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 		return this.playerAPI.muted
 	}
 
-	/* ----------------------- non-essential player specific calls ----------------------- */
-
-	//TODO
 }
 
 export default HTML5VideoPlayer;
