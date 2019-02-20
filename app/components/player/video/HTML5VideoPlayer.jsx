@@ -46,6 +46,9 @@ class HTML5VideoPlayer extends React.Component {
 			return true
 		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) { //but only rerender when the media object changed
+			if(this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
+				this.state.playerAPI.seek(nextProps.segment.start);
+			}
 			return false
 		}
 		return true
@@ -69,6 +72,7 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	onSourceLoaded() {
+		console.debug('loading new media source')
 		//then seek to the starting point
 		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
 		if(start > 0) {
@@ -76,7 +80,9 @@ class HTML5VideoPlayer extends React.Component {
 		}
 
 		//skip to the on-air content
-		if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
+		if(this.props.segment) {
+			this.state.playerAPI.seek(this.props.segment.start);
+		} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
 			this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
 		}
 
@@ -113,7 +119,6 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	renderCustomControls = (playerAPI, hideOffAirContent) => {
-		console.debug(hideOffAirContent)
 		if(playerAPI && hideOffAirContent) {
 			return (
 				<FlexPlayerControls

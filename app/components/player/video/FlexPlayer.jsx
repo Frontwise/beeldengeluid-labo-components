@@ -59,7 +59,7 @@ class FlexPlayer extends React.Component {
 
 		this.state = {
 			currentMediaObject : this.props.mediaObjects[0],//this one can be set per player
-
+			currentMediaSegment : this.props.mediaObjects[0].segments ? this.props.mediaObjects[0].segments[0] : null,
 			playerAPI : null,
 
 			curPosition : 0,
@@ -694,31 +694,40 @@ class FlexPlayer extends React.Component {
 
 	/* ----------------- RENDER THE TRACKLIST ------------------------------------------------ */
 
-	playTrack(mediaObject) {
-		this.setState(
-			{
-				currentMediaObject : mediaObject,
-				playerAPI : null,
-				activeAnnotation : null,
-				segmentStart : -1,
-				segmentEnd : -1
-			},
-			() => {
-				//make sure to load the annotations of the selected track
-				this.loadAnnotations(null);
+	playTrack(mediaObject, segment) {
+		if(mediaObject.assetId === this.state.currentMediaObject.assetId) {
+			this.setState({
+				currentMediaSegment : segment
+			})
+		} else {
+			this.setState(
+				{
+					currentMediaObject : mediaObject,
+					currentMediaSegment : segment,
+					playerAPI : null,
+					activeAnnotation : null,
+					segmentStart : -1,
+					segmentEnd : -1
+				},
+				() => {
+					//make sure to load the annotations of the selected track
+					this.loadAnnotations(null);
 
-				//communicate the selected track back to the details page
-				this.onOutput(mediaObject)
-			}
-		)
+					//communicate the selected track back to the details page
+					this.onOutput(mediaObject)
+				}
+			)
+		}
 	}
 
 	//FIXME make this a nice coherant list, instead of the horrible abomination it is now
 	renderPlayList = (playList) => {
-		if(!(playList && playList.length > 1)) return null;
+		if(!playList || playList.length === 0 || (playList.length === 1 && !playList[0].segments)) return null;
 
 		return (
-			<PlayList mediaObjects={playList} onSelect={this.playTrack.bind(this)}/>
+			<FlexBox title="Segments" isVisible={false}>
+				<PlayList mediaObjects={playList} onSelect={this.playTrack.bind(this)}/>
+			</FlexBox>
 		)
 	}
 
@@ -794,6 +803,7 @@ class FlexPlayer extends React.Component {
 					player = (
 						<HTML5VideoPlayer
 						mediaObject={this.state.currentMediaObject}
+						segment={this.state.currentMediaSegment}
 						useCredentials={this.props.useCredentials}
 						hideOffAirContent={this.props.hideOffAirContent}
 						eventCallbacks={playerEventCallbacks}
@@ -803,6 +813,7 @@ class FlexPlayer extends React.Component {
 			} else if(this.state.currentMediaObject.mimeType.indexOf('audio') != -1) {
 				player = (<HTML5AudioPlayer
 					mediaObject={this.state.currentMediaObject}
+					segment={this.state.currentMediaSegment}
 					useCredentials={this.props.useCredentials}
 					eventCallbacks={playerEventCallbacks}
 					onPlayerReady={this.onPlayerReady.bind(this)}/>

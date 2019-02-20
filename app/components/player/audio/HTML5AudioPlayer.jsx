@@ -3,6 +3,7 @@
 //https://github.com/521dimensions/amplitudejs
 import PlayerAPI from '../PlayerAPI';
 import IDUtil from '../../../util/IDUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 
 class HTML5AudioPlayer extends React.Component {
 
@@ -30,7 +31,13 @@ class HTML5AudioPlayer extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
+		if(nextState.playerAPI != null && this.state.playerAPI == null) { //rerender when the player is ready
+			return true
+		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			if(this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
+				this.state.playerAPI.seek(nextProps.segment.start);
+			}
 			return false
 		}
 		return true
@@ -58,6 +65,13 @@ class HTML5AudioPlayer extends React.Component {
 		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
 		if(start > 0) {
 			this.state.playerAPI.seek(start / 1000);
+		}
+
+		//skip to the on-air content
+		if(this.props.segment) {
+			this.state.playerAPI.seek(this.props.segment.start);
+		} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
+			this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
 		}
 
 		//notify the owner

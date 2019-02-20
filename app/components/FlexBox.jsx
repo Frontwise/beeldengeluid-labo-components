@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import IDUtil from '../util/IDUtil';
 
 //TODO the header sucks a bit, make it better
@@ -45,6 +46,11 @@ class FlexBox extends React.Component {
 			</div>
 		)
 	}
+}
+
+FlexBox.propTypes = {
+	title : PropTypes.string,
+	isVisible : PropTypes.bool
 }
 
 export default FlexBox;

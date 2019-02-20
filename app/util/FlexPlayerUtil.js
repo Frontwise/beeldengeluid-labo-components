@@ -60,7 +60,7 @@ const FlexPlayerUtil = {
 	},
 
 	containsOffAirEndOffset(mediaObject) {
-		return typeof(mediaObject.resourceEnd) === 'number' && mediaObject.resourceEnd > 0
+		return typeof(mediaObject.resourceEnd) === 'number' && mediaObject.resourceEnd > 0 && mediaObject.resourceEnd != -1
 	}
 
 }
