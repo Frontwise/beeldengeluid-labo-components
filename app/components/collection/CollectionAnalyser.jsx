@@ -72,7 +72,7 @@ class CollectionAnalyser extends React.Component {
                 this.previewAnalysis(field, (data)=>{
                     if(data && data.doc_stats) {
                         const completeness = {
-                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
+                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toPrecision(2) : 0,
                             total: data.doc_stats.total,
                             withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
                         };
