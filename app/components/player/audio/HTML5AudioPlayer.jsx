@@ -35,7 +35,7 @@ class HTML5AudioPlayer extends React.Component {
 			return true
 		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
-			if(this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
+			if(this.state.playerAPI && this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
 				this.state.playerAPI.seek(nextProps.segment.start);
 			}
 			return false
