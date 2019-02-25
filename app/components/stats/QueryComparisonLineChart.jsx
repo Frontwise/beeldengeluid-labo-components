@@ -219,7 +219,14 @@ class QueryComparisonLineChart extends React.Component {
                         margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         {lines}
                         <CartesianGrid stroke="#cacaca"/>
-                        <XAxis dataKey="year"/>
+                        <XAxis dataKey="year" height={100}>
+                            <Label
+                                value="Year (selected date field varies per query)"
+                                position="outside"
+                                offset={0}
+                                style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}
+                            />
+                        </XAxis>
                         <YAxis width={100} >
                             <Label
                                 value="Number of records"
