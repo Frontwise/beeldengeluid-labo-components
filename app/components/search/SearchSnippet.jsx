@@ -3,16 +3,14 @@
 import IconUtil from '../../util/IconUtil';
 import IDUtil from '../../util/IDUtil';
 import RegexUtil from '../../util/RegexUtil';
-import CollectionUtil from '../../util/CollectionUtil';
 import Classification from '../annotation/Classification';
 
 class SearchSnippet extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.CLASS_PREFIX = 'ss'
-	}
-
+		this.CLASS_PREFIX = 'ss';
+    }
 	getMediaTypes() {
 		let mediaTypes = this.props.collectionMediaTypes;
 		if(this.props.data.mediaTypes) {
@@ -106,12 +104,14 @@ class SearchSnippet extends React.Component {
         const classNames = ['media', IDUtil.cssClassName('search-snippet')];
         const title = this.props.data.title ? this.props.data.title + ' ' : '';
         const date = this.props.data.date ? '(' + this.props.data.date + ')' : '';
-
-        var subHeading = date;
+        const numberMetadataHits = this.props.data.numHighlights !== 0
+            ? this.props.data.numHighlights + " match(es) in metadata |"
+            : ' No matches in the archival metadata, matching terms found in the automatic enrichment';
+        let subHeading = date;
         if(date !== "") {
             subHeading += " | ";
         }
-        subHeading += this.props.data.numHighlights + " match(es) in metadata |";
+        subHeading += numberMetadataHits;
 
         return (
 			<div className={classNames.join(' ')}>
