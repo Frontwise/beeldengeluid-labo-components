@@ -1,6 +1,6 @@
 {
   "name": "labo-components",
-  "version": "3.1.3",
+  "version": "3.2.0",
   "description": "B&G UI components",
   "main": "webpack.config.js",
   "scripts": {
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/beeldengeluid/labo-components",
   "dependencies": {
-    "bootstrap-sass": "^3.3.7",
+    "bootstrap-sass": "^3.4.1",
     "debounce": "^1.1.0",
     "flux": "^3.1.3",
     "microevent": "^1.0.0",
