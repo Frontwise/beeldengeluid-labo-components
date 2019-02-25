@@ -98,7 +98,7 @@
     @include playerSlider();
 
 	position: absolute;
-    z-index:700000;
+    z-index:800; /* below the nav, but on top of anything else*/
     top: 0%;
     width: 100%;
     height: 100%;

@@ -157,6 +157,7 @@ class AnnotationSummary extends React.Component {
 				<div className={IDUtil.cssClassName('annotation-summary')}>
 					{title}
 					{comments}
+					<br/>
 					{links}
 					{classifications}
 					{cards}
