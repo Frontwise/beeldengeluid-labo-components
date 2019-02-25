@@ -15,6 +15,6 @@ export default class MediaSegment {
 			end: PropTypes.number.isRequired,
 			title: PropTypes.string,
 			programSegment: PropTypes.bool
-		})
+		}).isRequired
 	}
 }

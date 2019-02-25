@@ -1184,6 +1184,7 @@ class ItemDetailsRecipe extends React.Component {
                             &nbsp;
                             {resourceListPagingButtons}
 							<br/>
+							<br/>
 							{mediaPanel}
 							<br/>
 							<div className="row">

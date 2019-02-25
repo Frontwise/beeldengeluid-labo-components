@@ -139,7 +139,7 @@ class HTML5VideoPlayer extends React.Component {
 	render() {
 		//only show the custom controls when absolutely necessary. They are not yet perfect
 		const customControls = this.renderCustomControls(this.state.playerAPI, this.props.hideOffAirContent);
-		const nativeControls = customControls ? null : {controls : true, controlsList : 'nodownload', muted : true}
+		const nativeControls = customControls ? {muted : true} : {controls : true, controlsList : 'nodownload', muted : false}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
 				<div

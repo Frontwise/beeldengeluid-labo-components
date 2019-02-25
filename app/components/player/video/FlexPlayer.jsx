@@ -728,7 +728,7 @@ class FlexPlayer extends React.Component {
 		if(!playList || playList.length === 0 || (playList.length === 1 && !playList[0].segments)) return null;
 
 		return (
-			<FlexBox title="Segments" isVisible={false}>
+			<FlexBox title="Play list (including segments)" isVisible={false}>
 				<PlayList mediaObjects={playList} onSelect={this.playTrack.bind(this)}/>
 			</FlexBox>
 		)
@@ -826,8 +826,8 @@ class FlexPlayer extends React.Component {
 
 		return (
 			<div className={IDUtil.cssClassName('flex-player')}>
-				<div className="row">
-					<div className="col-md-7" style={{overflowX : 'auto'}}>
+				<div className="flex-container">
+					<div className="player-container" style={{overflowX : 'auto'}}>
 						<div className="item-title">
 							Playing: {this.state.currentMediaObject.assetId}
 						</div>
@@ -867,11 +867,11 @@ class FlexPlayer extends React.Component {
 								</button>
 							</div>
 						</div>
-						{playList}
 					</div>
-					<div className="col-md-5">
+					<div className="player-tabs">
 						{segmentationControls}
 						{annotationSummary}
+						{playList}
 					</div>
 				</div>
 				{annotationTiers}
