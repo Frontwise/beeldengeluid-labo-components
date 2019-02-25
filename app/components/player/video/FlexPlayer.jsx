@@ -228,8 +228,6 @@ class FlexPlayer extends React.Component {
 			this.setState({
 				duration : FlexPlayerUtil.onAirDuration(value, this.state.currentMediaObject)
 			})
-		} else {
-			console.error('duration is NaN')
 		}
 	}
 
