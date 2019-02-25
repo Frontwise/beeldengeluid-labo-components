@@ -1,4 +1,6 @@
-//TODO implement something neat and use it
+import PropTypes from 'prop-types';
+import MediaSegment from './MediaSegment';
+
 export default class MediaObject {
 
 	constructor(assetId, mimeType, url, contentId, contentServerId, segments, resourceStart, resourceEnd, isRawContent) {
@@ -48,6 +50,23 @@ export default class MediaObject {
 			typeof(obj.mimeType) == 'string' &&
 			typeof(obj.url) == 'string'
 
+	}
+
+	static getPropTypes() {
+		return PropTypes.shape({
+	    	url: PropTypes.string.isRequired,
+	    	mimeType: PropTypes.string.isRequired,
+	    	assetId: PropTypes.string.isRequired, //this should be a persistent ID
+
+	    	contentId: PropTypes.string, //encoded asset ID for the content proxy
+	    	contentServerId: PropTypes.string, //ID for the content proxy to decide which server to proxy
+
+	    	segments: PropTypes.arrayOf(MediaSegment.getPropTypes()),
+	    	resourceStart: PropTypes.number, //start (sec) of on-air content or related segment
+	    	resourceEnd: PropTypes.number, //end (sec) of on-air content or related segment
+
+	    	isRawContent : PropTypes.bool //raw content is material used to created the main media object that reflects the (media) resource
+		})
 	}
 
 }

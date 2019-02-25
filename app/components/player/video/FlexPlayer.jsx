@@ -886,15 +886,7 @@ FlexPlayer.PropTypes = {
 	//this is the media object the player will try to load
 	//the mimeType & url determine which implementation (HTML5, YouTube, JW, Vimeo) will be used
 	mediaObjects: PropTypes.arrayOf(
-		PropTypes.shape({
-	    	url: PropTypes.string.isRequired,
-	    	mimeType: PropTypes.string.isRequired,
-	    	assetId: PropTypes.string.isRequired, //this should be a persistent ID
-	    	contentId: PropTypes.string, //encoded asset ID for the content proxy
-	    	contentServerId: PropTypes.string, //ID for the content proxy to decide which server to proxy
-	    	resourceStart: PropTypes.number, //start (sec) of on-air content
-	    	resourceEnd: PropTypes.number //end (sec) of on-air content
-		})
+		MediaObject.getPropTypes()
 	).isRequired,
 
 	//the resource & collection ID are required for saving annotations

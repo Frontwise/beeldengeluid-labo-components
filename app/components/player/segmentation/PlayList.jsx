@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import TimeUtil from '../../../util/TimeUtil';
 import IDUtil from '../../../util/IDUtil';
 
+import MediaObject from '../../../model/MediaObject';
+
 //TODO now that the playlist is in this nice separate component, let's make it less like a pile of shit
 export default class PlayList extends React.PureComponent {
 
@@ -89,16 +91,7 @@ export default class PlayList extends React.PureComponent {
 PlayList.propTypes = {
 
 	mediaObjects: PropTypes.arrayOf(
-		PropTypes.shape({
-	    	url: PropTypes.string.isRequired,
-	    	mimeType: PropTypes.string.isRequired,
-	    	assetId: PropTypes.string.isRequired, //this should be a persistent ID
-	    	contentId: PropTypes.string, //encoded asset ID for the content proxy
-	    	contentServerId: PropTypes.string, //ID for the content proxy to decide which server to proxy
-	    	resourceStart: PropTypes.number, //start (sec) of on-air content or related segment
-	    	resourceEnd: PropTypes.number, //end (sec) of on-air content or related segment
-	    	isRawContent : PropTypes.bool //raw content is material used to created the main media object that reflects the (media) resource
-		})
+		MediaObject.getPropTypes()
 	).isRequired
 
 }
