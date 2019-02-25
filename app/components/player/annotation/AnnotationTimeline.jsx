@@ -1,4 +1,3 @@
-import TimeUtil from '../../../util/TimeUtil';
 import IDUtil from '../../../util/IDUtil';
 import AnnotationUtil from '../../../util/AnnotationUtil';
 import AnnotationActions from '../../../flux/AnnotationActions';
@@ -123,44 +122,34 @@ class AnnotationTimeline extends React.Component {
 		}
 		this.repainting = true;
 		const c = document.getElementById("an_timebar_canvas__" + this.props.mediaObject.id);
+		const ctx = c.getContext("2d");
 		if(c.width == 0 && c.height == 0) {
 			this.updateCanvasDimensions();
 		}
-		let dur = -1;
 		let t = this.props.curPosition;
         if(!t) {
             t = this.props.start;
         }
-		if(this.props.fragmentMode === false) {
-	        dur = this.props.duration;
-	        var ctx = c.getContext("2d");
-	        ctx.clearRect (0, 0, c.width, c.height);
-	        if(this.props.annotations) {
-		        this.props.annotations.forEach((a, index) => {
-		        	if(a.target) {
-		        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a.target);
-			        	if(frag) {
-				        	const start = c.width / 100 * (frag.start / (dur / 100));
-				        	const end = c.width / 100 * (frag.end / (dur / 100));
-				        	if(this.hoverPos >= frag.start && this.hoverPos <= frag.end) {
-				        		ctx.fillStyle = "#FF69B4";
-				        	} else if(this.props.annotation && a.id == this.props.annotation.id){
-				        		ctx.fillStyle = "lime";
-				        	} else {
-				        		ctx.fillStyle = "#00bfff";
-				        	}
-				        	ctx.fillRect(start, 0, end - start, c.height / 2);//time progressing
-				        }
-				    }
-		        });
-		    }
-	    } else {
-			dur = this.props.end - this.props.start;
-			const dt = t - this.props.start;
-			var ctx = c.getContext("2d");
-			ctx.clearRect (0, 0, c.width, c.height);
-			console.debug('TODO: implement this');
-        }
+        ctx.clearRect (0, 0, c.width, c.height);
+        if(this.props.annotations) {
+	        this.props.annotations.forEach((a, index) => {
+	        	if(a.target) {
+	        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a.target);
+		        	if(frag) {
+			        	const start = c.width / 100 * (frag.start / (this.props.duration / 100));
+			        	const end = c.width / 100 * (frag.end / (this.props.duration / 100));
+			        	if(this.hoverPos >= frag.start && this.hoverPos <= frag.end) {
+			        		ctx.fillStyle = "#FF69B4";
+			        	} else if(this.props.annotation && a.id == this.props.annotation.id){
+			        		ctx.fillStyle = "lime";
+			        	} else {
+			        		ctx.fillStyle = "#00bfff";
+			        	}
+			        	ctx.fillRect(start, 0, end - start, c.height / 2);//time progressing
+			        }
+			    }
+	        });
+	    }
         this.repainting = false;
 	}
 

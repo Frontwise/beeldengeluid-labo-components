@@ -3,6 +3,7 @@
 //https://github.com/521dimensions/amplitudejs
 import PlayerAPI from '../PlayerAPI';
 import IDUtil from '../../../util/IDUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 
 class HTML5AudioPlayer extends React.Component {
 
@@ -23,27 +24,33 @@ class HTML5AudioPlayer extends React.Component {
 			vid.onpause = this.props.eventCallbacks.onPause.bind(this);
 			vid.onended = this.props.eventCallbacks.onFinish.bind(this);
 			vid.onseeked = this.props.eventCallbacks.onSeek.bind(this);
-			vid.oncanplay = this.onReady.bind(this, vid);
+			vid.onloadedmetadata = this.onReady.bind(this, vid);
 		}
 		//needed until React will support the controlsList attribute of the video tag
 		vid.setAttribute("controlsList","nodownload");
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
+		if(nextState.playerAPI != null && this.state.playerAPI == null) { //rerender when the player is ready
+			return true
+		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
+			if(this.state.playerAPI && this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
+				this.state.playerAPI.seek(nextProps.segment.start);
+			}
 			return false
 		}
 		return true
 	}
 
 	componentDidUpdate() {
-		this.state.playerAPI.load()
+		this.state.playerAPI.getApi().load()
 	}
 
 	onReady(playerAPI) {
 		if(this.state.playerAPI == null) {
 			this.setState(
-				{playerAPI : playerAPI},
+				{playerAPI : new HTML5AudioPlayerAPI(playerAPI)},
 				() => {
 					this.onSourceLoaded();
 				}
@@ -54,15 +61,26 @@ class HTML5AudioPlayer extends React.Component {
 	}
 
 	onSourceLoaded() {
-		//then seek to the starting point
-		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
-		if(start > 0) {
-			this.state.playerAPI.seek(start / 1000);
-		}
+		if(this.state.playerAPI) {
+			//then seek to the starting point
+			const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
+			if(start > 0) {
+				this.state.playerAPI.seek(start / 1000);
+			}
 
-		//notify the owner
-		if(this.props.onPlayerReady) {
-			this.props.onPlayerReady(new HTML5AudioPlayerAPI(this.state.playerAPI));
+			//skip to the on-air content
+			if(this.props.segment) {
+				this.state.playerAPI.seek(this.props.segment.start);
+			} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
+				this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
+			}
+
+			//notify the owner
+			if(this.props.onPlayerReady) {
+				this.props.onPlayerReady(this.state.playerAPI);
+			}
+		} else {
+			console.error('No player API? (too many renders?)');
 		}
 	}
 
@@ -101,21 +119,53 @@ class HTML5AudioPlayerAPI extends PlayerAPI {
 		this.playerAPI.currentTime = secs;
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			return this.playerAPI.currentTime;
+		}
 		callback(this.playerAPI.currentTime);
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			return this.playerAPI.duration;
+		}
 		callback(this.playerAPI.duration);
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			return this.playerAPI.paused;
+		}
 		callback(this.playerAPI.paused);
 	}
 
-	/* ----------------------- non-essential player specific calls ----------------------- */
+	setVolume(volume) { //value between 0-1
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
+		this.playerAPI.volume = volume;
+	}
 
-	//TODO
+	getVolume() {
+		return this.playerAPI.volume;
+	}
+
+	getLastVolume() {
+		return this.lastVolume
+	}
+
+	toggleMute() {
+		this.playerAPI.muted = !this.playerAPI.muted
+		if(this.isMuted()) {
+			this.lastVolume = this.playerAPI.volume;
+		}
+	}
+
+	isMuted() {
+		return this.playerAPI.muted
+	}
+
 }
 
 export default HTML5AudioPlayer;

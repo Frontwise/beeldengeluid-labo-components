@@ -1,20 +1,25 @@
 .bg__flex-player {
-	.bg__fxp__track-title {
-		font-weight: bold;
-		margin: 10px 0px;
-	}
-	.bg__fxp__track-list {
-		margin:5px;
-		display: flex;
-  		flex-flow: row wrap;
-  		justify-content: flex-start;
-  		.bg__fxp__track-item {
-  			background-color: #ebebeb;
-  			border-radius:2px;
-  			box-shadow: 2px 2px 2px 2px #333;
-  			padding:5px;
-  			margin-right:10px;
-  		}
-	}
 
+    .item-title {
+        font-weight: bold;
+        margin: 10px 0px;
+    }
+
+    .flex-container {
+    	display:flex;
+    	width:100%;
+    }
+
+    .player-container {
+    	width: 58%;
+    }
+
+	.player-tabs {
+    	overflow-y: auto;
+    	overflow-x: hidden;
+    	padding:10px;
+    	width: 40%;
+    	margin-left:2%;
+    	max-height: 562px;
+    }
 }

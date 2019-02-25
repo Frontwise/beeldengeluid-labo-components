@@ -114,19 +114,23 @@ class CollectionConfig {
 	}
 
 	getImageBaseUrl() {
-		return null;
+		return null
 	}
 
 	getVideoBaseUrl() {
-		return null;
+		return null
 	}
 
 	getAudioBaseUrl() {
-		return null;
+		return null
 	}
 
 	requiresPlayoutAccess() {
-		return false;
+		return false
+	}
+
+	hideOffAirContent() {
+		return false
 	}
 
 	getThumbnailContentServerId() {

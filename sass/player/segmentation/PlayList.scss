@@ -1,0 +1,41 @@
+.bg__playlist {
+
+	.items {
+		.item {
+			margin-top:2px;
+			background-color: white;
+			padding:10px;
+			border-bottom: 1px solid #ccc;
+			.segment {
+				padding-left: 10px;
+				margin-bottom: 5px;
+				cursor: pointer;
+				color: #888;
+				&:hover {
+					color:black;
+				}
+				label {
+					font-weight: bold;
+					cursor: pointer;
+				}
+				&.main {
+					padding-left:0px;
+					color: black;
+				}
+			}
+		}
+	}
+
+	.raw-items {
+		margin-top:2px;
+		padding:10px;
+		label {
+			font-weight: bold;
+		}
+		.raw-item {
+			color: #888;
+			padding: 5px;
+		}
+	}
+
+}

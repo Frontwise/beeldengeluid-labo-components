@@ -1,0 +1,154 @@
+//this mixin is "local", since it's never re-used in any other component. Load it first, so the FlexPlayerControls component knows it's there (see below)
+/*
+    TODO style the sliders better, SEE TIPS:
+        http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html
+        https://www.cssportal.com/style-input-range/
+    FIXME
+        webkit & moz don't support separate colors for lower/upper (https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/)
+*/
+@mixin playerSlider($sliderHeight: 7px,  $sliderColor: #888, $sliderProgressColor: white, $sliderBorderColor : #888,
+    $thumbWidth: 14px, $thumbHeight: 14px, $thumbColor: white, $thumbBorderColor: #888) {
+
+    input[type=range] {
+        -webkit-appearance: none;
+        border: 1px solid $sliderBorderColor;
+        height: $sliderHeight;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+        height: $sliderHeight;
+        background: $sliderColor;
+        border: none;
+        border-radius: 3px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+        margin-top: -5px;
+    }
+    input[type=range]:focus {
+        outline: none;
+    }
+    input[type=range]:focus::-webkit-slider-runnable-track {
+        background: $sliderColor;
+    }
+
+    input[type=range]::-moz-range-track {
+        height: $sliderHeight;
+        background: $sliderColor;
+        border: 1px solid $sliderBorderColor;
+        border-radius: 3px;
+    }
+    input[type=range]::-moz-range-thumb {
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+    }
+
+    /*hide the outline behind the border*/
+    input[type=range]:-moz-focusring {
+        outline: 1px solid $sliderBorderColor;
+        outline-offset: -1px;
+    }
+
+    input[type=range]::-ms-track {
+        height: $sliderHeight;
+
+        /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+        background: transparent;
+
+        /*leave room for the larger thumb to overflow with a transparent border */
+        border-color: transparent;
+        border-width: 6px 0;
+
+        /*remove default tick marks*/
+        color: transparent;
+    }
+    input[type=range]::-ms-fill-lower {
+        background: $sliderProgressColor;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-fill-upper {
+        background: $sliderColor;
+        border-radius: 10px;
+    }
+    input[type=range]::-ms-thumb {
+        border: 1px solid $thumbBorderColor;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        border-radius: 50%;
+        background: $thumbColor;
+    }
+    input[type=range]:focus::-ms-fill-lower {
+        background: $sliderProgressColor;
+    }
+    input[type=range]:focus::-ms-fill-upper {
+        background: $sliderColor;
+    }
+
+}
+
+.bg__flex-controls {
+
+    @include playerSlider();
+
+	position: absolute;
+    z-index:800; /* below the nav, but on top of anything else*/
+    top: 0%;
+    width: 100%;
+    height: 100%;
+
+    .toggle-play-overlay {
+    	position: absolute;
+    	top: 0%;
+    	left:0%;
+    	width:100%;
+    	height:80%;
+
+        &:hover {
+            button {
+                display:block;
+            }
+        }
+
+        button {
+            margin: 24% auto;
+            display:none;
+            color: white;
+            background-color: black;
+            border: none;
+            height: 70px;
+            width: 70px;
+        }
+
+    }
+
+    .buttons {
+    	position: absolute;
+    	bottom: 28px;
+	    right: 1%;
+        .volume {
+            width: 80px;
+            margin-top: 5px;
+            display: inline;
+        }
+	    button  {
+		    background-color: transparent;
+		    border: none;
+		    color: white;
+		    cursor: pointer;
+	    }
+    }
+
+    .seekbar {
+        position: absolute;
+        bottom: 8px;
+        width: 98%;
+        left: 1%;
+    }
+}

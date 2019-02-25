@@ -1,9 +1,15 @@
+import FlexPlayerUtil from '../../util/FlexPlayerUtil';
+
 class PlayerAPI {
 
 	constructor(playerAPI) {
 		this.playerAPI = playerAPI;
 		this.activeSegment = null;
 		this.observers = [];
+	}
+
+	getApi() {
+		return this.playerAPI; //return the original API
 	}
 
 	addObserver(obj) {
@@ -25,14 +31,14 @@ class PlayerAPI {
 	}
 
 	//TODO this should also include the video url, so it can switch video!!!
-	setActiveSegment(activeSegment, play, notify) {
+	setActiveSegment(mediaObject, activeSegment, play, notify) {
 		if(activeSegment) {
 			this.activeSegment = activeSegment;
 		} else {
 			this.activeSegment = {start : 0, end : 0};
 		}
 		if(play) {
-			this.seek(this.activeSegment.start)
+			FlexPlayerUtil.seekRelativeToOnAir(this, this.activeSegment.start, mediaObject)
 		}
 		if(notify) {
 			this.notifyObservers();

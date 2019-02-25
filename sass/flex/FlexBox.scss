@@ -1,28 +1,34 @@
 .bg__flex-box {
-	cursor:pointer;
-	.bg__fb__open {
-		color: #666;
-		float:right;
-		margin-bottom: $default-margin;
+
+	.box-toggle {
+		width:100%;
+		height:40px;
+		cursor: pointer;
 		padding: $default-margin $default-margin 0px 0px;
-		&:after {
-			content: "\25BC";
+
+		label {
+			cursor: pointer;
+			float:right;
 		}
-		&:hover {
-			text-decoration:underline;
-		}
-	}
-	.bg__fb__closed {
-		float:right;
-		margin-bottom: $default-margin;
-		padding: $default-margin $default-margin 0px 0px;
-		&:after {
-			content: "\25B2";
-		}
-	}
-	&.closed { /* possibly change this name into bg__flex-box--closed (BEM style) */
+
 		&:hover {
 			background-color: $fill-color;
 		}
+
+		&.closed {
+			label {
+				&:after {
+					content: "\25B2";
+				}
+			}
+		}
+		&.open {
+			label {
+				&:after {
+					content: "\25BC";
+				}
+			}
+		}
 	}
+
 }
