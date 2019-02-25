@@ -1,11 +1,19 @@
 //TODO implement something neat and use it
-class MediaObject {
+export default class MediaObject {
 
-	constructor(id, mimeType, url, assetId) {
-		this.id = id;
+	constructor(assetId, mimeType, url, contentId, contentServerId, segments, resourceStart, resourceEnd, isRawContent) {
+		this.assetId = assetId;
 		this.mimeType = mimeType;
 		this.url = url;
-		this.assetId = assetId;
+
+		this.contentId = contentId;
+		this.contentServerId = contentServerId;
+
+		this.segments = segments; //list of MediaSegment
+		this.resourceStart = resourceStart;
+		this.resourceEnd = resourceEnd;
+
+		this.isRawContent = isRawContent;
 	}
 
 	static construct(obj) {
@@ -13,26 +21,33 @@ class MediaObject {
 			return null;
 		}
 		return new MediaObject(
-			obj.id,
-			obj.url,
 			obj.assetId,
-			obj.mimeType
+			obj.mimeType,
+			obj.url,
+
+			obj.contentId,
+			obj.contentServerId,
+
+			obj.segments,
+
+			obj.resourceStart,
+			obj.resourceEnd,
+
+			obj.isRawContent
 		)
 	}
 
 	//TODO really bad implementation and never used. Finish & test later
 	static validateObject(obj) {
 		return
-			obj.hasOwnProperty('id') &&
-			obj.hasOwnProperty('url') &&
 			obj.hasOwnProperty('assetId') &&
 			obj.hasOwnProperty('mimeType') &&
-			typeof(obj.id) == 'string' &&
-			typeof(obj.url) == 'string' &&
+			obj.hasOwnProperty('url') &&
+
 			typeof(obj.assetId) == 'string' &&
-			typeof(obj.mimeType) == 'string'
+			typeof(obj.mimeType) == 'string' &&
+			typeof(obj.url) == 'string'
+
 	}
 
 }
-
-export default MediaObject;

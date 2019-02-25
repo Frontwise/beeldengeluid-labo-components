@@ -96,7 +96,8 @@ PlayList.propTypes = {
 	    	contentId: PropTypes.string, //encoded asset ID for the content proxy
 	    	contentServerId: PropTypes.string, //ID for the content proxy to decide which server to proxy
 	    	resourceStart: PropTypes.number, //start (sec) of on-air content or related segment
-	    	resourceEnd: PropTypes.number //end (sec) of on-air content or related segment
+	    	resourceEnd: PropTypes.number, //end (sec) of on-air content or related segment
+	    	isRawContent : PropTypes.bool //raw content is material used to created the main media object that reflects the (media) resource
 		})
 	).isRequired
 

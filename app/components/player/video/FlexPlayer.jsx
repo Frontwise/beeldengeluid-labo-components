@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types';
 import MouseTrap from 'mousetrap';
 
+import MediaObject from '../../../model/MediaObject';
+import MediaSegment from '../../../model/MediaSegment';
+
 import HTML5AudioPlayer from '../audio/HTML5AudioPlayer';
 
 import HTML5VideoPlayer from './HTML5VideoPlayer';
