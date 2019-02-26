@@ -15,10 +15,10 @@ class HTML5VideoPlayer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			playerAPI : null,
-			fullScreen : false
+			playerAPI : null
 		}
 		this.controlsRef = React.createRef();
+		this.fullScreenWrapperRef = React.createRef();
 		this.alreadyShowing = true;
 		this.alertTimerId = null;
 	}
@@ -96,7 +96,8 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	toggleFullScreen() {
-		this.setState({fullScreen : !this.state.fullScreen})
+		const curMode = this.fullScreenWrapperRef.current.className;
+		this.fullScreenWrapperRef.current.className = curMode === 'default' ? 'full-screen' : 'default';
 	}
 
 	toggleControls(e) {
@@ -143,8 +144,9 @@ class HTML5VideoPlayer extends React.Component {
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
 				<div
-					className={this.state.fullScreen ? 'full-screen' : 'default'}
-					id={'__htmlvid__' + this.props.mediaObject.id}
+					id={'__htmlvid__' + this.props.mediaObject.assetId}
+					ref={this.fullScreenWrapperRef}
+					className="default"
 					onMouseMove={this.toggleControls.bind(this)}
 				>
 					<video

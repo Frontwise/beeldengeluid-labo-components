@@ -803,6 +803,7 @@ class FlexPlayer extends React.Component {
 				} else {
 					player = (
 						<HTML5VideoPlayer
+						key={'html_v_player__' + this.state.currentMediaObject.assetId}
 						mediaObject={this.state.currentMediaObject}
 						segment={this.state.currentMediaSegment}
 						useCredentials={this.props.useCredentials}
@@ -813,6 +814,7 @@ class FlexPlayer extends React.Component {
 				}
 			} else if(this.state.currentMediaObject.mimeType.indexOf('audio') != -1) {
 				player = (<HTML5AudioPlayer
+					key={'html_a_player__' + this.state.currentMediaObject.assetId}
 					mediaObject={this.state.currentMediaObject}
 					segment={this.state.currentMediaSegment}
 					useCredentials={this.props.useCredentials}
