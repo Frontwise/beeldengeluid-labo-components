@@ -23,7 +23,7 @@ class Transcriber extends React.PureComponent {
 
         //TODO rewrite to proper React
         if (transcriptWindow) {
-            transcriptWindow.onscroll = (e) => {
+            transcriptWindow.onscroll = () => {
                 if (this.alertTimerId == null) {
                     this.alertTimerId = setTimeout(() => {
                         this.userHasScrolled = false;
@@ -58,15 +58,12 @@ class Transcriber extends React.PureComponent {
             if(element.sequenceNr === sequenceNr) {
                 this.userHasScrolled = false;
                 this.props.playerAPI.seek(element.start / 1000);
-                return;
             }
         }, this);
     }
 
     getSegmentByStartTime(time) {
-        const lines = this.state.transcript.filter(function (obj) {
-            return obj.start === time;
-        });
+        const lines = this.state.transcript.filter(obj =>  obj.start === time);
         if(lines.length > 0) {
             return lines[0];
         }
@@ -75,9 +72,7 @@ class Transcriber extends React.PureComponent {
 
     //FIXME make this one faster
     findClosestSegment(currentTime) {
-        let index = this.state.transcript.findIndex(function (a) {
-            return a.start >= currentTime;
-        });
+        let index = this.state.transcript.findIndex(a => a.start >= currentTime);
 
         if((index === -1) && this.state.transcript.length > 0) {
             index = 0;
@@ -104,9 +99,12 @@ class Transcriber extends React.PureComponent {
     }
 
     resetTranscriber() {
-        this.setState({transcript: this.props.transcript, prevSearchLength: 0},
+        this.setState({
+                transcript: this.props.transcript,
+                prevSearchLength: 0
+            },
             () => {
-                document.querySelector('.numberOfMatches').style.display = 'none',
+                    document.querySelector('.numberOfMatches').style.display = 'none',
                     document.querySelector('input[name="search-transcriptLine"]').value = ''
             }
         );
@@ -126,19 +124,18 @@ class Transcriber extends React.PureComponent {
         if (searchTerm.length > 2 || (this.state.prevSearchLength > searchTerm.length)) {
             let replacementText = '',
                 word = '',
-                copiedItem = {},
-                regex = new RegExp(searchTerm, 'gi');
+                copiedItem = {};
+            const regex = new RegExp(searchTerm, 'gi');
             const updatedList = this.props.transcript.filter(function (item) {
                 return item.words.toLowerCase().search(
                     searchTerm.toLowerCase()) !== -1;
             }).map((item) => {
                 replacementText = "<span class='highLightText'>" + searchTerm + "</span>";
-                word = item.words.replace(regex, replacementText);
+                word = item.words.replace(regex, searchedTerm => "<span class='highLightText'>" + searchedTerm + "</span>");
                 copiedItem = Object.assign({}, item);
                 copiedItem.words = word;
                 return copiedItem;
             });
-
             if (updatedList.length !== 0) {
                 this.setState({
                         transcript: updatedList,
@@ -173,35 +170,39 @@ class Transcriber extends React.PureComponent {
     render() {
         const segmentId = this.findClosestSegment(Math.trunc(this.props.curPosition * 1000)),
             transcriptContainer = this.state.transcript.map((obj) => {
-            const className = obj.sequenceNr == segmentId ? 'sub currentLine' : 'sub';
+            const className = obj.sequenceNr === segmentId ? 'sub currentLine' : 'sub';
             return (
                 <div
                     id={obj.sequenceNr} className={className}
                     onClick={this.gotoLine.bind(this, obj.sequenceNr)}>
                     <span className="data line-start-time">
                         {TimeUtil.formatMillisToTime(obj.start)}
-                        </span>
-                    <span dangerouslySetInnerHTML={{__html: obj.words}}></span>
+                    </span>
+                    <span dangerouslySetInnerHTML={{__html: obj.words}}/>
                 </div>
             );
         });
-
         //FIXME currently there can only be one transcriber on the screen...
         return (
             <div className={IDUtil.cssClassName('transcriber')}>
                 <div className="transcript_search_box">
-                    <span className="glyphicon glyphicon-search"></span>
+                    <span className="glyphicon glyphicon-search"/>
                     <input data-transcribersearch="search-transcriptLine" type="text"
                            onChange={this.doFilter.bind(this)} name="search-transcriptLine"
                            placeholder="Zoek.."/>
                     <span className="numberOfMatches">
-                        <span className="numberOfHits"></span> HITS
-                        <button type="button" onClick={this.resetTranscriber.bind(this)}
-                                className="glyphicon glyphicon-remove removeTranscriptFilter"
-                                aria-label="Close"></button>
+                        <span className="numberOfHits"/> HITS
+                        <button
+                            type="button"
+                            onClick={this.resetTranscriber.bind(this)}
+                            className="glyphicon glyphicon-remove removeTranscriptFilter"
+                            aria-label="Close"
+                        />
                     </span>
                 </div>
-                <div id={this.GUID} className="transcriptsList">{transcriptContainer}</div>
+                <div id={this.GUID} className="transcriptsList">
+                    {transcriptContainer}
+                </div>
             </div>
         )
     }
