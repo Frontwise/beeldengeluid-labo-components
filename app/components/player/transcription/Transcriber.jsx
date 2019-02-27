@@ -1,5 +1,6 @@
 import IDUtil from '../../../util/IDUtil';
 import TimeUtil from "../../../util/TimeUtil";
+import FlexPlayerUtil from "../../../util/FlexPlayerUtil";
 
 //TODO replace all the css javascript selection and replace with pure React
 class Transcriber extends React.PureComponent {
@@ -176,9 +177,11 @@ class Transcriber extends React.PureComponent {
                     id={obj.sequenceNr} className={className}
                     onClick={this.gotoLine.bind(this, obj.sequenceNr)}>
                     <span className="data line-start-time">
-                        {TimeUtil.formatMillisToTime(obj.start)}
+                        {TimeUtil.formatMillisToTime(
+                            FlexPlayerUtil.timeRelativeToOnAir(obj.start / 1000, this.props.mediaObject) * 1000
+                        )}
                     </span>
-                    <span dangerouslySetInnerHTML={{__html: obj.words}}/>
+                    <span dangerouslySetInnerHTML={{__html: obj.words}}></span>
                 </div>
             );
         });
