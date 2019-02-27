@@ -65,7 +65,8 @@ class FlexPlayer extends React.Component {
 			currentMediaSegment : this.props.mediaObjects[0].segments ? this.props.mediaObjects[0].segments[0] : null,
 			playerAPI : null,
 
-			curPosition : 0,
+			relativePosition : 0, //player pos relative to on-air start time (e.g. on-air starts at 6:01, real player = 8:01, so relative pos = 2:00)
+			realPosition : 0, //real player position
 			duration : 0,
 
 			segmentStart : -1, //start point of the active ANNOTATION
@@ -234,7 +235,8 @@ class FlexPlayer extends React.Component {
 	//TODO test this well! (relative player pos)
 	onGetPosition(value) {
 	    this.setState({
-	    	curPosition : FlexPlayerUtil.timeRelativeToOnAir(value, this.state.currentMediaObject)
+	    	relativePosition : FlexPlayerUtil.timeRelativeToOnAir(value, this.state.currentMediaObject),
+	    	realPosition : value
 	    })
 	}
 
@@ -291,7 +293,7 @@ class FlexPlayer extends React.Component {
 	setStart(start) {
 	    let temp = -1;
 	    if(start == undefined) {
-	        temp = this.state.curPosition;
+	        temp = this.state.relativePosition;
 	    } else {
 	        temp = start;
 	    }
@@ -308,7 +310,7 @@ class FlexPlayer extends React.Component {
 	setEnd(end, skipPause) {
 	    let temp = -1;
 	    if(end == undefined) {
-	        temp = this.state.curPosition;
+	        temp = this.state.relativePosition;
 	    } else {
 	        temp = end;
 	    }
@@ -326,11 +328,11 @@ class FlexPlayer extends React.Component {
 	}
 
 	rw(t) {
-		this.__doOnAirSeek(this.state.curPosition - t)
+		this.__doOnAirSeek(this.state.relativePosition - t)
 	}
 
 	ff(t) {
-		this.__doOnAirSeek(this.state.curPosition + t)
+		this.__doOnAirSeek(this.state.relativePosition + t)
 	}
 
 	//this is the central seek function of the FlexPlayer and makes sure all seeks take on air content into account
@@ -631,7 +633,7 @@ class FlexPlayer extends React.Component {
 			<SegmentationTimeline
 				mediaObject={state.currentMediaObject}
 				duration={state.duration}
-				curPosition={state.curPosition}
+				curPosition={state.relativePosition}
 
 				start={state.segmentStart}
 				end={state.segmentEnd}
@@ -646,7 +648,7 @@ class FlexPlayer extends React.Component {
 			<AnnotationTimeline
 				mediaObject={state.currentMediaObject}
 				duration={state.duration}
-				curPosition={state.curPosition}
+				curPosition={state.relativePosition}
 
 				start={state.segmentStart}
 				end={state.segmentEnd}
@@ -679,16 +681,16 @@ class FlexPlayer extends React.Component {
 		})
 	}
 
-	renderTranscriber = (transcript, playerAPI, initialSearchTerm, currentMediaObject, curPosition) => {
+	renderTranscriber = (transcript, playerAPI, initialSearchTerm, currentMediaObject, realPosition) => {
 		if(!(transcript && transcript.length > 0 && playerAPI && currentMediaObject)) return null;
 		return (
 			<Transcriber
 				key={'transcriber__' + currentMediaObject.assetId}
 				initialSearchTerm={this.props.initialSearchTerm}
 				transcript={transcript}
-				curPosition={curPosition}
+				curPosition={realPosition}
 				playerAPI={playerAPI}
-				//mediaObject={currentMediaObject}
+				mediaObject={currentMediaObject}
 			/>
 		)
 	}
@@ -764,7 +766,7 @@ class FlexPlayer extends React.Component {
 			this.state.playerAPI,
 			this.props.initialSearchTerm,
 			this.state.currentMediaObject,
-			this.state.curPosition
+			this.state.realPosition
 		);
 
 		//render the play list
