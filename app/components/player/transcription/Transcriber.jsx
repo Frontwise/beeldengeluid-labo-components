@@ -200,6 +200,7 @@ export default class Transcriber extends React.PureComponent {
 					ref={this.searchBarRef}
 					className="transcriber-search-input"
 					type="text"
+					defaultValue={this.props.initialSearchTerm || ''}
 					onChange={this.doFilter}
 					placeholder="Search..."/>
 				{hitCounter}
