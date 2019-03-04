@@ -40,18 +40,18 @@ class HTML5VideoPlayer extends React.Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
 		if(nextState.playerAPI != null && this.state.playerAPI == null) { //rerender when the player is ready
-			return true
+			return true;
 		}
 		if(nextState.fullScreen != this.state.fullScreen) { //rerender when full screen is toggled
-			return true
+			return true;
 		}
 		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) { //but only rerender when the media object changed
 			if(this.state.playerAPI && this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
 				this.state.playerAPI.seek(nextProps.segment.start);
 			}
-			return false
+			return false;
 		}
-		return true
+		return true;
 	}
 
 	componentDidUpdate() {
@@ -95,8 +95,8 @@ class HTML5VideoPlayer extends React.Component {
 		}
 	}
 
-	toggleFullScreen() {
-		const curMode = this.fullScreenWrapperRef.current.className;
+	toggleFullScreen(exitFullScreen) {
+		const curMode = exitFullScreen === true ? 'full-screen' : this.fullScreenWrapperRef.current.className;
 		this.fullScreenWrapperRef.current.className = curMode === 'default' ? 'full-screen' : 'default';
 	}
 
@@ -134,13 +134,13 @@ class HTML5VideoPlayer extends React.Component {
 				/>
 			)
 		}
-		return null
+		return null;
 	}
 
 	render() {
 		//only show the custom controls when absolutely necessary. They are not yet perfect
 		const customControls = this.renderCustomControls(this.state.playerAPI, this.props.hideOffAirContent);
-		const nativeControls = customControls ? null : {controls : true, controlsList : 'nodownload', muted : false}
+		const nativeControls = customControls ? {muted : true, controls : false} : {controls : true, controlsList : 'nodownload', muted : false}
 		return (
 			<div className={IDUtil.cssClassName('html5-video-player')}>
 				<div

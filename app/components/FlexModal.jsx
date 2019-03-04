@@ -6,10 +6,9 @@ class FlexModal extends React.Component {
 	constructor(props) {
 		super(props);
 		this.CLASS_PREFIX = 'fm';
-		this.handleKey = this.handleKey.bind(this);
 	}
 
-	handleKey(event){
+	handleKey = event => {
 	    if(event.keyCode === 27) {
 	        this.close(true);
 	    }

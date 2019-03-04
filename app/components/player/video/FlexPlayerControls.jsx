@@ -13,7 +13,7 @@ class FlexPlayerControls extends React.Component {
 		super(props);
 		this.state = {
 			muted : this.props.api.isMuted(),
-			paused : this.props.api.isPaused()
+			paused : !this.props.api.isPaused()
 		}
 		this.seekBarRef = React.createRef();//not using state for this, since media playback updates every second!
 		this.volumeRef = React.createRef();
@@ -21,7 +21,7 @@ class FlexPlayerControls extends React.Component {
 		this.overlayRef = React.createRef();
 	}
 
-	componentDidMount() {
+	componentDidMount = () => {
 		//FIXME this part is not player agnostic yet. For now this is fine (see comment at the top)
 		this.props.api.getApi().addEventListener('timeupdate', () => {
 	  		this.onPlayProgress();
@@ -30,9 +30,27 @@ class FlexPlayerControls extends React.Component {
 		this.props.api.getApi().addEventListener('volumechange', () => {
 			this.volumeRef.current.value = this.props.api.getVolume();
 		})
+
+		//only add a listener (for the ESC key) if the "fake full-screen" is used
+		if(this.props.toggleFullScreen && typeof this.props.toggleFullScreen === 'function') {
+			document.addEventListener("keydown", this.handleKey, false);
+		}
 	}
 
-	onPlayProgress() {
+	componentWillUnmount = () => {
+		if(this.props.toggleFullScreen && typeof this.props.toggleFullScreen === 'function') {
+	 	   document.removeEventListener("keydown", this.handleKey, false);
+		}
+	}
+
+	//handles the ESC key for the "fake full screen" mode
+	handleKey = event => {
+	    if(event.keyCode === 27) {
+	        this.onToggleFullScreen(true);
+	    }
+	}
+
+	onPlayProgress = () => {
 		//update the seekbar
 		const value = (100 / this.props.duration) * FlexPlayerUtil.timeRelativeToOnAir(
   			this.props.api.getPosition(),
@@ -46,7 +64,7 @@ class FlexPlayerControls extends React.Component {
   		}
 	}
 
-	onTogglePlay() {
+	onTogglePlay = () => {
 		let paused = this.props.api.isPaused();
 		if (paused) {
 			this.props.api.play();
@@ -54,11 +72,11 @@ class FlexPlayerControls extends React.Component {
 			this.props.api.pause();
 		}
 		this.setState({
-			paused : paused
+			paused : !paused
 		})
 	}
 
-	onToggleMute() {
+	onToggleMute = () => {
 		this.props.api.toggleMute();
 		this.setState(
 			{
@@ -75,27 +93,30 @@ class FlexPlayerControls extends React.Component {
 	}
 
 	//this function is call directly by the parent (HTML5Player)
-	setVisible(visible) {
+	setVisible = visible => {
 		this.seekBarRef.current.style.display = visible ? 'block' : 'none';
 		this.buttonsRef.current.style.display = visible ? 'block' : 'none';
 		this.overlayRef.current.style.display = visible ? 'block' : 'none';
 	}
 
-	onSeek(e) {
+	onSeek = e => {
   		const time = this.props.duration * (e.target.value / 100);
   		FlexPlayerUtil.seekRelativeToOnAir(this.props.api, time, this.props.mediaObject)
 	}
 
-	onVolumeChange(e) {
+	onVolumeChange = e => {
 		this.props.api.setVolume(e.target.value);
 	}
 
 	//FIXME this function is not yet player agnostic (in the else statement) and only works for the HTML5player API
-	onToggleFullScreen() {
-		if(this.props.toggleFullScreen) {
-			this.props.toggleFullScreen()
+	onToggleFullScreen = exitFullScreen => {
+		if(this.props.toggleFullScreen && typeof this.props.toggleFullScreen === 'function') {
+			this.props.toggleFullScreen(exitFullScreen)
 		} else {
-			console.debug('toggling the HTML5 full screen')
+			if(exitFullScreen === true && !document.fullScreen) {
+				//should never happen, but just to be sure
+				return;
+			}
 			const api = this.props.api.getApi();
 			if (api.requestFullscreen) {
 				api.requestFullscreen();
@@ -107,28 +128,28 @@ class FlexPlayerControls extends React.Component {
 		}
 	}
 
-	render() {
+	render = () => {
 		return (
 			<div className={IDUtil.cssClassName('flex-controls')}>
-				<div className="toggle-play-overlay" onClick={this.onTogglePlay.bind(this)} ref={this.overlayRef}>
+				<div className="toggle-play-overlay" onClick={this.onTogglePlay} ref={this.overlayRef}>
 					<button type="button">
 						<span className={'glyphicon' + (this.state.paused ? ' glyphicon-play' : ' glyphicon-pause')}></span>
 					</button>
 				</div>
 
 				<div className="buttons" ref={this.buttonsRef}>
-					<button type="button" onClick={this.onToggleMute.bind(this)}>
+					<button type="button" onClick={this.onToggleMute}>
 						<span className={'glyphicon' + (this.state.muted ? ' glyphicon-volume-off' : ' glyphicon-volume-up')}></span>
 					</button>
 					<input className="volume" type="range" ref={this.volumeRef}
-						min="0" max="1" step="0.1" defaultValue="1" onChange={this.onVolumeChange.bind(this)}
+						min="0" max="1" step="0.1" defaultValue="1" onChange={this.onVolumeChange}
 					/>
-					<button type="button" onClick={this.onToggleFullScreen.bind(this)}>
+					<button type="button" onClick={this.onToggleFullScreen}>
 						<span className="glyphicon glyphicon-fullscreen"/>
 					</button>
 				</div>
 
-				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek.bind(this)}/>
+				<input className="seekbar" type="range" ref={this.seekBarRef} defaultValue="0" onChange={this.onSeek}/>
 
 			</div>
 		)

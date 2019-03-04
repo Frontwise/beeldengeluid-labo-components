@@ -667,13 +667,12 @@ class FlexPlayer extends React.Component {
 	//takes into account the active carrier/track and whether it relates to off-air content or not
 	getTranscript = (transcript, currentMediaObject) => {
 		if(!transcript || !currentMediaObject) return null;
-
 		return transcript.filter(t => {
 			//first make sure the transcript only includes the active carrier/track
-			if(t.carrierId == currentMediaObject.assetId) {
+			if(t.carrierId === currentMediaObject.assetId) {
 				//then make sure the transcript does not contain off-air lines
 				if(!FlexPlayerUtil.isTimeBeforeOnAir(t.start / 1000, currentMediaObject) &&
-					!FlexPlayerUtil.isTimeAfterOnAir(t.end / 1000, currentMediaObject)) {
+					!FlexPlayerUtil.isTimeAfterOnAir(t.start / 1000, currentMediaObject)) {
 					return true
 				}
 			}

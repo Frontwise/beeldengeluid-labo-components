@@ -76,8 +76,9 @@ export default class Transcriber extends React.PureComponent {
 	findClosestSegment = currentTime => {
 		let index = this.state.transcript.findIndex(a => a.start >= currentTime);
 
-		if((index === -1) && this.state.transcript.length > 0) {
-			index = 0;
+		//if no line was found it's either the very last line (if player time is bigger than 0) or the first line
+		if(index === -1 && this.state.transcript.length > 0) {
+			index = currentTime > 0 ? this.state.transcript.length -1 : 0;
 		}
 		//adjust the index to the previous item when the start time is larger than the current time
 		if(this.state.transcript[index] && this.state.transcript[index].start > currentTime) {
