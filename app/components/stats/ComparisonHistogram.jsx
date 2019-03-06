@@ -206,7 +206,13 @@ export default class ComparisonHistogram extends React.Component {
                         data={dataToPrint}
                         margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         <CartesianGrid strokeDasharray="3 3"/>
-                        <XAxis dataKey="date">
+                        <XAxis dataKey="date" height={100}>
+                            <Label
+                                value="Year (selected date field varies per query)"
+                                position="outside"
+                                offset={0}
+                                style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}
+                            />
                         </XAxis>
                         <YAxis width={100} >
                             <Label
