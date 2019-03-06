@@ -10,16 +10,24 @@
 				padding-left: 10px;
 				margin-bottom: 5px;
 				cursor: pointer;
-				color: #888;
+				color: black;
 				&:hover {
-					color:black;
+					color: #ddd;
 				}
-				label {
-					font-weight: bold;
+				.segment-title {
 					cursor: pointer;
+				}
+				.segment-duration {
+					background-color: #468dcb;
+				    border-radius: 4px;
+				    color: #fff;
+				    display: inline-block;
+				    font-size: 1rem;
+				    padding: 1px 6px;
 				}
 				&.main {
 					padding-left:0px;
+					font-weight: bold;
 					color: black;
 				}
 			}

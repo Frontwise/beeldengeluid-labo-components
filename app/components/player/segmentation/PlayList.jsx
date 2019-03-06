@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 
 import TimeUtil from '../../../util/TimeUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 import IDUtil from '../../../util/IDUtil';
 
 import MediaObject from '../../../model/MediaObject';
@@ -27,20 +28,28 @@ export default class PlayList extends React.PureComponent {
 		let segments = mediaObject.segments;
 		if(!segments) {
 			segments = [{
+				programSegment : true,
 				start : mediaObject.resourceStart ? mediaObject.resourceStart : 0,
 				end : mediaObject.resourceEnd ? mediaObject.resourceEnd : -1 //-1 means the video will be played to the end
 			}]
 		}
 		const segmentList = segments.map((s, i) => {
 			const className = s.programSegment ? 'segment main' : 'segment';
+			const timeInfo = !s.programSegment ? (
+				<span className="segment-duration">{
+					TimeUtil.formatTime(FlexPlayerUtil.timeRelativeToOnAir(s.start, mediaObject)) + ' - ' + TimeUtil.formatTime(FlexPlayerUtil.timeRelativeToOnAir(s.end, mediaObject))
+				}</span>
+			) : null;
 			return (
 				<div
 					id={'__seg__' + index + '_' + i}
 					className={className}
 					onClick={this.selectSegment.bind(this, mediaObject, s)}
 				>
-					<label>{s.title ? s.title : 'Carrier: ' + mediaObject.assetId}</label>
-					&nbsp;{TimeUtil.formatTime(s.start) + ' - ' + TimeUtil.formatTime(s.end)}
+					{timeInfo}&nbsp;
+					<span className="segment-title">
+						{s.title ? s.title : 'Carrier: ' + mediaObject.assetId}
+					</span>
 				</div>
 			)
 		})
