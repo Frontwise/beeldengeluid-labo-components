@@ -30,7 +30,6 @@ const FlexPlayerUtil = {
 			} else if(FlexPlayerUtil.containsOffAirEndOffset(mediaObject) && realPlayerTime >= mediaObject.resourceEnd) {
 				return mediaObject.resourceEnd
 			}
-			return 0
 		}
 		return realPlayerTime
 	},
