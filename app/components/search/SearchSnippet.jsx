@@ -105,8 +105,8 @@ class SearchSnippet extends React.Component {
         const title = this.props.data.title ? this.props.data.title + ' ' : '';
         const date = this.props.data.date ? '(' + this.props.data.date + ')' : '';
         const numberMetadataHits = this.props.data.numHighlights !== 0
-            ? this.props.data.numHighlights + " match(es) in metadata |"
-            : ' No matches in the archival metadata, matching terms found in the automatic enrichment';
+            ? this.props.data.numHighlights + " match(es) in archival metadata |"
+            : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
         let subHeading = date;
         if(date !== "") {
             subHeading += " | ";
