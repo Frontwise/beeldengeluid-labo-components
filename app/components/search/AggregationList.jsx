@@ -354,7 +354,7 @@ class AggregationList extends React.Component {
         uiData.filter(aggr => !aggr.empty).forEach(curAggr => {
 
             //add another (rendered) aggregation block to the list
-            aggregationBlocks.push(this.renderAggregationBlock(curAggr));
+            aggregationBlocks.unshift(this.renderAggregationBlock(curAggr));
 
             //add the (rendered) facets that are selected within the current aggregation block (to be displayed at the top)
             curAggr.facets.filter(f => f.selected).forEach((f, index) => {
@@ -402,7 +402,7 @@ class AggregationList extends React.Component {
                     elementId="field_select__modal"
                     stateVariable="showModal"
                     owner={this}
-                    title="Create a new aggregation">
+                    title="Create a new facet">
                     <AggregationCreator
                         collectionConfig={this.props.collectionConfig}
                         onOutput={this.onComponentOutput.bind(this)}/>
@@ -444,7 +444,7 @@ class AggregationList extends React.Component {
                 {aggregationModalWarning}
                 <li key={'new__tab'} className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
                     <a href="javascript:void(0);" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
-                        NEW&nbsp;<i className="fa fa-plus"/>
+                        <i className="fa fa-plus"/> Add a new facet
                     </a>
                 </li>
                 <div className={IDUtil.cssClassName('selected-facets', this.CLASS_PREFIX)}>
