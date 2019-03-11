@@ -660,6 +660,7 @@ class ItemDetailsRecipe extends React.Component {
 			const content = (
 				<FlexPlayer
 					mediaObjects={mediaObjects}
+                    mediaItemTitle={this.state.itemData.title}
 					mediaType='video'
 
 					transcript={this.state.itemData.rawData.layer__asr || null}
@@ -696,6 +697,7 @@ class ItemDetailsRecipe extends React.Component {
 			const content = (
 				<FlexPlayer
 					mediaObjects={mediaObjects}
+                    mediaItemTitle={this.state.itemData.title}
 					mediaType='audio'
 
 					transcript={this.state.itemData.rawData.layer__asr || null}
