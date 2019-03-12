@@ -12,8 +12,10 @@ class AggregationList extends React.Component {
         this.state = {
             showModal: false,
             showModalWarning: false,
+            //TODO merge these three states into one, since they all keep state information per aggregation box
             sortModes: {},
-            showAllModes: {}
+            showAllModes: {},
+            showExtraOptions: {}
         };
         this.CLASS_PREFIX = 'agl';
         this.minToShow = 5;
@@ -74,7 +76,6 @@ class AggregationList extends React.Component {
     /*------------------------------------- REMOVE DIALOG (TODO MAKE NICER) ----------------------------*/
 
     showRemoveDialog = (key, index) => {
-        console.debug('removing', key, index)
         this.currentFacet = key;
 
         //FIXME this part is still nasty, but for now it's necessary to prevent toggling the header menu when clicking the "X"
@@ -126,14 +127,22 @@ class AggregationList extends React.Component {
     }
 
     setFacetSortMode = (aggrField, type, direction) => {
-        //console.debug('sort by ' + type + ' ' + direction)
         const sortModes = this.state.sortModes;
         let curSortMode = this.getFacetSortMode(aggrField);
         curSortMode[type] = direction;
         curSortMode.active = type;
         sortModes[aggrField] = curSortMode;
-        //console.debug(sortModes);
         this.setState({sortModes : sortModes})
+    }
+
+    getShowExtraOptions = aggrField => {
+        return this.state.showExtraOptions[aggrField] === undefined ? false : this.state.showExtraOptions[aggrField];
+    }
+
+    toggleExtraOptions = aggrField => {
+        const showExtraOptions = this.state.showExtraOptions;
+        showExtraOptions[aggrField] = showExtraOptions[aggrField] === undefined ? true : !showExtraOptions[aggrField];
+        this.setState({showExtraOptions : showExtraOptions})
     }
 
     sortFacetList = (a, b, sortType, sortDirection) => {
@@ -303,10 +312,26 @@ class AggregationList extends React.Component {
     }
 
     renderHamburgerMenu = aggr => {
+        const extraOptions = this.getShowExtraOptions(aggr.field) ? (
+            <div className={IDUtil.cssClassName('sort-exclude-wrapper', this.CLASS_PREFIX)}>
+                <div className={IDUtil.cssClassName('exclude-btn', this.CLASS_PREFIX)}>
+                    <input
+                        type="checkbox"
+                        id={aggr.field}
+                        checked={this.props.desiredFacets[aggr.index]['exclude']}
+                        onChange={this.toggleExcludeFacets.bind(this, aggr.index)}
+                    />
+                    &nbsp;Exclude selection
+                </div>
+                <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
+                    {this.renderSortButton(aggr, 'alpha')}
+                    {this.renderSortButton(aggr, 'numeric')}
+                </div>
+            </div>
+        ) : null;
+
         return (
             <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
-
-                <input className="hamburger-toggle" type="checkbox" id={aggr.guid}/>
 
                 <label htmlFor={aggr.guid}>
 
@@ -318,29 +343,13 @@ class AggregationList extends React.Component {
                         this.showRemoveDialog.bind(this, aggr.field, aggr.index)
                     }/>
 
-                    <div className="hb">
+                    <div className="hb" onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
                         <div className="hb-line hb-line-top"/>
                         <div className="hb-line hb-line-center"/>
                     </div>
 
                 </label>
-
-                <div className={IDUtil.cssClassName('sort-exclude-wrapper', this.CLASS_PREFIX)}>
-                    <div className={IDUtil.cssClassName('exclude-btn', this.CLASS_PREFIX)}>
-                        <input
-                            type="checkbox"
-                            id={aggr.field}
-                            checked={this.props.desiredFacets[aggr.index]['exclude']}
-                            onChange={this.toggleExcludeFacets.bind(this, aggr.index)}
-                        />
-                        &nbsp;Exclude selection
-                    </div>
-                    <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
-                        {this.renderSortButton(aggr, 'alpha')}
-                        {this.renderSortButton(aggr, 'numeric')}
-                    </div>
-                </div>
-
+                {extraOptions}
             </div>
         );
     }
