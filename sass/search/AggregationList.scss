@@ -1,11 +1,4 @@
 .bg__aggregation-list {
-    .bg__agl__aggregationSwitchBtn {
-        @include switchButton($transition-time : 1s, $backColorBtnActive : #468dcb, $backColorBtnInactive :#7aabd6, $widthBtn:78,$marginLeftBtn: 47);
-		padding: 0;
-        .ms_toggle_btn {
-            text-transform: capitalize;
-        }
-    }
 
 	.bg__agl__tab-new {
 		list-style: none;
@@ -159,6 +152,7 @@
 		background-color: #468dcb;
 		border-radius: 3px 3px 0 0;
 		position: relative;
+
 		.hb {
 			cursor: pointer;
 			height: 25px;
@@ -197,24 +191,27 @@
 			display: flex;
 			width: 100%;
 		}
-		ul {
+		.bg__agl__sort-exclude-wrapper {
+			display: flex;
 			color: #fff;
-			font-family: sans-serif;
-			list-style-type: none;
-			margin-top: 1em;
-			padding: 0;
-			text-align: center;
-			margin-bottom: 0;
-			li {
-				background-color: transparent !important;
-				flex-grow: 1;
-				cursor: pointer;
+			padding: 5px;
 
-				a {
-					color: white;
-					font-size: 2rem;
+			.bg__agl__exclude-btn {
+				flex-grow:8;
+				input {
+					margin: 0px 2px 0px 6px;
 				}
 			}
+			.bg__agl__sort-btn-wrapper {
+				flex-grow: 2;
+				display:flex;
+				flex-direction: row-reverse;
+				.bg__agl__sort-btn {
+					cursor: pointer;
+					margin-left:10px;
+				}
+			}
+
 		}
 		label {
 			display: inline;
