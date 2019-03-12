@@ -33,7 +33,7 @@ class AggregationList extends React.Component {
     onComponentOutput(componentClass, data) {
         if (componentClass === 'AggregationCreator' && data) {
             const desiredFacets = this.props.desiredFacets;
-            desiredFacets.push(data);
+            desiredFacets.unshift(data);
             this.onOutput(desiredFacets, this.props.selectedFacets);
             ComponentUtil.hideModal(this, 'showModal', 'field_select__modal', true);
         }
@@ -135,8 +135,8 @@ class AggregationList extends React.Component {
         const sortModes = this.state.sortModes;
         sortModes[aggrField] = {
             type : type,
-            direction, direction
-        }
+            direction: direction
+        };
         this.setState({sortModes : sortModes})
     }
 
@@ -171,7 +171,7 @@ class AggregationList extends React.Component {
     generateUIData() {
 
         //will be ultimately returned containing a list of ui data per "desired aggregation"
-        const uiData = []
+        const uiData = [];
 
         //first filter out the histogram aggregations: they are not supported in this list view
         const desiredFacets = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
@@ -191,7 +191,7 @@ class AggregationList extends React.Component {
         //loop through the desired facets, available in the state
         desiredFacets.forEach((da, index) => {
             //first check if the aggregation has anything in it
-            const isEmptyAggr = this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0 ? false : true;
+            const isEmptyAggr = !(this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0);
 
             //then determine the sort mode
             let sortMode = this.state.sortModes[da.field];
@@ -215,7 +215,7 @@ class AggregationList extends React.Component {
                         hidden = false;
                     }
 
-                    if (this.props.selectedFacets[da.field] && this.props.selectedFacets[da.field].indexOf(facet.key) != -1) {
+                    if (this.props.selectedFacets[da.field] && this.props.selectedFacets[da.field].indexOf(facet.key) !== -1) {
                         isSelected = true;
                         hidden = false; //always show selected facets
                     }
@@ -234,25 +234,20 @@ class AggregationList extends React.Component {
                 const selectedFacets = facets.filter(f => f.selected);
 
                 //sort them properly (selected facets go on top)
-                facets.sort((a, b) => { // first sort the whole list of facets
-                    return this.sortFacetList(a, b, sortMode.type, sortMode.direction)
-                })
-                facets = facets.filter( // filter out the selected ones
-                    f => !f.selected
-                )
-                facets.unshift( //and readd them on top
-                    ...selectedFacets
-                );
+                facets.sort((a, b) =>  this.sortFacetList(a, b, sortMode.type, sortMode.direction));
+                // filter out the selected ones
+                facets = facets.filter(f => !f.selected);
+                facets.push(...selectedFacets);
             }
 
-            //then add them to the conventient UI object (together with the exclusion property)
+            //then add them to the convenient UI object (together with the exclusion property)
             uiData.push({
                 facets : facets,
                 exclude : da.exclude === undefined ? false : da.exclude,
                 field : da.field,
                 title : da.title,
                 empty : isEmptyAggr, //does the aggregation have anything in it
-                index : index, // temprarily needed for guid
+                index : index, // temporarily needed for guid
                 guid : "facets__" + index
             })
         });
@@ -354,7 +349,7 @@ class AggregationList extends React.Component {
         uiData.filter(aggr => !aggr.empty).forEach(curAggr => {
 
             //add another (rendered) aggregation block to the list
-            aggregationBlocks.unshift(this.renderAggregationBlock(curAggr));
+            aggregationBlocks.push(this.renderAggregationBlock(curAggr));
 
             //add the (rendered) facets that are selected within the current aggregation block (to be displayed at the top)
             curAggr.facets.filter(f => f.selected).forEach((f, index) => {
