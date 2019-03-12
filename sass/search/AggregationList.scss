@@ -204,11 +204,15 @@
 			}
 			.bg__agl__sort-btn-wrapper {
 				flex-grow: 2;
-				display:flex;
+				display: flex;
 				flex-direction: row-reverse;
 				.bg__agl__sort-btn {
 					cursor: pointer;
-					margin-left:10px;
+					margin-left: 10px;
+					color: #ccc;
+					.bg__agl__sort-active {
+						color: white;
+					}
 				}
 			}
 

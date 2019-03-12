@@ -288,12 +288,16 @@ class AggregationList extends React.Component {
         const sortMode = this.getFacetSortMode(aggr.field);
         const title = sortMode[sortType] === 'desc' ? this.SORT_BUTTON_TITLES[sortType] + ' descending' : this.SORT_BUTTON_TITLES[sortType] + ' ascending'
         const newDirection = sortMode[sortType] === 'desc' ? 'asc' : 'desc';
+        const classNames = ['fa', 'fa-lg', 'fa-sort-' + sortType + '-' + sortMode[sortType]]
+        if(sortMode.active == sortType) {
+            classNames.push(IDUtil.cssClassName('sort-active', this.CLASS_PREFIX));
+        }
 
         return (
             <div className={IDUtil.cssClassName('sort-btn', this.CLASS_PREFIX)}
                 title={title}
                 onClick={this.setFacetSortMode.bind(this, aggr.field, sortType, newDirection)}>
-                <i aria-hidden="true" className={'fa fa-lg fa-sort-' + sortType + '-' + sortMode[sortType]}/>
+                <i aria-hidden="true" className={classNames.join(' ')}/>
             </div>
         );
     }
