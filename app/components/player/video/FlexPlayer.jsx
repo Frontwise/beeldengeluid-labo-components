@@ -830,7 +830,7 @@ class FlexPlayer extends React.Component {
 				<div className="flex-container">
 					<div className="player-container" style={{overflowX : 'auto'}}>
 						<div className="item-title">
-							Playing: {this.props.mediaItemTitle}
+							{this.props.title}
 						</div>
 						{player}
 						<div className="btn-toolbar" role="toolbar">
