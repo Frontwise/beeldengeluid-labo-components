@@ -324,8 +324,8 @@ class AggregationList extends React.Component {
                     &nbsp;Exclude selection
                 </div>
                 <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
-                    {this.renderSortButton(aggr, 'alpha')}
                     {this.renderSortButton(aggr, 'numeric')}
+                    {this.renderSortButton(aggr, 'alpha')}
                 </div>
             </div>
         ) : null;
