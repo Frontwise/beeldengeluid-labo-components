@@ -141,10 +141,6 @@ class CollectionConfig {
 		return this.docType;
 	}
 
-    getNoMatchingTermsMsg() {
-        return 'No highlights in metadata';
-    }
-
 	//CURRENT this gets the layers from additional indices with the __[LAYER NAME] suffix
 	getCollectionIndices() {
 		const indices = [this.getCollectionId()];
@@ -510,6 +506,10 @@ class CollectionConfig {
             }
         }
         return aggregatedHighlights
+	}
+
+	getNoMatchingTermsMsg() {
+		return 'No matching terms found in archival metadata';
 	}
 
 }

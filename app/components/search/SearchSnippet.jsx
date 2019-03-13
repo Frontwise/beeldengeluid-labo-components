@@ -24,6 +24,7 @@ class SearchSnippet extends React.Component {
     static createMarkup(text){
 		return {__html: text}
 	}
+
 	//possible default fields: posterURL, title, description, tags
 	render() {
 		let poster = null;
