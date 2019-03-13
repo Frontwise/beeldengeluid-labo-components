@@ -11,7 +11,7 @@ class HighlightOverview extends React.Component {
     }
 
 	render() {
-	    let table = (<p>No highlights in metadata</p>);
+		let table = null;
 	    if(this.props.data && typeof this.props.data === 'object' && Object.keys(this.props.data).length > 0) {
     		const rows = Object.keys(this.props.data).map((key) => {
             	return this.props.data[key].map(highlight => {
@@ -30,9 +30,12 @@ class HighlightOverview extends React.Component {
 			}
 		}
 
+		//determine the header text
+		const headerText = table ? 'Matching terms in archival metadata' : this.props.collectionConfig.getNoMatchingTermsMsg();
+
 	    return (
 			<div className={IDUtil.cssClassName('highlight-overview')}>
-				<h4>Highlighted term(s) in metadata</h4>
+				<h4>{headerText}</h4>
 				{table}
 			</div>
         );

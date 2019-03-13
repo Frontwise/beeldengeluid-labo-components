@@ -1,4 +1,3 @@
-import CollectionAPI from '../../api/CollectionAPI';
 import MetadataSchemaUtil from '../../util/MetadataSchemaUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import RegexUtil from '../../util/RegexUtil';
@@ -105,7 +104,7 @@ class CollectionConfig {
 	getSearchIndex() {
 		let searchIndex = this.collectionId;
 		if(this.collectionInfo) {
-			searchIndex = this.collectionInfo.index
+			searchIndex = this.collectionInfo.index;
 			if(!searchIndex && this.collectionInfo.user && this.collectionInfo.id) {
 				searchIndex = 'pc__' + this.clientId + '__' + this.collectionInfo.user + '__' + this.collectionInfo.id;
 			}
@@ -181,7 +180,7 @@ class CollectionConfig {
 	}
 
 	getStringFields() {
-		let tmp = []
+		let tmp = [];
 		if(this.stringFields) {
 			tmp = tmp.concat(this.stringFields);
 		}
@@ -200,7 +199,7 @@ class CollectionConfig {
 	}
 
 	getNonAnalyzedFields() {
-		let tmp = []
+		let tmp = [];
 		if(this.nonAnalyzedFields) {
 			tmp = tmp.concat(this.nonAnalyzedFields);
 		}
@@ -216,7 +215,7 @@ class CollectionConfig {
 
 	//checks if the field is a keyword field and makes sure to return the matched keyword field name
 	getMatchedKeywordField(fieldName) {
-		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) != -1);
+		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) !== -1);
 		if(kwMatch) {
 			return fieldName === kwMatch ? fieldName : fieldName + '.keyword';
 		}
@@ -225,7 +224,7 @@ class CollectionConfig {
 
 	//used by the collection analyzer (field analysis pull down)
 	getAllFields() {
-		let tmp = []
+		let tmp = [];
 
 		//console.debug(this.keywordFields);
 
@@ -259,7 +258,7 @@ class CollectionConfig {
 
 		//mark all the nested fields
 		tmp.forEach(f => {
-			if(this.nestedFields && this.nestedFields.indexOf(f.id) != -1) {
+			if(this.nestedFields && this.nestedFields.indexOf(f.id) !== -1) {
 				f.nested = true;
 			}
 		});
@@ -267,14 +266,14 @@ class CollectionConfig {
 		//mark all the fields that are a multi-field keyword field
 		if(this.keywordFields) {
 			tmp.forEach(f => {
-				if(this.keywordFields.indexOf(f.id + '.keyword') != -1) {
+				if(this.keywordFields.indexOf(f.id + '.keyword') !== -1) {
 					f.keywordMultiField = true;
 				}
 			});
 		}
 		if(this.nonAnalyzedFields) {
 			tmp.forEach(f => {
-				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') != -1) {
+				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') !== -1) {
 					f.keywordMultiField = true;
 				}
 			});
@@ -283,7 +282,7 @@ class CollectionConfig {
 		//finally add all the pure keyword fields
 		if(this.keywordFields) {
 			this.keywordFields.forEach(f => {
-				if(f.indexOf('.keyword') == -1) {
+				if(f.indexOf('.keyword') === -1) {
 					tmp.push({id : f, type : 'keyword', keywordMultiField : false, title : this.toPrettyFieldName(f)})
 				}
 			});
@@ -339,7 +338,7 @@ class CollectionConfig {
 			resourceId : result._id,
 			index : result._index,
 			docType : result._type
-		}
+		};
 
 		//then fetch any data that can be fetched from known schemas (DIDL, DC, ...)
 		const structuredData = MetadataSchemaUtil.extractStructuredData(result);
@@ -401,7 +400,7 @@ class CollectionConfig {
 			mediaTypes : result.mediaTypes ? result.mediaTypes : []
 		}
 		//FIXME not sure if this is still used
-		if(result.docType == 'media_fragment' && result.rawData) {
+		if(result.docType === 'media_fragment' && result.rawData) {
 			result.start = result.rawData.start ? result.rawData.start : 0;
 			result.end = result.rawData.end ? result.rawData.end : -1;
 		}
@@ -442,7 +441,7 @@ class CollectionConfig {
             let isKeywordField = false;
 
             //if the last field is called raw or keyword (ES reserved names), drop it
-            if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
+            if(tmp[tmp.length -1] === 'raw' || tmp[tmp.length -1] === 'keyword') {
                 isKeywordField = true;
                 tmp.pop();
             }
@@ -450,12 +449,12 @@ class CollectionConfig {
             let leaf = tmp.pop();
 
             // move @ to end of fieldname
-            if (leaf.substring(0,1) == '@'){
+            if (leaf.substring(0,1) === '@'){
                 leaf = leaf.substring(1) + '@';
             }
             let origin = tmp.join(".");
             if (origin) {
-            	if(origin.indexOf('@graph') != -1) {
+            	if(origin.indexOf('@graph') !== -1) {
             		origin = origin.substring('@graph.'.length);
             	}
             	if(origin.length > 0 && leaf !== 'value@') {
@@ -488,7 +487,7 @@ class CollectionConfig {
 
 	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
 	getHighlights(obj, searchTerm, aggregatedHighlights={}, baseField = null) {
-        for(let field in obj) {
+        for(const field in obj) {
             if(obj.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) === -1) {
                 let snippets = [];
                 if (Array.isArray(obj[field])) { // in case the value is a list
@@ -511,6 +510,10 @@ class CollectionConfig {
             }
         }
         return aggregatedHighlights
+	}
+
+	getNoMatchingTermsMsg() {
+		return 'No matching terms found in archival metadata';
 	}
 
 }

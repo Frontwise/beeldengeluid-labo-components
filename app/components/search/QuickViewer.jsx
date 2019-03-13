@@ -1,5 +1,4 @@
 import IDUtil from '../../util/IDUtil';
-import ComponentUtil from '../../util/ComponentUtil';
 
 import MetadataTablePreview from './MetadataTablePreview';
 import HighlightOverview from './HighlightOverview';
@@ -51,7 +50,7 @@ class QuickViewer extends React.Component {
                 </div>
                 <h4>Metadata</h4>
                 <MetadataTablePreview data={this.props.data.formattedData}/>
-                <HighlightOverview data={this.props.data.highlights}/>
+                <HighlightOverview collectionConfig={this.props.data.collectionConfig} data={this.props.data.highlights}/>
             </div>
       	)
 	}
