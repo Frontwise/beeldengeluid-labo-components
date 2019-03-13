@@ -36,7 +36,7 @@ class FieldCategoryCreator extends React.PureComponent {
 		}
 	}
 
-    filterFields = (arr, str) => arr.filter(item => item.includes(str));
+    filterFields = (arr, str) => arr.filter(item => item.toLowerCase().includes(str.toLowerCase()));
 
     onKeywordFilter = (e) => {
         const stats = this.props.collectionConfig.getCollectionStats();
