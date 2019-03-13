@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 
 import PropTypes from 'prop-types';
 
@@ -8,7 +9,11 @@ class FieldCategoryCreator extends React.PureComponent {
 	constructor(props) {
 		super(props);
         this.state = {
-            filteredCategories : this.props.collectionConfig.getCollectionStats().collection_statistics.document_types[0].fields.text
+            filteredCategories :
+                ComponentUtil.getSafe(
+                    () => this.props.collectionConfig.getCollectionStats().collection_statistics.document_types[0].fields.text,
+                    []
+                )
         }
 	}
 
