@@ -36,20 +36,6 @@ class FieldCategoryCreator extends React.PureComponent {
 		}
 	}
 
-    // -1 sorts array desc, 1 sorts array asc
-    sortArray = (array, direction) => {
-        direction = direction || 1;
-        array.sort((a, b) => {
-            let comparison = 0;
-            if (a.props.children > b.props.children) {
-                comparison = 1 * direction;
-            } else if (a.props.children < b.props.children) {
-                comparison = -1 * direction;
-            }
-            return comparison;
-        })
-    };
-
     filterFields = (arr, str) => arr.filter(item => item.includes(str));
 
     onKeywordFilter = (e) => {
@@ -62,10 +48,14 @@ class FieldCategoryCreator extends React.PureComponent {
     };
 
 	render() {
-        const options = this.state.filteredCategories.map((field, index) =>
-				<option id={index} value={field}>{this.props.collectionConfig.toPrettyFieldName(field)}</option>);
-
-        this.sortArray(options, 1);
+        const sortedCategories = this.state.filteredCategories.map(
+            field => (
+                {'value': field, 'prettyName': this.props.collectionConfig.toPrettyFieldName(field)})
+        );
+        sortedCategories.sort((a,b) => (a.prettyName > b.prettyName) ? 1 : -1);
+        const options = sortedCategories.map((field, index) =>
+				<option id={index} value={field.value}>{field.prettyName}</option>
+        );
 
 		return (
 			<div className={IDUtil.cssClassName('field-category-creator')}>
