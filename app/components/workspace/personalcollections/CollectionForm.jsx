@@ -14,7 +14,6 @@ class CollectionForm extends React.PureComponent {
         collection.description = this.description.value;
         collection.dateCreated = this.dateCreated.value;
         collection.creator = this.creator.value;
-        collection.isPrivate = this.isPrivate.checked;
         this.save(collection);
 
         return false;
@@ -60,17 +59,6 @@ class CollectionForm extends React.PureComponent {
                         name="creator"
                         defaultValue={this.props.collection.creator}
                         ref={elem => (this.creator = elem)}/>
-                    <input
-                        type="checkbox"
-                        name="private"
-                        disabled={true}
-                        defaultChecked={true}
-                        id="project-private"
-                        ref={elem => (this.isPrivate = elem)}/>
-
-                    <label htmlFor="collection-private">
-                        This is a private collection that is only visible to you
-                    </label>
                 </div>
 
                 <div className="actions">
@@ -92,8 +80,7 @@ CollectionForm.PropTypes = {
     cancelLink: PropTypes.string.isRequired,
     collection: PropTypes.shape({
         name: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        private: PropTypes.bool.isRequired
+        description: PropTypes.string.isRequired
     }).isRequired,
     collectionDidSave: PropTypes.func.isRequired,
     user: PropTypes.shape({

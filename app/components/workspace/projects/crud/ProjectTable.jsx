@@ -23,7 +23,7 @@ class ProjectTable extends React.PureComponent {
             { field: 'description', content: 'Description', sortable: true },
             {
                 field: 'bookmarks',
-                content: <i className="bookmark-icon" title="Number of bookmarks"/>,
+                content: <img className="bookmark-icon" title="Number of bookmarks" width={20} height={20} src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNzc1cHgiIGhlaWdodD0iOTgwcHgiIHZpZXdCb3g9IjAgMCA3NzUgOTgwIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogICAgPCEtLSBHZW5lcmF0b3I6IFNrZXRjaCA1Mi42ICg2NzQ5MSkgLSBodHRwOi8vd3d3LmJvaGVtaWFuY29kaW5nLmNvbS9za2V0Y2ggLS0+CiAgICA8dGl0bGU+MTIzNDU8L3RpdGxlPgogICAgPGRlc2M+Q3JlYXRlZCB3aXRoIFNrZXRjaC48L2Rlc2M+CiAgICA8ZyBpZD0iUGFnZS0xIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iMTIzNDUiIGZpbGw9IiNGRkZGRkYiIGZpbGwtcnVsZT0ibm9uemVybyI+CiAgICAgICAgICAgIDxwYXRoIGQ9Ik03NDEuNSw5ODAgQzczNCw5ODAgNzI2LjYsOTc3LjUgNzIwLjUsOTcyLjYgTDM5MCw3MDcuNCBMNTUuMyw5NzIuNyBDNDUuMiw5ODAuNyAzMS40LDk4Mi4yIDE5LjgsOTc2LjYgQzguMiw5NzEgMC44LDk1OS4zIDAuOCw5NDYuNCBMMC44LDMzLjYgQzAuOCwxNS4xIDE1LjgsMCAzNC40LDAgTDc0MS40LDAgQzc1OS45LDAgNzc1LDE1IDc3NSwzMy42IEw3NzUsOTQ2LjUgQzc3NSw5NTkuNCA3NjcuNiw5NzEuMiA3NTYsOTc2LjggQzc1MS40LDk3OC45IDc0Ni41LDk4MCA3NDEuNSw5ODAgWiBNNjgsNjcuMSBMNjgsODc3IEwzNjkuMiw2MzguMiBDMzgxLjUsNjI4LjUgMzk4LjgsNjI4LjUgNDExLjEsNjM4LjMgTDcwOCw4NzYuNSBMNzA4LDY3LjEgTDY4LDY3LjEgWiIgaWQ9IlNoYXBlIj48L3BhdGg+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4=' />,
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
@@ -205,15 +205,6 @@ class ProjectTable extends React.PureComponent {
         });
     }
 
-    //triggered upon using the "show only my collections" checkbox
-    currentUserChange(e) {
-        this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                currentUser: e.target.checked
-            })
-        });
-    }
-
     deleteProject(project) {
         if (window.confirm('Are you sure you want to delete project ' + project.name)) {
             this.props.api.delete(this.props.user.id, project.id, status => {
@@ -366,14 +357,6 @@ class ProjectTable extends React.PureComponent {
                                 placeholder="Search User Projects"
                                 value={this.state.filter.keywords}
                                 onChange={this.keywordsChange.bind(this)}/>
-                        </div>
-                        <div className="filter-container">
-                            <input
-                                type="checkbox"
-                                id="current-user"
-                                checked={this.state.filter.currentUser}
-                                onChange={this.currentUserChange.bind(this)}/>
-                            <label htmlFor="current-user">Show only my projects</label>
                         </div>
                     </div>
                 </div>
