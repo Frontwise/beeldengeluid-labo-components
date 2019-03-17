@@ -1,5 +1,7 @@
 import ProjectAPI from '../../api/ProjectAPI';
 import IDUtil from '../../util/IDUtil';
+import MessageHelper from "../helpers/MessageHelper";
+import ReactTooltip from 'react-tooltip';
 
 import ProjectQueriesTable from '../workspace/projects/query/ProjectQueriesTable';
 
@@ -76,6 +78,14 @@ class QueryEditor extends React.PureComponent {
                                     ref={input => (this.queryName = input)}
     								placeholder="Name your query"/>
   							</div>
+                            <div className="queryDetails">
+                                <a data-tip data-for={'__qtt__' + this.props.query.id} data-class="bg__custom-queryTooltip">
+                                    query details
+                                </a>
+                                <ReactTooltip id={'__qtt__' + this.props.query.id}
+                                              getContent={() => MessageHelper.__renderQuery(this.props.query)}>
+                                </ReactTooltip>
+                            </div>
   							<button type="submit" className="btn btn-default">Save</button>
                         </form>
                     </div>
@@ -86,6 +96,8 @@ class QueryEditor extends React.PureComponent {
 	                <div className={[
 	                	IDUtil.cssClassName('no-bootstrap-custom-styling'),
 						IDUtil.cssClassName('table', this.CLASS_PREFIX)].join(' ')}>
+                        <div className="bg__saved-queries-title">Saved queries in this User project</div>
+                        <div className="bg__current-project-name">Project name: {this.props.project.name}</div>
 	                    <ProjectQueriesTable project={this.state.project} user={this.props.user}/>
 					</div>
 				</div>

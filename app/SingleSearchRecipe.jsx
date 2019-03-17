@@ -275,10 +275,30 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	onQuerySaved = (project) => {
-		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
-		});
-	}
+        ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
+			ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+            this.showSavedQueryMsg()
+        });
+
+        this.setState({
+            showSavedQueryMsg : true
+        });
+    }
+
+    showSavedQueryMsg = () => {
+        return (
+            <FlexModal
+                elementId="abc"
+                stateVariable="showSavedQueryMsg"
+                owner={this}
+                size="large"
+                title="Query saved">
+                <div className="bg__querysaved-msn">
+                    The query has been saved to project  {this.state.activeProject.name}
+                </div>
+            </FlexModal>
+        )
+    }
 
 	/* ------------------------------- SEARCH RELATED FUNCTIONS ----------------------- */
 
@@ -1040,6 +1060,8 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
+        const showMsg = this.state.showSavedQueryMsg ? this.showSavedQueryMsg() : null;
+
         const selectionButtons = this.renderSelectionButtons(
         	this.state.activeProject,
         	this.state.collectionConfig,
@@ -1071,6 +1093,7 @@ class SingleSearchRecipe extends React.Component {
 				{queryModal}
 				{bookmarkModal}
 				{quickViewModal}
+                {showMsg}
 			</div>
 		);
 	}
