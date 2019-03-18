@@ -28,6 +28,7 @@ $font-weight: bold;
       font-weight: $font-weight;
     }
   }
+
   .bg__err-msg {
     color: red;
     font-weight: bold;
@@ -35,7 +36,13 @@ $font-weight: bold;
   }
 }
 
-#query__modal {
+.bg__query-saved-msn {
+  font-size: $font-size;
+  padding-bottom: $padding-bottom;
+  padding-bottom: 30px;
+}
+
+#query__modal, #querySavedConfirmation {
   h4 {
     font-size: $font-size;
     padding-bottom: $padding-bottom;

@@ -105,7 +105,7 @@ class QueryEditor extends React.PureComponent {
     								placeholder="Name your query"/>
   							</div>
                             <div className={classNames.join(' ')}>
-                                Name field is required. <br/> Please add a name to the query to be saved.
+                               * Name field is required. <br/> Please name the query before saving it.
                             </div>
   							<button type="submit" className="btn btn-default">Save</button>
                         </form>

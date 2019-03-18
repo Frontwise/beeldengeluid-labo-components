@@ -288,7 +288,7 @@ class SingleSearchRecipe extends React.Component {
     showSavedQueryMsg = () => {
         return (
             <FlexModal
-                elementId="abc"
+                elementId="querySavedConfirmation"
                 stateVariable="showSavedQueryMsg"
                 owner={this}
                 size="large"
