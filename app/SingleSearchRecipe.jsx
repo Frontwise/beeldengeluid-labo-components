@@ -41,6 +41,7 @@ class SingleSearchRecipe extends React.Component {
 			showProjectModal : false, //for the project selector
 			showBookmarkModal : false, //for the bookmark group selector
 			showQuickViewModal : false, //for the quickview result preview
+            savedBookmarkModal: false,
 
 			showSelectionOverview : false, //show the selected items, instead of the search results
 
@@ -285,22 +286,6 @@ class SingleSearchRecipe extends React.Component {
         });
     };
 
-    showSavedQueryMsg = () => {
-        return (
-            <FlexModal
-                elementId="querySavedConfirmation"
-                stateVariable="showSavedQueryMsg"
-                owner={this}
-                size="large"
-                title="Query saved successfully!">
-                <div className="bg__query-saved-msn">
-                    <p><b>Project name:</b>  {this.state.activeProject.name}</p>
-                    <p><b>Query name:</b> {this.state.lastQuerySaved}</p>
-                </div>
-            </FlexModal>
-        )
-    }
-
 	/* ------------------------------- SEARCH RELATED FUNCTIONS ----------------------- */
 
 	onStartSearch = () => {
@@ -537,12 +522,12 @@ class SingleSearchRecipe extends React.Component {
 		this.setState({
 			selectedOnPage : {},
 			allRowsSelected : false,
-            showSelectionOverview : false
+            showSelectionOverview : false,
+            savedBookmarkModal: true
 		}, () => {
-			alert('Bookmarks were saved successfully');
             ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
 		})
-	}
+	};
 
 	/* ------------------------------- QUERY SAVING RELATED FUNCTIONS ----------------------- */
 
@@ -737,7 +722,7 @@ class SingleSearchRecipe extends React.Component {
 						onOutput={this.onComponentOutput}/>
 			</FlexModal>
 		)
-	}
+	};
 
 	renderBookmarkModal = (collectionConfig, activeProject) => {
 		return (
@@ -756,6 +741,34 @@ class SingleSearchRecipe extends React.Component {
 			</FlexModal>
 		)
 	}
+
+    renderSavedBookmarkModal = () => (
+        <FlexModal
+            elementId="saved-bookmark__modal"
+            stateVariable="savedBookmarkModal"
+            owner={this}
+            size="large"
+            title="Bookmarks were saved successfully">
+            <div className="savedBookmarksMsg">
+                <b>Saved to project:</b> {this.state.activeProject.name}
+            </div>
+        </FlexModal>
+    );
+
+
+    renderShowSavedQueryMsg = () => (
+        <FlexModal
+            elementId="querySavedConfirmation"
+            stateVariable="showSavedQueryMsg"
+            owner={this}
+            size="large"
+            title="Query saved successfully!">
+            <div className="bg__query-saved-msn">
+                <p><b>Project name:</b>  {this.state.activeProject.name}</p>
+                <p><b>Query name:</b> {this.state.lastQuerySaved}</p>
+            </div>
+        </FlexModal>
+    );
 
 	/* --------------------------- RENDER SELECTION BUTTONS --------------------- */
 
@@ -1062,7 +1075,8 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
-        const showMsg = this.state.showSavedQueryMsg ? this.showSavedQueryMsg() : null;
+        const showSavedQueryMsg = this.state.showSavedQueryMsg ? this.renderShowSavedQueryMsg() : null;
+        const savedBookmarkModal = this.state.savedBookmarkModal ? this.renderSavedBookmarkModal() : null;
 
         const selectionButtons = this.renderSelectionButtons(
         	this.state.activeProject,
@@ -1095,7 +1109,8 @@ class SingleSearchRecipe extends React.Component {
 				{queryModal}
 				{bookmarkModal}
 				{quickViewModal}
-                {showMsg}
+                {showSavedQueryMsg}
+                {savedBookmarkModal}
 			</div>
 		);
 	}
