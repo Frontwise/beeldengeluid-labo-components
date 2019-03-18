@@ -1,8 +1,44 @@
+$font-size: 20px;
+$padding-bottom: 12px;
+$font-weight: bold;
+
 .bg__query-editor {
-	.bg__qed__table {
-		padding: 15px;
-	}
-	.form-group {
-		padding: 0 15px;
-	}
+  .bg__qed__table {
+    padding: 15px;
+  }
+
+  .form-group {
+    padding: 0 15px;
+  }
+
+  .bg__query-header {
+    font-size: $font-size;
+    padding-bottom: $padding-bottom;
+    font-weight: $font-weight;
+  }
+
+  .bg__query-details {
+    padding-left: 24px;
+  }
+
+  .bg__flex-box {
+    label {
+      font-size: $font-size;
+      padding-bottom: $padding-bottom;
+      font-weight: $font-weight;
+    }
+  }
+  .bg__err-msg {
+    color: red;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
+}
+
+#query__modal {
+  h4 {
+    font-size: $font-size;
+    padding-bottom: $padding-bottom;
+    font-weight: $font-weight;
+  }
 }

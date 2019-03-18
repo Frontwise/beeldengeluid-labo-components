@@ -1,8 +1,7 @@
 import ProjectAPI from '../../api/ProjectAPI';
 import IDUtil from '../../util/IDUtil';
 import MessageHelper from "../helpers/MessageHelper";
-import ReactTooltip from 'react-tooltip';
-
+import FlexBox from '../FlexBox';
 import ProjectQueriesTable from '../workspace/projects/query/ProjectQueriesTable';
 
 import PropTypes from 'prop-types';
@@ -12,7 +11,8 @@ class QueryEditor extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
-			project : null
+			project : null,
+            errorMessage: false
 		};
 		this.CLASS_PREFIX = 'qed'
 	}
@@ -31,6 +31,15 @@ class QueryEditor extends React.PureComponent {
 
 	save(e) {
 		e.preventDefault();
+
+		// require query name value
+        if(!this.queryName.value){
+            this.setState({
+                errorMessage: true
+            });
+            return;
+        }
+
 		if(this.state.project && this.props.query) {
 			const project = this.state.project;
 			let query = this.props.query;
@@ -43,7 +52,8 @@ class QueryEditor extends React.PureComponent {
 			 // store project
             ProjectAPI.save(this.props.user.id, project, resp => {
                 if (resp) {
-                	this.onOutput(project);
+                    project.lastQuerySaved = this.queryName.value ? this.queryName.value : null;
+                	this.onOutput({project, queryName: this.queryName.value});
                 } else {
                     alert('An error occured while saving this project');
                     this.onOutput(null);
@@ -64,13 +74,29 @@ class QueryEditor extends React.PureComponent {
 	render() {
 		let formOrMessage = null;
 		let queryTable = null;
+		const classNames = ['bg__err-msg'];
+		if (!this.state.errorMessage) {
+            classNames.push('hide');
+        }
+
 		if(this.state.project) {
 			formOrMessage = (
 				<div className="row">
                     <div className="col-md-12">
                         <form className="form-horizontal" onSubmit={this.save.bind(this)}>
                             <div className="form-group">
-    							<label htmlFor="queryName">Name</label>
+                                <div className="tab-content">
+                                    <div className="bg__query-parameters">
+                                        <div className="bg__query-header">
+                                            Query Details
+                                        </div>
+                                        <div className="bg__query-details">
+                                            {MessageHelper.__renderQuery(this.props.query)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr/>
+    							<label className="bg__query-header" htmlFor="queryName">Name</label>
     							<input
     								type="text"
     								className="form-control"
@@ -78,13 +104,8 @@ class QueryEditor extends React.PureComponent {
                                     ref={input => (this.queryName = input)}
     								placeholder="Name your query"/>
   							</div>
-                            <div className="queryDetails">
-                                <a data-tip data-for={'__qtt__' + this.props.query.id} data-class="bg__custom-queryTooltip">
-                                    query details
-                                </a>
-                                <ReactTooltip id={'__qtt__' + this.props.query.id}
-                                              getContent={() => MessageHelper.__renderQuery(this.props.query)}>
-                                </ReactTooltip>
+                            <div className={classNames.join(' ')}>
+                                Name field is required. <br/> Please add a name to the query to be saved.
                             </div>
   							<button type="submit" className="btn btn-default">Save</button>
                         </form>
@@ -92,15 +113,16 @@ class QueryEditor extends React.PureComponent {
                 </div>
 			);
 			queryTable = (
-				<div className="row">
-	                <div className={[
-	                	IDUtil.cssClassName('no-bootstrap-custom-styling'),
-						IDUtil.cssClassName('table', this.CLASS_PREFIX)].join(' ')}>
-                        <div className="bg__saved-queries-title">Saved queries in this User project</div>
-                        <div className="bg__current-project-name">Project name: {this.props.project.name}</div>
-	                    <ProjectQueriesTable project={this.state.project} user={this.props.user}/>
-					</div>
-				</div>
+                <div className="row">
+                    <FlexBox isVisible={false} title="Saved queries in current project">
+                        <div className={[
+                            IDUtil.cssClassName('no-bootstrap-custom-styling'),
+                            IDUtil.cssClassName('table', this.CLASS_PREFIX)].join(' ')}>
+                            <div className="bg__query-header">Project: {this.props.project.name}</div>
+                            <ProjectQueriesTable project={this.state.project} user={this.props.user}/>
+                        </div>
+                    </FlexBox>
+                </div>
 			)
 		} else {
 			formOrMessage = <h4>Loading project queries...</h4>

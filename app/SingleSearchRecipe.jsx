@@ -55,7 +55,7 @@ class SingleSearchRecipe extends React.Component {
 			collectionConfig : null, //loaded after mounting, without it nothing works
 			currentOutput: null, //contains the current search results
 			initialQuery : null, //yikes this is only used for storing the initial query
-
+            lastQuerySaved : null,
 			selectedOnPage : {}, // key = resourceId, value = true/false
 			allRowsSelected : false // are all search results selected
 		};
@@ -274,16 +274,16 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onQuerySaved = (project) => {
+	onQuerySaved = (data) => {
         ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project);
-            this.showSavedQueryMsg()
+			ComponentUtil.storeJSONInLocalStorage('activeProject', data.project);
         });
 
         this.setState({
-            showSavedQueryMsg : true
+            showSavedQueryMsg : true,
+            lastQuerySaved : data.queryName
         });
-    }
+    };
 
     showSavedQueryMsg = () => {
         return (
@@ -292,9 +292,10 @@ class SingleSearchRecipe extends React.Component {
                 stateVariable="showSavedQueryMsg"
                 owner={this}
                 size="large"
-                title="Query saved">
-                <div className="bg__querysaved-msn">
-                    The query has been saved to project  {this.state.activeProject.name}
+                title="Query saved successfully!">
+                <div className="bg__query-saved-msn">
+                    <p><b>Project name:</b>  {this.state.activeProject.name}</p>
+                    <p><b>Query name:</b> {this.state.lastQuerySaved}</p>
                 </div>
             </FlexModal>
         )
@@ -721,13 +722,14 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	renderQueryModal = (currentOutput, activeProject) => {
+        const projectTitle = `Save query to project: ${activeProject.name}`;
 		return (
 			<FlexModal
 				elementId="query__modal"
 				stateVariable="showQueryModal"
 				owner={this}
 				size="large"
-				title="Enter a name for your query">
+				title={projectTitle}>
 					<QueryEditor
 						query={currentOutput.query}
 						user={this.props.user}
