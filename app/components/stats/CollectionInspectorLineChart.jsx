@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import {Bar, BarChart, Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 
 class CollectionInspectorLineChart extends React.Component {
@@ -124,19 +125,19 @@ class CustomTooltip extends React.Component{
                                 Present:
                                 <span className="rightAlign">
                                     <span className="percentage">{presentPerc}%</span>
-                                    {payload[0].payload['present']}
+                                    {ComponentUtil.formatNumber(payload[0].payload['present'])}
                                     </span>
                             </p>
                             <p>
                                 Missing:
                                 <span className="rightAlign">
                                     <span className="percentage">{missingPerc}%</span>
-                                    {payload[0].payload['missing']}
+                                    {ComponentUtil.formatNumber(payload[0].payload['missing'])}
                                 </span>
                             </p>
                             <p>
                                 Total:
-                                <span className="rightAlign">{payload[0].payload['total']}</span>
+                                <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].payload['total'])}</span>
                             </p>
                         </div>
                     );

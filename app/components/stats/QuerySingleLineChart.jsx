@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Label, ResponsiveContainer, BarChart, Legend, Bar} from 'recharts';
 import TimeUtil from '../../util/TimeUtil';
 import SearchAPI from '../../api/SearchAPI';
@@ -164,7 +165,7 @@ class CustomTooltip extends React.Component{
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                        <p>Total: <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].value)}</span></p>
                     </div>
                 );
             }
