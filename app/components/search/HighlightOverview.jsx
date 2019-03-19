@@ -31,7 +31,7 @@ class HighlightOverview extends React.Component {
 		}
 
 		//determine the header text
-		const headerText = table ? 'Matching terms in archival metadata' : this.props.collectionConfig.getNoMatchingTermsMsg();
+		const headerText = this.props.collectionConfig.getMatchingTermsMsg(table ? 1 : 0, false);
 
 	    return (
 			<div className={IDUtil.cssClassName('highlight-overview')}>
