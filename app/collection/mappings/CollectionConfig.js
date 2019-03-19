@@ -385,9 +385,17 @@ class CollectionConfig {
 	}
 
 	//the result passed is a raw result and needs to be formatted first
-	getResultSnippetData(rawResult, currentDateField=null, searchTerm=null) {
-		//const result = this.getItemDetailData(rawResult, currentDateField);
+	getResultSnippetData(rawResult, numHighlights) {
 		const result = rawResult;
+
+		//populate the list of media types, merging general collection level media types with result specific types
+		let mediaTypes = this.getCollectionMediaTypes();
+		if(result.mediaTypes) {
+			mediaTypes = mediaTypes.concat(
+				result.mediaTypes.filter(mt => !mediaTypes.includes(mt))
+			);
+		}
+
 	    const snippet = {
 			id : result.resourceId,
 			type : result.docType,
@@ -397,21 +405,22 @@ class CollectionConfig {
 			posterURL : result.posterURL,
 			mediaFragment : result.mediaFragment,
 			tags : result.tags ? result.tags : [],
-			mediaTypes : result.mediaTypes ? result.mediaTypes : []
-		}
-		//FIXME not sure if this is still used
-		if(result.docType === 'media_fragment' && result.rawData) {
-			result.start = result.rawData.start ? result.rawData.start : 0;
-			result.end = result.rawData.end ? result.rawData.end : -1;
+			mediaTypes : mediaTypes
 		}
 		if(result.playableContent && result.playableContent.length > 0) {
 		    snippet['playable'] = true;
 		} else {
 		    snippet['playable']= false;
 		}
-		// if(searchTerm) {
-		// 	snippet['highlights'] = this.getHighlights(result.rawData, searchTerm);
-		// }
+		//finally assign the highlight data to the snippet for the SearchSnippet component
+		snippet['highlightMsg'] = this.getMatchingTermsMsg(numHighlights, true);
+
+		//FIXME not sure if this is still used...
+		if(result.docType === 'media_fragment' && result.rawData) {
+			result.start = result.rawData.start ? result.rawData.start : 0;
+			result.end = result.rawData.end ? result.rawData.end : -1;
+		}
+
 		return snippet;
 	}
 
@@ -512,9 +521,16 @@ class CollectionConfig {
         return aggregatedHighlights
 	}
 
-	getNoMatchingTermsMsg() {
-		return 'No matching terms found in archival metadata';
-	}
+	/* ---------------------------------- COLLECTION-SPECIFIC STATIC TEXTS -------------------------------- */
+
+	//returns the static text for the search snippet or the highlight overview in the quick viewer
+	getMatchingTermsMsg(numHits, forSnippet) {
+		if(forSnippet) {
+			return numHits > 0 ? numHits + " match(es) in archival metadata |" : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
+		} else {
+        	return numHits <= 0 ? 'No matching terms found in archival metadata' : 'Matching terms in archival metadata';
+        }
+    }
 
 }
 
