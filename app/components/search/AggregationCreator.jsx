@@ -33,7 +33,7 @@ class AggregationCreator extends React.Component {
 		if(this.state.selectedField && this.props.onOutput) {
 			this.props.onOutput(this.constructor.name, {
 				field: this.state.selectedField.value,
-				title : this.labelRef.value,
+				title : this.labelRef.value, //FIXME this custom title is only stored in the query, but not remembered when creating a new query with the same aggregation...
 				id : this.state.selectedField.value,
 				type : 'string'
 			});

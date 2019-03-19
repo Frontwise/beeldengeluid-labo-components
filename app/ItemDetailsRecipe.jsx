@@ -499,6 +499,7 @@ class ItemDetailsRecipe extends React.Component {
 			term : this.props.params.st,
 			desiredFacets : [{
 				field: entity.field,
+				title : this.state.collectionConfig.toPrettyFieldName(entity.field), //FIXME this could be also obtained from a user setting
 				type: "string",
 				exclude : false
 			}],
@@ -1161,7 +1162,7 @@ class ItemDetailsRecipe extends React.Component {
 			);
 
 			//media objects
-			if(this.state.itemData.playableContent) {
+			if(this.state.itemData.playableContent && this.state.itemData.playableContent.length > 0) {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
