@@ -66,7 +66,7 @@ class CollectionInspectorLineChart extends React.Component {
                             <Label value={this.props.dateField} offset={0} position="outside"
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
                         </XAxis>
-                        <YAxis width={100}>
+                        <YAxis tickFormatter={ComponentUtil.formatNumber} width={100}>
                             <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
