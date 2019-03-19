@@ -31,7 +31,7 @@ class AggregationList extends React.Component {
                 selectedFacets: selectedFacets
             })
         }
-    }
+    };
 
     onComponentOutput = (componentClass, data) => {
         if (componentClass === 'AggregationCreator' && data) {
@@ -40,7 +40,7 @@ class AggregationList extends React.Component {
             this.onOutput(desiredFacets, this.props.selectedFacets);
             ComponentUtil.hideModal(this, 'showModal', 'field_select__modal', true);
         }
-    }
+    };
 
     /* ------------------------------------- FACET SELECTION -------------------------------- */
 
@@ -63,7 +63,7 @@ class AggregationList extends React.Component {
             //output to the parent component
             this.onOutput(this.props.desiredFacets, facets);
         }
-    }
+    };
 
     /* ------------------------------------- SHOW MORE/LESS -------------------------------- */
 
@@ -71,7 +71,7 @@ class AggregationList extends React.Component {
         let states = this.state.showAllModes;
         states[aggr.field] = states[aggr.field] === undefined ? true : !states[aggr.field];
         this.setState({showAllModes : states});
-    }
+    };
 
     /*------------------------------------- REMOVE DIALOG (TODO MAKE NICER) ----------------------------*/
 
@@ -85,7 +85,7 @@ class AggregationList extends React.Component {
             }, {once:true});
             ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
         }
-    }
+    };
 
     removeAggregation = () => {
         //first remove the entry from the desiredFacets
@@ -103,14 +103,14 @@ class AggregationList extends React.Component {
 
         ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
         this.onOutput(desiredFacets, this.props.selectedFacets);
-    }
+    };
 
     /*------------------------------------- EXCLUDE MODE AGGREGATION ----------------------------*/
 
     toggleExcludeFacets = index => {
         this.props.desiredFacets[index]['exclude'] = !this.props.desiredFacets[index]['exclude'];
         this.onOutput(this.props.desiredFacets, this.props.selectedFacets);
-    }
+    };
 
     /*------------------------------------- SORTING FACETS ----------------------------*/
 
@@ -124,7 +124,7 @@ class AggregationList extends React.Component {
             }
         }
         return sortMode;
-    }
+    };
 
     setFacetSortMode = (aggrField, type, direction) => {
         const sortModes = this.state.sortModes;
@@ -133,17 +133,17 @@ class AggregationList extends React.Component {
         curSortMode.active = type;
         sortModes[aggrField] = curSortMode;
         this.setState({sortModes : sortModes})
-    }
+    };
 
     getShowExtraOptions = aggrField => {
         return this.state.showExtraOptions[aggrField] === undefined ? false : this.state.showExtraOptions[aggrField];
-    }
+    };
 
     toggleExtraOptions = aggrField => {
         const showExtraOptions = this.state.showExtraOptions;
         showExtraOptions[aggrField] = showExtraOptions[aggrField] === undefined ? true : !showExtraOptions[aggrField];
         this.setState({showExtraOptions : showExtraOptions})
-    }
+    };
 
     sortFacetList = (a, b, sortType, sortDirection) => {
         if(sortType === 'alpha') {
@@ -168,7 +168,7 @@ class AggregationList extends React.Component {
                 return a.count - b.count;
             }
         }
-    }
+    };
 
     /*------------------------------------- FUNCTION FOR GENERATING UI FRIENDLY DATA OBJECT --------------*/
 
@@ -244,14 +244,14 @@ class AggregationList extends React.Component {
                 facets : facets,
                 exclude : da.exclude === undefined ? false : da.exclude,
                 field : da.field,
-                title : da.title,
+                title : da.title || this.props.collectionConfig.toPrettyFieldName(da.field), // show user generated title or else the automated prettified title
                 empty : isEmptyAggr, //does the aggregation have anything in it
                 index : index, // temporarily needed for guid
                 guid : "facets__" + index
             })
         });
         return uiData;
-    }
+    };
 
     /*------------------------------------- FUNCTIONS FOR RENDERING ----------------------------*/
 
@@ -291,7 +291,7 @@ class AggregationList extends React.Component {
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
             </div>
         )
-    }
+    };
 
     renderSortButton = (aggr, sortType) => { //alpha || numeric
         const sortMode = this.getFacetSortMode(aggr.field);
@@ -309,7 +309,7 @@ class AggregationList extends React.Component {
                 <i aria-hidden="true" className={classNames.join(' ')}/>
             </div>
         );
-    }
+    };
 
     renderHamburgerMenu = aggr => {
         const extraOptions = this.getShowExtraOptions(aggr.field) ? (
@@ -352,7 +352,7 @@ class AggregationList extends React.Component {
                 {extraOptions}
             </div>
         );
-    }
+    };
 
     renderToggleShowMore = aggr => {
         const showAll = this.state.showAllModes[aggr.field] === undefined ? false : this.state.showAllModes[aggr.field];
@@ -372,7 +372,7 @@ class AggregationList extends React.Component {
                 <span className={currentStatus.symbol} aria-hidden="true"/>
             </a>
         );
-    }
+    };
 
     renderEmptyBlocks = (aggr, index) => {
         return (
@@ -391,7 +391,7 @@ class AggregationList extends React.Component {
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
             </div>
         );
-    }
+    };
 
     renderNewFacetModal = () => {
         return (
@@ -406,7 +406,7 @@ class AggregationList extends React.Component {
                     onOutput={this.onComponentOutput}/>
             </FlexModal>
         );
-    }
+    };
 
     renderHideFacetModal = () => {
         return (
@@ -427,7 +427,7 @@ class AggregationList extends React.Component {
                 </div>
             </FlexModal>
         );
-    }
+    };
 
     render() {
         //contains all required data for generating the (empty) aggregation blocks and selected facets

@@ -499,6 +499,7 @@ class ItemDetailsRecipe extends React.Component {
 			term : this.props.params.st,
 			desiredFacets : [{
 				field: entity.field,
+				title : this.state.collectionConfig.toPrettyFieldName(entity.field), //FIXME this could be also obtained from a user setting
 				type: "string",
 				exclude : false
 			}],
