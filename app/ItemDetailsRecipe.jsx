@@ -1162,7 +1162,7 @@ class ItemDetailsRecipe extends React.Component {
 			);
 
 			//media objects
-			if(this.state.itemData.playableContent) {
+			if(this.state.itemData.playableContent && this.state.itemData.playableContent.length > 0) {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
