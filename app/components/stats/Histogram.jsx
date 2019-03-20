@@ -152,7 +152,7 @@ class Histogram extends React.Component {
                         	<Label value={this.props.title} offset={0} position="outside"
 								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
 						</XAxis>
-						<YAxis width={100} >
+						<YAxis tickFormatter={ComponentUtil.formatNumber} width={100} >
                             <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
 						</YAxis>
@@ -171,14 +171,14 @@ class CustomTooltip extends React.Component{
         if (active) {
             const payload = this.props.payload,
                 label = payload[0].payload.date,
-                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0,
                 dataType = payload[0].payload.dataType;
             if (dataType === 'relative') {
                 return (
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                        <p>Percentage: <span className="rightAlign">{ComponentUtil.formatNumber(relativeValue)}%</span></p>
                     </div>
                 );
             } else {
@@ -186,7 +186,7 @@ class CustomTooltip extends React.Component{
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                        <p>Total: <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].value)}</span></p>
                     </div>
                 );
             }

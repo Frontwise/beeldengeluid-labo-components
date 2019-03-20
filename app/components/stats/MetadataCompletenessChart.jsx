@@ -1,7 +1,9 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import {Bar, BarChart, Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
+import PropTypes from 'prop-types';
 
-class CollectionInspectorLineChart extends React.Component {
+export default class MetadataCompletenessChart extends React.Component {
 
     constructor(props) {
         super(props);
@@ -9,6 +11,7 @@ class CollectionInspectorLineChart extends React.Component {
             opacity: {}
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
+        this.CLASS_PREFIX = 'mdc'
     }
 
     hasNoDataForChart() {
@@ -43,8 +46,8 @@ class CollectionInspectorLineChart extends React.Component {
     render() {
         if (this.hasNoDataForChart()) {
             return (
-                <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
-                    <div className="no-data alert alert-danger">
+                <div className={IDUtil.cssClassName('md-completeness-chart')}>
+                    <div className={[IDUtil.cssClassName('no-data', this.CLASS_PREFIX), 'alert', 'alert-danger'].join(' ')}>
                         No data available for date field: {this.props.dateField}
                     </div>
                 </div>
@@ -52,20 +55,19 @@ class CollectionInspectorLineChart extends React.Component {
         }
         const timelineData = this.generateChartData();
 
-        const fieldLabel = this.props.dateField ? this.props.dateField : '';
         return (
-            <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
+            <div className={IDUtil.cssClassName('md-completeness-chart')}>
                 <h4>
-                    Completeness of metadata field "{fieldLabel}" over time for the selected date field
+                    Completeness of metadata field "{this.props.collectionConfig.toPrettyFieldName(this.props.analysisField)}" over time for the selected date field
                 </h4>
                 <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <BarChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year" height={100}>
-                            <Label value={this.props.dateField} offset={0} position="outside"
+                            <Label value={this.props.collectionConfig.toPrettyFieldName(this.props.dateField)} offset={0} position="outside"
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
                         </XAxis>
-                        <YAxis width={100}>
+                        <YAxis tickFormatter={ComponentUtil.formatNumber} width={100}>
                             <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
@@ -80,18 +82,39 @@ class CollectionInspectorLineChart extends React.Component {
     }
 }
 
-class CustomTooltip extends React.Component{
+MetadataCompletenessChart.PropTypes = {
+    dateField: PropTypes.string.isRequired,
+    analysisField : PropTypes.string.isRequired,
+    collectionConfig : PropTypes.object.isRequired,
+    data : PropTypes.object.isRequired //TODO further specify
+}
+
+
+class CustomTooltip extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.CLASS_PREFIX = 'mdc';
+    }
 
     calcPresentPercentage(data) {
         if(data['present'] !== 0 || data['total'] !== 0) {
-            return ((data['present'] / data['total']) * 100).toFixed(2)
+            return ComponentUtil.formatNumber(
+                parseFloat(
+                    ((data['present'] / data['total']) * 100).toFixed(2)
+                )
+            )
         }
         return 0
     }
 
     calcMissingPercentage(data) {
         if(data['missing'] !== 0 || data['total'] !== 0) {
-            return ((data['missing'] / data['total']) * 100).toFixed(2)
+            return ComponentUtil.formatNumber(
+                parseFloat(
+                    ((data['missing'] / data['total']) * 100).toFixed(2)
+                )
+            )
         }
     }
 
@@ -100,51 +123,38 @@ class CustomTooltip extends React.Component{
         if (active) {
             const {payload, label} = this.props;
             if(payload && payload.length > 0) {
-                const relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0;
-                const dataType = payload[0].payload.dataType;
                 const presentPerc = this.calcPresentPercentage(payload[0].payload);
                 const missingPerc = this.calcMissingPercentage(payload[0].payload);
-                if (dataType === 'relative') {
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>{dataType} Completeness</h4>
-                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                            <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
-                        </div>
-                    );
-                } else {
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>Field Completeness</h4>
-                            <p>
-                                Year:
-                                <span className="rightAlign">{`${label}`}</span>
-                            </p>
-                            <p>
-                                Present:
-                                <span className="rightAlign">
-                                    <span className="percentage">{presentPerc}%</span>
-                                    {payload[0].payload['present']}
-                                    </span>
-                            </p>
-                            <p>
-                                Missing:
-                                <span className="rightAlign">
-                                    <span className="percentage">{missingPerc}%</span>
-                                    {payload[0].payload['missing']}
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>Field Completeness</h4>
+                        <p>
+                            Year:
+                            <span className="rightAlign">{`${label}`}</span>
+                        </p>
+                        <p>
+                            Present:
+                            <span className="rightAlign">
+                                <span className={IDUtil.cssClassName('percentage', this.CLASS_PREFIX)}>{presentPerc}%</span>
+                                {ComponentUtil.formatNumber(payload[0].payload['present'])}
                                 </span>
-                            </p>
-                            <p>
-                                Total:
-                                <span className="rightAlign">{payload[0].payload['total']}</span>
-                            </p>
-                        </div>
-                    );
-                }
+                        </p>
+                        <p>
+                            Missing:
+                            <span className="rightAlign">
+                                <span className={IDUtil.cssClassName('percentage', this.CLASS_PREFIX)}>{missingPerc}%</span>
+                                {ComponentUtil.formatNumber(payload[0].payload['missing'])}
+                            </span>
+                        </p>
+                        <p>
+                            Total:
+                            <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].payload['total'])}</span>
+                        </p>
+                    </div>
+                );
             }
+
         }
         return null;
     }
 }
-
-export default CollectionInspectorLineChart;
