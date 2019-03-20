@@ -171,14 +171,14 @@ class CustomTooltip extends React.Component{
         if (active) {
             const payload = this.props.payload,
                 label = payload[0].payload.date,
-                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0,
                 dataType = payload[0].payload.dataType;
             if (dataType === 'relative') {
                 return (
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                        <p>Percentage: <span className="rightAlign">{ComponentUtil.formatNumber(relativeValue)}%</span></p>
                     </div>
                 );
             } else {

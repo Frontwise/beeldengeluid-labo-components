@@ -13,7 +13,7 @@ import CollectionAnalyser from './components/collection/CollectionAnalyser';
 import CollectionSelector from './components/collection/CollectionSelector';
 import DateFieldSelector from './components/collection/DateFieldSelector';
 import FieldAnalysisStats from './components/collection/FieldAnalysisStats';
-import CollectionInspectorLineChart from './components/stats/CollectionInspectorLineChart';
+import MetadataCompletenessChart from './components/stats/MetadataCompletenessChart';
 
 import PropTypes from 'prop-types';
 
@@ -332,7 +332,7 @@ class CollectionRecipe extends React.Component {
     	}
 
     	return (
-			<CollectionInspectorLineChart
+			<MetadataCompletenessChart
 				collectionConfig={collectionConfig}
 				dateField={dateField}
                 analysisField={analysisField}

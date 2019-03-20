@@ -1,12 +1,12 @@
-.bg__collection-inspector-line-chart {
+.bg__md-completeness-chart {
 	margin-top: 30px;
 	@include lineChartBase();
 
-	.no-data {
+	.bg__mdc__no-data {
 		margin-top: 12px;
 	}
 
-	.percentage {
+	.bg__mdc__percentage {
 		font-size: 90%;
 		font-weight: bold;
 		margin-right: 12px;

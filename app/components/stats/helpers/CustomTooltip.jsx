@@ -20,9 +20,14 @@ export default class CustomTooltip extends React.Component{
                 if (this.props.viewMode === 'relative') {
                     const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage';
                     const valueLabel = payload.length > 1 ? 'Values' : 'Value';
-                    const point = payload.map(
-                        (p, index) => <span style={this.getStyle(p)}><span>Query#{index+1}</span> <span>{p.value ? p.value.toFixed(2) : 0}%</span></span>
-                    );
+                    const point = payload.map((p, index) => {
+                        return (
+                            <span style={this.getStyle(p)}>
+                                <span>Query#{index+1}</span>
+                                <span>{p.value ? ComponentUtil.formatNumber(parseFloat(p.value.toFixed(2))) : 0}%</span>
+                            </span>
+                        )
+                    });
 
                     return (
                         <div className={IDUtil.cssClassName('custom-tooltip')}>
@@ -35,7 +40,8 @@ export default class CustomTooltip extends React.Component{
                     const point = payload.map((p,index) => {
                         return (
                             <span className="bg__tooltip-spaceBetween" style={this.getStyle(p)}>
-                                <span>Query#{this.props.colorIndexes[index]+1}</span> <span className="bg__tooltip-spaceBetween">{p.value ? ComponentUtil.formatNumber(p.value) : 0}</span>
+                                <span>Query#{this.props.colorIndexes[index]+1}</span>
+                                <span className="bg__tooltip-spaceBetween">{p.value ? ComponentUtil.formatNumber(p.value) : 0}</span>
                             </span>
                         )
                     });

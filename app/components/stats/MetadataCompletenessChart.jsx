@@ -3,7 +3,7 @@ import ComponentUtil from '../../util/ComponentUtil';
 import {Bar, BarChart, Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 import PropTypes from 'prop-types';
 
-class CollectionInspectorLineChart extends React.Component {
+export default class MetadataCompletenessChart extends React.Component {
 
     constructor(props) {
         super(props);
@@ -11,6 +11,7 @@ class CollectionInspectorLineChart extends React.Component {
             opacity: {}
         };
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
+        this.CLASS_PREFIX = 'mdc'
     }
 
     hasNoDataForChart() {
@@ -45,8 +46,8 @@ class CollectionInspectorLineChart extends React.Component {
     render() {
         if (this.hasNoDataForChart()) {
             return (
-                <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
-                    <div className="no-data alert alert-danger">
+                <div className={IDUtil.cssClassName('md-completeness-chart')}>
+                    <div className={[IDUtil.cssClassName('no-data', this.CLASS_PREFIX), 'alert', 'alert-danger'].join(' ')}>
                         No data available for date field: {this.props.dateField}
                     </div>
                 </div>
@@ -55,7 +56,7 @@ class CollectionInspectorLineChart extends React.Component {
         const timelineData = this.generateChartData();
 
         return (
-            <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
+            <div className={IDUtil.cssClassName('md-completeness-chart')}>
                 <h4>
                     Completeness of metadata field "{this.props.collectionConfig.toPrettyFieldName(this.props.analysisField)}" over time for the selected date field
                 </h4>
@@ -81,7 +82,7 @@ class CollectionInspectorLineChart extends React.Component {
     }
 }
 
-CollectionInspectorLineChart.PropTypes = {
+MetadataCompletenessChart.PropTypes = {
     dateField: PropTypes.string.isRequired,
     analysisField : PropTypes.string.isRequired,
     collectionConfig : PropTypes.object.isRequired,
@@ -89,7 +90,12 @@ CollectionInspectorLineChart.PropTypes = {
 }
 
 
-class CustomTooltip extends React.Component{
+class CustomTooltip extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.CLASS_PREFIX = 'mdc';
+    }
 
     calcPresentPercentage(data) {
         if(data['present'] !== 0 || data['total'] !== 0) {
@@ -117,51 +123,38 @@ class CustomTooltip extends React.Component{
         if (active) {
             const {payload, label} = this.props;
             if(payload && payload.length > 0) {
-                const relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0;
-                const dataType = payload[0].payload.dataType;
                 const presentPerc = this.calcPresentPercentage(payload[0].payload);
                 const missingPerc = this.calcMissingPercentage(payload[0].payload);
-                if (dataType === 'relative') {
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>{dataType} Completeness</h4>
-                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                            <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
-                        </div>
-                    );
-                } else {
-                    return (
-                        <div className="ms__custom-tooltip">
-                            <h4>Field Completeness</h4>
-                            <p>
-                                Year:
-                                <span className="rightAlign">{`${label}`}</span>
-                            </p>
-                            <p>
-                                Present:
-                                <span className="rightAlign">
-                                    <span className="percentage">{presentPerc}%</span>
-                                    {ComponentUtil.formatNumber(payload[0].payload['present'])}
-                                    </span>
-                            </p>
-                            <p>
-                                Missing:
-                                <span className="rightAlign">
-                                    <span className="percentage">{missingPerc}%</span>
-                                    {ComponentUtil.formatNumber(payload[0].payload['missing'])}
+                return (
+                    <div className="ms__custom-tooltip">
+                        <h4>Field Completeness</h4>
+                        <p>
+                            Year:
+                            <span className="rightAlign">{`${label}`}</span>
+                        </p>
+                        <p>
+                            Present:
+                            <span className="rightAlign">
+                                <span className={IDUtil.cssClassName('percentage', this.CLASS_PREFIX)}>{presentPerc}%</span>
+                                {ComponentUtil.formatNumber(payload[0].payload['present'])}
                                 </span>
-                            </p>
-                            <p>
-                                Total:
-                                <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].payload['total'])}</span>
-                            </p>
-                        </div>
-                    );
-                }
+                        </p>
+                        <p>
+                            Missing:
+                            <span className="rightAlign">
+                                <span className={IDUtil.cssClassName('percentage', this.CLASS_PREFIX)}>{missingPerc}%</span>
+                                {ComponentUtil.formatNumber(payload[0].payload['missing'])}
+                            </span>
+                        </p>
+                        <p>
+                            Total:
+                            <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].payload['total'])}</span>
+                        </p>
+                    </div>
+                );
             }
+
         }
         return null;
     }
 }
-
-export default CollectionInspectorLineChart;
