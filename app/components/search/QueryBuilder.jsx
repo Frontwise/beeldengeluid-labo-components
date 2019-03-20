@@ -578,6 +578,7 @@ class QueryBuilder extends React.Component {
 			} else {
 				searchIcon = (<i className="fa fa-search"/>)
 			}
+
 			//render the stuff on screen
 			return (
 				<div className={IDUtil.cssClassName('query-builder')}>
@@ -587,6 +588,8 @@ class QueryBuilder extends React.Component {
 						<div className="col-md-12">
 							<form className="form-horizontal" onSubmit={this.blockSearch.bind(this)}>
 								<div className="form-group">
+
+									{/* Search keywords input */}
 									<div className="col-sm-6">
 										<div className="input-group">
 											<input
@@ -609,6 +612,8 @@ class QueryBuilder extends React.Component {
 											</span>
 										</div>
 									</div>
+
+									{/* Metadata field selector */}
 									<div className="col-sm-6">
 										{fieldCategorySelector}
 									</div>
