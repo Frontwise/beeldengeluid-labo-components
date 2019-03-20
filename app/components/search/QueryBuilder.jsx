@@ -535,14 +535,10 @@ class QueryBuilder extends React.Component {
 
                 } //END OF the big code block of rendering aggregations
 
-                //draw the overall result statistics
+                //draw the date result statistics
                 const resultStats = (
                     <div>
-                        <div>
-                            Total number of results based on <em>&quot;{currentSearchTerm}&quot; </em>
-                            and selected filters: <b>{ComponentUtil.formatNumber(this.state.totalHits)}</b>
                             {dateStats}
-                        </div>
                     </div>
                 );
 
@@ -572,6 +568,14 @@ class QueryBuilder extends React.Component {
                 );
 			}
 
+			// number of query results if available
+            const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? (
+                <span className="count" title="Total number of results based on keyword and selected filters">
+                    {ComponentUtil.formatNumber(this.state.totalHits)}
+                </span>
+            ) : null;
+
+
 			//determine which icon to show after the search input
 			if(this.state.isSearching === true) {
 				searchIcon = (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"/>)
@@ -590,12 +594,12 @@ class QueryBuilder extends React.Component {
 								<div className="form-group">
 
 									{/* Search keywords input */}
-									<div className="col-sm-6">
+									<div className="col-sm-5">
 										<div className="input-group">
 											<input
 												type="text"
 												id="search_term"
-												className="form-control"
+												className="form-control input-search"
 												placeholder="Search"
 												onKeyPress={
 													this.searchFormKeyPressed.bind(this)
@@ -614,19 +618,29 @@ class QueryBuilder extends React.Component {
 									</div>
 
 									{/* Metadata field selector */}
-									<div className="col-sm-6">
+									<div className="col-sm-6 field-category-selector-holder">
+										<div className="in-label">in</div>
 										{fieldCategorySelector}
+										<div className="arrow-label">{queryResultCount && "►"}</div>
 									</div>
+
+									{/* Result count */}
+									<div className="col-sm-1">
+										{queryResultCount}
+										{/* WTODO: Add back: 
+										<a onClick={this.clearSearch.bind(this)}>
+											Clear&nbsp;<span data-for={'__clear-search-tt'}
+			                                  data-tip="Clear all query parameters, but keeps the collection selected"
+			                                  data-html={false}>
+			                                  	<i className="fa fa-info-circle"/>
+											</span>
+										</a>
+										<ReactTooltip id={'__clear-search-tt'}/> */}
+									</div>
+
 								</div>
 							</form>
-							<a onClick={this.clearSearch.bind(this)}>
-								Clear search&nbsp;<span data-for={'__clear-search-tt'}
-                                  data-tip="Clear all query parameters, but keeps the collection selected"
-                                  data-html={false}>
-                                  	<i className="fa fa-info-circle"/>
-								</span>
-							</a>
-							<ReactTooltip id={'__clear-search-tt'}/>
+
 						</div>
 					</div>
 					{layerOptions}

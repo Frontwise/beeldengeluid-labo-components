@@ -101,12 +101,12 @@ class FieldCategorySelector extends React.Component {
             }
         });
         if (optsEnrichment.length && optsMetadata.length) {
-            return [{"label": "-- Archive's metadata --", "options": optsMetadata},
-                {"label": "-- Enrichments --", "options": optsEnrichment}]
+            return [{"label": "── Archive's metadata ──", "options": optsMetadata},
+                {"label": "── Enrichments ──", "options": optsEnrichment}]
         } else if (optsMetadata.length) {
-            return [{"label": "-- Archive's metadata --", "options": optsMetadata}]
+            return [{"label": "── Archive's metadata ──", "options": optsMetadata}]
         } else if (optsEnrichment.length) {
-            return [{"label": "-- Enrichments --", "options": optsEnrichment}]
+            return [{"label": "── Enrichments ──", "options": optsEnrichment}]
         } else {
             return [];
         }
@@ -152,7 +152,7 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="Search in: all metadata fields"
+						placeholder="All metadata fields"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
@@ -178,7 +178,7 @@ export default FieldCategorySelector;
 
 export const ListOption = ({ option, collectionConfig }) => (
 	<div title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
-		Search in: {option.label}
+		{option.label}
 	</div>
 );
 

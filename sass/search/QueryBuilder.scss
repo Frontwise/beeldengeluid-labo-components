@@ -1,16 +1,17 @@
 .bg__query-builder {
-	.bg__qb__search-layers {}
+	.bg__qb__search-layers {
+	}
 
 	.bg__qb__breadcrumbs {
 		.bg__qb__crumb {
 			display: inline-block;
-	    	margin: 0px 5px 5px 0px;
-	    	i {
-	    		cursor: pointer;
-		    	&:hover {
-		    		text-decoration:underline;
-		    	}
-		    }
+			margin: 0px 5px 5px 0px;
+			i {
+				cursor: pointer;
+				&:hover {
+					text-decoration: underline;
+				}
+			}
 		}
 	}
 
@@ -23,5 +24,52 @@
 	}
 	.bg__clear-query-btn {
 		margin-left: 12px;
+	}
+
+	.input-group-addon.btn-effect {
+		background-color: $clPrimary;
+		color: white;
+		border-radius: 0 5px 5px 0;
+	}
+
+	.input-search {
+		border-radius: 5px 0 0 5px;
+	}
+
+	.count {
+		margin-top: 5px;
+		background-color: $clGrey;
+		font-size: 1em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 8px;
+		min-width: 20px;
+		vertical-align: top;
+		font-family: $fontHeading;
+	}
+
+	.field-category-selector-holder {
+		display: flex;
+
+		.in-label {
+			margin-right: 10px;
+			line-height: 37px;
+			margin-left: -15px;
+		}
+
+		.arrow-label {
+			margin-left: 10px;
+			line-height: 37px;
+			margin-right: -25px;
+			font-size: 0.8em;
+		}
+
+		.bg__field-category-selector {
+			flex-grow: 1;
+		}
+	}
+
+	.separator.line{
+		border-bottom: 1px solid $clGreyTint;
 	}
 }
