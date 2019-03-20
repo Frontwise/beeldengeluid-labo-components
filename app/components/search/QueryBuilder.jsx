@@ -40,7 +40,6 @@ class QueryBuilder extends React.Component {
 			isSearching : false,
 			query : this.props.query, //this is only set by the owner after choosing a collection or loading the page
 			//query OUTPUT
-            currentCollectionHits: this.getCollectionHits(this.props.collectionConfig),
             aggregations : {}
 
         };
@@ -60,26 +59,6 @@ class QueryBuilder extends React.Component {
 				this.doSearch(this.props.query);
 			}
 		}
-	}
-
-	//called by the constructor once to get the amount of documents in the entire collection
-	getCollectionHits(config) {
-		let collectionHits = -1;
-		if(config && config.collectionStats) {
-			const stats = config.collectionStats;
-			const docType = config.getDocumentType();
-			if(stats && stats.collection_statistics && stats.collection_statistics.document_types) {
-				const docTypes = stats.collection_statistics.document_types;
-				if(docTypes.length > 0) {
-				    for(let i=0;i<docTypes.length;i++) {
-                        if(docTypes[i].doc_type === docType) {
-                            collectionHits = docTypes[i].doc_count
-                        }
-                    }
-				}
-			}
-		}
-		return collectionHits;
 	}
 
     switchGraphType(typeOfGraph) {
@@ -343,22 +322,7 @@ class QueryBuilder extends React.Component {
             let layerOptions = null;
             let resultBlock = null;
             let ckanLink = null;
-            //collectionInfo comes from CKAN, which can be empty
-            const currentCollectionTitle = this.props.collectionConfig.collectionInfo
-                ? this.props.collectionConfig.collectionInfo.title
-                :  this.props.collectionConfig.collectionId;
-
-            if (this.props.collectionConfig.collectionInfo && this.props.collectionConfig.collectionInfo.ckanUrl) {
-                ckanLink = <ReadMoreLink linkUrl={this.props.collectionConfig.collectionInfo.ckanUrl}/>
-            }
-
-            if (this.props.header) {
-                heading = (<div>
-                        <h3>Searching in :&nbsp;{currentCollectionTitle} {ckanLink}</h3>
-                        <h4>Total number of records in this collection: {ComponentUtil.formatNumber(this.state.currentCollectionHits)}</h4>
-                    </div>
-                )
-            }
+            
 
 			//draw the field category selector
 			const fieldCategorySelector = (

@@ -1,0 +1,47 @@
+.bg__single-search-header {
+	width: 100%;
+	margin: 45px 0 10px;
+	border-bottom: 1px solid #eee;
+
+	h1 {
+		display: inline-block;
+		margin: 0;
+		padding: 10px 0 10px 38px;
+		font-size: 1.5em;
+		background-image: $iconToolUrl;
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 25px;
+	}
+
+	// project info/selector
+	& > .project {
+		display: inline-block;
+		float: right;
+		padding: 5px 10px 5px 38px;
+		background-image: $iconProjectUrl;
+		background-repeat: no-repeat;
+		background-position: 7px center;
+		background-size: 20px;
+		min-height: 30px;
+		line-height: 30px;
+		cursor: pointer;
+
+		&.active {
+			border-bottom: 3px solid $clSecondary;
+   		    border-radius: 5px 5px 0 0;
+
+			&:hover {
+				background-color: $clGrey;
+			}
+
+			span {
+				display: inline-block;
+				padding-right: 25px;
+				background-image: $arrowDownDarkUrl;
+				background-position: right 4px center;
+				background-repeat: no-repeat;
+			}
+		}
+	}
+}

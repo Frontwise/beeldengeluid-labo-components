@@ -8,6 +8,25 @@
 }
 
 .bg__single-search-recipe {
+
+     /* Restyle buttons to new format */
+	.btn{
+		text-transform: uppercase;
+		font-weight: 400px;
+		font-size: .96em;
+		font-family: $fontHeading;
+		transition: background-color $transition;
+
+		&.btn-secondary{
+			background-color: $clSecondary;
+			color: white;
+
+			&:hover{
+				background-color: darken($clSecondary,8%);
+			}
+		}
+	}
+
 	.select-all {
 		@include checkbox();
 		margin-top: 6px;

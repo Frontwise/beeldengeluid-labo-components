@@ -18,6 +18,8 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
+import Header from './components/search/Header';
+import CollectionBar from './components/search/CollectionBar';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
 import SearchHit from './components/search/SearchHit';
@@ -735,31 +737,29 @@ class SingleSearchRecipe extends React.Component {
 		)
 	}
 
-	/* --------------------------- RENDER SELECTION BUTTONS --------------------- */
+	/* --------------------------- RENDER RECIPE HEADER --------------------- */
 
-
-	renderSelectionButtons = (activeProject, collectionConfig, showCollectionSelector = true) => {
-		let collectionBtn = null;
-		const projectBtn = (
-			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
-				Set project ({activeProject ? activeProject.name : 'none selected'})
-			</button>
-		);
-
-		if(showCollectionSelector) {
-			//show the button to open the modal
-			collectionBtn = (
-				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}>
-					Set collection ({collectionConfig ? collectionConfig.getCollectionTitle() : 'none selected'})
-				</button>
-			);
-		}
-
+	renderHeader = (name, activeProject) => {
 		return (
-			<div>{collectionBtn}&nbsp;{projectBtn}</div>
-		)
+			<Header
+				name={name}
+				activeProject={activeProject}
+				selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}
+			/>
+		);
 	}
 
+	/* --------------------------- RENDER COLLECTION BAR --------------------- */
+
+
+	renderCollectionBar = (collectionConfig) => {
+		return(
+			<CollectionBar
+				collectionConfig={collectionConfig}
+				selectCollection={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}
+			/>
+		);
+	}
 
 	/* --------------------------- RENDER RESULT LIST ----------------------------*/
 
@@ -1040,11 +1040,14 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
-        const selectionButtons = this.renderSelectionButtons(
-        	this.state.activeProject,
-        	this.state.collectionConfig,
-        	this.props.recipe.ingredients.collectionSelector
-        )
+        const header = this.renderHeader(
+        	this.props.recipe.name,
+        	this.state.activeProject
+        );
+
+        const collectionBar = this.renderCollectionBar(
+        	this.state.collectionConfig
+        );
 
         //the query builder & loading message
 		const searchComponent = this.renderSearchComponent(
@@ -1061,7 +1064,8 @@ class SingleSearchRecipe extends React.Component {
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
 					<div className="col-md-12">
-						{selectionButtons}
+						{header}
+						{collectionBar}
 						{searchComponent}
                         {resultList}
 					</div>
