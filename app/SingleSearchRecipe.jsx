@@ -222,6 +222,11 @@ class SingleSearchRecipe extends React.Component {
 				)
 			}
         );
+
+        // store current query, on collection select/change
+        if(!this.props.params.queryId) {
+        	FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
+        }
 	}
 
 	onProjectSelected = (project) => {
