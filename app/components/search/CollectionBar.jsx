@@ -42,14 +42,14 @@ class CollectionBar extends React.PureComponent {
 		const ckanUrl =
 			collectionConfig && collectionConfig.collectionInfo.ckanUrl ? (
 				<a
-					title="Collection info"
+					title="View collection info"
 					href={collectionConfig.collectionInfo.ckanUrl}
 					target="_blank"
 				/>
 			) : null;
 
 		const hits = collectionConfig ? (
-			<span class="count" title="Records in this collection">
+			<span className="count" title="Records in this collection">
 				{ComponentUtil.formatNumber(
 					this.getCollectionHits(collectionConfig)
 				)}
