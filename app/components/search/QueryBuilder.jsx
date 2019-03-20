@@ -27,6 +27,7 @@ import MessageHelper from '../helpers/MessageHelper';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 class QueryBuilder extends React.Component {
 
@@ -322,7 +323,6 @@ class QueryBuilder extends React.Component {
             let layerOptions = null;
             let resultBlock = null;
             let ckanLink = null;
-            
 
 			//draw the field category selector
 			const fieldCategorySelector = (
@@ -345,7 +345,7 @@ class QueryBuilder extends React.Component {
 						</label>
 					)
 				});
-				// Hide collection metada tickbox from current search interface.
+				// Hide collection metadata tickbox from current search interface.
 				//https://github.com/CLARIAH/wp5_mediasuite/issues/130
 				// it could be enabled once we have more options to provide.
 				if(layers) {
@@ -538,21 +538,23 @@ class QueryBuilder extends React.Component {
                 //draw the date result statistics
                 const resultStats = (
                     <div>
-                            {dateStats}
+                        {dateStats}
                     </div>
                 );
 
                 //draw the result block
                 resultBlock = (
                     <div>
-                        {resultStats}
-                        <div className="separator"/>
-                        {dateRangeCrumb}
-                        <div className="row">
-                            <div className="col-md-12">
-                                {dateRangeSelector}
-                                {graph}
-                            </div>
+                    	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
+	                        {resultStats}
+	                        <div className="separator"/>
+	                        {dateRangeCrumb}
+	                        <div className="row">
+	                            <div className="col-md-12">
+	                                {dateRangeSelector}
+	                                {graph}
+	                            </div>
+	                        </div>
                         </div>
                         <div className="separator"/>
                         {aggregationBox}
@@ -570,7 +572,7 @@ class QueryBuilder extends React.Component {
 
 			// number of query results if available
             const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? (
-                <span className="count" title="Total number of results based on keyword and selected filters">
+                <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
                     {ComponentUtil.formatNumber(this.state.totalHits)}
                 </span>
             ) : null;
@@ -599,7 +601,7 @@ class QueryBuilder extends React.Component {
 											<input
 												type="text"
 												id="search_term"
-												className="form-control input-search"
+												className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
 												placeholder="Search"
 												onKeyPress={
 													this.searchFormKeyPressed.bind(this)
@@ -618,10 +620,10 @@ class QueryBuilder extends React.Component {
 									</div>
 
 									{/* Metadata field selector */}
-									<div className="col-sm-6 field-category-selector-holder">
-										<div className="in-label">in</div>
+									<div className={classNames("col-sm-6",IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX))}>
+										<div className={IDUtil.cssClassName('in-label', this.CLASS_PREFIX)}>in</div>
 										{fieldCategorySelector}
-										<div className="arrow-label">{queryResultCount && "►"}</div>
+										<div className={IDUtil.cssClassName('arrow-label', this.CLASS_PREFIX)}>{queryResultCount && "►"}</div>
 									</div>
 
 									{/* Result count */}

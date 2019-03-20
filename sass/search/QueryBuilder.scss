@@ -32,11 +32,11 @@
 		border-radius: 0 5px 5px 0;
 	}
 
-	.input-search {
+	.bg__qb__input-search {
 		border-radius: 5px 0 0 5px;
 	}
 
-	.count {
+	.bg__qb__count {
 		margin-top: 5px;
 		background-color: $clGrey;
 		font-size: 1em;
@@ -48,18 +48,18 @@
 		font-family: $fontHeading;
 	}
 
-	.field-category-selector-holder {
+	.bg__qb__selector-holder {
 		display: flex;
 
-		.in-label {
+		.bg__qb__in-label {
 			margin-right: 10px;
-			line-height: 37px;
+			line-height: 35px;
 			margin-left: -15px;
 		}
 
-		.arrow-label {
+		.bg__qb__arrow-label {
 			margin-left: 10px;
-			line-height: 37px;
+			line-height: 35px;
 			margin-right: -25px;
 			font-size: 0.8em;
 		}
@@ -69,7 +69,10 @@
 		}
 	}
 
-	.separator.line{
-		border-bottom: 1px solid $clGreyTint;
+	.bg__qb__result-dates{
+		padding: 10px;
+		border-radius: 5px;
+		box-shadow: 2px 2px 5px rgba(black, 0.2) inset;
+		background-color: $clGrey;
 	}
 }
