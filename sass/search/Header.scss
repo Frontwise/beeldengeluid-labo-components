@@ -3,19 +3,19 @@
 	margin: 45px 0 10px;
 	border-bottom: 1px solid #eee;
 
-	h1 {
+	.bg__ssh__title {
 		display: inline-block;
 		margin: 0;
 		padding: 10px 0 10px 38px;
 		font-size: 1.5em;
-		background-image: $iconToolUrl;
+		background-image: $iconRecipeUrl;
 		background-repeat: no-repeat;
 		background-position: left center;
-		background-size: 25px;
+		background-size: 27px;
 	}
 
 	// project info/selector
-	& > .project {
+	& > .bg__ssh__project {
 		display: inline-block;
 		float: right;
 		padding: 5px 10px 5px 33px;

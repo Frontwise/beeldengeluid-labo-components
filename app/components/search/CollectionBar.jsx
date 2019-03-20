@@ -4,6 +4,11 @@ import PropTypes from "prop-types";
 import ComponentUtil from "../../util/ComponentUtil";
 
 class CollectionBar extends React.PureComponent {
+	constructor(props) {
+		super(props);
+		this.CLASS_PREFIX = "scb";
+	}
+
 	getCollectionHits(config) {
 		let collectionHits = -1;
 		if (config && config.collectionStats) {
@@ -32,7 +37,9 @@ class CollectionBar extends React.PureComponent {
 
 		const collectionButton = (
 			<button
-				className={classNames("btn",{"btn-primary": !collectionConfig})}
+				className={classNames("btn", {
+					"btn-primary": !collectionConfig
+				})}
 				onClick={this.props.selectCollection}
 			>
 				{collectionConfig ? "Change collection" : "Select collection"}
@@ -42,6 +49,7 @@ class CollectionBar extends React.PureComponent {
 		const ckanUrl =
 			collectionConfig && collectionConfig.collectionInfo.ckanUrl ? (
 				<a
+					className={IDUtil.cssClassName("link", this.CLASS_PREFIX)}
 					title="View collection info"
 					href={collectionConfig.collectionInfo.ckanUrl}
 					target="_blank"
@@ -49,7 +57,10 @@ class CollectionBar extends React.PureComponent {
 			) : null;
 
 		const hits = collectionConfig ? (
-			<span className="count" title="Records in this collection">
+			<span
+				className={IDUtil.cssClassName("count", this.CLASS_PREFIX)}
+				title="Records in this collection"
+			>
 				{ComponentUtil.formatNumber(
 					this.getCollectionHits(collectionConfig)
 				)}
@@ -68,8 +79,20 @@ class CollectionBar extends React.PureComponent {
 					</div>
 				) : (
 					/* Collection info + change */
-					<div className="active">
-						<h2>{collectionConfig.getCollectionTitle()}</h2>
+					<div
+						className={IDUtil.cssClassName(
+							"active",
+							this.CLASS_PREFIX
+						)}
+					>
+						<h2
+							className={IDUtil.cssClassName(
+								"title",
+								this.CLASS_PREFIX
+							)}
+						>
+							{collectionConfig.getCollectionTitle()}
+						</h2>
 						{hits}
 						{ckanUrl}
 						{collectionButton}
