@@ -1,6 +1,7 @@
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import {Bar, BarChart, Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
+import PropTypes from 'prop-types';
 
 class CollectionInspectorLineChart extends React.Component {
 
@@ -53,17 +54,16 @@ class CollectionInspectorLineChart extends React.Component {
         }
         const timelineData = this.generateChartData();
 
-        const fieldLabel = this.props.dateField ? this.props.dateField : '';
         return (
             <div className={IDUtil.cssClassName('collection-inspector-line-chart')}>
                 <h4>
-                    Completeness of metadata field "{fieldLabel}" over time for the selected date field
+                    Completeness of metadata field "{this.props.collectionConfig.toPrettyFieldName(this.props.analysisField)}" over time for the selected date field
                 </h4>
                 <ResponsiveContainer width="100%" minHeight="360px" height="40%">
                     <BarChart width={1200} height={200} data={timelineData} margin={{top: 5, right: 20, bottom: 5, left: 0}}>
                         <CartesianGrid stroke="#cacaca"/>
                         <XAxis dataKey="year" height={100}>
-                            <Label value={this.props.dateField} offset={0} position="outside"
+                            <Label value={this.props.collectionConfig.toPrettyFieldName(this.props.dateField)} offset={0} position="outside"
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
                         </XAxis>
                         <YAxis tickFormatter={ComponentUtil.formatNumber} width={100}>
@@ -81,18 +81,34 @@ class CollectionInspectorLineChart extends React.Component {
     }
 }
 
+CollectionInspectorLineChart.PropTypes = {
+    dateField: PropTypes.string.isRequired,
+    analysisField : PropTypes.string.isRequired,
+    collectionConfig : PropTypes.object.isRequired,
+    data : PropTypes.object.isRequired //TODO further specify
+}
+
+
 class CustomTooltip extends React.Component{
 
     calcPresentPercentage(data) {
         if(data['present'] !== 0 || data['total'] !== 0) {
-            return ((data['present'] / data['total']) * 100).toFixed(2)
+            return ComponentUtil.formatNumber(
+                parseFloat(
+                    ((data['present'] / data['total']) * 100).toFixed(2)
+                )
+            )
         }
         return 0
     }
 
     calcMissingPercentage(data) {
         if(data['missing'] !== 0 || data['total'] !== 0) {
-            return ((data['missing'] / data['total']) * 100).toFixed(2)
+            return ComponentUtil.formatNumber(
+                parseFloat(
+                    ((data['missing'] / data['total']) * 100).toFixed(2)
+                )
+            )
         }
     }
 
