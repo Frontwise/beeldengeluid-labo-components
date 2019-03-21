@@ -71,6 +71,12 @@ class QueryEditor extends React.PureComponent {
 		}
 	}
 
+    renderValidationFailed = () => {
+        <div className={IDUtil.cssClassName('validation-failed')}>
+                               * Name field is required. <br/> Please name the query before saving it.
+                            </div>
+    }
+
 	render() {
 		let formOrMessage = null;
 		let queryTable = null;
@@ -104,9 +110,7 @@ class QueryEditor extends React.PureComponent {
                                     ref={input => (this.queryName = input)}
     								placeholder="Name your query"/>
   							</div>
-                            <div className={classNames.join(' ')}>
-                               * Name field is required. <br/> Please name the query before saving it.
-                            </div>
+                            {validationFailed}
   							<button type="submit" className="btn btn-default">Save</button>
                         </form>
                     </div>
