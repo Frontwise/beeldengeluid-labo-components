@@ -758,14 +758,13 @@ class SingleSearchRecipe extends React.Component {
 
     renderShowSavedQueryMsg = () => (
         <FlexModal
-            elementId="querySavedConfirmation"
+            elementId="query-saved__modal"
             stateVariable="showSavedQueryMsg"
             owner={this}
             size="large"
-            title="Query saved successfully!">
-            <div className="bg__query-saved-msn">
-                <p><b>Project name:</b>  {this.state.activeProject.name}</p>
-                <p><b>Query name:</b> {this.state.lastQuerySaved}</p>
+            title="Query saved successfully">
+            <div>
+            	The query was saved successfully to {this.state.activeProject.name}
             </div>
         </FlexModal>
     );
