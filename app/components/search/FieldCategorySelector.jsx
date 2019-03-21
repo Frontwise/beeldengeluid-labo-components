@@ -19,18 +19,18 @@ class FieldCategorySelector extends React.Component {
 		this.CLASS_PREFIX = 'fcs';
 	}
 
-    shouldComponentUpdate(nextProps, nextState) {
-	    if (nextProps.fieldCategory && this.props.fieldCategory) {
-            return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
-        }
-        return true
-    }
-
 	onComponentOutput(componentClass, data) {
 		if(componentClass === 'FieldCategoryCreator') {
 			this.onFieldsSelected(data);
 		}
 	}
+
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (nextProps.fieldCategory && this.props.fieldCategory) {
+    //         return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
+    //     }
+    //     return true
+    // }
 
 	onOutput(data) {
 		if(this.props.onOutput) {

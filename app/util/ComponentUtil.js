@@ -157,6 +157,17 @@ const ComponentUtil = {
 			numHighlights : Object.keys(highlights).length !== 0 ? Object.keys(highlights).reduce((acc, cur) => acc += highlights[cur].length, 0) : 0,
 			collectionConfig : collectionConfig
 		}
+    },
+
+    /*--------------------------------------------------------------------------------
+    * ------------------------- METHOD FOR Cannot read property 'name' of undefined"-----------------------------
+    ---------------------------------------------------------------------------------*/
+    getSafe(fn, defaultVal=null) {
+        try {
+            return fn();
+        } catch (e) {
+            return defaultVal;
+        }
     }
 
 };
