@@ -490,6 +490,10 @@ class CollectionConfig {
 		return -1
 	}
 
+    getFieldDescription(esFieldName) {
+        "-"
+    }
+
 	getFieldsToExclude() {
 		return null
 	}
