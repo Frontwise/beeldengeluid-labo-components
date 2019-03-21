@@ -281,7 +281,7 @@ class SingleSearchRecipe extends React.Component {
         });
 
         this.setState({
-            showSavedQueryMsg : true,
+            savedQueryModal : true,
             lastQuerySaved : data.queryName
         });
     };
@@ -748,24 +748,20 @@ class SingleSearchRecipe extends React.Component {
             stateVariable="savedBookmarkModal"
             owner={this}
             size="large"
-            title="Bookmarks were saved successfully">
-            <div className="savedBookmarksMsg">
-                <b>Saved to project:</b> {this.state.activeProject.name}
-            </div>
+            title="Bookmarks saved successfully">
+			Your selection of bookmarks were saved succesfully to project &quot;{this.state.activeProject.name}&quot;
         </FlexModal>
     );
 
 
-    renderShowSavedQueryMsg = () => (
+    renderSavedQueryModal = () => (
         <FlexModal
             elementId="query-saved__modal"
-            stateVariable="showSavedQueryMsg"
+            stateVariable="savedQueryModal"
             owner={this}
             size="large"
             title="Query saved successfully">
-            <div>
-            	The query was saved successfully to {this.state.activeProject.name}
-            </div>
+            Your query ({this.state.lastQuerySaved}) was saved successfully to project &quot;{this.state.activeProject.name}&quot;
         </FlexModal>
     );
 
@@ -792,7 +788,7 @@ class SingleSearchRecipe extends React.Component {
 		return (
 			<div>{collectionBtn}&nbsp;{projectBtn}</div>
 		)
-	}
+	};
 
 
 	/* --------------------------- RENDER RESULT LIST ----------------------------*/
@@ -852,7 +848,7 @@ class SingleSearchRecipe extends React.Component {
                 {tableFooter}
             </div>
         )
-	}
+	};
 
 	/* --------------------------- RENDERING LISTS -------------------------------*/
 
@@ -1074,7 +1070,7 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
-        const showSavedQueryMsg = this.state.showSavedQueryMsg ? this.renderShowSavedQueryMsg() : null;
+        const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;
         const savedBookmarkModal = this.state.savedBookmarkModal ? this.renderSavedBookmarkModal() : null;
 
         const selectionButtons = this.renderSelectionButtons(
@@ -1108,7 +1104,7 @@ class SingleSearchRecipe extends React.Component {
 				{queryModal}
 				{bookmarkModal}
 				{quickViewModal}
-                {showSavedQueryMsg}
+                {savedQueryModal}
                 {savedBookmarkModal}
 			</div>
 		);

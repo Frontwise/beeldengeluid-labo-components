@@ -13,7 +13,7 @@ class QueryEditor extends React.PureComponent {
 		this.state = {
             errorMessage: false
 		};
-		this.CLASS_PREFIX = 'qed'
+		this.CLASS_PREFIX = 'qed';
 	}
 
     //communicate the result back to the owning component
