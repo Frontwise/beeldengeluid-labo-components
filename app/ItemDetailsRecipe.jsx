@@ -223,7 +223,6 @@ class ItemDetailsRecipe extends React.Component {
 				annotationTarget : null,
 				found : false
 			});
-			console.debug('this item does not exist');
 		}
 	}
 
@@ -561,7 +560,6 @@ class ItemDetailsRecipe extends React.Component {
 
 
 	checkMediaObjectIsSelected(mediaObject) {
-		//console.debug(mediaObject, this.props.params.assetId)
 		if(mediaObject.assetId === this.props.params.assetId) {
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
@@ -878,7 +876,6 @@ class ItemDetailsRecipe extends React.Component {
         if(userLastQuery && userLastQuery.id) {
             FlexRouter.gotoSingleSearch('cache');
         }
-        console.debug('There is no cached query');
         return false;
     }
 
