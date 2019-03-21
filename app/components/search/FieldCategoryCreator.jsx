@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 
 import PropTypes from 'prop-types';
 
@@ -7,6 +8,13 @@ class FieldCategoryCreator extends React.PureComponent {
 
 	constructor(props) {
 		super(props);
+        this.state = {
+            filteredCategories :
+                ComponentUtil.getSafe(
+                    () => this.props.collectionConfig.getCollectionStats().collection_statistics.document_types[0].fields.text,
+                    []
+                )
+        }
 	}
 
 	onOutput() {
@@ -28,16 +36,38 @@ class FieldCategoryCreator extends React.PureComponent {
 		}
 	}
 
+    filterFields = (arr, str) => arr.filter(item => item.toLowerCase().includes(str.toLowerCase()));
+
+    onKeywordFilter = (e) => {
+        const stats = this.props.collectionConfig.getCollectionStats();
+        const newCategorySet = this.filterFields(stats.collection_statistics.document_types[0].fields.text, e.target.value);
+
+        this.setState({
+            filteredCategories: newCategorySet
+        })
+    };
+
 	render() {
-		const stats = this.props.collectionConfig.getCollectionStats();
-		const options = stats.collection_statistics.document_types[0].fields.text.sort().map((field, index) => {
-			return (
-				<option id={index} value={field}>{this.props.collectionConfig.toPrettyFieldName(field)}</option>
-			)
-		});
+        const sortedCategories = this.state.filteredCategories.map(
+            field => (
+                {'value': field, 'prettyName': this.props.collectionConfig.toPrettyFieldName(field)})
+        );
+        sortedCategories.sort((a,b) => (a.prettyName > b.prettyName) ? 1 : -1);
+        const options = sortedCategories.map((field, index) =>
+				<option id={index} value={field.value}>{field.prettyName}</option>
+        );
+
 		return (
 			<div className={IDUtil.cssClassName('field-category-creator')}>
 					<label htmlFor="field_selector">Select one or more fields to include</label>
+                    <div className="input-group">
+                        <input type="text"
+                               className="form-control"
+                               placeholder="Search fields"
+                               onChange={this.onKeywordFilter}
+                        />
+                        <span className="input-group-addon btn-effect"><i className="fa fa-search"/></span>
+                    </div>
 					<select className="form-control" multiple id="field_selector">
 						{options}
 					</select>

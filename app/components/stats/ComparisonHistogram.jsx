@@ -61,8 +61,10 @@ export default class ComparisonHistogram extends React.Component {
         dataSet.forEach(k => {
             let tempDataSet = k.aggregations[k.query.dateRange.field];
             tempDataSet.forEach(point => {
-                point[`${k.query.id}`] = point.doc_count;
-                point['date'] = new Date(point.date_millis).getFullYear();
+                if(point) {
+                    point[`${k.query.id}`] = point.doc_count;
+                    point['date'] = new Date(point.date_millis).getFullYear();
+                }
             });
            if(returnedType === 'arr') {
                dataArr.push(tempDataSet)

@@ -1,4 +1,5 @@
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import {LineChart, Label, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 import SearchAPI from '../../api/SearchAPI';
 import ElasticsearchDataUtil from "../../util/ElasticsearchDataUtil";
@@ -227,7 +228,7 @@ class QueryComparisonLineChart extends React.Component {
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}
                             />
                         </XAxis>
-                        <YAxis width={100} >
+                        <YAxis width={100} tickFormatter={ComponentUtil.formatNumber}>
                             <Label
                                 value="Number of records"
                                 offset={10}

@@ -601,7 +601,7 @@ class QueryBuilder extends React.Component {
 												type="text"
 												id="search_term"
 												className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
-												placeholder="Search"
+												placeholder='Search (see "how-tos" in the help "?" button)'
 												onKeyPress={
 													this.searchFormKeyPressed.bind(this)
 												}

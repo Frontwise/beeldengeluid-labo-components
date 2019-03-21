@@ -1,30 +1,33 @@
 import PropTypes from "prop-types";
 
 import IDUtil from '../../../util/IDUtil';
+import ComponentUtil from '../../../util/ComponentUtil';
 
 export default class CustomTooltip extends React.Component{
 
-    getStyle = (p) => {
-        return {
-            color: p.color,
-            display: 'block',
-            right: '0',
-            margin: '0',
-            padding: '0',
-        }
-    }
+    getStyle = (p) => ({
+        color: p.color,
+        display: 'flex',
+        right: '0',
+        margin: '0',
+        padding: '0',
+    });
 
     render() {
-        const {active} = this.props;
-        if (active) {
+        if (this.props) {
             const {payload, label} = this.props;
             if(payload && label) {
                 if (this.props.viewMode === 'relative') {
                     const labelPercentage = payload.length > 1 ? 'Percentages' : 'Percentage';
                     const valueLabel = payload.length > 1 ? 'Values' : 'Value';
-                    const point = payload.map(
-                        (p, index) => <span style={this.getStyle(p)}>Query#{index+1} {p.value ? p.value.toFixed(2) : 0}%</span>
-                    );
+                    const point = payload.map((p, index) => {
+                        return (
+                            <span style={this.getStyle(p)}>
+                                <span>Query#{index+1}</span>
+                                <span>{p.value ? ComponentUtil.formatNumber(parseFloat(p.value.toFixed(2))) : 0}%</span>
+                            </span>
+                        )
+                    });
 
                     return (
                         <div className={IDUtil.cssClassName('custom-tooltip')}>
@@ -36,11 +39,12 @@ export default class CustomTooltip extends React.Component{
                 } else {
                     const point = payload.map((p,index) => {
                         return (
-                            <span style={this.getStyle(p)}>
-                                Query#{this.props.colorIndexes[index]+1} {p.value ? p.value : 0}
+                            <span className="bg__tooltip-spaceBetween" style={this.getStyle(p)}>
+                                <span>Query#{this.props.colorIndexes[index]+1}</span>
+                                <span className="bg__tooltip-spaceBetween">{p.value ? ComponentUtil.formatNumber(p.value) : 0}</span>
                             </span>
                         )
-                    })
+                    });
                     const labelTotals = payload.length > 1 ? 'Totals' : 'Total';
                     const valueLabel = payload.length > 1 ? 'Values' : 'Value';
 
