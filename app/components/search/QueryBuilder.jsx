@@ -323,7 +323,6 @@ class QueryBuilder extends React.Component {
 
     render() {
         if (this.props.collectionConfig && this.state.query) {
-            let heading = null;
             let searchIcon = null;
             let layerOptions = null;
             let resultBlock = null;
@@ -599,69 +598,58 @@ class QueryBuilder extends React.Component {
 			//render the stuff on screen
 			return (
 				<div className={IDUtil.cssClassName('query-builder')}>
-					{heading}
-					<div className="separator"/>
-					<div className="row">
-						<div className="col-md-12">
-							<form className="form-horizontal" onSubmit={this.blockSearch.bind(this)}>
-								<div className="form-group">
+					<form onSubmit={this.blockSearch.bind(this)}>
+						<div className={IDUtil.cssClassName('query-row', this.CLASS_PREFIX)}>
 
-									{/* Search keywords input */}
-									<div className="col-sm-5">
-										<div className="input-group">
-											<input
-												type="text"
-												id="search_term"
-												className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
-												placeholder='Search'
-												onKeyPress={
-													this.searchFormKeyPressed.bind(this)
-												}
-												defaultValue={
-													typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''
-												}
-												ref={
-													input => (this.setSearchTerm = input)
-												}
-											/>
-											<span className="input-group-addon btn-effect" onClick={this.newSearch.bind(this)}>
-												{searchIcon}
-											</span>
-										</div>
-									</div>
+							{/* Search keywords input */}
+							<div className={IDUtil.cssClassName('search-holder', this.CLASS_PREFIX)}>
+								<input
+									type="text"
+									id="search_term"
+									className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
+									placeholder='Search'
+									onKeyPress={
+										this.searchFormKeyPressed.bind(this)
+									}
+									defaultValue={
+										typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''
+									}
+									ref={
+										input => (this.setSearchTerm = input)
+									}
+								/>
+								<span onClick={this.newSearch.bind(this)}>
+									{searchIcon}
+								</span>
+							</div>
 
 
-									{/* Metadata field selector */}
-									<div className={classNames("col-sm-6",IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX))}>
-										<div className={IDUtil.cssClassName('in-label', this.CLASS_PREFIX)}>in</div>
-										{fieldCategorySelector}
-										<div className={IDUtil.cssClassName('arrow-label', this.CLASS_PREFIX)}>{queryResultCount && "►"}</div>
-									</div>
+							{/* Metadata field selector */}
+							<div className={IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX)}>
+								<div className={IDUtil.cssClassName('in-label', this.CLASS_PREFIX)}>in</div>
+								{fieldCategorySelector}
+								<div className={IDUtil.cssClassName('arrow-label', this.CLASS_PREFIX)}>{queryResultCount && "►"}</div>
+							</div>
 
-									{/* Result count */}
-									<div className="col-sm-1">
-										{queryResultCount}
-										{/* WTODO: Add back: 
-										<a onClick={this.clearSearch.bind(this)}>
-											Clear&nbsp;<span data-for={'__clear-search-tt'}
-			                                  data-tip="Clear all query parameters, but keeps the collection selected"
-			                                  data-html={false}>
-			                                  	<i className="fa fa-info-circle"/>
-											</span>
-										</a>
-										<ReactTooltip id={'__clear-search-tt'}/> */}
-									</div>
-
-								</div>
-							</form>
-
+							{/* Result count */}
+							<div >
+								{queryResultCount}
+								{/* WTODO: Add back: 
+								<a onClick={this.clearSearch.bind(this)}>
+									Clear&nbsp;<span data-for={'__clear-search-tt'}
+	                                  data-tip="Clear all query parameters, but keeps the collection selected"
+	                                  data-html={false}>
+	                                  	<i className="fa fa-info-circle"/>
+									</span>
+								</a>
+								<ReactTooltip id={'__clear-search-tt'}/> */}
+							</div>
 						</div>
-					</div>
+					</form>
 
 					{tutorial}
 
 					{layerOptions}
-					<div className="separator"/>
 					{resultBlock}
 				</div>
 			)

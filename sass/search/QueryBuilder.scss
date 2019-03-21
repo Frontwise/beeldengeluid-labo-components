@@ -1,4 +1,8 @@
 .bg__query-builder {
+	.separator {
+	    height: 1em;
+	}
+
 	.bg__qb__search-layers {
 	}
 
@@ -15,6 +19,10 @@
 		}
 	}
 
+	.bg__qb__query-row{
+		display: flex;
+	}
+
 	.bg__qb__graph > button {
 		float: right;
 		position: relative;
@@ -24,12 +32,6 @@
 	}
 	.bg__clear-query-btn {
 		margin-left: 12px;
-	}
-
-	.input-group-addon.btn-effect {
-		background-color: $clPrimary;
-		color: white;
-		border-radius: 0 5px 5px 0;
 	}
 
 	.bg__qb__input-search {
@@ -48,19 +50,36 @@
 		font-family: $fontHeading;
 	}
 
-	.bg__qb__selector-holder {
+	.bg__qb__search-holder {
 		display: flex;
+		margin-right: 10px;
+		& > span{
+			background-color: $clPrimary;
+			color: white;
+			border-radius: 0 5px 5px 0;
+			display: inline-block;
+			width: 50px;
+			height:34px;
+			text-align: center;
+			line-height: 34px;
+			& > i, &>span{
+				line-height: 34px;
+			}
+		}
+	}
 
+	.bg__qb__selector-holder {
+		flex-grow: 1;
+		display: flex;
+		margin-right: 10px;
 		.bg__qb__in-label {
 			margin-right: 10px;
 			line-height: 35px;
-			margin-left: -15px;
 		}
 
 		.bg__qb__arrow-label {
 			margin-left: 10px;
 			line-height: 35px;
-			margin-right: -25px;
 			font-size: 0.8em;
 		}
 
