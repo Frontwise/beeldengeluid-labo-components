@@ -69,14 +69,41 @@
 		}
 	}
 
+	.bg__qb__tutorial{
+		margin-top: 15px;
+		margin-bottom: 10px;
+		border-radius: 5px;
+		border: 1px solid mix(white, $clPrimary, 70%);
+		background-color: mix(white, $clPrimary, 90%);
+		padding: 10px;
+		text-align: center;
+		line-height: 25px;
+		span{
+			cursor: pointer;
+			margin-left: 10px;
+			background-color: $clPrimary;
+			display: inline-block;
+			vertical-align: top;
+			width: 25px;
+			height: 25px;
+			line-height: 24px;
+			color: white;
+			font-weight: bold;
+			font-family: $fontHeading;
+			vertical-align: center;
+			font-size: 1.3em;
+		}
+	}
+
 	.bg__qb__result-dates{
 		padding: 10px 10px;
 		border-radius: 5px;
 		border: 1px solid $clGreyTint;
 		background-color: $clGrey;
+
+		input[type=text]{
+			margin-bottom: 0;
+		}
 	}
 
-	input[type=text]{
-		margin-bottom: 0;
-	}
 }

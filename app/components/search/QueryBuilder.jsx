@@ -316,6 +316,11 @@ class QueryBuilder extends React.Component {
 	    return aggregations
     }
 
+    showHelp = () => {
+    	var event = new Event('BG__SHOW_HELP');
+    	window.dispatchEvent(event);
+    }
+
     render() {
         if (this.props.collectionConfig && this.state.query) {
             let heading = null;
@@ -357,6 +362,9 @@ class QueryBuilder extends React.Component {
 				}
 			}
 
+		    //let countsBasedOnDateRange = null;
+            const currentSearchTerm = (this.setSearchTerm && this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
+
 			//only draw this when there are search results
 			if(this.state.totalHits > 0) {
 				let dateStats = null;
@@ -368,9 +376,6 @@ class QueryBuilder extends React.Component {
 
 				let dateCounts = null;
 				let outOfRangeCount = 0;
-
-                //let countsBasedOnDateRange = null;
-                const currentSearchTerm = (this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
@@ -584,6 +589,13 @@ class QueryBuilder extends React.Component {
 				searchIcon = (<i className="fa fa-search"/>)
 			}
 
+			const tutorial = currentSearchTerm ? null : (
+				<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
+					 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+				</div>
+			);
+
+
 			//render the stuff on screen
 			return (
 				<div className={IDUtil.cssClassName('query-builder')}>
@@ -601,7 +613,7 @@ class QueryBuilder extends React.Component {
 												type="text"
 												id="search_term"
 												className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
-												placeholder='Search (see "how-tos" in the help "?" button)'
+												placeholder='Search'
 												onKeyPress={
 													this.searchFormKeyPressed.bind(this)
 												}
@@ -617,6 +629,7 @@ class QueryBuilder extends React.Component {
 											</span>
 										</div>
 									</div>
+
 
 									{/* Metadata field selector */}
 									<div className={classNames("col-sm-6",IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX))}>
@@ -644,6 +657,9 @@ class QueryBuilder extends React.Component {
 
 						</div>
 					</div>
+
+					{tutorial}
+
 					{layerOptions}
 					<div className="separator"/>
 					{resultBlock}
