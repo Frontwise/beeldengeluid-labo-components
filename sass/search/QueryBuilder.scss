@@ -54,6 +54,7 @@
 		display: flex;
 		margin-right: 10px;
 		& > span{
+			cursor: pointer;
 			background-color: $clPrimary;
 			color: white;
 			border-radius: 0 5px 5px 0;
@@ -115,10 +116,31 @@
 	}
 
 	.bg__qb__result-dates{
-		padding: 10px 10px;
 		border-radius: 5px;
 		border: 1px solid $clGreyTint;
 		background-color: $clGrey;
+
+		.bg__qb__result-dates-header{
+			display: flex;
+			line-height: 34px;
+			background-image: $iconTimeUrl;
+			background-repeat: no-repeat;
+			background-position: 10px center;
+			padding: 5px 10px 5px 40px;
+			border-bottom: 1px solid $clGreyTint;
+
+			&>div{
+				margin-right: 10px;
+			}
+
+			input{
+				background-color: white;
+			}
+		}
+
+		.bg__qb__result-dates-content{
+			padding: 10px 10px;
+		}
 
 		input[type=text]{
 			margin-bottom: 0;

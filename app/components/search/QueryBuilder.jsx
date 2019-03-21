@@ -550,14 +550,14 @@ class QueryBuilder extends React.Component {
                 resultBlock = (
                     <div>
                     	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
-	                        {dateRangeSelector}
-	                        <div className="row">
-	                            <div className="col-md-12">
-	                                {dateRangeCrumb}
-	                        		{resultStats}
-	                                {graph}
-	                            </div>
+                    		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
+	                        	<div>Time analysis:</div>{dateRangeSelector}
 	                        </div>
+	                        {(dateRangeCrumb || resultStats || graph) && <div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
+	                            {dateRangeCrumb}
+	                     		{resultStats}
+	                            {graph}
+	                        </div>}
                         </div>
                         <div className="separator"/>
                         {aggregationBox}

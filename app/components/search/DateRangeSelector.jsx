@@ -33,6 +33,7 @@ class DateRangeSelector extends React.Component {
             currentDateField: dateFields && dateFields.length > 0 ? dateFields[0] : null,
             slider: null
         };
+        this.CLASS_PREFIX = 'drs';
     }
 
     //only update on a new search
@@ -147,21 +148,19 @@ class DateRangeSelector extends React.Component {
 
         return (
             <div id={'__dps__' + IDUtil.hashCode(this.props.queryId)} className="datePickerSelector">
-                <div className={IDUtil.cssClassName('date-range-select')}>
-                    <div className="row">
-                        <div className="col-md-5">
-                            {dateFieldSelect}
-                        </div>
-                        <div className="col-md-7">
-                            {this.props.dateRange !== null && (
-                            <DatePickerSelector
-                                disabled={this.props.dateRange == null}
-                                minDate={this.getMinDate()}
-                                maxDate={this.getMaxDate()}
-                                dateRange={this.props.dateRange}
-                                onOutput={this.onComponentOutput.bind(this)}
-                            />)}
-                        </div>
+                <div className={IDUtil.cssClassName('date-range-select', this.CLASS_PREFIX)}>
+                    <div>
+                        {dateFieldSelect}
+                    </div>
+                    <div>
+                        {this.props.dateRange !== null && (
+                        <DatePickerSelector
+                            disabled={this.props.dateRange == null}
+                            minDate={this.getMinDate()}
+                            maxDate={this.getMaxDate()}
+                            dateRange={this.props.dateRange}
+                            onOutput={this.onComponentOutput.bind(this)}
+                        />)}
                     </div>
                 </div>
             </div>
