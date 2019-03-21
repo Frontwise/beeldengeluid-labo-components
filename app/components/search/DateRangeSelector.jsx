@@ -153,13 +153,14 @@ class DateRangeSelector extends React.Component {
                             {dateFieldSelect}
                         </div>
                         <div className="col-md-7">
+                            {this.props.dateRange !== null && (
                             <DatePickerSelector
                                 disabled={this.props.dateRange == null}
                                 minDate={this.getMinDate()}
                                 maxDate={this.getMaxDate()}
                                 dateRange={this.props.dateRange}
                                 onOutput={this.onComponentOutput.bind(this)}
-                            />
+                            />)}
                         </div>
                     </div>
                 </div>

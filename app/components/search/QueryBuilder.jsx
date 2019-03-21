@@ -546,12 +546,11 @@ class QueryBuilder extends React.Component {
                 resultBlock = (
                     <div>
                     	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
-	                        {resultStats}
-	                        <div className="separator"/>
-	                        {dateRangeCrumb}
+	                        {dateRangeSelector}
 	                        <div className="row">
 	                            <div className="col-md-12">
-	                                {dateRangeSelector}
+	                                {dateRangeCrumb}
+	                        		{resultStats}
 	                                {graph}
 	                            </div>
 	                        </div>
