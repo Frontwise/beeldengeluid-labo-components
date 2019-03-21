@@ -41,6 +41,7 @@ class SingleSearchRecipe extends React.Component {
 			showProjectModal : false, //for the project selector
 			showBookmarkModal : false, //for the bookmark group selector
 			showQuickViewModal : false, //for the quickview result preview
+            savedBookmarkModal: false,
 
 			showSelectionOverview : false, //show the selected items, instead of the search results
 
@@ -55,7 +56,7 @@ class SingleSearchRecipe extends React.Component {
 			collectionConfig : null, //loaded after mounting, without it nothing works
 			currentOutput: null, //contains the current search results
 			initialQuery : null, //yikes this is only used for storing the initial query
-
+            lastQuerySaved : null,
 			selectedOnPage : {}, // key = resourceId, value = true/false
 			allRowsSelected : false // are all search results selected
 		};
@@ -274,11 +275,16 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onQuerySaved = (project) => {
-		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
-		});
-	}
+	onQuerySaved = (data) => {
+        ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
+			ComponentUtil.storeJSONInLocalStorage('activeProject', data.project);
+        });
+
+        this.setState({
+            savedQueryModal : true,
+            lastQuerySaved : data.queryName
+        });
+    };
 
 	/* ------------------------------- SEARCH RELATED FUNCTIONS ----------------------- */
 
@@ -516,12 +522,12 @@ class SingleSearchRecipe extends React.Component {
 		this.setState({
 			selectedOnPage : {},
 			allRowsSelected : false,
-            showSelectionOverview : false
+            showSelectionOverview : false,
+            savedBookmarkModal: true
 		}, () => {
-			alert('Bookmarks were saved successfully');
             ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
 		})
-	}
+	};
 
 	/* ------------------------------- QUERY SAVING RELATED FUNCTIONS ----------------------- */
 
@@ -701,13 +707,14 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	renderQueryModal = (currentOutput, activeProject) => {
+        const projectTitle = `Save query to project: ${activeProject.name}`;
 		return (
 			<FlexModal
 				elementId="query__modal"
 				stateVariable="showQueryModal"
 				owner={this}
 				size="large"
-				title="Enter a name for your query">
+				title={projectTitle}>
 					<QueryEditor
 						query={currentOutput.query}
 						user={this.props.user}
@@ -715,7 +722,7 @@ class SingleSearchRecipe extends React.Component {
 						onOutput={this.onComponentOutput}/>
 			</FlexModal>
 		)
-	}
+	};
 
 	renderBookmarkModal = (collectionConfig, activeProject) => {
 		return (
@@ -734,6 +741,29 @@ class SingleSearchRecipe extends React.Component {
 			</FlexModal>
 		)
 	}
+
+    renderSavedBookmarkModal = () => (
+        <FlexModal
+            elementId="saved-bookmark__modal"
+            stateVariable="savedBookmarkModal"
+            owner={this}
+            size="large"
+            title="Bookmarks saved successfully">
+			Your selection of bookmarks were saved succesfully to project &quot;{this.state.activeProject.name}&quot;
+        </FlexModal>
+    );
+
+
+    renderSavedQueryModal = () => (
+        <FlexModal
+            elementId="query-saved__modal"
+            stateVariable="savedQueryModal"
+            owner={this}
+            size="large"
+            title="Query saved successfully">
+            Your query ({this.state.lastQuerySaved}) was saved successfully to project &quot;{this.state.activeProject.name}&quot;
+        </FlexModal>
+    );
 
 	/* --------------------------- RENDER SELECTION BUTTONS --------------------- */
 
@@ -758,7 +788,7 @@ class SingleSearchRecipe extends React.Component {
 		return (
 			<div>{collectionBtn}&nbsp;{projectBtn}</div>
 		)
-	}
+	};
 
 
 	/* --------------------------- RENDER RESULT LIST ----------------------------*/
@@ -818,7 +848,7 @@ class SingleSearchRecipe extends React.Component {
                 {tableFooter}
             </div>
         )
-	}
+	};
 
 	/* --------------------------- RENDERING LISTS -------------------------------*/
 
@@ -1040,6 +1070,9 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
+        const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;
+        const savedBookmarkModal = this.state.savedBookmarkModal ? this.renderSavedBookmarkModal() : null;
+
         const selectionButtons = this.renderSelectionButtons(
         	this.state.activeProject,
         	this.state.collectionConfig,
@@ -1071,6 +1104,8 @@ class SingleSearchRecipe extends React.Component {
 				{queryModal}
 				{bookmarkModal}
 				{quickViewModal}
+                {savedQueryModal}
+                {savedBookmarkModal}
 			</div>
 		);
 	}

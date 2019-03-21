@@ -1,8 +1,23 @@
+$font-size: 20px;
+$padding-bottom: 12px;
+$font-weight: bold;
+
 .bg__query-editor {
-	.bg__qed__table {
-		padding: 15px;
-	}
-	.form-group {
-		padding: 0 15px;
-	}
+  .bg__qed__table {
+    padding: 15px;
+  }
+
+  .form-group {
+    padding: 0 15px;
+  }
+
+  .bg__qed__query-params {
+    padding-left: 24px;
+  }
+
+  .bg__validation-failed {
+    color: crimson;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
 }

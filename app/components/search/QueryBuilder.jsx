@@ -629,7 +629,7 @@ class QueryBuilder extends React.Component {
 												type="text"
 												id="search_term"
 												className="form-control"
-												placeholder="Search"
+												placeholder='Search (see "how-tos" in the help "?" button)'
 												onKeyPress={
 													this.searchFormKeyPressed.bind(this)
 												}

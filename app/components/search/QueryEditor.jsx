@@ -1,6 +1,7 @@
 import ProjectAPI from '../../api/ProjectAPI';
 import IDUtil from '../../util/IDUtil';
-
+import MessageHelper from "../helpers/MessageHelper";
+import FlexBox from '../FlexBox';
 import ProjectQueriesTable from '../workspace/projects/query/ProjectQueriesTable';
 
 import PropTypes from 'prop-types';
@@ -10,27 +11,31 @@ class QueryEditor extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
-			project : null
+            errorMessage: false
 		};
-		this.CLASS_PREFIX = 'qed'
+		this.CLASS_PREFIX = 'qed';
 	}
 
-	componentDidMount() {
-		this.loadData();
-	}
+    //communicate the result back to the owning component
+    onOutput(data) {
+        if(this.props.onOutput) {
+            this.props.onOutput(this.constructor.name, data);
+        }
+    }
 
-	loadData() {
-		ProjectAPI.get(this.props.user.id, this.props.project.id, (p) => {
-			this.setState({
-				project : p
-			})
-		})
-	}
-
-	save(e) {
+	save = e => {
 		e.preventDefault();
-		if(this.state.project && this.props.query) {
-			const project = this.state.project;
+
+		// require query name value
+        if(!this.queryName.value){
+            this.setState({
+                errorMessage: true
+            });
+            return;
+        }
+
+		if(this.props.query) {
+            const project = this.props.project;
 			let query = this.props.query;
 			query.id = IDUtil.guid(); //always assign a new ID, since this component only supports saving new queries
 			project.queries.push({
@@ -41,7 +46,7 @@ class QueryEditor extends React.PureComponent {
 			 // store project
             ProjectAPI.save(this.props.user.id, project, resp => {
                 if (resp) {
-                	this.onOutput(project);
+                	this.onOutput({project, queryName: this.queryName.value});
                 } else {
                     alert('An error occured while saving this project');
                     this.onOutput(null);
@@ -50,52 +55,68 @@ class QueryEditor extends React.PureComponent {
 		} else { //this should never happen though
 			this.onOutput(null);
 		}
-	}
+	};
 
-	//communicate the result back to the owning component
-	onOutput(data) {
-		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, data);
-		}
-	}
+    renderValidationFailed = () => {
+        return (
+            <div className={IDUtil.cssClassName('validation-failed')}>
+               * Name field is required. <br/> Please name the query before saving it.
+            </div>
+        );
+    };
+
+    renderForm = errorMessage => {
+        const validationFailed = errorMessage ? this.renderValidationFailed() : null;
+        return (
+            <form className="form-horizontal" onSubmit={this.save}>
+                <div className="form-group">
+                    <div className="tab-content">
+                        <div>
+                            <h4>
+                                Query Details
+                            </h4>
+                            <div className={IDUtil.cssClassName('query-params', this.CLASS_PREFIX)}>
+                                {MessageHelper.__renderQuery(this.props.query)}
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <h4>Name</h4>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="queryName"
+                        ref={input => (this.queryName = input)}
+                        placeholder="Name your query"/>
+                    </div>
+                    {validationFailed}
+                    <button type="submit" className="btn btn-default">Save</button>
+            </form>
+        );
+    };
+
+    renderQueryTable = (project, user) => {
+        if(project.queries.length === 0) return null;
+
+        return (
+            <FlexBox isVisible={false} title={'Other queries saved in: ' + project.name}>
+                <div className={[
+                    IDUtil.cssClassName('no-bootstrap-custom-styling'),
+                    IDUtil.cssClassName('table', this.CLASS_PREFIX)].join(' ')
+                }>
+                    <ProjectQueriesTable project={project} user={user}/>
+                </div>
+            </FlexBox>
+        );
+    };
 
 	render() {
-		let formOrMessage = null;
-		let queryTable = null;
-		if(this.state.project) {
-			formOrMessage = (
-				<div className="row">
-                    <div className="col-md-12">
-                        <form className="form-horizontal" onSubmit={this.save.bind(this)}>
-                            <div className="form-group">
-    							<label htmlFor="queryName">Name</label>
-    							<input
-    								type="text"
-    								className="form-control"
-    								id="queryName"
-                                    ref={input => (this.queryName = input)}
-    								placeholder="Name your query"/>
-  							</div>
-  							<button type="submit" className="btn btn-default">Save</button>
-                        </form>
-                    </div>
-                </div>
-			);
-			queryTable = (
-				<div className="row">
-	                <div className={[
-	                	IDUtil.cssClassName('no-bootstrap-custom-styling'),
-						IDUtil.cssClassName('table', this.CLASS_PREFIX)].join(' ')}>
-	                    <ProjectQueriesTable project={this.state.project} user={this.props.user}/>
-					</div>
-				</div>
-			)
-		} else {
-			formOrMessage = <h4>Loading project queries...</h4>
-		}
+		const form = this.renderForm(this.state.errorMessage);
+		const queryTable = this.renderQueryTable(this.props.project, this.props.user);
+
 		return (
 			<div className={IDUtil.cssClassName('query-editor')}>
-				{formOrMessage}
+				{form}
 				{queryTable}
 			</div>
 		)
