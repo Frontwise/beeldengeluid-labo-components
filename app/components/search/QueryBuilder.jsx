@@ -590,7 +590,7 @@ class QueryBuilder extends React.Component {
                 //draw the result block
                 resultBlock = (
                     <div>
-                    	{ (this.props.dateRangeSelector && this.state.searchId != null) && (
+                    	{ (this.props.dateRangeSelector && this.state.searchId != null && !(!this.state.query.dateRange && this.state.totalHits === 0)) && (
 	                    	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
 		                    		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
 
