@@ -1,8 +1,14 @@
 .bg__aggregation-list {
 
 	.bg__agl__tab-new {
-		list-style: none;
 		margin-bottom: 1rem;
+		& > button{
+			background-color: $clGrey;
+			transition: background-color $transition;
+			&:hover{
+				background-color: mix($clGrey, $clGreyTint);
+			}
+		}
 	}
 
 	.bg__agl__selected-facets {

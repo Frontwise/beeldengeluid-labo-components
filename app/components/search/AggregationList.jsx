@@ -471,15 +471,22 @@ class AggregationList extends React.Component {
             <div className={IDUtil.cssClassName('aggregation-list checkboxes')}>
                 {aggregationCreatorModal}
                 {aggregationModalWarning}
-                <li key={'new__tab'} className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
-                    <a href="javascript:void(0);" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
+
+                {/* Create new facet */}
+                <div className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
+                    <button className="btn"
+                            onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
                         <i className="fa fa-plus"/> Add a new facet
-                    </a>
-                </li>
+                    </button>
+                </div>
+
+                {/* Selected/active facets */}
                 <div className={IDUtil.cssClassName('selected-facets', this.CLASS_PREFIX)}>
                     {selectedFacets}
                     {emptyAggrBlocks}
                 </div>
+
+                {/* Facet list */}
                 {aggregationBlocks}
             </div>
         );
