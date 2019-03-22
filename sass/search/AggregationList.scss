@@ -11,18 +11,39 @@
 		}
 	}
 
+	.bg__agl__count{
+		background-color: $clGrey;
+		font-size: 1.0em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 8px;
+		min-width: 20px;
+		vertical-align: middle;
+		font-family: $fontHeading;
+		float:right;
+	}
+
 	.bg__agl__selected-facets {
+		margin-bottom: 10px;
+
 		.bg__agl__selected-item {
-			border: 1px solid #f3f3f3;
-			border-radius: 6px;
-			box-shadow: 0 5px 3px -5px black;
+			border: 1px solid $clGreyTint;
+			border-radius: 3px;
+			box-shadow: 0 1px 5px rgba(black, 0.1);
 			margin-bottom: 3px;
-			padding: 6px 5px 6px 1rem;
+			padding: 6px 2px 6px 1rem;
 
 			.fa-remove {
 				cursor: pointer;
 				float: right;
-				padding-top: 2px;
+				padding: 4px 5px;
+				&:hover{
+					opacity: 0.8;
+				}
+			}
+			.bg__agl__count{
+				margin-right: 2px;
+				margin-top: -2px;
 			}
 		}
 	}

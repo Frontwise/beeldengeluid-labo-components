@@ -459,8 +459,9 @@ class AggregationList extends React.Component {
                 }
                 selectedFacets.push(
                     <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                        {title.toUpperCase()} ({count})
+                        {title.toUpperCase()}
                         <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, curAggr.field, f.key)}/>
+                         <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{count}</span>
                     </div>
                 )
             });
