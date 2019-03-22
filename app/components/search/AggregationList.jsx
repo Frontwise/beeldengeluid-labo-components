@@ -319,7 +319,7 @@ class AggregationList extends React.Component {
                         checked={this.props.desiredFacets[aggr.index]['exclude']}
                         onChange={this.toggleExcludeFacets.bind(this, aggr.index)}
                     />
-                    &nbsp;Exclude selection
+                    &nbsp;<label htmlFor={aggr.field}>Exclude selection</label>
                 </div>
                 <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
                     {this.renderSortButton(aggr, 'numeric')}

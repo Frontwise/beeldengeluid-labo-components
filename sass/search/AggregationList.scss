@@ -205,7 +205,7 @@
 			display: block;
 			padding: 5px;
 			&:hover {
-				color: red;
+				color: $clPrimary;
 			}
 
 			.switchViewText {
@@ -221,29 +221,30 @@
 
 	// hamburger menu
 	.bg__agl__hamburger-menu {
-		background-color: #468dcb;
-		border-radius: 3px 3px 0 0;
+		background-color: $clPrimary;
+		border-radius: 2px 2px 0 0;
 		position: relative;
 
 		.hb {
 			cursor: pointer;
-			height: 25px;
-			padding: 4px 0 26px 10px;
+			height: 36px;
+			padding: 10px 0 8px 8px;
 			position: relative;
 		}
+
 		.hb-line {
 			background-color: #fff;
 			border-radius: 10px;
 			height: 3px;
 			position: absolute;
-			width: 18px;
+			width: 16px;
 		}
 		.hb-line-top {
-			top: 6px;
+			top: 10px;
 		}
 		.hb-line-center {
 			position: absolute;
-			top: 12px;
+			top: 16px;
 		}
 		.hb-line-center::after {
 			background-color: #fff;
@@ -252,8 +253,9 @@
 			height: 3px;
 			position: absolute;
 			top: 6px;
-			width: 18px;
+			width: 16px;
 		}
+
 		.hamburger-toggle,
 		ul {
 			display: none;
@@ -264,15 +266,21 @@
 			display: flex;
 			width: 100%;
 		}
+
 		.bg__agl__sort-exclude-wrapper {
 			display: flex;
 			color: #fff;
 			padding: 5px;
 
 			.bg__agl__exclude-btn {
+				cursor: pointer;
 				flex-grow: 8;
-				input {
-					margin: 0px 2px 0px 6px;
+				& > input {
+					margin: 0px 2px 2px 6px;
+					vertical-align: middle;
+				}
+				& > label{
+					font-weight: normal;
 				}
 			}
 			.bg__agl__sort-btn-wrapper {
@@ -281,9 +289,15 @@
 				flex-direction: row-reverse;
 				.bg__agl__sort-btn {
 					cursor: pointer;
-					margin-left: 10px;
-					color: #ccc;
+					color: mix(white, $clPrimary, 50%);
+					padding: 3px 5px;
 					.bg__agl__sort-active {
+						color: white;
+						&:hover{
+							opacity: 0.7;
+						}
+					}
+					&:hover{
 						color: white;
 					}
 				}
@@ -302,7 +316,7 @@
 			font-size: 18px;
 			position: absolute;
 			right: 0;
-			top: 5px;
+			top: 8px;
 			z-index: 12;
 		}
 		span {
@@ -311,13 +325,13 @@
 				font-size: 16px;
 				font-family: $fontHeading;
 				text-transform: uppercase;
-				left: 10%;
+				left: 20px;
 				overflow: hidden;
 				position: absolute;
 				text-overflow: ellipsis;
-				top: 4px;
+				top: 6px;
 				white-space: nowrap;
-				max-width: 76%;
+				max-width: calc(100% - 70px);
 				z-index: 10;
 				font-weight: normal;
 
