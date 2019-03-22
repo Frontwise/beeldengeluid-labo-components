@@ -27,7 +27,6 @@
 		float: right;
 		position: relative;
 		right: 12px;
-		top: 12px;
 		z-index: 10;
 	}
 	.bg__clear-query-btn {
@@ -135,7 +134,7 @@
 				line-height: 34px;
 				padding: 8px 10px 0px 10px;
 				display: flex;
-				margin-bottom: 20px;
+				margin-bottom: 15px;
 
 				input {
 					background-color: $clGrey;
