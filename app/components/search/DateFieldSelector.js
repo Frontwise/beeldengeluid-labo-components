@@ -47,8 +47,8 @@ class DateFieldSelector extends React.Component {
         if(e.target.value != 'null_option') {
             data = {
                 field: e.target.value,
-                start: null,
-                end: null
+                start: null, // reset start/end dates
+                end: null,
             }
         }
         this.onOutput(data);
@@ -83,7 +83,7 @@ class DateFieldSelector extends React.Component {
             });
 
             options = options.sort(this.sortDateFieldOptions);
-            options.splice(0,0, <option key={'df__default_value' } value="null_option">Select date field for analysis</option>);
+            options.splice(0,0, <option key={'df__default_value' } value="null_option">Select date field</option>);
 
             dateFieldSelect = (
                 <select className="form-control" value={selectedOption}

@@ -1023,7 +1023,7 @@ class SingleSearchRecipe extends React.Component {
 					key={collectionId} //for resetting all the states held within after selecting a new collection
 					header={true}
 					aggregationView={this.props.recipe.ingredients.aggregationView}
-					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
+					dateRangeSelector={true}
 					showTimeLine={true}
 					query={initialQuery || QueryModel.ensureQuery(null, collectionConfig) }
 					collectionConfig={collectionConfig}

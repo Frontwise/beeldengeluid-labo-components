@@ -7,6 +7,11 @@
 	}
 
 	.bg__qb__breadcrumbs {
+		padding: 10px;
+		text-align: center;
+		margin-top: -30px;
+		border-top: 1px solid $clGreyTint;
+
 		.bg__qb__crumb {
 			display: inline-block;
 			margin: 0px 5px 5px 0px;
@@ -109,35 +114,39 @@
 
 		.bg__qb__result-dates-header {
 			display: flex;
+			flex-wrap: wrap;
 			line-height: 34px;
-			// background-image: $iconTimeUrl;
-			// background-repeat: no-repeat;
-			// background-position: 10px center;
-			padding: 8px 10px 8px 7px;
 			border-bottom: 1px solid $clGreyTint;
 
-			& > div {
-				margin-right: 10px;
-			}
-			& > i {
-				display: inline-block;
-				width: 20px;
-				line-height: 34px;
-				text-align: center;
-				margin-right: 10px;
-			}
-		}
-
-		.bg__qb__result-dates-content {
-			background-color: mix($clGreyTint, $clGrey, 50%);
-			.bg__qb__date-range {
-				line-height: 34px;
-				padding: 8px 10px 0px 10px;
+			.bg__qb__date-field {
 				display: flex;
-				margin-bottom: 15px;
+				padding: 8px 0px 8px 7px;
+				& > div {
+					margin-right: 10px;
+				}
+
+				i {
+					display: inline-block;
+					width: 20px;
+					line-height: 34px;
+				}
+				& > i {
+					text-align: center;
+					margin-right: 10px;
+				}
+
+			}
+
+			.bg__qb__date-range {
+				flex-grow: 1;
+				border-left: 1px solid $clGreyTint;
+				line-height: 34px;
+				padding: 5px 10px 5px 10px;
+				display: flex;
+				margin: 3px 0;
 
 				input {
-					background-color: $clGrey;
+					background-color: white;
 				}
 
 				.bg__qb__date-range-stats {
@@ -145,8 +154,19 @@
 				}
 			}
 
+			& > button{
+				height: 28px;
+			    line-height: 16px;
+			    padding: 5px 10px;
+			    box-sizing: border-box;
+			    margin: 10px;
+			}
+		}
+
+		.bg__qb__result-dates-content {
+			background-color: mix($clGreyTint, $clGrey, 50%);
 			.bg__qb__date-graph {
-				padding: 0 10px;
+				padding: 20px 10px 0 10px;
 			}
 		}
 
