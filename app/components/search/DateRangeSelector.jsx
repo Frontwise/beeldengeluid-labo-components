@@ -136,11 +136,13 @@ class DateRangeSelector extends React.Component {
             });
 
             options = options.sort(this.sortDateFieldOptions);
-            options.splice(0,0, <option key={'df__default_value' } value="null_option">Select date field</option>);
+            options.splice(0,0, <option key={'df__default_value' } value="null_option">Select date field for analysis</option>);
 
             dateFieldSelect = (
                 <select className="form-control" value={selectedOption}
-                        onChange={this.changeDateField.bind(this)}>
+                        onChange={this.changeDateField.bind(this)}
+                        title={selectedOption == "null_option" ? '' : selectedOption}
+                        >
                     {options}
                 </select>
             )
