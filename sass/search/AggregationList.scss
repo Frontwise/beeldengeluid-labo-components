@@ -198,21 +198,28 @@
 			padding-top: 4px;
 		}
 
-		.switchView {
-			background-color: #efefef;
-			border-radius: 0 0 6px 6px;
+		.bg__agl__switch-view {
+			background-color: $clGrey;
+			border-radius: 0 0 2px 2px;
 			color: #666;
 			display: block;
-			padding: 5px;
+			border-top: 1px solid mix($clGrey, $clGreyTint, 50%);
+			padding: 5px 8px 5px 5px;
+			text-align: right;
+			cursor: pointer;
+			text-decoration: none;
 			&:hover {
 				color: $clPrimary;
+
 			}
 
-			.switchViewText {
-				font-size: 1.1rem;
+			& > .switchViewText {
+				font-family: $fontHeading;
+				font-size: 12px;
 				padding-left: 1rem;
+				text-transform: uppercase;
 			}
-			.switchIcon {
+			& > .switchIcon {
 				font-size: 1rem;
 				margin-left: 0.5rem;
 			}

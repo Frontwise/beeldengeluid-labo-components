@@ -365,7 +365,7 @@ class AggregationList extends React.Component {
             };
 
         return (
-            <a className="switchView" onClick={this.toggleShowMore.bind(this, aggr)}>
+            <a className={IDUtil.cssClassName('switch-view', this.CLASS_PREFIX)} onClick={this.toggleShowMore.bind(this, aggr)}>
                 <span className="switchViewText">{currentStatus.text}</span>
                 <span className={currentStatus.symbol} aria-hidden="true"/>
             </a>
