@@ -1,6 +1,6 @@
 .bg__query-builder {
 	.separator {
-	    height: 1em;
+		height: 1em;
 	}
 
 	.bg__qb__search-layers {
@@ -19,7 +19,7 @@
 		}
 	}
 
-	.bg__qb__query-row{
+	.bg__qb__query-row {
 		display: flex;
 	}
 
@@ -53,17 +53,18 @@
 	.bg__qb__search-holder {
 		display: flex;
 		margin-right: 10px;
-		& > span{
+		& > span {
 			cursor: pointer;
 			background-color: $clPrimary;
 			color: white;
 			border-radius: 0 5px 5px 0;
 			display: inline-block;
 			width: 50px;
-			height:34px;
+			height: 34px;
 			text-align: center;
 			line-height: 34px;
-			& > i, &>span{
+			& > i,
+			& > span {
 				line-height: 34px;
 			}
 		}
@@ -89,43 +90,69 @@
 		}
 	}
 
-	.bg__qb__result-dates{
+	.bg__qb__date-count {
+		margin: 7px 10px 0 5px;
+		background-color: $clGreyTint;
+		font-size: 1em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 8px;
+		min-width: 20px;
+		line-height: 17px;
+		vertical-align: top;
+		font-family: $fontHeading;
+	}
+
+	.bg__qb__result-dates {
 		border-radius: 5px;
 		border: 1px solid $clGreyTint;
 		background-color: $clGrey;
 
-		.bg__qb__result-dates-header{
+		.bg__qb__result-dates-header {
 			display: flex;
 			line-height: 34px;
 			// background-image: $iconTimeUrl;
 			// background-repeat: no-repeat;
 			// background-position: 10px center;
-			padding: 5px 10px 5px 5px;
+			padding: 8px 10px 8px 7px;
 			border-bottom: 1px solid $clGreyTint;
 
-			&>div{
+			& > div {
 				margin-right: 10px;
 			}
-			&>i{
+			& > i {
 				display: inline-block;
 				width: 20px;
 				line-height: 34px;
 				text-align: center;
 				margin-right: 10px;
 			}
+		}
 
-			input{
-				background-color: white;
+		.bg__qb__result-dates-content {
+			background-color: mix($clGreyTint, $clGrey, 50%);
+			.bg__qb__date-range {
+				line-height: 34px;
+				padding: 8px 10px 0px 10px;
+				display: flex;
+				margin-bottom: 20px;
+
+				input {
+					background-color: $clGrey;
+				}
+
+				.bg__qb__date-range-stats {
+					margin-left: 5px;
+				}
+			}
+
+			.bg__qb__date-graph {
+				padding: 0 10px;
 			}
 		}
 
-		.bg__qb__result-dates-content{
-			padding: 10px 10px;
-		}
-
-		input[type=text]{
+		input[type="text"] {
 			margin-bottom: 0;
 		}
 	}
-
 }

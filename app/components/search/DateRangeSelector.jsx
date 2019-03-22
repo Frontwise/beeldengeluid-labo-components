@@ -25,12 +25,7 @@ class DateRangeSelector extends React.Component {
 
     constructor(props) {
         super(props);
-        let dateFields = null;
-        if (this.props.collectionConfig) {
-            dateFields = this.props.collectionConfig.getDateFields();
-        }
         this.state = {
-            currentDateField: dateFields && dateFields.length > 0 ? dateFields[0] : null,
             slider: null
         };
         this.CLASS_PREFIX = 'drs';
@@ -39,18 +34,6 @@ class DateRangeSelector extends React.Component {
     //only update on a new search
     shouldComponentUpdate(nextProps, nextState) {
         return nextProps.searchId != this.props.searchId;
-    }
-
-    changeDateField(e) {
-        let data = null;
-        if(e.target.value != 'null_option') {
-            data = {
-                field: e.target.value,
-                start: null,
-                end: null
-            }
-        }
-        this.onOutput(data);
     }
 
     //the data looks like this => {start : '' : end : '', dateField : ''}
@@ -113,47 +96,10 @@ class DateRangeSelector extends React.Component {
         return null
     }
 
-    // Helper function to sort selection list options based on an array of objects with
-    // sorting based on props.children values.
-    sortDateFieldOptions(a,b) {
-        if(a.props.children < b.props.children) {
-          return -1;
-        }
-        if(a.props.children > b.props.children) {
-          return 1;
-        }
-        return 0;
-    }
-
   render() {
-        let dateFieldSelect = null;
-        let fieldSelected = false;
-
-        if (this.props.collectionConfig.getDateFields()) {
-            const selectedOption = this.props.dateRange ? this.props.dateRange.field : 'null_option';
-            let options = this.props.collectionConfig.getDateFields().map((df, index) => {
-                return (<option key={'df__' + index} value={df}>{this.props.collectionConfig.toPrettyFieldName(df)}</option>);
-            });
-
-            options = options.sort(this.sortDateFieldOptions);
-            options.splice(0,0, <option key={'df__default_value' } value="null_option">Select date field for analysis</option>);
-
-            dateFieldSelect = (
-                <select className="form-control" value={selectedOption}
-                        onChange={this.changeDateField.bind(this)}
-                        title={selectedOption == "null_option" ? '' : selectedOption}
-                        >
-                    {options}
-                </select>
-            )
-        }
-
         return (
             <div id={'__dps__' + IDUtil.hashCode(this.props.queryId)} className="datePickerSelector">
                 <div className={IDUtil.cssClassName('date-range-select', this.CLASS_PREFIX)}>
-                    <div>
-                        {dateFieldSelect}
-                    </div>
                     <div>
                         {this.props.dateRange !== null && (
                         <DatePickerSelector

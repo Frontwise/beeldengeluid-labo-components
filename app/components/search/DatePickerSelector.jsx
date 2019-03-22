@@ -70,7 +70,7 @@ class DatePickerSelector extends React.Component {
                     placeholderText="Start date"
                 />
                 {/* <i className="fa fa-calendar" aria-hidden="true" />*/ }
-                ►
+                to
                 <DatePicker
                     disabled={this.props.disabled}
                     selected={endDate}

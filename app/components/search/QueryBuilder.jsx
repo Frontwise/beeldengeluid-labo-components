@@ -12,6 +12,7 @@ import TimeUtil from '../../util/TimeUtil';
 
 //ui controls for assembling queries
 import FieldCategorySelector from './FieldCategorySelector';
+import DateFieldSelector from './DateFieldSelector';
 import DateRangeSelector from './DateRangeSelector';
 import AggregationList from './AggregationList';
 
@@ -361,10 +362,12 @@ class QueryBuilder extends React.Component {
 
 			//only draw this when there are search results
 			if(this.state.totalHits > 0) {
-				let dateStats = null;
+				let dateTotalStats = null;
+				let dateRangeStats = null;
 				let graph = null;
 				let aggrView = null; //either a box or list (TODO the list might not work properly anymore!)
 				let aggregationBox = null;
+				let dateFieldSelector = null;
 				let dateRangeSelector = null;
 				let dateRangeCrumb = null;
 
@@ -497,6 +500,18 @@ class QueryBuilder extends React.Component {
 					} //END OF THE date range aggregation
 
                     if (this.props.dateRangeSelector && this.props.collectionConfig.getDateFields() != null) {
+                    	//draw the date field selector
+                    	dateFieldSelector = (
+                            <DateFieldSelector
+                            	queryId={this.state.query.id} //used for the guid (is it still needed?)
+                                searchId={this.state.searchId} //for determining when the component should rerender
+                                collectionConfig={this.props.collectionConfig} //for determining available date fields & aggregations
+                                dateRange={this.state.query.dateRange} //for activating the selected date field
+                                aggregations={this.state.aggregations} //to fetch the date aggregations
+                                onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
+                            />
+                        );
+
                     	//draw the date range selector
                     	dateRangeSelector = (
                             <DateRangeSelector
@@ -511,22 +526,38 @@ class QueryBuilder extends React.Component {
 
 	                    //populate the date related stats
 			            if(dateCounts != null) {
+
+			            	// Total date stats
 			            	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
 			            	info += '<br/>making it possible that there are more dates found than the number of search results';
-			            	dateStats = (
-			            		<div>
-			            			<br/>
-			            			Total number of dates found based on the selected date field: {ComponentUtil.formatNumber(dateCounts)}&nbsp;
+
+			            	dateTotalStats = (<div><span title="Total number of dates found based on selected date field" className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}>{ComponentUtil.formatNumber(dateCounts)}</span>dates &nbsp;
 			            			<span data-for={'__qb__tt' + this.state.query.id}
 			            				data-tip={info}
 			            				data-html={true}>
 										<i className="fa fa-info-circle"/>
 									</span>
-			            			<ul>
-				            			<li>Dates within the selected date range: {ComponentUtil.formatNumber(dateCounts - outOfRangeCount)}</li>
-				            			<li>Dates outside of the selected date range: {ComponentUtil.formatNumber(outOfRangeCount)}</li>
-			            			</ul>
-			            			<ReactTooltip id={'__qb__tt' + this.state.query.id}/>
+									<ReactTooltip id={'__qb__tt' + this.state.query.id}/>
+								</div>
+							)
+
+			            	// Range stats
+			            	dateRangeStats = (
+			            		<div className={IDUtil.cssClassName('date-range-stats', this.CLASS_PREFIX)}>
+			            			<span>
+			            				Inside date range:
+			            				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
+			            				      title="Number of dates found inside selected date range">
+			            					{ComponentUtil.formatNumber(dateCounts - outOfRangeCount)}
+			            				</span>
+			            			</span>
+			            			<span>
+			            				Outside date range:
+			            				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
+			            				      title="Number of dates found outside selected date range">
+			            					{ComponentUtil.formatNumber(outOfRangeCount)}
+		            					</span>
+	            					</span>
 			            		</div>
 			            	)
 			            }
@@ -534,25 +565,25 @@ class QueryBuilder extends React.Component {
 
                 } //END OF the big code block of rendering aggregations
 
-                //draw the date result statistics
-                const resultStats = (
-                    <div>
-                        {dateStats}
-                    </div>
-                );
-
                 //draw the result block
                 resultBlock = (
                     <div>
                     	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
                     		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
-	                        	<i className="fa fa-calendar" aria-hidden="true" /> {dateRangeSelector}
+	                        	<i className="fa fa-calendar" aria-hidden="true" />
+	                        	{dateFieldSelector} ► {dateTotalStats}
 	                        </div>
-	                        {(dateRangeCrumb || resultStats || graph) && <div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
-	                            {dateRangeCrumb}
-	                     		{resultStats}
-	                            {graph}
-	                        </div>}
+	                        {this.state.query.dateRange && this.state.query.dateRange.field &&
+	                        	<div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
+	                        		<div className={IDUtil.cssClassName('date-range', this.CLASS_PREFIX)}>
+	                        			Range {dateRangeSelector} ►&nbsp;{dateRangeStats}
+	                        		</div>
+	                        		<div className={IDUtil.cssClassName('date-graph', this.CLASS_PREFIX)}>
+	                            		{graph}
+	                            	</div>
+	                            	{/* dateRangeCrumb */}
+	                        	</div>
+	                    	}
                         </div>
                         <div className="separator"/>
                         {aggregationBox}
@@ -610,7 +641,6 @@ class QueryBuilder extends React.Component {
 									{searchIcon}
 								</span>
 							</div>
-
 
 							{/* Metadata field selector */}
 							<div className={IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX)}>
