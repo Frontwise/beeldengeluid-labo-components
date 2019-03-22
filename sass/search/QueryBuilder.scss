@@ -160,6 +160,11 @@
 			    padding: 5px 10px;
 			    box-sizing: border-box;
 			    margin: 10px;
+			    background-color: $clGreyTint;
+			    transition: background-color $transition;
+			    &:hover{
+			    	background-color: darken($clGreyTint,5%);
+			    }
 			}
 		}
 
