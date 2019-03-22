@@ -13,11 +13,11 @@
 
 	.bg__agl__count {
 		background-color: white;
-		font-size: 1em;
+		font-size: 0.9em;
 		border-radius: 25px;
 		display: inline-block;
-		padding: 2px 8px;
-		min-width: 20px;
+		padding: 2px 4px;
+		min-width: 15px;
 		vertical-align: middle;
 		font-family: $fontHeading;
 		float: right;
@@ -28,10 +28,12 @@
 
 		.bg__agl__selected-item {
 			border: 1px solid $clGreyTint;
-			border-radius: 3px;
+			border-radius: 2px;
+			border-left: 3px solid $clPrimary;
 			box-shadow: $aggrBoxShadow;
 			margin-bottom: 3px;
 			padding: 6px 2px 6px 1rem;
+			word-wrap: break-word;
 
 			.fa-remove {
 				cursor: pointer;
@@ -43,8 +45,11 @@
 			}
 			.bg__agl__count {
 				margin-right: 2px;
-				margin-top: -2px;
 				background-color: $clGrey;
+			}
+
+			&.exclude{
+				border-left: 3px solid $clRed;
 			}
 		}
 	}
@@ -56,6 +61,7 @@
 		padding-left: 0;
 
 		.bg__agl__facet-item {
+			transition: background-color $transition;
 			background-color: $clGrey;
 			word-wrap: break-word;
 			font-size: 1.3rem;
@@ -63,33 +69,84 @@
 			margin-bottom: 1px;
 			padding: 8px 6px;
 			position: relative;
-			text-transform: uppercase;
 
 			cursor: pointer;
 			color: $list-item-color;
 			position: relative;
 			margin: 0;
-			//Customs styling for checkboxes in facet's view.
-			input[type="checkbox"] {
-				position: absolute;
-				left: 0;
-				top: 0;
-				height: 100%;
-				opacity: 0;
-				width: 100%;
-				z-index: 10;
-				margin: 0;
+
+			&.selected {
+				background-color: mix($clPrimary, $clGrey, 25%);
+				border-left: 3px solid $clPrimary;
+				font-weight: 600;
+				&:hover {
+					background-color: mix(
+						mix($clPrimary, $clGrey, 25%),
+						$clGrey,
+						50%
+					);
+					.bg__agl__checkbox {
+						background-color: rgba($clPrimary, 0.4);
+					}
+				}
+				span {
+					font-weight: normal;
+				}
+				.bg__agl__checkbox {
+					background-color: $clPrimary;
+					border-color: darken($clPrimary, 10%);
+				}
 			}
-			input[type="checkbox"]:checked + div span:after {
-				color: #468dcb;
-				content: "\2713";
-				font-size: 18px;
-				font-weight: bold;
-				position: absolute;
+
+			&:hover {
+				background-color: mix($clGrey, $clGreyTint, 50%);
+				.bg__agl__checkbox {
+					background-color: $clPrimary;
+					border-color: darken($clPrimary, 10%);
+				}
 			}
-		}
-		&:hover {
-			background-color: mix($clGrey, $clGreyTint, 50%);
+
+			// Make color red, to indicate elements will be excluded
+			&.exclude {
+				&.selected {
+					border-color: $clRed;
+					background-color: mix($clRed, $clGrey, 25%);
+					&:hover {
+						background-color: mix(
+							mix($clRed, $clGrey, 25%),
+							$clGrey,
+							50%
+						);
+						.bg__agl__checkbox {
+							background-color: rgba($clRed, 0.4);
+						}
+					}
+					.bg__agl__checkbox {
+						background-color: $clRed;
+						border-color: darken($clRed, 10%);
+					}
+				}
+				&:hover {
+					.bg__agl__checkbox {
+						background-color: $clRed;
+						border-color: darken($clRed, 10%);
+					}
+				}
+			}
+
+			&.exclude {
+			}
+
+			.bg__agl__checkbox {
+				transition: background-color $transition;
+				display: inline-block;
+				width: 12px;
+				height: 12px;
+				border: 1px solid $clGreyTint;
+				margin-right: 6px;
+				margin-top: 3px;
+				vertical-align: top;
+			}
 		}
 	}
 
@@ -252,7 +309,8 @@
 			&.bg__facet-title {
 				color: #fff;
 				font-size: 16px;
-				font-weight: normal;
+				font-family: $fontHeading;
+				text-transform: uppercase;
 				left: 10%;
 				overflow: hidden;
 				position: absolute;
@@ -261,6 +319,7 @@
 				white-space: nowrap;
 				max-width: 76%;
 				z-index: 10;
+				font-weight: normal;
 
 				.fa-info-circle {
 					float: left;

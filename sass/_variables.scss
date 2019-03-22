@@ -73,8 +73,9 @@ $clDarkGrey: #9E9290;
 $clGreyTint: #EEE3E1;
 $clGrey: #FAF6F6;
 $clWhite: #FFFFFF;
+$clRed: desaturate(#F25050,30%);
 
-$clError: #F25050;
+$clError: $clRed;
 $clWarning: #F29650;
 $clConfirm: #50F27A;
 
