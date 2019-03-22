@@ -261,25 +261,22 @@ class AggregationList extends React.Component {
         //first generate the facet (options) to be included in the block later on
         const sortedFacets = aggr.facets.map((f, index) => {
             return (
-                <li key={'facet__' + aggr.index + '__' + index} hidden={f.hidden}
+                <li key={'facet__' + aggr.index + '__' + index} 
+                    hidden={f.hidden}
                     className={IDUtil.cssClassName('facet-item', this.CLASS_PREFIX)}>
-                    <div className="checkbox">
-                        <input id={f.guid}
-                               type="checkbox"
-                               checked={f.selected}
-                               onChange={this.toggleSelectedFacet.bind(this, aggr.field, f.key)}/>
-                        <label>
-                            <span> </span>
-                            {f.key}&nbsp;({f.count})
-                        </label>
-                    </div>
+                    <input id={f.guid}
+                           type="checkbox"
+                           checked={f.selected}
+                           onChange={this.toggleSelectedFacet.bind(this, aggr.field, f.key)}/>
+                    {f.key}
+                    <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{f.count}</span>
                 </li>
             )
         });
 
         //finally return the whole block with all of the (selected) facets and their counts etc...
         return (
-            <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)} key={'facet__' + aggr.index} id={'index__' + aggr.index}>
+            <div className={IDUtil.cssClassName('facet-block', this.CLASS_PREFIX)} key={'facet__' + aggr.index} id={'index__' + aggr.index}>
                 {this.renderHamburgerMenu(aggr)}
 
                 <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
@@ -376,7 +373,7 @@ class AggregationList extends React.Component {
 
     renderEmptyBlocks = (aggr, index) => {
         return (
-            <div className={IDUtil.cssClassName('hamburger-header aggregation-no-results', this.CLASS_PREFIX)}
+            <div className={IDUtil.cssClassName('facet-block aggregation-no-results', this.CLASS_PREFIX)}
                 key={'facet__' + aggr.index}
                 id={'index__' + aggr.index}>
                 <span data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
@@ -459,9 +456,8 @@ class AggregationList extends React.Component {
                 }
                 selectedFacets.push(
                     <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                        {title.toUpperCase()}
+                        {title.toUpperCase()} <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{count}</span>
                         <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, curAggr.field, f.key)}/>
-                         <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{count}</span>
                     </div>
                 )
             });

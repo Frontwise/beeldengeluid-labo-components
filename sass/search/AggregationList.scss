@@ -1,26 +1,26 @@
 .bg__aggregation-list {
-
+	$aggrBoxShadow: 0 1px 5px rgba(black, 0.1);
 	.bg__agl__tab-new {
 		margin-bottom: 1rem;
-		& > button{
+		& > button {
 			background-color: $clGrey;
 			transition: background-color $transition;
-			&:hover{
+			&:hover {
 				background-color: mix($clGrey, $clGreyTint);
 			}
 		}
 	}
 
-	.bg__agl__count{
-		background-color: $clGrey;
-		font-size: 1.0em;
+	.bg__agl__count {
+		background-color: white;
+		font-size: 1em;
 		border-radius: 25px;
 		display: inline-block;
 		padding: 2px 8px;
 		min-width: 20px;
 		vertical-align: middle;
 		font-family: $fontHeading;
-		float:right;
+		float: right;
 	}
 
 	.bg__agl__selected-facets {
@@ -29,7 +29,7 @@
 		.bg__agl__selected-item {
 			border: 1px solid $clGreyTint;
 			border-radius: 3px;
-			box-shadow: 0 1px 5px rgba(black, 0.1);
+			box-shadow: $aggrBoxShadow;
 			margin-bottom: 3px;
 			padding: 6px 2px 6px 1rem;
 
@@ -37,68 +37,67 @@
 				cursor: pointer;
 				float: right;
 				padding: 4px 5px;
-				&:hover{
+				&:hover {
 					opacity: 0.8;
 				}
 			}
-			.bg__agl__count{
+			.bg__agl__count {
 				margin-right: 2px;
 				margin-top: -2px;
+				background-color: $clGrey;
 			}
 		}
 	}
 
 	.bg__agl__facet-group {
-		margin:0;
+		margin: 0;
 		max-height: 400px;
 		overflow: auto;
+		padding-left: 0;
 
 		.bg__agl__facet-item {
-			color: $list-item-color;
-			.checkbox {
-				margin: 0;
-				//Customs styling for checkboxes in facet's view.
-				input[type=checkbox] {
-					height: 100%;
-					opacity: 0;
-					width: 100%;
-					z-index: 10;
-				}
-				input[type=checkbox] + label {
-					padding-left: 10px;
-				}
-				input[type=checkbox] + label span {
-					border: 1px solid #ccc;
-					border-radius: 4px;
-					display: inline-block;
-					font-style: normal;
-					height: 18px;
-					margin-right: 10px;
-					width: 18px;
-				}
+			background-color: $clGrey;
+			word-wrap: break-word;
+			font-size: 1.3rem;
+			list-style-type: none;
+			margin-bottom: 1px;
+			padding: 8px 6px;
+			position: relative;
+			text-transform: uppercase;
 
-				input[type=checkbox]:checked + label span {
-					position:relative;
-				}
-				input[type=checkbox]:checked + label span:after {
-					color: #468dcb;
-					content: "\2713";
-					font-size: 18px;
-					font-weight: bold;
-					margin-top:-4px;
-					position: absolute;
-				}
+			cursor: pointer;
+			color: $list-item-color;
+			position: relative;
+			margin: 0;
+			//Customs styling for checkboxes in facet's view.
+			input[type="checkbox"] {
+				position: absolute;
+				left: 0;
+				top: 0;
+				height: 100%;
+				opacity: 0;
+				width: 100%;
+				z-index: 10;
+				margin: 0;
 			}
-			&:hover {
-				color:#ccc;
+			input[type="checkbox"]:checked + div span:after {
+				color: #468dcb;
+				content: "\2713";
+				font-size: 18px;
+				font-weight: bold;
+				position: absolute;
 			}
+		}
+		&:hover {
+			background-color: mix($clGrey, $clGreyTint, 50%);
 		}
 	}
 
-	.bg__agl__hamburger-header {
-		background-color: #ebebeb;
-		border-radius: 6px;
-		box-shadow: 0 6px 4px -6px black;
+	.bg__agl__facet-block {
+		background-color: $clGrey;
+		border-bottom: 1px solid $clGreyTint;
+		border-radius: 2px;
+		box-shadow: $aggrBoxShadow;
 		margin-bottom: 12px;
 
 		h4 {
@@ -122,7 +121,8 @@
 				white-space: nowrap;
 			}
 
-			.fa-info-circle, .fa-remove {
+			.fa-info-circle,
+			.fa-remove {
 				padding-top: 8px;
 				font-size: 17px;
 			}
@@ -140,19 +140,7 @@
 			margin-right: 1rem;
 			padding-top: 4px;
 		}
-		ul {
-			padding-left: 0;
-			li {
-				background-color: #efefef;
-				word-wrap: break-word;
-				font-size: 1.3rem;
-				list-style-type: none;
-				margin-bottom: 1px;
-				padding: 8px 6px;
-				position: relative;
-				text-transform: uppercase;
-			}
-		}
+
 		.switchView {
 			background-color: #efefef;
 			border-radius: 0 0 6px 6px;
@@ -169,7 +157,7 @@
 			}
 			.switchIcon {
 				font-size: 1rem;
-				margin-left: .5rem;
+				margin-left: 0.5rem;
 			}
 		}
 	}
@@ -203,13 +191,14 @@
 		.hb-line-center::after {
 			background-color: #fff;
 			border-radius: 10px;
-			content: '';
+			content: "";
 			height: 3px;
 			position: absolute;
 			top: 6px;
 			width: 18px;
 		}
-		.hamburger-toggle, ul {
+		.hamburger-toggle,
+		ul {
 			display: none;
 		}
 
@@ -224,7 +213,7 @@
 			padding: 5px;
 
 			.bg__agl__exclude-btn {
-				flex-grow:8;
+				flex-grow: 8;
 				input {
 					margin: 0px 2px 0px 6px;
 				}
@@ -242,7 +231,6 @@
 					}
 				}
 			}
-
 		}
 		label {
 			display: inline;
