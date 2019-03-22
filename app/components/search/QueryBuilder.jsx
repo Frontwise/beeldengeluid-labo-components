@@ -316,11 +316,6 @@ class QueryBuilder extends React.Component {
 	    return aggregations
     }
 
-    showHelp = () => {
-    	var event = new Event('BG__SHOW_HELP');
-    	window.dispatchEvent(event);
-    }
-
     render() {
         if (this.props.collectionConfig && this.state.query) {
             let searchIcon = null;
@@ -551,7 +546,7 @@ class QueryBuilder extends React.Component {
                     <div>
                     	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
                     		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
-	                        	<div>Time analysis:</div>{dateRangeSelector}
+	                        	<i className="fa fa-calendar" aria-hidden="true" /> {dateRangeSelector}
 	                        </div>
 	                        {(dateRangeCrumb || resultStats || graph) && <div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
 	                            {dateRangeCrumb}
@@ -587,13 +582,6 @@ class QueryBuilder extends React.Component {
 			} else {
 				searchIcon = (<i className="fa fa-search"/>)
 			}
-
-			const tutorial = currentSearchTerm ? null : (
-				<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
-					 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
-				</div>
-			);
-
 
 			//render the stuff on screen
 			return (
@@ -646,9 +634,6 @@ class QueryBuilder extends React.Component {
 							</div>
 						</div>
 					</form>
-
-					{tutorial}
-
 					{layerOptions}
 					{resultBlock}
 				</div>

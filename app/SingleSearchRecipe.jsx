@@ -62,6 +62,8 @@ class SingleSearchRecipe extends React.Component {
 			selectedOnPage : {}, // key = resourceId, value = true/false
 			allRowsSelected : false // are all search results selected
 		};
+
+		this.CLASS_PREFIX = "ssr";
 	}
 
 	static elementInViewport(el) {
@@ -1045,6 +1047,19 @@ class SingleSearchRecipe extends React.Component {
 
 	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
 
+    showHelp = () => {
+    	var event = new Event('BG__SHOW_HELP');
+    	window.dispatchEvent(event);
+    }
+
+	renderTutorial = () => (
+		<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
+			 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+		</div>
+	);
+
+	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
+
 	render() {
 		const storedSelectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows') || [];
         const activeBookmarks =  ComponentUtil.getJSONFromLocalStorage('activeBookmarks');
@@ -1093,6 +1108,9 @@ class SingleSearchRecipe extends React.Component {
 		//search result table with paging, sorting and ability to toggle a list of selected items
 		const resultList = this.renderResultTable(this.state, storedSelectedRows, activeBookmarks);
 
+		// show a short introduction/tutorial for this tool
+		const tutorial = this.renderTutorial();
+
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
@@ -1103,6 +1121,7 @@ class SingleSearchRecipe extends React.Component {
                         {resultList}
 					</div>
 				</div>
+                {tutorial}
 				{collectionModal}
 				{projectModal}
 				{queryModal}
