@@ -19,6 +19,7 @@
 		button{
 			float:right;
 			background-color: $clGrey;
+			margin-left: 15px;
 			&:hover{
 				background-color: darken($clGrey, 4%);
 			}

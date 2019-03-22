@@ -696,15 +696,6 @@ class QueryBuilder extends React.Component {
 							{/* Result count */}
 							<div >
 								{queryResultCount}
-								{/* WTODO: Add back: 
-								<a onClick={this.clearSearch.bind(this)}>
-									Clear&nbsp;<span data-for={'__clear-search-tt'}
-	                                  data-tip="Clear all query parameters, but keeps the collection selected"
-	                                  data-html={false}>
-	                                  	<i className="fa fa-info-circle"/>
-									</span>
-								</a>
-								<ReactTooltip id={'__clear-search-tt'}/> */}
 							</div>
 						</div>
 					</form>

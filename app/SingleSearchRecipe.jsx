@@ -204,6 +204,8 @@ class SingleSearchRecipe extends React.Component {
 			this.onBookmarkGroupSelected(data);
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
+		} else if(componentClass === 'CollectionBar') {
+			this.onSearched(data);
 		}
 	}
 
@@ -790,6 +792,7 @@ class SingleSearchRecipe extends React.Component {
 			<CollectionBar
 				collectionConfig={collectionConfig}
 				selectCollection={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}
+				resetSearch={this.onComponentOutput}
 			/>
 	);
 
@@ -1091,7 +1094,7 @@ class SingleSearchRecipe extends React.Component {
         );
 
         const collectionBar = this.renderCollectionBar(
-        	this.state.collectionConfig
+        	this.state.collectionConfig,
         );
 
         const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;

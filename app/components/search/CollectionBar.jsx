@@ -32,6 +32,10 @@ class CollectionBar extends React.PureComponent {
 		return collectionHits;
 	}
 
+	resetSearch = ()=>{
+		this.props.resetSearch(this.constructor.name, null);
+	}
+
 	render() {
 		const collectionConfig = this.props.collectionConfig;
 
@@ -67,6 +71,16 @@ class CollectionBar extends React.PureComponent {
 			</span>
 		) : null;
 
+
+		const resetButton = collectionConfig ? (
+			<button
+				className="btn"
+				onClick={this.resetSearch}
+			>
+				Reset search
+			</button>
+		) : null;
+
 		return (
 			<div
 				className={IDUtil.cssClassName("single-search-collection-bar")}
@@ -96,6 +110,7 @@ class CollectionBar extends React.PureComponent {
 						{hits}
 						{ckanUrl}
 						{collectionButton}
+						{resetButton}
 					</div>
 				)}
 			</div>
@@ -108,7 +123,8 @@ CollectionBar.propTypes = {
 		// optional: collection config of active project
 		getCollectionTitle: PropTypes.func.isRequired
 	}),
-	selectCollection: PropTypes.func.isRequired // show modal to select collection
+	selectCollection: PropTypes.func.isRequired, // show modal to select collection
+	resetSearch: PropTypes.func.isRequired, // reset search
 };
 
 export default CollectionBar;
