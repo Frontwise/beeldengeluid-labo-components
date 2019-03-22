@@ -587,6 +587,14 @@ class QueryBuilder extends React.Component {
 
                 } //END OF the big code block of rendering aggregations
 
+
+				// number of query results if available
+	            const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? (
+	                <span className={IDUtil.cssClassName('total-count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
+	                    Results: <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{ComponentUtil.formatNumber(this.state.totalHits)}</span>
+	                </span>
+	            ) : null;
+
                 //draw the result block
                 resultBlock = (
                     <div>
@@ -630,6 +638,9 @@ class QueryBuilder extends React.Component {
 	                        </div>
 	                    )}
                         <div className="separator"/>
+
+                        {queryResultCount}
+
                         {
                         	this.state.searchId != null && this.state.isSearching === false && this.state.totalHits === 0 ?
 		                	(
@@ -642,14 +653,6 @@ class QueryBuilder extends React.Component {
                     </div>
                 )
 			}
-
-			// number of query results if available
-            const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? (
-                <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
-                    {ComponentUtil.formatNumber(this.state.totalHits)}
-                </span>
-            ) : null;
-
 
 			//determine which icon to show after the search input
 			if(this.state.isSearching === true) {
@@ -690,12 +693,6 @@ class QueryBuilder extends React.Component {
 							<div className={IDUtil.cssClassName('selector-holder', this.CLASS_PREFIX)}>
 								<div className={IDUtil.cssClassName('in-label', this.CLASS_PREFIX)}>in</div>
 								{fieldCategorySelector}
-								<div className={IDUtil.cssClassName('arrow-label', this.CLASS_PREFIX)}>{queryResultCount && "►"}</div>
-							</div>
-
-							{/* Result count */}
-							<div >
-								{queryResultCount}
 							</div>
 						</div>
 					</form>

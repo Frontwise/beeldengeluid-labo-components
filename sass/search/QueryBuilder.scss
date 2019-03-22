@@ -54,6 +54,22 @@
 		font-family: $fontHeading;
 	}
 
+	.bg__qb__total-count{
+		margin-left: 20px;
+		font-family: $fontHeading;
+		font-size: 16px;
+		font-weight: bold;
+		line-height: 20px;
+		margin-top: 5px;
+		display: inline-block;
+		.bg__qb__count{
+			background-color: $clPrimary;
+			color: white;
+			margin-top:0;
+			vertical-align: middle;
+		}
+	}
+
 	.bg__qb__search-holder {
 		display: flex;
 		margin-right: 10px;
@@ -81,12 +97,6 @@
 		.bg__qb__in-label {
 			margin-right: 10px;
 			line-height: 35px;
-		}
-
-		.bg__qb__arrow-label {
-			margin-left: 10px;
-			line-height: 35px;
-			font-size: 0.8em;
 		}
 
 		.bg__field-category-selector {
