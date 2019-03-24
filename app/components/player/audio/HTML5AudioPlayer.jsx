@@ -116,7 +116,9 @@ class HTML5AudioPlayerAPI extends PlayerAPI {
 	}
 
 	seek(secs) {
-		this.playerAPI.currentTime = secs;
+		if(secs != isNaN && secs != undefined) {
+			this.playerAPI.currentTime = secs;
+		}
 	}
 
 	getPosition(callback=null) {
