@@ -41,9 +41,7 @@ class CollectionBar extends React.PureComponent {
 
 		const collectionButton = (
 			<button
-				className={classNames("btn", {
-					"btn-primary": !collectionConfig
-				})}
+				className="btn btn-primary"
 				onClick={this.props.selectCollection}
 			>
 				{collectionConfig ? "Change collection" : "Select collection"}
@@ -74,7 +72,7 @@ class CollectionBar extends React.PureComponent {
 
 		const resetButton = collectionConfig ? (
 			<button
-				className="btn"
+				className="btn btn-secondary"
 				onClick={this.resetSearch}
 			>
 				Reset search
