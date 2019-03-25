@@ -3,24 +3,7 @@ import TimeUtil from '../../util/TimeUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import DatePickerSelector from './DatePickerSelector';
 import moment from 'moment';
-//https://facebook.github.io/react/blog/2013/07/11/react-v0-4-prop-validation-and-default-values.html
-/*
-	Currently based on noUIslider.js
 
-	TODO:
-		- create another component based on either:
-			https://www.npmjs.com/package/react-bootstrap-date-picker
-			https://bootstrap-datepicker.readthedocs.io/en/latest/
-
-	PLAN (9 mrt 2017):
-		- first implement it without a date selector
-		- then implement a string field selector for the regular search
-		- then implement the date field selector here
-
-	component output:
-		- a certain date field
-		- a certain date range based on years
-*/
 class DateFieldSelector extends React.Component {
 
     constructor(props) {
