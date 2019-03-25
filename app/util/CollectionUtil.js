@@ -85,7 +85,7 @@ const CollectionUtil = {
 	__loadCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass) {
 		if(collectionId.startsWith('pc__')) {
 			CollectionUtil.__loadPersonalCollectionInfo(clientId, user, collectionId, collectionStats, callback, configClass);
-		} else if(user){
+		} else if(user) {
 			CollectionUtil.__loadCKANInfo(clientId, user, collectionId, collectionStats, callback, configClass);
 		} else {
 			callback(new configClass(clientId, user, collectionId, collectionStats, null));

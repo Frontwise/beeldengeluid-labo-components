@@ -49,7 +49,7 @@ class CollectionBar extends React.PureComponent {
 		);
 
 		const ckanUrl =
-			collectionConfig && collectionConfig.collectionInfo.ckanUrl ? (
+			collectionConfig && collectionConfig.collectionInfo && collectionConfig.collectionInfo.ckanUrl ? (
 				<a
 					className={IDUtil.cssClassName("link", this.CLASS_PREFIX)}
 					title="View collection info"
