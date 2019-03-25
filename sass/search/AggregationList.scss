@@ -1,77 +1,160 @@
 .bg__aggregation-list {
-
+	$aggrBoxShadow: 0 1px 5px rgba(black, 0.1);
 	.bg__agl__tab-new {
-		list-style: none;
 		margin-bottom: 1rem;
+		& > button {
+			background-color: $clGrey;
+			transition: background-color $transition;
+			&:hover {
+				background-color: mix($clGrey, $clGreyTint);
+			}
+		}
+	}
+
+	.bg__agl__count {
+		background-color: white;
+		font-size: 0.9em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 4px;
+		min-width: 15px;
+		vertical-align: middle;
+		font-family: $fontHeading;
+		float: right;
 	}
 
 	.bg__agl__selected-facets {
+		margin-bottom: 10px;
+
 		.bg__agl__selected-item {
-			border: 1px solid #f3f3f3;
-			border-radius: 6px;
-			box-shadow: 0 5px 3px -5px black;
+			border: 1px solid $clGreyTint;
+			border-radius: 2px;
+			border-left: 3px solid $clPrimary;
+			box-shadow: $aggrBoxShadow;
 			margin-bottom: 3px;
-			padding: 6px 5px 6px 1rem;
+			padding: 6px 2px 6px 1rem;
+			word-wrap: break-word;
 
 			.fa-remove {
 				cursor: pointer;
 				float: right;
-				padding-top: 2px;
+				padding: 4px 5px;
+				&:hover {
+					opacity: 0.8;
+				}
+			}
+			.bg__agl__count {
+				margin-right: 2px;
+				background-color: $clGrey;
+			}
+
+			&.exclude{
+				border-left: 3px solid $clRed;
 			}
 		}
 	}
 
 	.bg__agl__facet-group {
-		margin:0;
+		margin: 0;
 		max-height: 400px;
 		overflow: auto;
+		padding-left: 0;
 
 		.bg__agl__facet-item {
-			color: $list-item-color;
-			.checkbox {
-				margin: 0;
-				//Customs styling for checkboxes in facet's view.
-				input[type=checkbox] {
-					height: 100%;
-					opacity: 0;
-					width: 100%;
-					z-index: 10;
-				}
-				input[type=checkbox] + label {
-					padding-left: 10px;
-				}
-				input[type=checkbox] + label span {
-					border: 1px solid #ccc;
-					border-radius: 4px;
-					display: inline-block;
-					font-style: normal;
-					height: 18px;
-					margin-right: 10px;
-					width: 18px;
-				}
+			transition: background-color $transition;
+			background-color: $clGrey;
+			word-wrap: break-word;
+			font-size: 1.3rem;
+			list-style-type: none;
+			margin-bottom: 1px;
+			padding: 8px 6px;
+			position: relative;
 
-				input[type=checkbox]:checked + label span {
-					position:relative;
+			cursor: pointer;
+			color: $list-item-color;
+			position: relative;
+			margin: 0;
+
+			&.selected {
+				background-color: mix($clPrimary, $clGrey, 25%);
+				border-left: 3px solid $clPrimary;
+				font-weight: 600;
+				&:hover {
+					background-color: mix(
+						mix($clPrimary, $clGrey, 25%),
+						$clGrey,
+						50%
+					);
+					.bg__agl__checkbox {
+						background-color: rgba($clPrimary, 0.4);
+					}
 				}
-				input[type=checkbox]:checked + label span:after {
-					color: #468dcb;
-					content: "\2713";
-					font-size: 18px;
-					font-weight: bold;
-					margin-top:-4px;
-					position: absolute;
+				span {
+					font-weight: normal;
+				}
+				.bg__agl__checkbox {
+					background-color: $clPrimary;
+					border-color: darken($clPrimary, 10%);
 				}
 			}
+
 			&:hover {
-				color:#ccc;
+				background-color: mix($clGrey, $clGreyTint, 50%);
+				.bg__agl__checkbox {
+					background-color: $clPrimary;
+					border-color: darken($clPrimary, 10%);
+				}
+			}
+
+			// Make color red, to indicate elements will be excluded
+			&.exclude {
+				&.selected {
+					border-color: $clRed;
+					background-color: mix($clRed, $clGrey, 25%);
+					&:hover {
+						background-color: mix(
+							mix($clRed, $clGrey, 25%),
+							$clGrey,
+							50%
+						);
+						.bg__agl__checkbox {
+							background-color: rgba($clRed, 0.4);
+						}
+					}
+					.bg__agl__checkbox {
+						background-color: $clRed;
+						border-color: darken($clRed, 10%);
+					}
+				}
+				&:hover {
+					.bg__agl__checkbox {
+						background-color: $clRed;
+						border-color: darken($clRed, 10%);
+					}
+				}
+			}
+
+			&.exclude {
+			}
+
+			.bg__agl__checkbox {
+				transition: background-color $transition;
+				display: inline-block;
+				width: 12px;
+				height: 12px;
+				border: 1px solid $clGreyTint;
+				margin-right: 6px;
+				margin-top: 3px;
+				vertical-align: top;
 			}
 		}
 	}
 
-	.bg__agl__hamburger-header {
-		background-color: #ebebeb;
-		border-radius: 6px;
-		box-shadow: 0 6px 4px -6px black;
+	.bg__agl__facet-block {
+		background-color: $clGrey;
+		border-bottom: 1px solid $clGreyTint;
+		border-radius: 2px;
+		box-shadow: $aggrBoxShadow;
 		margin-bottom: 12px;
 
 		h4 {
@@ -95,7 +178,8 @@
 				white-space: nowrap;
 			}
 
-			.fa-info-circle, .fa-remove {
+			.fa-info-circle,
+			.fa-remove {
 				padding-top: 8px;
 				font-size: 17px;
 			}
@@ -113,76 +197,74 @@
 			margin-right: 1rem;
 			padding-top: 4px;
 		}
-		ul {
-			padding-left: 0;
-			li {
-				background-color: #efefef;
-				word-wrap: break-word;
-				font-size: 1.3rem;
-				list-style-type: none;
-				margin-bottom: 1px;
-				padding: 8px 6px;
-				position: relative;
-				text-transform: uppercase;
-			}
-		}
-		.switchView {
-			background-color: #efefef;
-			border-radius: 0 0 6px 6px;
+
+		.bg__agl__switch-view {
+			background-color: $clGrey;
+			border-radius: 0 0 2px 2px;
 			color: #666;
 			display: block;
-			padding: 5px;
+			border-top: 1px solid mix($clGrey, $clGreyTint, 50%);
+			padding: 5px 8px 5px 5px;
+			text-align: right;
+			cursor: pointer;
+			text-decoration: none;
 			&:hover {
-				color: red;
+				color: $clPrimary;
+
 			}
 
-			.switchViewText {
-				font-size: 1.1rem;
+			& > .switchViewText {
+				font-family: $fontHeading;
+				font-size: 12px;
 				padding-left: 1rem;
+				text-transform: uppercase;
 			}
-			.switchIcon {
+			& > .switchIcon {
 				font-size: 1rem;
-				margin-left: .5rem;
+				margin-left: 0.5rem;
 			}
 		}
 	}
 
 	// hamburger menu
 	.bg__agl__hamburger-menu {
-		background-color: #468dcb;
-		border-radius: 3px 3px 0 0;
+		background-color: $clPrimary;
+		border-radius: 2px 2px 0 0;
 		position: relative;
 
 		.hb {
 			cursor: pointer;
-			height: 25px;
-			padding: 4px 0 26px 10px;
+			height: 36px;
+			padding: 10px 0 8px 8px;
 			position: relative;
 		}
+
 		.hb-line {
 			background-color: #fff;
 			border-radius: 10px;
 			height: 3px;
 			position: absolute;
-			width: 18px;
+			width: 16px;
 		}
 		.hb-line-top {
-			top: 6px;
+			top: 10px;
 		}
 		.hb-line-center {
 			position: absolute;
-			top: 12px;
+			top: 16px;
 		}
 		.hb-line-center::after {
 			background-color: #fff;
 			border-radius: 10px;
-			content: '';
+			content: "";
 			height: 3px;
 			position: absolute;
 			top: 6px;
-			width: 18px;
+			width: 16px;
 		}
-		.hamburger-toggle, ul {
+
+		.hamburger-toggle,
+		ul {
 			display: none;
 		}
 
@@ -191,15 +273,21 @@
 			display: flex;
 			width: 100%;
 		}
+
 		.bg__agl__sort-exclude-wrapper {
 			display: flex;
 			color: #fff;
 			padding: 5px;
 
 			.bg__agl__exclude-btn {
-				flex-grow:8;
-				input {
-					margin: 0px 2px 0px 6px;
+				cursor: pointer;
+				flex-grow: 8;
+				& > input {
+					margin: 0px 2px 2px 6px;
+					vertical-align: middle;
+				}
+				& > label{
+					font-weight: normal;
 				}
 			}
 			.bg__agl__sort-btn-wrapper {
@@ -208,14 +296,19 @@
 				flex-direction: row-reverse;
 				.bg__agl__sort-btn {
 					cursor: pointer;
-					margin-left: 10px;
-					color: #ccc;
+					color: mix(white, $clPrimary, 50%);
+					padding: 3px 5px;
 					.bg__agl__sort-active {
+						color: white;
+						&:hover{
+							opacity: 0.7;
+						}
+					}
+					&:hover{
 						color: white;
 					}
 				}
 			}
-
 		}
 		label {
 			display: inline;
@@ -230,22 +323,24 @@
 			font-size: 18px;
 			position: absolute;
 			right: 0;
-			top: 5px;
+			top: 8px;
 			z-index: 12;
 		}
 		span {
 			&.bg__facet-title {
 				color: #fff;
 				font-size: 16px;
-				font-weight: normal;
-				left: 10%;
+				font-family: $fontHeading;
+				text-transform: uppercase;
+				left: 20px;
 				overflow: hidden;
 				position: absolute;
 				text-overflow: ellipsis;
-				top: 4px;
+				top: 6px;
 				white-space: nowrap;
-				max-width: 76%;
+				max-width: calc(100% - 70px);
 				z-index: 10;
+				font-weight: normal;
 
 				.fa-info-circle {
 					float: left;

@@ -10,6 +10,7 @@ class BookmarkSelector extends React.Component {
 			allBookmarkGroups : [],
 			selectedGroups : {}
 		}
+		this.CLASS_PREFIX = 'bms';
 	}
 
 	componentDidMount() {
@@ -34,8 +35,8 @@ class BookmarkSelector extends React.Component {
 		}
 	}
 
-	updateGroupMembership(resourceId, allGroups) {		
-		const filter = {			
+	updateGroupMembership(resourceId, allGroups) {
+		const filter = {
 			'target.selector.value.id' : resourceId,
 			'user.keyword' : this.props.user.id,
 			'motivation' : 'bookmarking'
@@ -44,11 +45,11 @@ class BookmarkSelector extends React.Component {
 			filter['project'] = this.props.project.id
 		}
 		AnnotationAPI.getFilteredAnnotations(
-			this.props.user.id, 
-			filter, 
-			null, 
+			this.props.user.id,
+			filter,
+			null,
 			this.onUpdateGroupMembership.bind(this, allGroups),
-			0, //offset 
+			0, //offset
 			250, //size
 			null, //sort direction
 			null //date range
@@ -56,14 +57,14 @@ class BookmarkSelector extends React.Component {
 	}
 
 	onUpdateGroupMembership(allGroups, resourceGroups) {
-		const selectedGroups = {}		
+		const selectedGroups = {}
 		allGroups.forEach(group => {
 			if(resourceGroups.findIndex(resourceGroup => resourceGroup.id === group.id) != -1) {
 				selectedGroups[group.id] = true;
 			}
 		})
 		this.setState({
-			allBookmarkGroups : allGroups, 
+			allBookmarkGroups : allGroups,
 			selectedGroups : selectedGroups
 		});
 	}
@@ -109,7 +110,7 @@ class BookmarkSelector extends React.Component {
 		if(this.props.onOutput) {
 			//returns all bookmark groups (multi-target annotations) + which have been selected
 			this.props.onOutput(
-				this.constructor.name, 
+				this.constructor.name,
 				{
 					allGroups : this.state.allBookmarkGroups,
 					selectedGroups : this.state.selectedGroups
@@ -145,7 +146,7 @@ class BookmarkSelector extends React.Component {
 		 				<i className="fa fa-bookmark" style={ this.state.selectedGroups[group.id] === true ? {color: '#468dcb'} : {color: 'white'} }/>
 		 				&nbsp;
 		 				{group.body[0].label}
-		 				<span className="member-count">Bookmarks: {group.target.length}</span> 						 				
+		 				<span className="member-count">Bookmarks: {group.target.length}</span>
 		 			</a>
 		 		)
 		 	});
@@ -157,34 +158,20 @@ class BookmarkSelector extends React.Component {
 		}
 		return (
 			<div className={IDUtil.cssClassName('bookmark-selector')}>
-				<br/>
-				<div className="row">
-					<div className="col-md-12">
-						{bookmarkList}
-					</div>
+				{bookmarkList}
+
+				<h4>New bookmark group</h4>
+				<div className={IDUtil.cssClassName('new-group', this.CLASS_PREFIX)}>
+					<input
+	                    ref={input => (this.setSearchTerm = input)}
+						type="text"
+						aria-label="Create new bookmark group"
+					/>
+					<button className="btn btn-default" onClick={this.addNewBookmarkGroup.bind(this)}>Add</button>
 				</div>
-				<div className="row">
-					<div className="col-md-12">
-						<form>
-							<div className="form-group">
-								<h4>Bookmark group</h4>
-								<div className="input-group">
-									<div className="input-group-btn">    
-										<button className="btn btn-default" onClick={this.addNewBookmarkGroup.bind(this)}>New</button>
-									</div>
-									<input
-	                                    ref={input => (this.setSearchTerm = input)}
-										type="text"
-										className="form-control"
-										aria-label="Create new bookmark group"
-									/>									
-								</div>
-							</div>
-						</form>
-					</div>
-				</div>
-				<div className="row">
-					<button className="btn btn-primary btn-save" onClick={this.onOutput.bind(this)}>Save</button>
+
+				<div className={IDUtil.cssClassName('save', this.CLASS_PREFIX)}>
+					<button className="btn btn-primary" onClick={this.onOutput.bind(this)}>Save</button>
 				</div>
 			</div>
 		)
