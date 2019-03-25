@@ -193,8 +193,9 @@ class CollectionAnalyser extends React.Component {
             const field = this.getCurrentField();
 
             const completeness = field && field.id in this.state.completeness ? this.state.completeness[field.id] : null;
-            //const description = this.state.descriptions !== null ? (field && field.id in this.state.descriptions ? this.state.descriptions[field.id].description || '-' : '-') : null;
-            const description = field ? this.props.collectionConfig.getFieldDescription(field.id) : null;
+            const description = this.state.descriptions !== null ? (field && field.id in this.state.descriptions ? this.state.descriptions[field.id].description || '-' : '-') : null;
+            //TODO activate when the new field mapping from the search API is ready
+            //const description = field ? this.props.collectionConfig.getFieldDescription(field.id) : null;
 
             // render current field information table
             const currentField = field != null ? (
