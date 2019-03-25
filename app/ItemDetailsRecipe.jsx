@@ -1,20 +1,22 @@
-import TimeUtil from './util/TimeUtil';
 import IDUtil from './util/IDUtil';
 import IconUtil from './util/IconUtil';
 import ComponentUtil from './util/ComponentUtil';
+
+import QueryModel from './model/QueryModel';
 
 import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
 import FlexPlayer from './components/player/video/FlexPlayer';
 import FlexImageViewer from './components/player/image/FlexImageViewer';
+import FlexRouter from './util/FlexRouter';
+import ReactTooltip from 'react-tooltip';
 
 import MetadataTable from './components/search/MetadataTable';
-
 import LDResourceViewer from './components/linkeddata/LDResourceViewer';
 
 import DocumentAPI from './api/DocumentAPI';
 import PlayoutAPI from './api/PlayoutAPI';
-
+import SearchAPI from './api/SearchAPI';
 import AnnotationAPI from './api/AnnotationAPI';
 import AnnotationUtil from './util/AnnotationUtil'
 import AnnotationBox from './components/annotation/AnnotationBox';
@@ -29,8 +31,10 @@ import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
 import PropTypes from 'prop-types';
+import ReactJson from 'react-json-view'
 
 import { initHelp } from './components/workspace/helpers/helpDoc';
+import LoadingSpinner from "./components/helpers/LoadingSpinner";
 
 //import TranscriptExample from './components/transcript.json';
 
@@ -49,6 +53,9 @@ import { initHelp } from './components/workspace/helpers/helpDoc';
 			- however the annotations are related to media fragments (also)
 			- distinguish loading of media fragment annotations & record/program annotations
 
+	OFF AIR CONTENT
+		http://localhost:5304/tool/default-item-details?id=4272263@program&cid=nisv-catalogue-aggr-full-18-158&st=%224272263@program%22
+
 */
 
 //TODO move most of the stuff to a new component called ResourceViewer
@@ -57,7 +64,7 @@ class ItemDetailsRecipe extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showModal : false, //triggered by the media players whenever an annotation needs to be edited
+			showAnnotationModal : false, //triggered by the media players whenever an annotation needs to be edited
 			showProjectModal : false, //showing the project selector
 			showBookmarkModal : false, //showing the bookmark selector
 
@@ -81,7 +88,7 @@ class ItemDetailsRecipe extends React.Component {
 			awaitingProcess : null,
 
 			collectionConfig : null
-		}
+		};
 		this.tabListeners = false;
 		this.CLASS_PREFIX = 'rcp__id'
 	}
@@ -118,9 +125,9 @@ class ItemDetailsRecipe extends React.Component {
 		//(for now we have to wait until the jquery is available... )
 		if(!this.tabListeners) {
 			$('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-				const target = $(e.target).attr("href") // activated tab
+				const target = $(e.target).attr("href"); // activated tab
 				const index = target.substring('#mo__'.length);
-				const annotationTarget = this.getAnnotationTarget(this.state.itemData, index)
+				const annotationTarget = this.getAnnotationTarget(this.state.itemData, index);
 				if(annotationTarget) {
 					this.setActiveAnnotationTarget.call(this, annotationTarget);
 				} else {
@@ -133,23 +140,27 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'ProjectSelector') {
+		if(componentClass === 'ProjectSelector') {
 			this.setState(
 				{activeProject : data},
 				() => {
 					this.onProjectChanged.call(this, data)
 				}
 			);
-		} else if(componentClass == 'BookmarkSelector') {
-			this.bookmarkToGroupInProject(data);
-		} else if(componentClass == 'FlexImageViewer') {
+		} else if(componentClass === 'BookmarkSelector') {
+			if(data && data.allGroups && data.selectedGroups) {
+				this.bookmarkToGroupInProject(data.allGroups, data.selectedGroups);
+			}
+		} else if(componentClass === 'FlexImageViewer') {
 			this.setActiveAnnotationTarget({
-				source : data.url //data => mediaObject
+				source : data.assetId //data => mediaObject
 			})
-		} else if(componentClass == 'FlexPlayer') {
+		} else if(componentClass === 'FlexPlayer') {
 			this.setActiveAnnotationTarget({
-				source : data.url //data => mediaObject
+				source : data.assetId //data => mediaObject
 			})
+		} else if(componentClass === 'LDResourceViewer') {
+			this.browseEntity(data);
 		}
 	}
 
@@ -158,62 +169,60 @@ class ItemDetailsRecipe extends React.Component {
 		if(data && data.error) {
 			found = false; //e.g. in case of access denied
 		}
-		if(collectionId && found != false) {
+		if(collectionId && found !== false) {
 			CollectionUtil.generateCollectionConfig(
 				this.props.clientId,
 				this.props.user,
 				collectionId,
 				function(config) {
 					const itemDetailData = config.getItemDetailData(data);
-					found = itemDetailData == null ? false : true;
+					found = itemDetailData != null;
 					if(found) {
 						//determine which media contant tab should be active
 						let activeMediaTab = 0;
 						if(itemDetailData.playableContent && this.props.params.fragmentUrl) {
 							for(let i = 0;i<itemDetailData.playableContent.length;i++) {
 								const mediaObject = itemDetailData.playableContent[i];
-								if(mediaObject.url == this.props.params.fragmentUrl) {
+								if(mediaObject.url === this.props.params.fragmentUrl) {
 									activeMediaTab = i;
 									break;
 								}
 							}
 						}
-						let desiredState = {
+						const desiredState = {
 							itemData : itemDetailData,
 							annotationTarget : this.getAnnotationTarget.call(this, itemDetailData), //for the list
 							found : true,
 							activeMediaTab : activeMediaTab,
 							collectionConfig : config
-						}
+						};
 						//TODO make sure this works for all carriers!!
 						if (config.requiresPlayoutAccess() && itemDetailData.playableContent) {
-							PlayoutAPI.requestAccess(
+						    if (itemDetailData.playableContent.length > 0){
+						        PlayoutAPI.requestAccess(
 								itemDetailData.playableContent[0].contentServerId,
 								itemDetailData.playableContent[0].contentId,
 								desiredState,
 								this.onLoadPlayoutAccess.bind(this)
-							)
+							    )
+						    } else {
+						        this.setState(desiredState);
+						    }
 						} else {
 							this.setState(desiredState);
 						}
 
 						//finally load the resource annotation with motivation bookmarking
-						AnnotationStore.getDirectResourceAnnotations(
-							itemDetailData.resourceId,
-							this.props.user,
-							this.state.activeProject,
-							this.onLoadResourceAnnotations.bind(this)
-						)
+						this.refreshResourceAnnotations(itemDetailData.resourceId);
 					}
 				}.bind(this));
 		}
-		if(found == false) {
+		if(found === false) {
 			this.setState({
 				itemData : data,
 				annotationTarget : null,
 				found : false
-			})
-			console.debug('this item does not exist');
+			});
 		}
 	}
 
@@ -245,22 +254,19 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	onSaveAnnotation(annotation) {
-		ComponentUtil.hideModal(this, 'showModal' , 'annotation__modal', true);
+		ComponentUtil.hideModal(this, 'showAnnotationModal' , 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type == 'Resource') {
-			this.refreshResourceAnnotations();
-		}
+		this.refreshResourceAnnotations();
 	}
 
 	onDeleteAnnotation(annotation) {
-		ComponentUtil.hideModal(this, 'showModal', 'annotation__modal', true);
+		ComponentUtil.hideModal(this, 'showAnnotationModal', 'annotation__modal', true);
 		//finally update the resource annotations (the "bookmark")
-		if(annotation && annotation.target && annotation.target.type == 'Resource') {
-			this.refreshResourceAnnotations();
-		}
+		this.refreshResourceAnnotations();
 	}
 
 	//TODO currently this is only called via the ugly componentDidUpdate() function
+	//FIXME this only properly supports whenever the target is a media object (see FlexPlayer)
 	setActiveAnnotationTarget(annotationTarget) {
 		this.setState(
 			{annotationTarget : annotationTarget},
@@ -274,8 +280,10 @@ class ItemDetailsRecipe extends React.Component {
 	//TODO extend with activeSubAnnotation?
 	setActiveAnnotation(annotation) {
 		this.setState({
-			activeAnnotation : annotation
-		})
+			annotationTarget: annotation.target,
+			activeAnnotation: annotation,
+			activeSubAnnotation : null
+		});
 	}
 
 	//tied to the annotateResourceBtn; used to annotate a resource as a whole
@@ -294,10 +302,13 @@ class ItemDetailsRecipe extends React.Component {
 		}
 	}
 
+	//returns the annotation that is directly added to the resource via the "Annotate resource" button
 	getResourceAnnotation() {
 		let annotation = null;
 		if(this.state.resourceAnnotations) {
-			let temp = this.state.resourceAnnotations.filter(a => a.motivation != 'bookmarking')
+			const temp = this.state.resourceAnnotations.filter(
+				a => a.motivation !== 'bookmarking' && a.target.source === this.state.itemData.resourceId
+			);
 			annotation = temp.length > 0 ? temp[0] : null;
 		}
 		return annotation
@@ -306,11 +317,9 @@ class ItemDetailsRecipe extends React.Component {
 	//show the annnotation form with the correct annotation target
 	//TODO extend this so the target can also be a piece of text or whatever
 	editAnnotation(annotation, subAnnotation) {
-		//TODO this should simply always just set the active annotation
-		//an annotation ALWAYS has a target, but not always a body or ID (in case of a new annotation)
 		if(annotation.target) {
 			this.setState({
-				showModal: true,
+				showAnnotationModal: true,
 				annotationTarget: annotation.target,
 				activeAnnotation: annotation,
 				activeSubAnnotation : subAnnotation
@@ -318,28 +327,70 @@ class ItemDetailsRecipe extends React.Component {
 		}
 	}
 
-	refreshResourceAnnotations() {
-		AnnotationStore.getDirectResourceAnnotations(
-			this.state.itemData.resourceId,
-			this.props.user,
-			this.state.activeProject,
-			this.onLoadResourceAnnotations.bind(this)
-		)
+	//returns all annotations that are tied to the given resourceId
+	refreshResourceAnnotations(resourceId = null) {
+		if(resourceId == null) {
+			resourceId = this.state.itemData.resourceId;
+		}
+		const filter = {
+			'target.selector.value.id' : resourceId,
+			'user.keyword' : this.props.user.id,
+		};
+		if(this.state.activeProject && this.state.activeProject.id) {
+			filter['project'] = this.state.activeProject.id
+		}
+		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id,
+			filter,
+			null,
+			this.onLoadResourceAnnotations.bind(this),
+			0, //offset
+			250, //size
+			null, //sort direction
+			null //dateRange
+		);
 	}
 
-	//TODO loaded all bookmarks associated with this resource (e.g. program, newspaper)
-	onLoadResourceAnnotations(data) {
+	onLoadResourceAnnotations(annotationList) {
 		this.setState({
-			resourceAnnotations : data.annotations || []
+			resourceAnnotations : annotationList || []
 		})
 	}
+
+	renderResourceAnnotationsTooltip() {
+    	if(!this.state.resourceAnnotations) {
+    		return null;
+    	}
+    	let html = '';
+    	const bookmarkGroups = this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking');
+    	const annotations = this.state.resourceAnnotations.filter(a => a.motivation !== 'bookmarking');
+
+    	if (bookmarkGroups.length > 0) {
+    		html += '<h5><u>Bookmark group(s)</u>:</h5><ul>';
+    		html += bookmarkGroups.map(
+         	   group => group.body && group.body.length > 0 && group.body[0].label ? "<li>" + group.body[0].label + "</li>" : ''
+        	).join('');
+        	html += '</ul>';
+    	}
+    	//count the number of annotation bodies
+    	if(annotations) {
+    		//html += '<h5><u>Number of annotated parts of this resource</u>: '+annotations.length+'</h5>';
+    		//count the number of annotation bodies
+    		let bodyCount = 0;
+    		annotations.forEach(a => bodyCount += a.body ? a.body.length : 0);
+    		html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
+    	}
+
+
+        return html;
+    }
 
 	/* ------------------------------------------------------------------
 	----------------------- PROJECTS ------------------------------------
 	--------------------------------------------------------------------- */
 
 	triggerProjectSelector() {
-		let showProjectModal = this.state.showProjectModal;
+		const showProjectModal = this.state.showProjectModal;
 		this.setState({
 			showProjectModal : !showProjectModal
 		});
@@ -347,11 +398,11 @@ class ItemDetailsRecipe extends React.Component {
 
 	//TODO test this
 	onProjectChanged(project) {
-		ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+		ComponentUtil.storeJSONInLocalStorage('activeProject', project);
 		ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
 			AnnotationActions.changeProject(project);
-			this.refreshResourceAnnotations()
-			if(this.state.awaitingProcess == 'bookmark') {
+			this.refreshResourceAnnotations();
+			if(this.state.awaitingProcess === 'bookmark') {
 				this.selectBookmarkGroup();
 			}
 		});
@@ -382,28 +433,47 @@ class ItemDetailsRecipe extends React.Component {
 	}
 
 	//finally after a bookmark group is selected, save the bookmark
-	bookmarkToGroupInProject(annotation) {
+	bookmarkToGroupInProject(allGroups, selectedGroups) {
 		ComponentUtil.hideModal(this, 'showBookmarkModal', 'bookmark__modal', true, () => {
-			//concatenate this resource to the existing "bookmark annotation"
-			const targets = annotation.target;
-			targets.push(
-				AnnotationUtil.generateSimpleResourceTarget(
-					this.state.itemData.resourceId,
-					this.state.itemData.index //collectionId
-				)
-			);
-			const temp = {};
-			const dedupedTargets = [];
-			targets.forEach((t) => {
-				if(!temp[t.source]) {
-					temp[t.source] = true;
-					dedupedTargets.push(t);
+			//run through all the bookmark groups to check if this resource is a member. Then check if it should be a member or not (anymore)
+			allGroups.forEach(group => {
+				const targets = group.target;
+				const shouldBeMember = selectedGroups[group.id] === true; //should the resource be a member or not
+
+				//first see if the resource is a member of the current group
+				const index = targets.findIndex(t => t.source === this.state.itemData.resourceId)
+
+				//this check only updates the bookmark group (and calls the annotation API) if membership changed
+				if(index != -1) { // if already a member
+					if(!shouldBeMember) { // ...and it shouldn't: remove it
+						targets.splice(index, 1);
+						group.target = targets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
+				} else { //if not a member
+					if(shouldBeMember) { // ...and it should be: add it
+						targets.push(
+							AnnotationUtil.generateResourceLevelTarget(
+								this.state.itemData.index, //collectionId
+								this.state.itemData.resourceId
+							)
+						);
+
+						//FIXME remove: this deduplocation check should not be necessary?
+						const temp = {};
+						const dedupedTargets = [];
+						targets.forEach((t) => {
+							if(!temp[t.source]) {
+								temp[t.source] = true;
+								dedupedTargets.push(t);
+							}
+						});
+						//set the deduped targets as the annotation target
+						group.target = dedupedTargets;
+						AnnotationAPI.saveAnnotation(group, this.onSaveBookmarks.bind(this));
+					}
 				}
 			})
-			//set the deduped targets as the annotation target
-			annotation.target = dedupedTargets;
-			//TODO implement saving the bookmarks in the workspace API
-			AnnotationAPI.saveAnnotation(annotation, this.onSaveBookmarks.bind(this));
 		});
 	}
 
@@ -412,19 +482,85 @@ class ItemDetailsRecipe extends React.Component {
 			selectedRows : {},
 			allRowsSelected : false
 		}, () => {
-			console.debug('saved bookmark, refreshing the annotations', data);
 			this.refreshResourceAnnotations();
 		})
 	}
 
+	/************************************************************************
+	************************ BROWSING FUNCTIONS *******************************
+	*************************************************************************/
 
+	browseEntity(entity) {
+		const selectedFacets = {};
+		selectedFacets[entity.field] = [entity.value];
+		const query = QueryModel.ensureQuery({
+			id : this.state.collectionConfig.getCollectionId(),
+			term : this.props.params.st,
+			desiredFacets : [{
+				field: entity.field,
+				title : this.state.collectionConfig.toPrettyFieldName(entity.field), //FIXME this could be also obtained from a user setting
+				type: "string",
+				exclude : false
+			}],
+			selectedFacets : selectedFacets
+		}, this.state.collectionConfig);
+
+		ComponentUtil.storeJSONInLocalStorage(
+			'user-last-query',
+			query
+		);
+
+		FlexRouter.gotoSingleSearch('cache')
+	}
+
+	getFieldValues(fieldName) {
+		//filter out the uninteresting fields
+		if(fieldName.indexOf('@context') !== -1 ||
+			fieldName.indexOf('hasFormat') !== -1 ||
+			fieldName.indexOf('@language') !== -1) {
+			return null
+		}
+		//make sure to remove the ES .keyword suffix, since the rawdata fieldnames don't have them
+		fieldName = fieldName.indexOf('.keyword') === -1 ?
+			fieldName :
+			fieldName.substring(0, fieldName.length - 8)
+
+		//this is the data to search for the values of the selected keyword field
+		let curObj = this.state.itemData.rawData;
+
+		//split the field name in path elements for lookup
+		const path = fieldName.split('.');
+		let i = 0;
+
+		//now look for the values of the selected field
+		while(i < path.length) {
+			if(curObj) {
+				//check if the current object is a list and the current path selects @value attributes from it
+				if(typeof(curObj) === "object" && curObj['@value'] === undefined && path[i] === '@value') {
+					curObj = curObj.map(obj => obj[path[i]]);
+					break;
+				}
+				//otherwise continue down the path, until the end is reached
+				curObj = curObj[path[i]];
+				i++;
+			} else {
+				break;
+			}
+		}
+		//always wrap the end-result in a list
+		if(typeof(curObj) === 'string') {
+			return [curObj]
+		}
+		return curObj;
+	}
 
 	/************************************************************************
 	************************ CALLED BY RENDER *******************************
 	*************************************************************************/
 
+
 	checkMediaObjectIsSelected(mediaObject) {
-		if(mediaObject.url == this.props.params.fragmentUrl) {
+		if(mediaObject.assetId === this.props.params.assetId) {
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
 			mediaObject.x = this.props.params.x;
@@ -440,8 +576,8 @@ class ItemDetailsRecipe extends React.Component {
 	//TODO this function is almost the same as checkMediaObjectIsSelected, remove the latter
 	getSelectedMediaObject() {
 		let mediaObject = null;
-		if(this.props.params.fragmentUrl) {
-			mediaObject = {url : this.props.params.fragmentUrl};
+		if(this.props.params.assetId) {
+			mediaObject = {assetId : this.props.params.assetId};
 			if(this.props.params.s) {
 				mediaObject.start = this.props.params.s;
 			}
@@ -466,7 +602,7 @@ class ItemDetailsRecipe extends React.Component {
 
 	getRenderedMediaContent() {
 		//first get all of the media contents per media type
-		let tabs = [
+		const tabs = [
 			this.getVideoTabContents(),
 			this.getAudioTabContents(),
 			this.getImageTabContents(),
@@ -476,20 +612,20 @@ class ItemDetailsRecipe extends React.Component {
 		//generate the tabs
 		const mediaTabs = tabs.map((tab, index) => {
 			const iconClass = IconUtil.getMimeTypeIcon(tab.type);
-			const active = this.props.params.fragmentUrl ? tab.active : index == 0;
+			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
 			return (
 				<li key={tab.type + '__tab'}
 					className={active ? 'active' : ''}>
 					<a data-toggle="tab" href={'#' + tab.type + '__content'}>
-						<span className={iconClass}></span>&nbsp;{tab.type}
+						<span className={iconClass}/>&nbsp;{tab.type}
 					</a>
 				</li>
 			)
-		}, this)
+		}, this);
 
 		//then the contents of the tabs
 		const mediaTabContents = tabs.map((tab, index) => {
-			const active = this.props.params.fragmentUrl ? tab.active : index == 0;
+			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
 			return (
 				<div key={tab.type + '__content'}
 					id={tab.type + '__content'}
@@ -503,7 +639,7 @@ class ItemDetailsRecipe extends React.Component {
 
 		//finally generate the mediaPanel
 		return (
-			<FlexBox title="Related media objects">
+			<FlexBox title="Media">
 				<ul className="nav nav-tabs">
 					{mediaTabs}
 				</ul>
@@ -518,11 +654,12 @@ class ItemDetailsRecipe extends React.Component {
 	getVideoTabContents() {
 		const mediaObjects = this.state.itemData.playableContent.filter(content => {
 			return content.mimeType.indexOf('video') !== -1;
-		})
+		});
 		if(mediaObjects.length > 0) {
 			const content = (
 				<FlexPlayer
 					mediaObjects={mediaObjects}
+                    title={this.state.itemData.title}
 					mediaType='video'
 
 					transcript={this.state.itemData.rawData.layer__asr || null}
@@ -531,14 +668,14 @@ class ItemDetailsRecipe extends React.Component {
 
                     useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 
+                    hideOffAirContent={this.state.collectionConfig.hideOffAirContent()}
+
 					user={this.props.user} //current user
 					project={this.state.activeProject} //selected via the ProjectSelector
 					resourceId={this.state.itemData.resourceId}
 					collectionId={this.state.itemData.index}
 
 					active={true}
-
-					enableFragmentMode={false} //get rid of this stupid property
 
 					annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
 					annotationLayers={this.props.recipe.ingredients.annotationLayers} //so the player can distribute annotations in layers
@@ -553,16 +690,16 @@ class ItemDetailsRecipe extends React.Component {
 
 	getAudioTabContents() {
 		const mediaObjects = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('audio') != -1;
-		})
+			return content.mimeType.indexOf('audio') !== -1;
+		});
 		if(mediaObjects.length > 0) {
 			const content = (
 				<FlexPlayer
 					mediaObjects={mediaObjects}
+                    title={this.state.itemData.title}
 					mediaType='audio'
 
 					transcript={this.state.itemData.rawData.layer__asr || null}
-
 					initialSearchTerm={this.props.params.st} //every player could interpret highlighting a search term
 
 					useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
@@ -573,8 +710,6 @@ class ItemDetailsRecipe extends React.Component {
 					collectionId={this.state.itemData.index}
 
 					active={true}
-
-					enableFragmentMode={false} //TODO get rid of this stupid property
 
 					annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
 					annotationLayers={this.props.recipe.ingredients.annotationLayers} //so the player can distribute annotations in layers
@@ -593,7 +728,7 @@ class ItemDetailsRecipe extends React.Component {
 		let cors = true;
 		let content = null;
 		const images = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('image') != -1;
+			return content.mimeType.indexOf('image') !== -1;
 		});
 		if(images.length > 0) {
 			images.forEach((mediaObject, index) => {
@@ -604,7 +739,7 @@ class ItemDetailsRecipe extends React.Component {
 				if(mediaObject.hasOwnProperty('cors') && mediaObject.cors === false) {
 					cors = false;
 				}
-			})
+			});
 			//CORS is required for OpenSeaDragon support!
 			if(cors === false) {
 				//for now simply draw a bunch of images on the screen (which means: no annotation support!)
@@ -623,7 +758,7 @@ class ItemDetailsRecipe extends React.Component {
 
 						useCredentials={this.state.collectionConfig.requiresPlayoutAccess()}
 
-						mediaObjects={images}//TODO make this plural for playlist support
+						mediaObjects={images}
 						selectedMediaObject={this.getSelectedMediaObject()}
 
 						annotationSupport={this.props.recipe.ingredients.annotationSupport} //annotation support the component should provide
@@ -643,15 +778,15 @@ class ItemDetailsRecipe extends React.Component {
 	getApplicationTabContents() {
 		let isActive = false;
 		const applications = this.state.itemData.playableContent.filter(content => {
-			return content.mimeType.indexOf('application') != -1;
-		})
+			return content.mimeType.indexOf('application') !== -1;
+		});
 		if(applications.length > 0) {
 			const content = applications.map((mediaObject, index) => {
 				mediaObject.id = 'application__' + index;
 				if(!isActive) {
 					isActive = this.checkMediaObjectIsSelected.call(this, mediaObject);
 				}
-				if(mediaObject.mimeType == 'application/javascript') {
+				if(mediaObject.mimeType === 'application/javascript') {
 					return (
 						<div style={{margin : '10px'}}>
 							Deze media kan i.v.m. beperkingen m.b.t. auteursrecht of het type content niet binnen de media suite worden afgespeeld
@@ -670,149 +805,368 @@ class ItemDetailsRecipe extends React.Component {
 		return null;
 	}
 
-	/* ------------------------------------------------------------------
-	----------------------- RENDER --------------------------------------
-	--------------------------------------------------------------------- */
+    saveResultsDetailsData(data, query, nextResultSet) {
+    	//store the RAW search results in the local storage...
+        ComponentUtil.storeJSONInLocalStorage('currentQueryOutput', data);
+
+        //also make sure the last query is stored...
+        ComponentUtil.storeJSONInLocalStorage('user-last-query', data.query);
+
+        //store all of the FORMATTED search results in the local storage...
+        const formattedResults = data.results.map((result, index) => {
+            return this.state.collectionConfig.getItemDetailData(
+            	data.results[index],
+                query.dateRange && query.dateField ? query.dateRange.dateField : null
+			);
+        });
+        ComponentUtil.storeJSONInLocalStorage('resultsDetailsData', formattedResults);
+
+
+        //FIXME this does not make any sense, this data is already available in formattedResults
+        //const result = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        if(nextResultSet) {
+            FlexRouter.gotoItemDetails(
+            	this.props.recipe.url.substr(1), formattedResults[0], this.props.params.st
+            );
+        } else {
+			FlexRouter.gotoItemDetails(
+				this.props.recipe.url.substr(1), formattedResults[formattedResults.length - 1], this.props.params.st
+			);
+        }
+    }
+
+    getResource(lastQuery, pageNumber, currentQueryOutput, nextResourceSet = true) {
+        if(currentQueryOutput) {
+            const query = lastQuery;
+            query.offset = nextResourceSet ? pageNumber * currentQueryOutput.query.size : (pageNumber - 1) * currentQueryOutput.query.size;
+            SearchAPI.search(
+            	query,
+            	this.state.collectionConfig,
+            	data => this.saveResultsDetailsData(data, query, nextResourceSet),
+            	true
+            )
+        }
+    }
+
+    gotoItemDetails(resourceId) {
+        const resultDetailsData = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+        const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+        const currentQueryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+        const pageNumber = currentQueryOutput.currentPage;
+		const result = resultDetailsData.find(elem => elem.resourceId === resourceId);
+
+        if (!resourceId) {
+            const indexCurrentResource = resultDetailsData.findIndex(elem => elem.resourceId === this.props.params.id);
+            if (indexCurrentResource === resultDetailsData.length - 1) {
+                this.getResource(userLastQuery, pageNumber,currentQueryOutput, true);
+                return;
+            } else if (indexCurrentResource === 0) {
+                this.getResource(userLastQuery, pageNumber-1,currentQueryOutput, false);
+                return;
+            }
+        }
+        if (this.props.recipe.url && resourceId) {
+            FlexRouter.gotoItemDetails(this.props.recipe.url.substr(1), result, this.props.params.st);
+        } else {
+            this.setState({showAnnotationModal: true})
+        }
+    }
+
+    gotToSearchResults(userLastQuery){
+        if(userLastQuery && userLastQuery.id) {
+            FlexRouter.gotoSingleSearch('cache');
+        }
+        return false;
+    }
+
+    /* ------------------------------------ TOP BUTTON BAR ----------------------------- */
+
+    //only render when coming from the single search recipe (checking this.props.param.bodyClass == noHeader)
+    renderResultListPagingButtons = () => {
+    	const userLastQuery = ComponentUtil.getJSONFromLocalStorage('user-last-query');
+    	const searchResults = ComponentUtil.getJSONFromLocalStorage('resultsDetailsData');
+    	const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
+    	const queryOutput = ComponentUtil.getJSONFromLocalStorage('currentQueryOutput');
+
+    	if(!userLastQuery || !searchResults || !queryOutput) {
+    		return null;
+    	}
+        const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.params.id);
+
+    	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
+    	const prevResource = currentIndex > 0 ? searchResults[currentIndex-1].resourceId : false;
+        const nextResource = (searchResults.length - 1) > currentIndex ?
+        	searchResults[currentIndex+1].resourceId : false;
+
+		const isFirstResource = (userLastQuery.offset === 0 && currentIndex === 0);
+
+        let isLastHit = false;
+        if((queryOutput.currentPage * queryOutput.query.size) >= queryOutput.totalHits) {
+            isLastHit = searchResults[searchResults.length - 1].resourceId === this.state.itemData.resourceId;
+        }
+
+        const previousResourceBtn = (
+            <button className="btn btn-primary" disabled={isFirstResource}
+                    onClick={this.gotoItemDetails.bind(this, prevResource)}>
+                <i className="glyphicon glyphicon-step-backward" aria-hidden="true"/> Previous resource
+            </button>
+        );
+        const nextResourceBtn = (
+            <button className="btn btn-primary" disabled={isLastHit}
+                    onClick={this.gotoItemDetails.bind(this, nextResource)}>
+                Next resource <i className="glyphicon glyphicon-step-forward" aria-hidden="true"/>
+            </button>
+        );
+        const backToSearchBtn = (
+            <button className="btn btn-primary"
+                    onClick={this.gotToSearchResults.bind(this, userLastQuery)}>
+                Back to results
+            </button>
+        );
+
+
+        return (
+        	<span>{previousResourceBtn}&nbsp;{nextResourceBtn}&nbsp;{backToSearchBtn}</span>
+        )
+    }
+
+
+    /* ------------------------------------ ALL THE MODALS ----------------------------- */
+
+    renderProjectModal = (showProjectModal) => {
+    	if(showProjectModal) {
+			return (
+				<FlexModal
+					elementId="project__modal"
+					stateVariable="showProjectModal"
+					owner={this}
+					size="large"
+					title="Select a project">
+						<ProjectSelector onOutput={this.onComponentOutput.bind(this)} user={this.props.user}/>
+				</FlexModal>
+			)
+		}
+		return null
+    }
+
+    renderAnnotationModal = (showModal, activeProject, activeAnnotation, activeSubAnnotation) => {
+    	if(showModal && activeAnnotation && activeAnnotation.target) {
+			return (
+				<FlexModal elementId="annotation__modal"
+					stateVariable="showAnnotationModal"
+					float="right"
+					owner={this}
+					title={'Annotate: ' + activeAnnotation.target.source}>
+					<AnnotationBox
+						user={this.props.user} //current user
+						project={activeProject} //selected via ProjectSelector
+						annotation={activeAnnotation}
+						activeSubAnnotation={activeSubAnnotation}
+						annotationModes={this.props.recipe.ingredients.annotationModes}/>
+				</FlexModal>
+			);
+		}
+		return null
+    }
+
+    renderBookmarkModal = (showBookmarkModal, activeProject, itemData) => {
+    	if(showBookmarkModal) {
+			return (
+				<FlexModal
+					elementId="bookmark__modal"
+					stateVariable="showBookmarkModal"
+					owner={this}
+					size="large"
+					title="Select one or more bookmark groups to associate the current resource with">
+						<BookmarkSelector
+							onOutput={this.onComponentOutput.bind(this)}
+							user={this.props.user}
+							project={activeProject}
+							collectionId={itemData.index}
+							resourceId={itemData.resourceId}
+							/>
+				</FlexModal>
+			)
+		}
+		return null
+    }
+
+    /* ----------------------------- EXPLORATION & RECOMMENDATION -------------------- */
+
+    renderExploreBlock = () => {
+    	const exploreFields = {};
+    	const orgNames = {};
+		this.state.collectionConfig.getKeywordFields().forEach((kw) => {
+			const values = this.getFieldValues(kw);
+			if(values) {
+                exploreFields[this.state.collectionConfig.toPrettyFieldName(kw)] = values;
+                orgNames[this.state.collectionConfig.toPrettyFieldName(kw)] = kw;
+			}
+		});
+		if(Object.keys(exploreFields).length === 0) {
+			return null;
+		}
+        return (
+            <FlexBox isVisible={false} title="Related content (experimental)">
+                <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+                    <h4>Search for related content</h4>
+                    <div className="property-list">
+                        {
+                            Object.keys(exploreFields).sort().map((kw, index) => {
+
+                                //make nice buttons for each available value for the current keyword
+                                const fieldValues = exploreFields[kw].map(value => {
+                                    const entity = {field: orgNames[kw], value: value};
+                                    return (
+                                        <div className="keyword" onClick={this.browseEntity.bind(this, entity)}>
+                                            {entity.value}
+                                        </div>
+                                    )
+                                });
+                                //then return a block with a pretty field title + a column of buttons for each value
+                                return (
+                                    <div className="cl_table cl_table--2cols">
+                                        <div className="cl_table-cell left-cell">
+                                            <span data-for={'tooltip__' + index} data-tip={orgNames[kw]} data-html={true}>
+                                                <i className="fa fa-info-circle"/>
+                                            </span> {kw}
+                                            <ReactTooltip id={'tooltip__' + index}/>
+                                        </div>
+                                        <div className="cl_table-cell right-cell">
+                                            {fieldValues}
+                                        </div>
+                                    </div>
+                                )
+
+                            })
+                        }
+                    </div>
+                </div>
+            </FlexBox>
+        )
+    }
+
+    renderJSONDataBlock() {
+    	if (this.state.itemData.rawData) {
+            return (
+	            <FlexBox isVisible={false} title="All Data">
+	                <div className={IDUtil.cssClassName('keyword-browser', this.CLASS_PREFIX)}>
+	                    <div className={IDUtil.cssClassName('raw-data', this.CLASS_PREFIX)}>
+							<ReactJson src={this.state.itemData.rawData} />
+						</div>
+	                </div>
+	            </FlexBox>
+            )
+        }
+        return null;
+    }
 
 	render() {
 		if(!this.state.itemData) {
-			return (<h4>Loading item</h4>);
+           return <LoadingSpinner message="Loading resource..."/>;
 		} else if(this.state.found === false) {
 			return (<h4>Either you are not allowed access or this item does not exist</h4>);
 		} else {
-			let ldResourceViewer = null;
 			let annotationList = null;
-
-			let metadataPanel = null;
 			let mediaPanel = null;
 
-			let annotationModal = null;
-			let projectModal = null; //disabled when there is ingredients.disableProject = true
-			let bookmarkModal = null;
+			//FIXME there is something wrong with the arrow functions, bind() is still required!
+			const annotationModal = this.renderAnnotationModal(
+				this.state.showAnnotationModal,
+				this.state.activeProject,
+				this.state.activeAnnotation,
+				this.state.activeSubAnnotation
+			);
+
+			const projectModal = this.renderProjectModal(this.state.showProjectModal); //disabled when there is ingredients.disableProject = true
+			const bookmarkModal = this.renderBookmarkModal(this.state.showBookmarkModal, this.state.activeProject, this.state.itemData);
 
 			let projectSelectorBtn = null;
+			let bookmarkIcon = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
-
+            let resourceListPagingButtons = null;
 
 			//on the top level we only check if there is any form of annotationSupport
 			if(this.props.recipe.ingredients.annotationSupport) {
-				if(this.state.showModal) {
-					annotationModal = (
-						<FlexModal
-							elementId="annotation__modal"
-							stateVariable="showModal"
-							float="right"
-							owner={this}
-							title={'Annotate: ' + AnnotationUtil.extractAssetIdFromTargetSource(
-								this.state.activeAnnotation)
-							}>
-							<AnnotationBox
-								user={this.props.user} //current user
-								project={this.state.activeProject} //selected via ProjectSelector
-								annotation={this.state.activeAnnotation}
-								activeSubAnnotation={this.state.activeSubAnnotation}
-								annotationModes={this.props.recipe.ingredients.annotationModes}/>
-						</FlexModal>
+
+				//draw the annotation list, which only shows annotations related to the active annotationTarget
+				if(this.state.annotationTarget) {
+					annotationList = (
+						<AnnotationList
+							key={'__anno-list__' + this.state.annotationTarget.source}
+							user={this.props.user} //current user
+							project={this.state.activeProject} //selected via ProjectSelector
+							activeAnnotation={this.state.activeAnnotation} //the active annotation
+							annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
+						/>
 					);
 				}
-				annotationList = (
-					<AnnotationList
-						user={this.props.user} //current user
-						project={this.state.activeProject} //selected via ProjectSelector
-						activeAnnotation={this.state.activeAnnotation} //the active annotation
-						annotationTarget={this.state.annotationTarget} //the current annotation target (later this can be also an annotation)
-					/>
-				);
 
-
+				//draw the button for annotating the resource as a whole
+				const hasResourceAnnotation = this.getResourceAnnotation() ? true : false;
 				resourceAnnotationBtn = (
 					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
 						Annotate resource
+						&nbsp;
+						<i className="fa fa-star" style={ hasResourceAnnotation ? {color: 'red'} : {color: 'white'} }/>
 					</button>
-				)
+				);
+			}
+			if(this.props.params.bodyClass !== 'noHeader') {
+				resourceListPagingButtons = this.renderResultListPagingButtons();
 			}
 
 			if(!this.props.recipe.ingredients.disableProjects) {
-
-				//project modal
-				if(this.state.showProjectModal) {
-					projectModal = (
-						<FlexModal
-							elementId="project__modal"
-							stateVariable="showProjectModal"
-							owner={this}
-							size="large"
-							title="Select a project">
-								<ProjectSelector onOutput={this.onComponentOutput.bind(this)} user={this.props.user}/>
-						</FlexModal>
-					)
-				}
-
-				//bookmark modal
-				if(this.state.showBookmarkModal) {
-					bookmarkModal = (
-						<FlexModal
-							elementId="bookmark__modal"
-							stateVariable="showBookmarkModal"
-							owner={this}
-							size="large"
-							title="Select or enter a bookmark group">
-								<BookmarkSelector
-									onOutput={this.onComponentOutput.bind(this)}
-									user={this.props.user}
-									project={this.state.activeProject}
-									collectionId={this.state.itemData.index}
-									/>
-						</FlexModal>
-					)
-				}
 
 				//project selector button
 				projectSelectorBtn = (
 					<button className="btn btn-primary" onClick={this.triggerProjectSelector.bind(this)}>
 						Projects ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
 					</button>
-				)
+				);
 
-				//let's determine whether the resource was added to a bookmark group
-				let partOfBookmarkGroup = false;
+
 				if(this.state.resourceAnnotations) {
-					let groups = this.state.resourceAnnotations.filter(a => a.motivation == 'bookmarking');
-					partOfBookmarkGroup = groups.length > 0;
-				}
+					//draw the bookmark group button
+					bookmarkBtn = (
+						<button
+							className="btn btn-primary"
+							onClick={this.bookmark.bind(this)}
+							title="Control the bookmark groups this resource is associated with">
+							Groups
+							({this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking').length})
+						</button>
+					)
 
-				//bookmark button (TODO query for determining existing bookmark should be updated!!!)
-				bookmarkBtn = (
-					<button className="btn btn-primary" onClick={this.bookmark.bind(this)}>
-						Bookmark
-						&nbsp;
-						<i className="fa fa-star" style={
-							partOfBookmarkGroup ? {color: 'red'} : {color: 'white'}
-						}></i>
-					</button>
-				)
+					//draw the bookmark icon
+		            bookmarkIcon = (
+		            	 <div data-for="__res_anno" data-tip={this.renderResourceAnnotationsTooltip()} data-html={true} className="bookmarked">
+							<i className="fa fa-bookmark" style={
+								this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
+							}/>
+							<ReactTooltip id={'__res_anno'}/>
+						</div>
+		            )
+		        }
 			}
 
 			//render the complete metadata block, which includes unique and basic metadata
-			metadataPanel = (
+			const metadataPanel = (
 				<FlexBox title="Metadata">
 					<MetadataTable data={this.state.itemData}/>
 				</FlexBox>
-			)
+			);
 
 			//media objects
-			if(this.state.itemData.playableContent) {
+			if(this.state.itemData.playableContent && this.state.itemData.playableContent.length > 0) {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 
-			//make this pretty & nice and work with awesome LD later on
-			if(1 == 2) {
-				ldResourceViewer = (
-					<LDResourceViewer resourceId={this.state.itemData.resourceId}
-						graphId={this.state.itemData.collectionId}/>
-				)
-			}
+			//render the exploration block
+            const exploreBlock = this.renderExploreBlock();
+
+            const jsonDataBlock = this.renderJSONDataBlock();
 
 			return (
 				<div className={IDUtil.cssClassName('item-details-recipe')}>
@@ -821,20 +1175,32 @@ class ItemDetailsRecipe extends React.Component {
 					{bookmarkModal}
 					<div className="row">
 						<div className="col-md-12">
+							{bookmarkIcon}
 							{projectSelectorBtn}
 							&nbsp;
 							{bookmarkBtn}
 							&nbsp;
 							{resourceAnnotationBtn}
+                            &nbsp;
+                            {resourceListPagingButtons}
+							<br/>
 							<br/>
 							{mediaPanel}
+							<br/>
 							<div className="row">
 								<div className="col-md-7">
-									{metadataPanel}
+									<div className="row">
+										{metadataPanel}
+									</div>
+                                    <div className="row">
+                                        {exploreBlock}
+                                    </div>
+                                    <div className="row">
+                                        {jsonDataBlock}
+                                    </div>
 								</div>
 								<div className="col-md-5">
 									{annotationList}
-									{ldResourceViewer}
 								</div>
 								<br/>
 							</div>

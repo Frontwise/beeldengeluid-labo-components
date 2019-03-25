@@ -1,0 +1,28 @@
+.bg__collection-analyser {
+	cursor: default;
+	.current_field{
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid #aaa;
+		table{
+			font-size: 0.9em;
+			background-color: white;
+			width: 100%;
+			td, th{
+				border-bottom: 1px solid #eee;
+				padding: 5px;
+				vertical-align: top;
+			}
+
+			.title{
+				font-weight: bold;
+			}
+
+			.total{
+				float: right;
+				color: #aaa;
+				font-size: 0.8em;
+			}
+		}
+	}
+}

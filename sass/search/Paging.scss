@@ -1,0 +1,31 @@
+.bg__paging {}
+
+//media queries to handle paging issues when too many page numbers are displayed.
+@media screen and (max-width: 662px) {
+	.bg__paging {
+		.btn-default:nth-of-type(n + 5):not(.next-last-page) {
+			display:none;
+		}
+	}
+}
+@media screen and (max-width: 710px) {
+	.bg__paging {
+		.btn-default:nth-of-type(n + 6):not(.next-last-page) {
+			display:none;
+		}
+	}
+}
+@media screen and (max-width: 1201px) {
+	.bg__paging {
+		.btn-default:nth-of-type(n + 7):not(.next-last-page) {
+			display:none;
+		}
+	}
+}
+@media screen and (min-width: 1202px) {
+	.bg__paging {
+		.btn-default:nth-of-type(n + 10):not(.next-last-page) {
+			display:none;
+		}
+	}
+}

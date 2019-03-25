@@ -1,12 +1,16 @@
 import PropTypes from 'prop-types';
 import MouseTrap from 'mousetrap';
 
+import MediaObject from '../../../model/MediaObject';
+import MediaSegment from '../../../model/MediaSegment';
+
 import HTML5AudioPlayer from '../audio/HTML5AudioPlayer';
 
 import HTML5VideoPlayer from './HTML5VideoPlayer';
 import VimeoPlayer from './VimeoPlayer';
 import YouTubePlayer from './YouTubePlayer';
 
+import PlayList from '../segmentation/PlayList';
 import SegmentationTimeline from '../segmentation/SegmentationTimeline';
 import SegmentationControls from '../segmentation/SegmentationControls';
 
@@ -16,14 +20,17 @@ import AnnotationTimeline from '../annotation/AnnotationTimeline';
 import AnnotationSummary from '../../annotation/AnnotationSummary';
 
 import IDUtil from '../../../util/IDUtil';
-import TimeUtil from '../../../util/TimeUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 import AnnotationUtil from '../../../util/AnnotationUtil';
 import IconUtil from '../../../util/IconUtil';
+import RegexUtil from '../../../util/RegexUtil';
 
 import FlexBox from '../../FlexBox';
 
 import AppAnnotationStore from '../../../flux/AnnotationStore';
 import AnnotationActions from '../../../flux/AnnotationActions';
+
+//TODO test out media fragments to shield off "off-air content"
 
 /*
 This class receives a (generic) playerAPI from the implementing player component.
@@ -47,23 +54,23 @@ http://localhost:5302/recipe/default-item-details?id=4238372@program&cid=nisv-ca
 
 TODO: check out this new React player: https://github.com/CookPete/react-player
 
-
-TODO: rebuild this class to assume a single media type + playlist!!
 */
 
 class FlexPlayer extends React.Component {
 
 	constructor(props) {
 		super(props);
-		const mediaObjects = this.props.mediaObject ? [this.props.mediaObject] : this.props.mediaObjects
 
+		const currentMediaObject = this.determineCurrentMediaObject(this.props.mediaObjects, this.props.transcript, this.props.initialSearchTerm);
 		this.state = {
-			playList : mediaObjects,
-			currentMediaObject : mediaObjects[0],//this one can be set per player
+			currentMediaObject : currentMediaObject,
+			currentMediaSegment : currentMediaObject.segments || null,
+			transcriptMatches : this.calcTranscriptMatchesPerMediaObject(this.props.mediaObjects, this.props.transcript, this.props.initialSearchTerm),
 
 			playerAPI : null,
 
-			curPosition : 0,
+			relativePosition : 0, //player pos relative to on-air start time (e.g. on-air starts at 6:01, real player = 8:01, so relative pos = 2:00)
+			realPosition : 0, //real player position
 			duration : 0,
 
 			segmentStart : -1, //start point of the active ANNOTATION
@@ -71,15 +78,49 @@ class FlexPlayer extends React.Component {
 
 			paused : true,//FIXME call the player API instead (isPaused)?
 
-			fragmentMode : false, //only play the current fragment
-
 			annotations : [], //populated in onLoadAnnotations()
 			activeAnnotation : null,
 			activeAnnotationIndex : -1,
 			mediaObjectAnnotation : null //populated in onLoadAnnotations(), there should only be one per user!
 		}
-		this.CLASS_PREFIX = 'fxp'
 	}
+
+	//returns the first media object that matches the search term in the accompanied transcript (if any, else it returns the first media object)
+	determineCurrentMediaObject = (mediaObjects, transcript, initialSearchTerm) => {
+		if(!transcript || !initialSearchTerm) return mediaObjects[0];
+		let regex = null;
+		try {
+			regex = RegexUtil.generateRegexForSearchTerm(initialSearchTerm);
+		} catch(err) {
+			console.debug('invalid regex');
+		}
+		const firstMatch = regex ? transcript.find(phrase => {
+			//console.debug(phrase.words.toLowerCase(), this.props.initialSearchTerm)
+			return phrase.words.search(regex) != -1
+		}) : null;
+		return firstMatch ? mediaObjects.find(mo => mo.assetId === firstMatch.carrierId) : mediaObjects[0];
+	};
+
+	//TODO get the number of matches per segment as well!
+	calcTranscriptMatchesPerMediaObject = (mediaObjects, transcript, initialSearchTerm) => {
+		if(!transcript || !initialSearchTerm) return {};
+
+		const matches = {}
+		let regex = null;
+		try {
+			regex = RegexUtil.generateRegexForSearchTerm(initialSearchTerm);
+		} catch(err) {
+			console.debug('invalid regex');
+		}
+		if(regex) {
+			mediaObjects.forEach(mo => {
+				matches[mo.assetId] = this.getTranscript(transcript, mo).filter(phrase => {
+					return phrase.words.search(regex) != -1
+				}).length;
+			});
+		}
+		return matches;
+	};
 
 	//TODO make sure to offer support for rendering different players, now it's just Vimeo (ArtTube needs this)
 	componentDidMount() {
@@ -92,9 +133,7 @@ class FlexPlayer extends React.Component {
 		const mediaObjects = this.props.mediaObject ? [this.props.mediaObject] : this.props.mediaObjects;
 		mediaObjects.forEach(mo => {
 			AppAnnotationStore.bind(
-				AnnotationUtil.removeSourceUrlParams(
-					mo.url
-				),
+				mo.assetId,
 				this.onChange.bind(this)
 			);
 		});
@@ -122,7 +161,7 @@ class FlexPlayer extends React.Component {
 			{activeAnnotation : annotation},
 			() => {
 				AppAnnotationStore.getMediaObjectAnnotations(
-					this.state.currentMediaObject.url,
+					this.state.currentMediaObject.assetId,
 					this.props.user,
 					this.props.project,
 					this.onLoadAnnotations.bind(this)
@@ -131,19 +170,22 @@ class FlexPlayer extends React.Component {
 		)
 	}
 
-	onLoadAnnotations(data) {
+	onLoadAnnotations(annotationList) {
 		let annotations = null;
 		let mediaObjectAnnotation = null;
-		if(data) {
-			annotations = data.annotations;
+		if(annotationList) {
 			//get the annotation on the media object level (there should be only one per user!)
-			mediaObjectAnnotation = data.annotations.filter((a) => {
-				return a.target.source === this.state.currentMediaObject.url && a.target.selector == null;
+			mediaObjectAnnotation = annotationList.filter((a) => {
+			    if (a.target){
+			        return a.target.source === this.state.currentMediaObject.assetId && a.target.selector === null;
+			    } else {
+			        return false;
+			    }
 			});
 			mediaObjectAnnotation = mediaObjectAnnotation.length > 0 ? mediaObjectAnnotation[0] : null;
 		}
 		this.setState({
-			annotations : annotations,
+			annotations : annotationList,
 			mediaObjectAnnotation : mediaObjectAnnotation
 		});
 	}
@@ -215,10 +257,6 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
-	onGetDuration(value) {
-		this.setState({duration : value});
-	}
-
 	onPause(paused) {
         this.setState({paused : true});
         if(this.props.onPause) {
@@ -226,8 +264,21 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
+	//TODO test this well! (relative duration)
+	onGetDuration(value) {
+		if(!isNaN(value)) {
+			this.setState({
+				duration : FlexPlayerUtil.onAirDuration(value, this.state.currentMediaObject)
+			})
+		}
+	}
+
+	//TODO test this well! (relative player pos)
 	onGetPosition(value) {
-	    this.setState({curPosition : value});
+	    this.setState({
+	    	relativePosition : FlexPlayerUtil.timeRelativeToOnAir(value, this.state.currentMediaObject),
+	    	realPosition : value
+	    })
 	}
 
 	loadProgress(data) {
@@ -252,28 +303,38 @@ class FlexPlayer extends React.Component {
 
 	setManualStart(start) {
 		if(start > 0 && start <= this.state.duration) {
-		    this.setState({segmentStart : start}, this.state.playerAPI.seek(start));
+		    this.setState(
+		    	{segmentStart : start},
+		    	() => {
+		    		this.__doOnAirSeek(start)
+		    	}
+		    );
 		}
 	}
 
 	setManualEnd(end) {
 		if(end > 0 && end <= this.state.duration) {
-		    this.setState({segmentEnd : end}, this.state.playerAPI.seek(end));
+		    this.setState(
+		    	{segmentEnd : end},
+		    	() => {
+		    		this.__doOnAirSeek(end)
+		    	}
+		    );
 		}
 	}
 
 	playStart() {
-    	this.state.playerAPI.seek(this.state.segmentStart);
+		this.__doOnAirSeek(this.state.segmentStart)
 	}
 
 	playEnd() {
-    	this.state.playerAPI.seek(this.state.segmentEnd);
+    	this.__doOnAirSeek(this.state.segmentEnd)
 	}
 
 	setStart(start) {
 	    let temp = -1;
 	    if(start == undefined) {
-	        temp = this.state.curPosition;
+	        temp = this.state.relativePosition;
 	    } else {
 	        temp = start;
 	    }
@@ -290,7 +351,7 @@ class FlexPlayer extends React.Component {
 	setEnd(end, skipPause) {
 	    let temp = -1;
 	    if(end == undefined) {
-	        temp = this.state.curPosition;
+	        temp = this.state.relativePosition;
 	    } else {
 	        temp = end;
 	    }
@@ -308,25 +369,16 @@ class FlexPlayer extends React.Component {
 	}
 
 	rw(t) {
-		this.state.playerAPI.seek(this.state.curPosition - t);
+		this.__doOnAirSeek(this.state.relativePosition - t)
 	}
 
 	ff(t) {
-		this.state.playerAPI.seek(this.state.curPosition + t);
+		this.__doOnAirSeek(this.state.relativePosition + t)
 	}
 
-	//Note: for now the fragment mode only enables the user to inspect the current
-	//fragment in isolation (only the SegmentationTimeline is changed to show only the active segment)
-	switchMode() {
-		if(this.state.segmentStart != -1 && this.state.segmentEnd != -1) {
-			if(this.state.fragmentMode === false) {
-				this.playStart();
-				//TODO make it play after switching!
-			}
-			this.setState({fragmentMode : !this.state.fragmentMode});
-		} else {
-			alert('You can only switch to fragment mode when you have an active start & end point set');
-		}
+	//this is the central seek function of the FlexPlayer and makes sure all seeks take on air content into account
+	__doOnAirSeek(time) {
+		FlexPlayerUtil.seekRelativeToOnAir(this.state.playerAPI, time, this.state.currentMediaObject)
 	}
 
 	/************************************** Keyboard controls ***************************************/
@@ -393,13 +445,6 @@ class FlexPlayer extends React.Component {
 		    	this.checkFocus.call(this, this.editMediaObjectAnnotation);
 		    }.bind(this));
 	    }
-
-	    //only allow if it is enabled
-	    if(this.props.enableFragmentMode) {
-		    Mousetrap.bind('shift+z', function() {
-		    	this.checkFocus.call(this, this.switchMode);
-		    }.bind(this));
-		}
 
 	    //fast forward shortcuts (somehow cannot create these in a loop...)
 	    Mousetrap.bind('1', function() {
@@ -479,13 +524,13 @@ class FlexPlayer extends React.Component {
 	playAnnotation(annotation) {
 		if(annotation && annotation.target) {
 			//TODO make sure to check the mimeType and also add support for images/spatial targets!!
-			if(annotation.target.source == AnnotationUtil.removeSourceUrlParams(this.state.currentMediaObject.url)) {
+			if(annotation.target.source == this.state.currentMediaObject.assetId) {
 				this.setActiveAnnotation(annotation);
-				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation);
+				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(annotation.target);
 				if(frag) {
-					this.state.playerAPI.setActiveSegment(frag, true, true);
+					this.state.playerAPI.setActiveSegment(this.state.currentMediaObject, frag, true, true);
 				} else {
-					this.state.playerAPI.setActiveSegment(null, true, true);
+					this.state.playerAPI.setActiveSegment(this.state.currentMediaObject, null, true, true);
 				}
 			}
 		}
@@ -531,12 +576,16 @@ class FlexPlayer extends React.Component {
 
 	newSegmentFromLast() {
 		if(this.state.segmentEnd > 0) {
-			this.setState({
-				activeAnnotation : null,
-				segmentStart : this.state.segmentEnd,
-				segmentEnd : -1
-			},
-			this.state.playerAPI.seek(this.state.segmentEnd))
+			this.setState(
+				{
+					activeAnnotation : null,
+					segmentStart : this.state.segmentEnd,
+					segmentEnd : -1
+				},
+				() => {
+					this.__doOnAirSeek(this.state.segmentEnd)
+				}
+			)
 		} else {
 			this.newSegment();
 		}
@@ -573,25 +622,6 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
-	playTrack(index) {
-		this.setState(
-			{
-				currentMediaObject : this.state.playList[index],
-				playerAPI : null,
-				activeAnnotation : null,
-				segmentStart : -1,
-				segmentEnd : -1
-			},
-			() => {
-				//make sure to load the annotations of the selected track
-				this.loadAnnotations(null);
-
-				//communicate the selected track back to the details page
-				this.onOutput(this.state.playList[index])
-			}
-		)
-	}
-
 	/* ----------------- inter component communication --------------------- */
 
 	onOutput(mediaObject) {
@@ -600,10 +630,154 @@ class FlexPlayer extends React.Component {
 		}
 	}
 
-	/* ----------------- just rendering --------------------- */
+	/* ----------------- RENDERING ANNOTATION & SEGMENTATION COMPONENTS --------------------------- */
+
+	renderSegmentationControls = (activeAnnotation, segmentStart, segmentEnd) => {
+		return (
+			<SegmentationControls
+				controls={{
+					setManualStart : this.setManualStart.bind(this),
+					setManualEnd : this.setManualEnd.bind(this)
+				}}
+				annotation={activeAnnotation}
+				start={segmentStart}
+				end={segmentEnd}/>
+		)
+	}
+
+	renderAnnotationSummary = (activeAnnotation, tiers) => {
+		return (
+			<AnnotationSummary
+				annotation={activeAnnotation}
+				annotationLayers={tiers}
+				showTitle={false}/>
+		)
+	}
+
+	renderTiers = (state, tiers) => {
+		let segmentationTier = this.renderSegmentationTier(state);
+		let annotationTier = this.renderAnnotationTier(state, tiers);
+		return (
+			<div className="row">
+				<div className="col-md-12">
+					<div>
+						{segmentationTier}
+						{annotationTier}
+					</div>
+				</div>
+			</div>
+		)
+	}
+
+	renderSegmentationTier = (state) => {
+		return (
+			<SegmentationTimeline
+				mediaObject={state.currentMediaObject}
+				duration={state.duration}
+				curPosition={state.relativePosition}
+
+				start={state.segmentStart}
+				end={state.segmentEnd}
+
+				playerAPI={state.playerAPI}
+			/>
+		)
+	}
+
+	renderAnnotationTier = (state, tiers) => {
+		return (
+			<AnnotationTimeline
+				mediaObject={state.currentMediaObject}
+				duration={state.duration}
+				curPosition={state.relativePosition}
+
+				start={state.segmentStart}
+				end={state.segmentEnd}
+
+				playerAPI={state.playerAPI}
+
+				annotations={state.annotations}
+				annotation={state.activeAnnotation}
+				annotationLayers={tiers}
+			/>
+		)
+	}
+
+	/* ----------------- RENDERING THE TRANSCRIBER --------------------------------------------*/
+
+	//takes into account the active carrier/track and whether it relates to off-air content or not
+	getTranscript = (transcript, currentMediaObject) => {
+		if(!transcript || !currentMediaObject) return null;
+		return transcript.filter(t => {
+			//first make sure the transcript only includes the active carrier/track
+			if(t.carrierId === currentMediaObject.assetId) {
+				//then make sure the transcript does not contain off-air lines
+				if(!FlexPlayerUtil.isTimeBeforeOnAir(t.start / 1000, currentMediaObject) &&
+					!FlexPlayerUtil.isTimeAfterOnAir(t.start / 1000, currentMediaObject)) {
+					return true
+				}
+			}
+			return false
+		})
+	}
+
+	renderTranscriber = (transcript, playerAPI, initialSearchTerm, currentMediaObject, realPosition) => {
+		if(!(transcript && transcript.length > 0 && playerAPI && currentMediaObject)) return null;
+		return (
+			<Transcriber
+				key={'transcriber__' + currentMediaObject.assetId}
+				initialSearchTerm={this.props.initialSearchTerm}
+				transcript={transcript}
+				curPosition={realPosition}
+				playerAPI={playerAPI}
+				mediaObject={currentMediaObject}
+			/>
+		)
+	}
+
+	/* ----------------- RENDER THE TRACKLIST ------------------------------------------------ */
+
+	playTrack(mediaObject, segment) {
+		if(mediaObject.assetId === this.state.currentMediaObject.assetId) {
+			this.setState({
+				currentMediaSegment : segment
+			})
+		} else {
+			this.setState(
+				{
+					currentMediaObject : mediaObject,
+					currentMediaSegment : segment,
+					playerAPI : null,
+					activeAnnotation : null,
+					segmentStart : -1,
+					segmentEnd : -1
+				},
+				() => {
+					//make sure to load the annotations of the selected track
+					this.loadAnnotations(null);
+
+					//communicate the selected track back to the details page
+					this.onOutput(mediaObject)
+				}
+			)
+		}
+	}
+
+	//FIXME make this a nice coherant list, instead of the horrible abomination it is now
+	renderPlayList = (playList) => {
+		if(!playList || playList.length === 0 || (playList.length === 1 && !playList[0].segments)) return null;
+
+		return (
+			<FlexBox title="Play list (including segments)" isVisible={false}>
+				<PlayList mediaObjects={playList} transcriptMatches={this.state.transcriptMatches} onSelect={this.playTrack.bind(this)}/>
+			</FlexBox>
+		)
+	}
+
+	/* ----------------- MAIN RENDER --------------------------------------------------------- */
 
 	render() {
-		//update the activeSegment in the playerAPI
+		//first update the activeSegment in the playerAPI
 		if(this.state.segmentStart != -1 && this.state.segmentEnd != -1 && this.state.playerAPI) {
 			this.state.playerAPI.setActiveSegment({
 				segmentStart : this.state.segmentStart,
@@ -611,72 +785,32 @@ class FlexPlayer extends React.Component {
 			});
 		}
 
+		//then just continue rendering
+		const annotationSummary = this.state.activeAnnotation ? this.renderAnnotationSummary(
+			this.state.activeAnnotation,
+			this.props.annotationLayers
+		) : null;
+
+		//render annotation & segmentation controls & tiers
 		let segmentationControls = null;
-		let segmentationBar = null;
-		let annotationBar = null;
-		let annotationControls = null;
-		let annotationSummary = null;
-		let transcriber = null;
-		let trackList = null;
-
-		//only draw segmentation controls if configured
-
-
-		if(this.state.playerAPI) {
-			if(this.props.annotationSupport.mediaSegment) {
-				const controls = {
-					setManualStart : this.setManualStart.bind(this),
-					setManualEnd : this.setManualEnd.bind(this)
-				}
-				segmentationControls = (
-					<SegmentationControls
-						controls={controls}
-						annotation={this.state.activeAnnotation}
-						start={this.state.segmentStart}
-						end={this.state.segmentEnd}/>
-				);
-				segmentationBar = (
-					<SegmentationTimeline
-						mediaObject={this.state.currentMediaObject}
-						duration={this.state.duration}
-						curPosition={this.state.curPosition}
-						start={this.state.segmentStart}
-						end={this.state.segmentEnd}
-						playerAPI={this.state.playerAPI}
-						fragmentMode={this.state.fragmentMode}/>
-				);
-				annotationBar = (
-					<AnnotationTimeline
-						mediaObject={this.state.currentMediaObject}
-						annotations={this.state.annotations}
-						annotation={this.state.activeAnnotation}
-						annotationLayers={this.props.annotationLayers}
-						duration={this.state.duration}
-						curPosition={this.state.curPosition}
-						start={this.state.segmentStart}
-						end={this.state.segmentEnd}
-						playerAPI={this.state.playerAPI}
-						fragmentMode={this.state.fragmentMode}/>
-				)
-				annotationControls = (<div className="row">
-					<div className="col-md-12">
-						<div>
-							{segmentationBar}
-							{annotationBar}
-						</div>
-					</div>
-				</div>);
-			}
+		let annotationTiers = null;
+		if(this.props.annotationSupport.mediaSegment && this.state.playerAPI) {
+			segmentationControls = this.renderSegmentationControls(this.state.activeAnnotation, this.state.segmentStart, this.state.segmentEnd);
+			annotationTiers = this.renderTiers(this.state, this.props.annotationLayers);
 		}
 
-		if(this.state.activeAnnotation) {
-			annotationSummary = (
-				<AnnotationSummary
-					annotation={this.state.activeAnnotation}
-					annotationLayers={this.props.annotationLayers}
-					showTitle={false}/>
-			);
-		}
+		//render the transcriber
+		const transcript = this.getTranscript(this.props.transcript, this.state.currentMediaObject)
+		const transcriber = this.renderTranscriber(
+			transcript,
+			this.state.playerAPI,
+			this.props.initialSearchTerm,
+			this.state.currentMediaObject,
+			this.state.realPosition
+		);
+
+		//render the play list
+		const playList = this.renderPlayList(this.props.mediaObjects);
 
 		const playerEventCallbacks = {
 		    playProgress : this.playProgress.bind(this),
@@ -711,15 +845,20 @@ class FlexPlayer extends React.Component {
 				} else {
 					player = (
 						<HTML5VideoPlayer
+						key={'html_v_player__' + this.state.currentMediaObject.assetId}
 						mediaObject={this.state.currentMediaObject}
+						segment={this.state.currentMediaSegment}
 						useCredentials={this.props.useCredentials}
+						hideOffAirContent={this.props.hideOffAirContent}
 						eventCallbacks={playerEventCallbacks}
 						onPlayerReady={this.onPlayerReady.bind(this)}/>
 					);
 				}
 			} else if(this.state.currentMediaObject.mimeType.indexOf('audio') != -1) {
 				player = (<HTML5AudioPlayer
+					key={'html_a_player__' + this.state.currentMediaObject.assetId}
 					mediaObject={this.state.currentMediaObject}
+					segment={this.state.currentMediaSegment}
 					useCredentials={this.props.useCredentials}
 					eventCallbacks={playerEventCallbacks}
 					onPlayerReady={this.onPlayerReady.bind(this)}/>
@@ -727,52 +866,12 @@ class FlexPlayer extends React.Component {
 			}
 		}
 
-		//if there is a transcript and a ready player API, draw the transcriber
-		if(this.props.transcript && this.state.playerAPI) { //player API must be ready!
-			//only pass the part belonging to the current media object!
-			const transcript = this.props.transcript.filter(
-				t => t.carrierId == this.state.currentMediaObject.assetId
-			)
-			if(transcript.length > 0) {
-				//completely redraw whenever the media object changes (FIXME change the transcriber)
-				transcriber = (
-					<Transcriber
-						key={'transcriber__' + this.state.currentMediaObject.assetId}
-						initialSearchTerm={this.props.initialSearchTerm}
-						transcript={transcript}
-						curPosition={this.state.curPosition}
-						playerAPI={this.state.playerAPI}
-					/>
-				)
-			}
-		}
-
-		//show the track list
-		if(this.state.playList && this.state.playList.length > 1) {
-			const trackOptions = this.state.playList.map(((t, index) => {
-				return (
-					<div className={IDUtil.cssClassName('track-item', this.CLASS_PREFIX)}
-						onClick={this.playTrack.bind(this, index)}
-						title={'Carrier ID: ' + t.assetId}
-						>
-						{'Track ' + (index+1)}
-					</div>
-				)
-			}))
-
-			trackList = (
-				<div className={IDUtil.cssClassName('track-list', this.CLASS_PREFIX)}>
-					{trackOptions}
-				</div>
-			)
-		}
-
 		return (
 			<div className={IDUtil.cssClassName('flex-player')}>
-				<div className="row">
-					<div className="col-md-7" style={{overflowX : 'auto'}}>
-						<div className={IDUtil.cssClassName('track-title', this.CLASS_PREFIX)}>
-							Playing: {this.state.currentMediaObject.assetId}
+				<div className="flex-container">
+					<div className="player-container" style={{overflowX : 'auto'}}>
+						<div className="item-title">
+							{this.props.title}
 						</div>
 						{player}
 						<div className="btn-toolbar" role="toolbar">
@@ -810,14 +909,14 @@ class FlexPlayer extends React.Component {
 								</button>
 							</div>
 						</div>
-						{trackList}
 					</div>
-					<div className="col-md-5">
+					<div className="player-tabs">
 						{segmentationControls}
 						{annotationSummary}
+						{playList}
 					</div>
 				</div>
-				{annotationControls}
+				{annotationTiers}
 				{transcriber}
 			</div>
 		)
@@ -828,10 +927,9 @@ class FlexPlayer extends React.Component {
 FlexPlayer.PropTypes = {
 	//this is the media object the player will try to load
 	//the mimeType & url determine which implementation (HTML5, YouTube, JW, Vimeo) will be used
-	mediaObject: PropTypes.shape({
-	    url: PropTypes.string.isRequired,
-	    mimeType: PropTypes.string.isRequired
-	}).isRequired,
+	mediaObjects: PropTypes.arrayOf(
+		MediaObject.getPropTypes()
+	).isRequired,
 
 	//the resource & collection ID are required for saving annotations
 	resourceId: PropTypes.string.isRequired,
@@ -864,9 +962,11 @@ FlexPlayer.PropTypes = {
 
 	active: PropTypes.bool, // this reflects whether this component is visible, so the keyboard controls can be activated
 
-	fragmentMode : PropTypes.bool, //not properly supported anymore, should be removed later on
-
 	transcript : PropTypes.array, //audio transcript
+	initialSearchTerm : PropTypes.string, //for jumping to the first matching line in the transcript
+
+	useCredentials : PropTypes.bool, //so the player sends all the required cookie information for the playout proxy
+	hideOffAirContent : PropTypes.bool, //in case the content has to be cut off at a certain start and/or end time
 
 	annotationLayers : PropTypes.array //for future implementation
 

@@ -69,6 +69,4 @@ class WrappedProjectDetailsView extends React.PureComponent {
     }
 }
 
-WrappedProjectDetailsView.propTypes = ProjectDetailsView.propTypes;
-
 export default WrappedProjectDetailsView;

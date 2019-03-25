@@ -1,0 +1,15 @@
+.bg__md-completeness-chart {
+	margin-top: 30px;
+	@include lineChartBase();
+
+	.bg__mdc__no-data {
+		margin-top: 12px;
+	}
+
+	.bg__mdc__percentage {
+		font-size: 90%;
+		font-weight: bold;
+		margin-right: 12px;
+
+	}
+}

@@ -23,17 +23,9 @@ class CollectionForm extends React.PureComponent {
 
     //Save the collection using the Collection API
     save(collection, callback) {
-        this.props.api.save(this.props.user.id, collection, msg => {
-            if (msg && msg.success) {
-                let collectionId = collection.id;
-
-                if (!collectionId) {
-                    // get collection id from message in case this is a new project
-                    // todo: ask api guys to return the id as a seperate field
-                    collectionId = msg.success.substring(msg.success.lastIndexOf(' ') + 1);
-                }
-
-                this.props.collectionDidSave(collectionId);
+        this.props.api.save(this.props.user.id, collection, c => {
+            if (c && c.id) {
+                this.props.collectionDidSave(c.id);
             } else {
                 alert('An error occured while saving this collection');
             }
@@ -71,13 +63,13 @@ class CollectionForm extends React.PureComponent {
                     <input
                         type="checkbox"
                         name="private"
-                        defaultChecked={this.props.collection.isPrivate}
+                        disabled={true}
+                        defaultChecked={true}
                         id="project-private"
                         ref={elem => (this.isPrivate = elem)}/>
 
                     <label htmlFor="collection-private">
-                        This is a private collection that is only visible to you and your
-                        collaborators
+                        This is a private collection that is only visible to you
                     </label>
                 </div>
 

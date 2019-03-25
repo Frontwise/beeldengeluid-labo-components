@@ -1,4 +1,3 @@
-import TimeUtil from '../../../util/TimeUtil';
 import IDUtil from '../../../util/IDUtil';
 import AnnotationUtil from '../../../util/AnnotationUtil';
 import AnnotationActions from '../../../flux/AnnotationActions';
@@ -63,10 +62,12 @@ class AnnotationTimeline extends React.Component {
 		if(this.props.annotations) {
 			const pos = this.props.curPosition;
 			currentAnnotation = this.props.annotations.filter((a, index)=> {
-				if(a.target.selector.refinedBy) {
-					if(a.target.selector.refinedBy.start < pos && a.target.selector.refinedBy.end > pos) {
-						return true;
-					}
+			    if(a.target){
+				    if(a.target.selector && a.target.selector.refinedBy) {
+					    if(a.target.selector.refinedBy.start < pos && a.target.selector.refinedBy.end > pos) {
+						    return true;
+					    }
+				    }
 				}
 			})
 		}
@@ -77,7 +78,7 @@ class AnnotationTimeline extends React.Component {
 	activateAnnotation(e) {
 		const activePos = parseFloat(this.hoverPos);
 		const currentAnnotation = this.props.annotations.filter((a, index)=> {
-			if(a.target.selector.refinedBy) {
+			if(a.target.selector && a.target.selector.refinedBy) {
 				if(a.target.selector.refinedBy.start < activePos && a.target.selector.refinedBy.end > activePos) {
 					return true;
 				}
@@ -90,7 +91,7 @@ class AnnotationTimeline extends React.Component {
 
 	editAnnotation() {
 		const currentAnnotation = this.props.annotations.filter((a, index)=> {
-			if(a.target.selector.refinedBy) {
+			if(a.target.selector && a.target.selector.refinedBy) {
 				if(a.target.selector.refinedBy.start < this.hoverPos && a.target.selector.refinedBy.end > this.hoverPos) {
 					return true;
 				}
@@ -121,24 +122,22 @@ class AnnotationTimeline extends React.Component {
 		}
 		this.repainting = true;
 		const c = document.getElementById("an_timebar_canvas__" + this.props.mediaObject.id);
+		const ctx = c.getContext("2d");
 		if(c.width == 0 && c.height == 0) {
 			this.updateCanvasDimensions();
 		}
-		let dur = -1;
 		let t = this.props.curPosition;
         if(!t) {
             t = this.props.start;
         }
-		if(this.props.fragmentMode === false) {
-	        dur = this.props.duration;
-	        var ctx = c.getContext("2d");
-	        ctx.clearRect (0, 0, c.width, c.height);
+        ctx.clearRect (0, 0, c.width, c.height);
+        if(this.props.annotations) {
 	        this.props.annotations.forEach((a, index) => {
-	        	if(a.target.selector.refinedBy) {
-	        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a);
+	        	if(a.target) {
+	        		const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(a.target);
 		        	if(frag) {
-			        	const start = c.width / 100 * (frag.start / (dur / 100));
-			        	const end = c.width / 100 * (frag.end / (dur / 100));
+			        	const start = c.width / 100 * (frag.start / (this.props.duration / 100));
+			        	const end = c.width / 100 * (frag.end / (this.props.duration / 100));
 			        	if(this.hoverPos >= frag.start && this.hoverPos <= frag.end) {
 			        		ctx.fillStyle = "#FF69B4";
 			        	} else if(this.props.annotation && a.id == this.props.annotation.id){
@@ -150,13 +149,7 @@ class AnnotationTimeline extends React.Component {
 			        }
 			    }
 	        });
-	    } else {
-			dur = this.props.end - this.props.start;
-			const dt = t - this.props.start;
-			var ctx = c.getContext("2d");
-			ctx.clearRect (0, 0, c.width, c.height);
-			console.debug('TODO: implement this');
-        }
+	    }
         this.repainting = false;
 	}
 

@@ -1,0 +1,53 @@
+.bg__playlist {
+
+	.bg__playlist-item-num-matches {
+		color: crimson;
+	}
+
+	.bg__playlist-items {
+		.bg__playlist-item {
+			margin-top:2px;
+			background-color: white;
+			padding:10px;
+			border-bottom: 1px solid #ccc;
+			.bg__segment {
+				padding-left: 10px;
+				margin-bottom: 5px;
+				cursor: pointer;
+				color: black;
+				&:hover {
+					color: #ddd;
+				}
+				.bg__segment-title {
+					cursor: pointer;
+				}
+				.bg__segment-duration {
+					background-color: #468dcb;
+				    border-radius: 4px;
+				    color: #fff;
+				    display: inline-block;
+				    font-size: 1rem;
+				    padding: 1px 6px;
+				}
+				&.main {
+					padding-left:0px;
+					font-weight: bold;
+					color: black;
+				}
+			}
+		}
+	}
+
+	.bg__playlist-items-raw {
+		margin-top:2px;
+		padding:10px;
+		label {
+			font-weight: bold;
+		}
+		.bg__playlist-item-raw {
+			color: #888;
+			padding: 5px;
+		}
+	}
+
+}

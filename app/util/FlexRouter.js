@@ -5,18 +5,13 @@ import QueryModel from '../model/QueryModel';
 
 const FlexRouter = {
 
-	routeQueryToSingleSearch : function(query) {
-		const paramList = FlexRouter.__toUrlParamList(
-			QueryModel.toUrlParams(query)
-		)
-		let url = FlexRouter.__getBaseUrl() + '/tool/single-search';
-		if(paramList) {
-			url += '?' + paramList.join('&');
-		}
-		document.location.href =  url;
+	gotoSingleSearch : function(queryId) {
+		let url = FlexRouter.__getBaseUrl() + '/tool/single-search?queryId=' + queryId;
+		document.location.href = url;
 	},
 
 	//this is typically called from a search recipe after clicking a search result
+	//FIXME expects a FORMATTED searchResult
 	gotoItemDetails : function(itemDetailsRecipePath, searchResult, searchTerm) {
 		let url = FlexRouter.__getBaseUrl() + '/' + itemDetailsRecipePath + '?id=' + searchResult.resourceId;
 		url += '&cid=' + searchResult.index;
@@ -31,8 +26,8 @@ const FlexRouter = {
 			*/
 
 			//TODO test this change to assetId thoroughly!
-			if(searchResult.mediaFragment.hasOwnProperty('url')) { url += '&fragmentUrl=' + searchResult.mediaFragment.url; }
-			//if(searchResult.mediaFragment.hasOwnProperty('assetId')) { url += '&assetId=' + searchResult.mediaFragment.assetId; }
+			//if(searchResult.mediaFragment.hasOwnProperty('url')) { url += '&fragmentUrl=' + searchResult.mediaFragment.url; }
+			if(searchResult.mediaFragment.hasOwnProperty('assetId')) { url += '&assetId=' + searchResult.mediaFragment.assetId; }
 
 			if(searchResult.mediaFragment.hasOwnProperty('start')) { url += '&s=' + searchResult.mediaFragment.start; }
 			if(searchResult.mediaFragment.hasOwnProperty('end')) { url += '&e=' + searchResult.mediaFragment.end; }

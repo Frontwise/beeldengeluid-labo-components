@@ -19,6 +19,7 @@ $border-radius: $border-radius-base; /* applying bootstrap variable */
 
 $hover-color: #3173ad !default;
 $highlight-color: #f26c50 !default;
+$highlight-color-snippets: #f26c50;
 $subdued-color: #888 !default;
 $subdued-hover-color: #efefef !default;
 $subdued-bg: #f8f8f8 !default;
@@ -26,6 +27,7 @@ $fill-color: #468dcb !default;
 $border-color: #e3e3e3 !default;
 $dark-text: #333 !default;
 $list-item-color: #333 !default;
+$visited-item: #6e7476;
 
 /* ---- Box shadow colors ---- */
 
@@ -71,8 +73,9 @@ $clDarkGrey: #9E9290;
 $clGreyTint: #EEE3E1;
 $clGrey: #FAF6F6;
 $clWhite: #FFFFFF;
+$clRed: desaturate(#F25050,30%);
 
-$clError: #F25050;
+$clError: $clRed;
 $clWarning: #F29650;
 $clConfirm: #50F27A;
 

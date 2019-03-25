@@ -1,0 +1,195 @@
+.bg__query-builder {
+	.separator {
+		height: 1em;
+	}
+
+	.bg__qb__search-layers {
+	}
+
+	.bg__qb__breadcrumbs {
+		padding: 10px;
+		text-align: center;
+		margin-top: -30px;
+		border-top: 1px solid $clGreyTint;
+
+		.bg__qb__crumb {
+			display: inline-block;
+			margin: 0px 5px 5px 0px;
+			i {
+				cursor: pointer;
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+
+	.bg__qb__query-row {
+		display: flex;
+	}
+
+	.bg__qb__graph > button {
+		float: right;
+		position: relative;
+		right: 12px;
+		z-index: 10;
+	}
+	.bg__clear-query-btn {
+		margin-left: 12px;
+	}
+
+	.bg__qb__input-search {
+		border-radius: 5px 0 0 5px;
+	}
+
+	.bg__qb__count {
+		margin-top: 5px;
+		background-color: $clGrey;
+		font-size: 1em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 8px;
+		min-width: 20px;
+		vertical-align: top;
+		font-family: $fontHeading;
+	}
+
+	.bg__qb__total-count{
+		margin-left: 20px;
+		font-family: $fontHeading;
+		font-size: 16px;
+		font-weight: bold;
+		line-height: 20px;
+		margin-top: 5px;
+		display: inline-block;
+		.bg__qb__count{
+			background-color: $clPrimary;
+			color: white;
+			margin-top:0;
+			vertical-align: middle;
+		}
+	}
+
+	.bg__qb__search-holder {
+		display: flex;
+		margin-right: 10px;
+		& > span {
+			cursor: pointer;
+			background-color: $clPrimary;
+			color: white;
+			border-radius: 0 5px 5px 0;
+			display: inline-block;
+			width: 50px;
+			height: 34px;
+			text-align: center;
+			line-height: 34px;
+			& > i,
+			& > span {
+				line-height: 34px;
+			}
+		}
+	}
+
+	.bg__qb__selector-holder {
+		flex-grow: 1;
+		display: flex;
+		margin-right: 10px;
+		.bg__qb__in-label {
+			margin-right: 10px;
+			line-height: 35px;
+		}
+
+		.bg__field-category-selector {
+			flex-grow: 1;
+		}
+	}
+
+	.bg__qb__date-count {
+		margin: 7px 10px 0 5px;
+		background-color: $clGreyTint;
+		font-size: 1em;
+		border-radius: 25px;
+		display: inline-block;
+		padding: 2px 8px;
+		min-width: 20px;
+		line-height: 17px;
+		vertical-align: top;
+		font-family: $fontHeading;
+	}
+
+	.bg__qb__result-dates {
+		border-radius: 5px;
+		border: 1px solid $clGreyTint;
+		background-color: $clGrey;
+
+		.bg__qb__result-dates-header {
+			display: flex;
+			flex-wrap: wrap;
+			line-height: 34px;
+			border-bottom: 1px solid $clGreyTint;
+
+			.__react_component_tooltip {
+				line-height: 16px;
+			}
+
+			.bg__qb__date-field {
+				display: flex;
+				padding: 8px 0px 8px 7px;
+				& > div {
+					margin-right: 10px;
+				}
+
+				i {
+					display: inline-block;
+					width: 20px;
+					line-height: 34px;
+				}
+				& > i {
+					text-align: center;
+					margin-right: 10px;
+				}
+			}
+
+			.bg__qb__date-range {
+				flex-grow: 1;
+				border-left: 1px solid $clGreyTint;
+				line-height: 34px;
+				padding: 5px 10px 5px 10px;
+				display: flex;
+				margin: 3px 0;
+
+				input {
+					background-color: white;
+				}
+
+				.bg__qb__date-range-stats {
+					margin-left: 5px;
+				}
+			}
+
+			& > button {
+				height: 28px;
+				line-height: 16px;
+				padding: 5px 10px;
+				box-sizing: border-box;
+				margin: 10px;
+				background-color: $clGreyTint;
+				transition: background-color $transition;
+				&:hover {
+					background-color: darken($clGreyTint, 5%);
+				}
+			}
+		}
+
+		.bg__qb__result-dates-content {
+			background-color: mix($clGreyTint, $clGrey, 50%);
+			.bg__qb__date-graph {
+				padding: 20px 10px 0 10px;
+			}
+		}
+
+		input[type="text"] {
+			margin-bottom: 0;
+		}
+	}
+}

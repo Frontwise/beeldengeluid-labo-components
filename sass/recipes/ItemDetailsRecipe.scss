@@ -1,0 +1,79 @@
+.bg__item-details-recipe {
+	
+	.bookmarked {
+    	float: left;
+    	padding: 9px 12px;
+	}
+
+	.bg__rcp__id__media-player {}
+
+	.bg__rcp__id__keyword-browser {
+		margin: 10px;
+		padding: 5px;
+		.property-list {
+	    	overflow-y: auto;
+			.keyword {
+				margin :0 0 5px 0;
+				padding :5px;
+				border-radius:3px;
+				background-color: $clBlue;
+				color: white;
+				cursor:pointer;
+				&:hover {
+					background-color: #666;
+				}
+			}
+		}
+		h4 {
+			border-bottom: 1px solid #eee;
+			padding-bottom: 5px;
+		}
+	}
+
+	.cl_table {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0;
+		padding: 0;
+	}
+
+	.cl_table-cell {
+		box-sizing: border-box;
+		flex-grow: 1;
+		width: 100%;
+		padding: 8px 0;
+		overflow: hidden;
+		list-style: none;
+		border: solid 3px white;
+
+		p {
+			margin: 0;
+		}
+		ul {
+			padding-left: 15px;
+		}
+
+		&.left-cell {
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		b {
+			color: #666;
+		}
+	}
+
+	.cl_table--2cols > .cl_table-cell  {
+		border-bottom: 1px solid #eee;
+		width: 50%;
+
+	}
+
+	.cl_table--2cols > .left-cell  {
+		width: 60%;
+	}
+
+	.cl_table--2cols > .right-cell  {
+		width: 40%;
+	}
+}

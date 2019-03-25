@@ -1,0 +1,39 @@
+.bg__dps__date-picker-selector {
+	display: flex;
+	input[type=text]{
+		max-width: 100px;
+		min-width: auto;
+		border-radius: 5px;
+	}
+
+	i{
+		pointer-events: none;
+		display: inline-block;
+		width: 30px;
+		background-color: yellow;
+		line-height: 34px;
+	}
+
+	&>div{
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+
+	.react-datepicker{
+		font-size: 13px;
+		.react-datepicker__navigation{
+			// somehow the prev/next buttons don't render correctly
+			// apply some quick fixes
+			font-size: 0;
+			height: 10px;
+			margin-top: 6px;
+			background-color: transparent;
+
+			.react-datepicker__navigation--previous{
+
+			}
+			.react-datepicker__navigation--next{
+			}
+		}
+	}
+} /* DateRangeSelector.jsx */

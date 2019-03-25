@@ -57,14 +57,16 @@ const PersonalCollectionAPI = {
 		xhr.send(JSON.stringify(collection));
 	},
 
-	saveEntry : function(userId, collectionId, entry, callback){
-		if ("id" in entry) {
-			var url = _config.PERSONAL_COLLECTION_API_BASE + '/' + userId + "/collections/" + encodeURIComponent(collectionId) + "/entry/" + encodeURIComponent(entry['id']);
+	saveEntry : function(userId, collectionId, entry, callback) {
+		let method = 'POST';
+		if (entry['id']) {
+			var url = _config.PERSONAL_COLLECTION_API_BASE + '/' + userId + "/collections/";
+			url += encodeURIComponent(collectionId) + "/entry/" + encodeURIComponent(entry['id']);
+			method = 'PUT';
 		} else {
-
-			var url = _config.PERSONAL_COLLECTION_API_BASE + '/' + userId + "/collections/" + encodeURIComponent(collectionId) + "/entry";
+			var url = _config.PERSONAL_COLLECTION_API_BASE + '/' + userId + "/collections/";
+			url += encodeURIComponent(collectionId) + "/entry";
 		}
-		let method = 'POST'
 
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {

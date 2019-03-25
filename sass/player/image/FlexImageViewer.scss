@@ -1,0 +1,20 @@
+.bg__flex-image-viewer {
+	.bg__fiv__overlay {
+		background-color: $image-overlay-bg;
+		border-radius: $image-overlay-border-radius;
+		box-shadow: $box-shadow-base $shadow-subdued;
+		cursor: pointer;
+		outline: $image-overlay-border;
+		padding:10px;
+		&.active { /* possibly change this into .bg__flex-image-viewer--active (BEM style) */
+			background-color: $image-overlay-bg-active;
+			border-radius: $image-overlay-border-radius-active;
+			box-shadow: $box-shadow-base $shadow-active;
+			outline: $image-overlay-border-active;
+		}
+	}
+	.bg__fiv__highlight {
+		background-color: $highlight-color;
+		opacity: 0.4;
+	}
+}

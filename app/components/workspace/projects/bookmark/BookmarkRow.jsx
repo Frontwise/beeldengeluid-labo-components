@@ -1,8 +1,9 @@
 import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
+import IconUtil from '../../../../util/IconUtil';
+import AnnotationUtil from '../../../../util/AnnotationUtil';
 
-import AnnotationStore from '../../../../flux/AnnotationStore';
 import {secToTime} from '../../helpers/time';
 import {AnnotationTranslator} from '../../helpers/AnnotationTranslator';
 import classNames from 'classnames';
@@ -56,14 +57,14 @@ class BookmarkRow extends React.PureComponent {
         // sort annotations by type
         annotations.sort((a,b)=>(a.annotationType > b.annotationType ? 1 : -1));
 
-        return !annotations || annotations.length === 0 ? 
+        return !annotations || annotations.length === 0 ?
             (<p>
-                This {bookmark.object.type.toLowerCase() || 'object'} has no annotations yet
+                This segment has no annotations yet
             </p>)
             :
-        
+
             (<table>
-                { showHeader ? 
+                { showHeader ?
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -73,35 +74,42 @@ class BookmarkRow extends React.PureComponent {
                 </thead>
                 : null}
                 <tbody>
-                    {annotations.map(annotation => (
-                        <tr>
-                            <td className="type bold">
-                                <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>{AnnotationTranslator(annotation.annotationType)}</Link>
-                            </td>
-                            <td className="content">
-                                {annotation.text ? annotation.text.substring(0, 200) : null}
-                                {annotation.label ? annotation.label : null}
-                            </td>                            
-                            <td className="details">
-                                {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
-                                {annotation.annotationType === 'comment' ? annotation.created : null}
-                                {annotation.url ? <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>{annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}</a> : null}
-                                {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
-                            </td>
-                        </tr>
-                    ))}
+                    {annotations.map(annotation => {
+                        return (
+                            <tr>
+                                <td className="type bold">
+                                    <Link to={'/workspace/projects/' + this.props.projectId + '/annotations#' + annotation.annotationType + '-centric'}>
+                                        {AnnotationTranslator(annotation.annotationType)}
+                                    </Link>
+                                </td>
+                                <td className="content">
+                                    {AnnotationUtil.annotationBodyToPrettyText(annotation)}
+                                </td>
+                                <td className="details">
+                                    {annotation.vocabulary ? 'Vocabulary: ' + annotation.vocabulary : null}
+                                    {annotation.annotationType === 'comment' ? annotation.created : null}
+                                    {annotation.url ?
+                                        <a rel="noopener noreferrer" target="_blank" href={'https:'+annotation.url}>
+                                            {annotation.url ? annotation.url.replace(/^\/\//i,"") : ""}
+                                        </a> : null
+                                    }
+                                    {annotation.annotationTemplate ? 'Template: ' + annotation.annotationTemplate : null}
+                                </td>
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
         )
     }
 
     renderSubSegment(bookmark, segments){
-        return !segments || segments.length === 0 ? 
+        return !segments || segments.length === 0 ?
             (<p>
                 This {bookmark.object.type.toLowerCase() || 'object'} has no fragments yet
             </p>)
             :
-        
+
             (<table>
                 <thead>
                     <tr>
@@ -109,26 +117,28 @@ class BookmarkRow extends React.PureComponent {
                         <th>
                             <table>
                                 <thead>
-                                    <th className="type">Type</th>
-                                    <th className="content">Content</th>
-                                    <th className="details">Details</th>
+                                    <tr>
+                                        <th className="type">Type</th>
+                                        <th className="content">Content</th>
+                                        <th className="details">Details</th>
+                                    </tr>
                                 </thead>
                             </table>
-                        </th>                       
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {segments.map(segment => (
                         <tr>
-                            <td className="time">{ segment.selector && segment.selector.refinedBy ? 
-                                secToTime(Math.round(segment.selector.refinedBy.start || 0)) 
+                            <td className="time">{ segment.selector && segment.selector.refinedBy ?
+                                secToTime(Math.round(segment.selector.refinedBy.start || 0))
                                 + " - " +
                                 secToTime(Math.round(segment.selector.refinedBy.end || 0))
                                 : '-'
                             }</td>
                             <td>
                                 {this.renderSubMediaObject(segment, segment.annotations, false)}
-                            </td>                            
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -147,7 +157,7 @@ class BookmarkRow extends React.PureComponent {
             annotations = annotations.filter((a)=>(a.annotationType === this.props.annotationTypeFilter));
         }
         const hasAnnotations = annotations.length > 0;
-        
+
         // prepare segments
         const segments = bookmark.segments || [];
         const hasSegments = segments.length > 0;
@@ -157,7 +167,7 @@ class BookmarkRow extends React.PureComponent {
 
         //populate the foldable annotation block
         let foldableBlock = null;
-        
+
         // render correct foldable block, if visible
         switch(true){
             case this.props.showSubMediaObject:
@@ -177,13 +187,43 @@ class BookmarkRow extends React.PureComponent {
 
         //format the date of the resource/target (i.e. bookmark.object)
         let resourceDate = null;
-        if(bookmark.object.date) {
+        if(bookmark.object.date && typeof(bookmark.object.date) === 'string') {
             if(bookmark.object.date.match(/^\d/)) {
-                resourceDate = bookmark.object.date.substring(0, 10);
+                resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '').substring(0, 10);
             } else {
-                resourceDate = bookmark.object.date
+                resourceDate = bookmark.object.date.replace(/[^0-9-]/g, '');
             }
         }
+
+        //show the user what media can be expected
+        let mediaIcon = null;
+        let playableIcon = (
+			<span
+				className={IconUtil.getMediaObjectAccessIcon(false, false, true, true, false)}
+				title="Media object(s) not accessible">
+			</span>
+		);
+		if(bookmark.object.mediaTypes) {
+			mediaIcon = bookmark.object.mediaTypes.map((mt) => {
+				if(mt == 'video') {
+					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"></span>);
+				} else if(mt == 'audio') {
+					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"></span>);
+				} else if(mt == 'image') {
+					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"></span>);
+				} else if(mt == 'text') {
+					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"></span>);
+ 				}
+			});
+		}
+		if(bookmark.object.playable) {
+            playableIcon = (
+                <span
+                    className={IconUtil.getMediaObjectAccessIcon(true, true, true, true, false)}
+                    title="Media object(s) can be viewed">
+                </span>
+            );
+		}
 
         return (
             <div className={classNames(IDUtil.cssClassName('bookmark-row'), 'item-row')}>
@@ -196,20 +236,26 @@ class BookmarkRow extends React.PureComponent {
                             title={'Select this bookmark with resource ID:\n' + bookmark.resourceId}/>
                     </div>
 
-                    <div className="image" title={"Resource ID: " + bookmark.resourceId} onClick={this.onView} style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}/>
+                    <div className="image"
+                        title={"Resource ID: " + bookmark.resourceId} onClick={this.onView}
+                        style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}
+                    />
 
                     <ul className="info">
                         <li className="primary content-title">
                             <h4 className="label">Title</h4>
-                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>{bookmark.object.title}</p>
+                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>
+                                {bookmark.object.error ? 'error: source catalogue not available' : bookmark.object.title}
+                            </p>
                         </li>
                         <li className="content-date">
                             <h4 className="label">Date</h4>
-                            <p title={bookmark.object.dateField}>{resourceDate}</p>                            
+                            <p title={bookmark.object.dateField}>{resourceDate}</p>
                         </li>
                         <li className="content-media">
-                            <h4 className="label">Media</h4>
-                            <p>{bookmark.object.mediaTypes.join(",")}</p>
+                            <h4 className="label">Media info</h4>
+                            {/*<p>{bookmark.object.mediaTypes ? bookmark.object.mediaTypes.join(",") : 'Unknown'}</p>-->*/}
+                            <p>{mediaIcon} {playableIcon}</p>
                         </li>
                         <li className="content-dataset">
                             <h4 className="label">Dataset</h4>
@@ -218,14 +264,14 @@ class BookmarkRow extends React.PureComponent {
                         <li>
                             <h4 className="label">Groups</h4>
                             <p className="groups">
-                                {bookmark.groups ? 
+                                {bookmark.groups ?
                                 bookmark.groups.map((g)=>(<span>{g.label}</span>))
                                 : null}
                             </p>
                         </li>
                     </ul>
 
-                    <div className="actions">                       
+                    <div className="actions">
                         <div className="btn primary" onClick={this.onView}>
                             View
                         </div>
@@ -245,7 +291,7 @@ class BookmarkRow extends React.PureComponent {
                                     zero: !hasSegments,
                                     lowered: this.props.showSubMediaObject
                                 })} onClick={this.toggleSubSegment}>
-                                <span className="icon segment"/>                            
+                                <span className="icon segment"/>
                                 <span className="count">{segments.length}</span>
                             </div>
 
@@ -257,7 +303,7 @@ class BookmarkRow extends React.PureComponent {
                                 <span className="icon annotation"/>
                                 <span className="count">{annotations.length}</span>
                             </div>
-                          
+
                         </div>
                     </div>
                 </div>

@@ -41,7 +41,7 @@ class AnnotationList extends React.Component {
 		this.loadAnnotations();
 
 		//make sure to reload the list when the target or project changes
-		AppAnnotationStore.bind('change-target', this.loadAnnotations.bind(this));
+		//AppAnnotationStore.bind('change-target', this.loadAnnotations.bind(this));
 		AppAnnotationStore.bind('change-project', this.loadAnnotations.bind(this));
 
 		//also make sure to reload the list when annotations are added/removed (to/from the target)
@@ -58,11 +58,11 @@ class AnnotationList extends React.Component {
 			   	this.onLoadAnnotations.bind(this),
 			);
 		}
-	}
+	}	
 
 	//this sets the annotations in the state object
-	onLoadAnnotations(annotationData) {
-		this.setState(annotationData);
+	onLoadAnnotations(annotationList) {		
+		this.setState({annotations : annotationList || []});
 	}
 
 	toggleAnnotations(event) {

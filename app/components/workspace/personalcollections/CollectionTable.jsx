@@ -4,8 +4,6 @@ import IDUtil from '../../../util/IDUtil';
 //import { exportDataAsJSON } from '../helpers/Export';
 
 import SortTable from '../SortTable';
-
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
@@ -23,7 +21,7 @@ class CollectionTable extends React.PureComponent {
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
             { field: '', content: '', sortable: false },
-            { field: '', content: '', sortable: false },
+            //{ field: '', content: '', sortable: false },
             { field: '', content: '', sortable: false }
         ];
 
@@ -35,7 +33,7 @@ class CollectionTable extends React.PureComponent {
         this.defaultSort = {
             field: 'name',
             order: 'asc'
-        }
+        };
 
         this.state = {
             collections: [],
@@ -166,8 +164,8 @@ class CollectionTable extends React.PureComponent {
 
     //Enrich collection with selected enrichment service
     enrichCollection(collection, event) {
-        var enrichmentservice = event.target.value;
-        if (enrichmentservice == "ASR"){
+        let enrichmentservice = event.target.value;
+        if (enrichmentservice === "ASR"){
             //TODO do something with collection
         }
     }
@@ -193,7 +191,7 @@ class CollectionTable extends React.PureComponent {
             collections.forEach((collection, index) => {
                 this.props.api.delete(this.props.user.id, collection.id, status => {
                     calls--;
-                    if (calls == 0) {
+                    if (calls === 0) {
                         // after the last delete just retrieve the latest data
                         this.loadData();
                     }
@@ -246,6 +244,7 @@ class CollectionTable extends React.PureComponent {
                         Delete
                     </a>) : ('')
             },
+            /*
             {
                 content: (
                     <select onChange={this.enrichCollection.bind(this, collection)}>
@@ -253,7 +252,7 @@ class CollectionTable extends React.PureComponent {
                     <option value="ASR">ASR</option>
                     </select>
                 )
-            },
+            },*/
             {
                 content: collection.canOpen(currentUserId) ? (
                     <Link to={'/workspace/collections/' + collection.id + '/edit'} className="btn">
@@ -309,7 +308,7 @@ CollectionTable.propTypes = {
 
     // current user object used for defining access roles per collection
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

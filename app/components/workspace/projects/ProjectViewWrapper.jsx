@@ -1,11 +1,11 @@
 import ProjectAPI from '../../../api/ProjectAPI';
+import AnnotationAPI from '../../../api/AnnotationAPI';
 
 import IDUtil from '../../../util/IDUtil';
-import AnnotationUtil from '../../../util/AnnotationUtil';
 
 import { setBreadCrumbsFromMatch } from '../helpers/BreadCrumbs';
 
-import AnnotationStore from '../../../flux/AnnotationStore';
+//import AnnotationStore from '../../../flux/AnnotationStore';
 
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
@@ -26,11 +26,8 @@ class ProjectViewWrapper extends React.PureComponent {
             annotationCount: 'bg__project-annotation-count',
         };
 
-        const bookmarkCount =
-        window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
-        
-        const annotationCount =
-        window.sessionStorage.getItem(this.keys.annotationCount) || 0;
+        const bookmarkCount = window.sessionStorage.getItem(this.keys.bookmarkCount) || 0;
+        const annotationCount = window.sessionStorage.getItem(this.keys.annotationCount) || 0;
 
         this.state = {
             loading: true,
@@ -78,30 +75,24 @@ class ProjectViewWrapper extends React.PureComponent {
         if (!project){
             project = this.state.project;
         }
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            project,
-            this.setBookmarkCount.bind(this)
-        );
-    }
-
-    //Set bookmark count to state
-    setBookmarkCount(data) {
-        const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            data.annotations || [], (bookmarks) =>{
-                const bookmarkCount = bookmarks ? bookmarks.length : 0;
-                window.sessionStorage.setItem(this.keys.bookmarkCount, bookmarkCount);
-
-                const annotationCount = bookmarks ? bookmarks.reduce((a,cur)=>(a + (cur.annotations ? cur.annotations.length : 0) ),0) : 0;
-                window.sessionStorage.setItem(this.keys.annotationCount, annotationCount);
-
-                this.setState({
-                    bookmarkCount, 
-                    annotationCount,
-                });        
+        AnnotationAPI.getAnnotationCounts(
+            this.props.user.id,
+            project.id,
+            (counts) => {
+                if(counts) {
+                    window.sessionStorage.setItem(this.keys.bookmarkCount, counts.bookmarkCount);
+                    window.sessionStorage.setItem(this.keys.annotationCount, counts.annotationCount);
+                    this.setState(counts);
+                } else {
+                    window.sessionStorage.setItem(this.keys.bookmarkCount, 0);
+                    window.sessionStorage.setItem(this.keys.annotationCount, 0);
+                    this.setState({
+                        bookmarkCount : 0,
+                        annotationCount : 0
+                    });
+                }
             }
-        );
-        
+        )
     }
 
     render() {
@@ -132,7 +123,7 @@ class ProjectViewWrapper extends React.PureComponent {
                                     encodeURIComponent(project.id) +
                                     '/bookmarks'}>
                                     Bookmarks<span className="count">{this.state.bookmarkCount}</span>
-                                </NavLink>                                
+                                </NavLink>
                                 <NavLink activeClassName="active" to={
                                     '/workspace/projects/' +
                                     encodeURIComponent(project.id) +
@@ -151,15 +142,15 @@ class ProjectViewWrapper extends React.PureComponent {
                                     '/queries'}>
                                     Queries<span className="count">{project.queries ? project.queries.length : 0}</span>
                                 </NavLink>
-                                
+
                             </div>
                         </div>
 
-                        <div class="component">
-                            <RenderComponent {...this.props} 
-                                            project={this.state.project} 
-                                            loadBookmarkCount={this.loadBookmarkCount}
-                                            />
+                        <div className="component">
+                            <RenderComponent {...this.props}
+                                project={this.state.project}
+                                loadBookmarkCount={this.loadBookmarkCount}
+                            />
                         </div>
                     </div>
                 )
@@ -175,5 +166,7 @@ class ProjectViewWrapper extends React.PureComponent {
         );
     }
 }
-
+ProjectViewWrapper.propTypes = {
+    RenderComponent: PropTypes.func.isRequired
+};
 export default ProjectViewWrapper;

@@ -1,0 +1,9 @@
+@include spinner();
+
+.bg__query-comparison-line-chart {
+	@include lineChartBase();
+
+	.recharts-responsive-container {
+		margin-top: 20px
+	}
+}

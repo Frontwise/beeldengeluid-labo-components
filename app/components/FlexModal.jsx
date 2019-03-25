@@ -8,6 +8,16 @@ class FlexModal extends React.Component {
 		this.CLASS_PREFIX = 'fm';
 	}
 
+	handleKey = event => {
+	    if(event.keyCode === 27) {
+	        this.close(true);
+	    }
+
+        if(this.props.onKeyPressed){
+            this.props.onKeyPressed(event.keyCode);
+        }
+	}
+
 	componentDidMount() {
 		const instance = $('#' + this.props.elementId).modal({
 			keyboard : true,
@@ -15,6 +25,11 @@ class FlexModal extends React.Component {
 			show : true
 		})
 		.on('hidden.bs.modal', this.close.bind(this, false))
+		document.addEventListener("keydown", this.handleKey, false);
+	}
+
+	componentWillUnmount(){
+	    document.removeEventListener("keydown", this.handleKey, false);
 	}
 
 	close(manualCloseRequired, e) {
@@ -27,7 +42,6 @@ class FlexModal extends React.Component {
 		} else if(manualCloseRequired) { //otherwise hide it here
 			$('#' + this.props.elementId).modal('hide');
 		}
-
 	}
 
 	render() {

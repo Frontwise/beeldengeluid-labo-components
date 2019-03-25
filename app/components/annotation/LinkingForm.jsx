@@ -24,7 +24,7 @@ class LinkingForm extends React.Component {
 			data: this.props.data ? this.props.data : [],
 			api : api,
 			results : []
-		}
+		};
 		this.CLASS_PREFIX = 'lf';
 	}
 
@@ -59,14 +59,14 @@ class LinkingForm extends React.Component {
 
 	submit(event) {
 		event.preventDefault();
-		if(this.state.api != 'custom') {
-			ExternalAPI.search(this.state.api, this.refs.search.value, this.onSubmit.bind(this));
+		if(this.state.api !== 'custom') {
+			ExternalAPI.search(this.state.api, this.searchTermRef.value, this.onSubmit.bind(this));
 		} else {
-			if(AnnotationUtil.isValidURL(this.refs.link_url.value)) {
+			if(AnnotationUtil.isValidURL(this.link_url.value)) {
 				const links = this.state.data;
 				links.push({
-					url : this.refs.link_url.value,
-					label : this.refs.link_label.value
+					url : this.link_url.value,
+					label : this.link_label.value
 				});
 				this.setState({data : links}, this.onOutput.bind(this));
 			} else {
@@ -90,9 +90,9 @@ class LinkingForm extends React.Component {
 			links = this.state.data.map((link, index) => {
 				return (
 					<li key={'com__' + index} className="list-group-item" title={link.url}>
-						<i className="fa fa-close interactive" onClick={this.removeLink.bind(this, index)}></i>
+						<i className="fa fa-close interactive" onClick={this.removeLink.bind(this, index)}/>
 						&nbsp;
-						{link.label}
+						<a href={link.url} target="_new">{link.label}</a>
 					</li>
 				)
 			}, this);
@@ -118,7 +118,7 @@ class LinkingForm extends React.Component {
 							name="apiOptions"
 							id={api.name}
 							value={api.name}
-							checked={api.name == this.state.api}
+							checked={api.name === this.state.api}
 							onChange={this.setAPI.bind(this)}/>
 							{api.name}
 					</label>
@@ -128,18 +128,18 @@ class LinkingForm extends React.Component {
 
 		//draw a URL and link label field (custom mode) OR draw a search field (if an API is selected)
 		let formFields = null;
-		if(this.state.api == 'custom') {
+		if(this.state.api === 'custom') {
 			formFields = [
 				<div key="input_url" className="form-group">
 					<label htmlFor="link_url" className="col-sm-2 control-label">URL</label>
 					<div className="col-sm-10">
-						<input type="text" id="link_url" ref="link_url" className="form-control"/>
+						<input type="text" id="link_url" ref={input => (this.link_url = input)} className="form-control"/>
 					</div>
 				</div>,
 				<div key="input_label" className="form-group">
 					<label htmlFor="link_label" className="col-sm-2 control-label">Link label</label>
 					<div className="col-sm-10">
-						<input type="text" id="link_label" ref="link_label" className="form-control"/>
+						<input type="text" id="link_label" ref={input => (this.link_label = input)} className="form-control"/>
 					</div>
 				</div>
 			]
@@ -148,7 +148,7 @@ class LinkingForm extends React.Component {
 				<div className="form-group">
 					<label htmlFor="search" className="col-sm-2 control-label">Search API</label>
 					<div className="col-sm-10">
-						<input type="text" id="search" ref="search" className="form-control"/>
+						<input type="text" id="search" ref={input => (this.searchTermRef = input)} className="form-control"/>
 					</div>
 				</div>
 			);
@@ -166,7 +166,7 @@ class LinkingForm extends React.Component {
 				<div className="form-group">
     				<div className="col-sm-offset-2 col-sm-10">
 						<button className="btn btn-primary" onClick={this.submit.bind(this)}>
-							{this.state.api == 'custom' ? 'Add' : 'Search'}
+							{this.state.api === 'custom' ? 'Add' : 'Search'}
 						</button>
 					</div>
 				</div>

@@ -1,11 +1,9 @@
-import classNames from 'classnames';
 import IDUtil from '../../../../util/IDUtil';
 import ProjectViewWrapper from '../ProjectViewWrapper';
 import PropTypes from 'prop-types';
 import SortTable from '../../SortTable';
 import { exportDataAsJSON } from '../../helpers/Export';
 import { initHelp } from '../../helpers/helpDoc';
-import { Link } from 'react-router-dom';
 
 /**
 * Tool sessions table for a given project, that handles the loading^ and filtering of
@@ -36,7 +34,7 @@ class ProjectSessionView extends React.PureComponent {
         this.defaultSort = {
             field: 'name',
             order: 'asc'
-        }
+        };
 
         this.state = {
             sessions: [],
@@ -117,7 +115,7 @@ class ProjectSessionView extends React.PureComponent {
             const project = this.props.project;
 
             // delete sessions from project
-            project.sessions = project.sessions.filter(s => s != session);
+            project.sessions = project.sessions.filter(s => s !== session);
 
             // store project
             this.props.api.save(this.props.user.id, project, msg => {
@@ -125,7 +123,7 @@ class ProjectSessionView extends React.PureComponent {
                     // update data
                     this.loadData();
                 } else {
-                    alert('An error occured while saving this project');
+                    alert('An error occurred while saving this project');
                 }
             });
         }
@@ -188,7 +186,6 @@ class ProjectSessionView extends React.PureComponent {
     render() {
         const sessions = this.state.sessions;
         const currentUser = this.props.user;
-        const currentUserId = currentUser.id;
 
         return (
             <div className={IDUtil.cssClassName('project-session-view')}>
@@ -265,7 +262,7 @@ ProjectSessionView.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

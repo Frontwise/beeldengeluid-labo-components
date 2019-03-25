@@ -1,0 +1,147 @@
+@keyframes slideInFromLeft {
+	0% {
+		transform: translateY(100%);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+
+.bg__single-search-recipe {
+
+     /* Restyle buttons to new format */
+	.btn{
+		text-transform: uppercase;
+		font-weight: 400px;
+		font-size: .96em;
+		font-family: $fontHeading;
+		transition: background-color $transition;
+
+		&.btn-secondary{
+			background-color: $clSecondary;
+			color: white;
+
+			&:hover{
+				background-color: darken($clSecondary,8%);
+			}
+		}
+	}
+
+	.select-all {
+		@include checkbox();
+		margin-top: 6px;
+	}
+	.table-actions-header {
+		background-color: #2d343a;
+		border-radius: 6px;
+		margin: 5px;
+		min-height:53px;
+		min-width: 100%;
+		padding: 10px;
+		.table-actions {
+			float:left;
+			.btn {
+				margin-right:2px;
+				.fa-bookmark {
+					font-weight: bold;
+					&:before {
+						margin-right: 6px;
+					}
+				}
+			}
+		}
+		&.bookmarked-results {
+			background-color: transparent;
+			margin: 0 0 0 6px;
+			padding: 0;
+			animation: .6s ease-in 0s 1 slideInFromLeft;
+			.header-selected-items {
+				background-color: #468dcb;
+				color: white;
+				margin: 0;
+				padding: 7px 7px 7px 25px;
+				.fa-remove {
+					float: right;
+					padding: 0 10px;
+				}
+				.fa-remove:hover {
+					cursor: pointer;
+				}
+			}
+		}
+	}
+
+	.table-actions-footer {
+		padding: 10px;
+		text-align: center;
+	}
+	.result-list {
+		margin-top: 8px;
+	}
+	.table-actions > .bookmark-dropdown-menu {
+		display: inline-block;
+		margin-right: 5px;
+		button {
+			background-color: #468dcb;
+			color: white;
+			text-align: left;
+			width: 100%;
+		}
+		#dropdownMenuLink {
+			padding: 9px;
+		}
+		.dropdown-menu {
+			background-color: #468dcb;
+		}
+		.dropdown-item {
+			border-color: #468dcb;
+			margin: 3px 0;
+
+			&:hover {
+				color: #d3d3d3;
+			}
+		}
+	}
+	.selected-items {
+		background-color: #efefef;
+		border-radius: 6px;
+		box-shadow: 0 6px 4px -6px #000;
+		margin-bottom: 12px;
+		max-height: 380px;
+		position: relative;
+		overflow: scroll;
+
+		h4 {
+			font-size: 14px;
+		}
+		.snippet_description {
+			display: none;
+		}
+	}
+
+	.bg__ssr__tutorial{
+		margin-top: 15px;
+		margin-bottom: 10px;
+		border-radius: 5px;
+		border: 1px solid mix(white, $clPrimary, 70%);
+		background-color: mix(white, $clPrimary, 90%);
+		padding: 10px;
+		text-align: center;
+		line-height: 25px;
+		span{
+			cursor: pointer;
+			margin-left: 10px;
+			background-color: $clPrimary;
+			display: inline-block;
+			vertical-align: top;
+			width: 25px;
+			height: 25px;
+			line-height: 24px;
+			color: white;
+			font-weight: bold;
+			font-family: $fontHeading;
+			vertical-align: center;
+			font-size: 1.3em;
+		}
+	}
+}

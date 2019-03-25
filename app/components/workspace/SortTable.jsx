@@ -36,6 +36,12 @@ class SortTable extends React.PureComponent {
         }
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if(prevState.selection !== this.state.selection && this.props.onSelectQuery) {
+            this.props.onSelectQuery(this.state.selection);
+        }
+    }
+
     //sort data based on the given field
     sort(field) {
         const sort = {
@@ -103,7 +109,7 @@ class SortTable extends React.PureComponent {
         //populate the header using the provided header function
         const header = this.props.head.map((head, index) =>
             this.getHeader(index, head.field, head.content, head.sortable)
-        )
+        );
 
         //populate the table body using the provided row function
         const tableBody = itemsOnPage.map((item, index) => (
@@ -120,11 +126,11 @@ class SortTable extends React.PureComponent {
                     </td>
                 ))}
             </tr>
-        ))
+        ));
 
         //show the correct message when there are no items
         let message = null;
-        if(this.state.items.length == 0) {
+        if(this.state.items.length === 0) {
             if(this.state.loading) {
                 message = <h3 className="error">Loading...</h3>
             } else {

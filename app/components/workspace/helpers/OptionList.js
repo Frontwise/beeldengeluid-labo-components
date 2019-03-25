@@ -2,6 +2,7 @@ import { AnnotationTranslator } from './AnnotationTranslator';
 
 // Create a {value/name} list based on given items and key
 export const createOptionList = (items, getValue) =>{
+    if(!items) { return []; }
     const hits = {};
     const options = [];
     items.forEach(item => {
@@ -35,6 +36,7 @@ export const createClassificationOptionList = (items, key) =>{
 
 // Create a {value/name} array list based on given bookmarks
 export const createSimpleArrayOptionList = (items, getValue) => {
+    if(!items) { return []; }
     items = items.reduce((acc, i)=>(acc.concat(getValue(i))), []);
     const hits = {};
     const options = [];
@@ -54,6 +56,7 @@ const valueSort = (list) =>{
 
 // Create a {value/name} classification list based on given annotations
 export const createAnnotationClassificationOptionList = (items, key) =>{
+    if(!items) { return []; }
     const hits = {};
     return items.reduce((a,b)=>(
         a.concat(createClassificationOptionList(b.bookmarks,key))
@@ -68,6 +71,7 @@ export const createAnnotationClassificationOptionList = (items, key) =>{
 
 // Create a {value/name} list based on given annotations of given bookmarks
 export const createAnnotationOptionList = (items) =>{
+    if(!items) { return []; }
     const hits = {};
     const list = [];
     items.forEach((i)=>{

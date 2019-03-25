@@ -3,6 +3,7 @@ import CollectionAPI from '../../api/CollectionAPI';
 
 import CollectionUtil from '../../util/CollectionUtil';
 import IDUtil from '../../util/IDUtil';
+import ReadMoreLink from '../helpers/ReadMoreLink';
 
 import PropTypes from 'prop-types';
 import { PowerSelect } from 'react-power-select';
@@ -23,7 +24,7 @@ class CollectionSelector extends React.Component {
 		this.state = {
 			activeCollection: '',
 			collectionList : null
-		}
+		};
 		this.CLASS_PREFIX = 'cls';
 	}
 
@@ -34,7 +35,6 @@ class CollectionSelector extends React.Component {
 		});
 		//TODO add collections to the list!!
 		CollectionAPI.listCollections('personalcollection__clariah_test', (collections) => {
-			//console.debug('got my personal collections back!')
 			//console.debug(collections);
 		})
 	}
@@ -57,9 +57,9 @@ class CollectionSelector extends React.Component {
 	getCollectionInfo(collectionId) {
 		if(this.state.collectionList) {
 			const tmp = this.state.collectionList.filter((c) => {
-				return c.index == collectionId;
+				return c.index === collectionId;
 			});
-			if(tmp.length == 1) {
+			if(tmp.length === 1) {
 				return tmp[0];
 			}
 		}
@@ -71,9 +71,6 @@ class CollectionSelector extends React.Component {
 	------------------------------------------------------------------------------- */
 
 	onOutput(collectionId, collectionStats, collectionInfo) {
-		// console.debug(collectionId)
-		// console.debug(collectionStats)
-		// console.debug(collectionInfo)
 		const collectionConfig = CollectionUtil.createCollectionConfig(
 			this.props.clientId,
 			this.props.user,
@@ -123,22 +120,29 @@ class CollectionSelector extends React.Component {
 			}
 
 			if(this.props.showBrowser) {
-
 				//the collections visualized as blocks
 				const collectionBlocks = this.state.collectionList.map((collection) => {
 					let organisationImage = null;
-					if(collection.organization.image_url) {
+                    let ckanLink = null;
+
+                    if(collection.organization.image_url) {
 						organisationImage = (<img src={collection.organization.image_url}/>)
 					}
+					if (collection.ckanUrl) {
+						ckanLink = (<ReadMoreLink linkUrl={collection.ckanUrl}/>)
+					}
 					return (
-						<div className={IDUtil.cssClassName('collection', this.CLASS_PREFIX)}
-							onClick={this.selectCollection.bind(this, collection.index)}>
-							<div className={IDUtil.cssClassName('caption', this.CLASS_PREFIX)}>
-								<h4>{collection.title}</h4>
-								<p>{collection.organization.title}</p>
-								{organisationImage}
-							</div>
-						</div>
+					    <div className="bg__collection-wrapper">
+                            <div className={IDUtil.cssClassName('collection', this.CLASS_PREFIX)}
+                                 onClick={this.selectCollection.bind(this, collection.index)}>
+                                <div className={IDUtil.cssClassName('caption', this.CLASS_PREFIX)}>
+                                    <h4>{collection.title}</h4>
+                                    <p>{collection.organization.title}</p>
+                                    {organisationImage}
+                                </div>
+                            </div>
+                            {ckanLink}
+                        </div>
 					)
 				});
 
@@ -175,7 +179,7 @@ CollectionSelector.propTypes = {
 	clientId : PropTypes.string,
 
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })
 
 };

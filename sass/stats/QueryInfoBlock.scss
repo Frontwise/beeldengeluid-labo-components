@@ -1,0 +1,30 @@
+.bg__query-info-block {
+	color: #f3f3f3;
+	margin: 4rem 0;
+	padding: 1rem 0;
+	text-transform: capitalize;
+	display: flex;
+	flex-wrap: wrap;
+
+	.query-details {
+		flex-wrap: wrap;
+		flex: 2 2 30em;
+		padding: 15px;
+		background-color: #fefefe;
+		border: 1px solid #DEDEDA;
+		border-radius: 4px;
+		box-shadow: 1px 1px 1px 0 #999;
+		margin: 1rem 10px 1rem 0;
+		width: 49%;
+		vertical-align: top;
+		p {
+			color: #2D343A;
+			padding: 0 20px;
+			line-height: 1.2rem;
+		}
+		li {
+		   color: #2D343A;
+			list-style-type: none;
+		}
+	}
+}

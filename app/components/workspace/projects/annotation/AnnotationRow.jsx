@@ -2,7 +2,6 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 
 import IDUtil from '../../../../util/IDUtil';
 
-import AnnotationStore from '../../../../flux/AnnotationStore';
 import {BookmarkTranslator} from '../../helpers/BookmarkTranslator';
 
 import classNames from 'classnames';
@@ -48,7 +47,7 @@ class AnnotationRow extends React.PureComponent {
                             <h4 className="label">Vocabulary</h4>
                             <p>{annotation.vocabulary}</p>
                         </li>
-                       
+
                         <li className="created">
                             <h4 className="label">Created</h4>
                             <p>{annotation.created ? annotation.created.substring(0, 10) : '-'}</p>
@@ -155,7 +154,7 @@ class AnnotationRow extends React.PureComponent {
                                     <td>{bookmark.object.title}</td>
                                     <td>{bookmark.collectionId}</td>
                                     <td className="groups">
-                                        {bookmark.groups ? 
+                                        {bookmark.groups ?
                                             bookmark.groups.map((g)=>(<span>{g.label}</span>))
                                             : null}
                                     </td>
@@ -193,7 +192,7 @@ class AnnotationRow extends React.PureComponent {
                     </div>
 
                     {this.getInfoRow(annotation)}
-                    
+
                     <div className="actions">
                         <div className="row-menu">
                             <span>⋮</span>
@@ -215,7 +214,7 @@ class AnnotationRow extends React.PureComponent {
                             </div>
                     </div>
 
-                    
+
                 </div>
 
                 {foldableBlock}

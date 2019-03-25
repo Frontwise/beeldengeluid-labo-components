@@ -8,9 +8,7 @@ import SortTable from '../SortTable';
 
 import DataEntryForm from './DataEntryForm';
 
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
 /*
 * Displays all the entries of a personal collection.
@@ -38,7 +36,7 @@ class DataEntryTable extends React.PureComponent {
         this.defaultSort = {
             field: 'name',
             order: 'asc'
-        }
+        };
 
         this.state = {
             entries: [],
@@ -188,7 +186,7 @@ class DataEntryTable extends React.PureComponent {
             entries.forEach((entry, index) => {
                 this.props.api.deleteEntry(this.props.user.id, this.props.collection.id, entry.id, status => {
                     calls--;
-                    if (calls == 0) {
+                    if (calls === 0) {
                         // after the last delete just retrieve the latest data
                         this.loadData();
                     }
@@ -409,7 +407,7 @@ DataEntryTable.propTypes = {
 
     // current user object used for defining access roles per collection
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired,
 
     collection: PropTypes.shape({

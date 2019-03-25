@@ -1,0 +1,26 @@
+@include spinner();
+
+.bg__comparative-search-recipe {
+	.bg__project-queries-view {
+		@import '../workspace/index';
+		.tools {
+			width: 100%;
+		}
+	}
+	.combineSavedQueries {
+		position: relative;
+	}
+
+	.recharts-legend-wrapper {
+		position: relative;
+	}
+	.bg__comparative-graphs {
+		position: relative;
+
+		.bg__switch-type-btn {
+			position: absolute;
+			top: 0;
+			right: 0;
+		}
+	}
+}

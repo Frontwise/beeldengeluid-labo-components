@@ -1,0 +1,44 @@
+.bg__project-selector {
+	.bg__select-project {
+		border-bottom: 1px solid #e5e5e5;
+		padding-bottom: 15px;
+	}
+
+	.bg__project-form  {
+		margin-top: 4rem;
+		padding-bottom: 3rem;
+		&::before {
+			content: 'Create a new project';
+			font-size: 16px;
+			font-weight: 600;
+			margin-top: 3rem;
+		}
+
+		.new-project-container {
+			padding-top: 3rem;
+			.bg__new-project-wrapper{
+				display: flex;
+				flex-wrap: wrap;
+				margin: 0;
+				padding: 0;
+				.project-modal-right {
+					margin-left: 15px;
+					width: 80%;
+				}
+				.project-modal-left {
+					font-weight: 600;
+					width: 16.3332%;
+				}
+				label {
+					color: #000;
+					text-align: left;
+					text-transform: none;
+				}
+			}
+		}
+		.actions {
+			margin-top: 3rem;
+		}
+	}
+
+}

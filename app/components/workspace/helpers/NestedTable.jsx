@@ -1,10 +1,8 @@
 import ProjectAPI from '../../../api/ProjectAPI';
 
 import AnnotationUtil from '../../../util/AnnotationUtil';
-import ComponentUtil from '../../../util/ComponentUtil';
+//import ComponentUtil from '../../../util/ComponentUtil';
 import IDUtil from '../../../util/IDUtil';
-
-import AnnotationStore from '../../../flux/AnnotationStore';
 
 import ItemDetailsRecipe from '../../../ItemDetailsRecipe';
 
@@ -20,8 +18,9 @@ class NestedTable extends React.PureComponent {
 
         // retrieve persistent filters from localstorage
         this.filterKey = props.uid + '-filter';
-        let filter = ComponentUtil.getJSONFromLocalStorage(this.filterKey);
-        filter = filter ? filter : {keywords:''};
+        //FIXME STORED FILTERS COULD BECOME CORRUPT, SO NO LONGER USING THIS UNTIL FIXED!
+        //let filter = ComponentUtil.getJSONFromLocalStorage(this.filterKey);
+        const filter = { keywords:''}
 
         this.state = {
             filteredItems: [],
@@ -42,7 +41,6 @@ class NestedTable extends React.PureComponent {
 
         // sort
         const sorted = this.props.sortItems(filtered, this.state.order);
-
         // update state
         this.setState({
             filteredItems: filtered,
@@ -90,7 +88,8 @@ class NestedTable extends React.PureComponent {
         filter = Object.assign({}, this.state.filter, filter);
 
         // persistent filters: Store to localstorage
-        ComponentUtil.storeJSONInLocalStorage(this.filterKey, filter);
+        //FIXME STORED FILTERS COULD BECOME CORRUPT, SO NO LONGER USING THIS UNTIL FIXED!
+        //ComponentUtil.storeJSONInLocalStorage(this.filterKey, filter);
 
         // update state
         this.setState({
@@ -140,7 +139,7 @@ class NestedTable extends React.PureComponent {
                         </span>
                     </div>)
                 break;
-                default: 
+                default:
                     console.error("Unknown filter type", filter);
 
             }

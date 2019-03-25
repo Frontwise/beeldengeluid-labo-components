@@ -18,13 +18,15 @@ class SessionSaver extends React.Component {
       'motivation' : 'bookmarking'
     }
     AnnotationAPI.getFilteredAnnotations(
+      this.props.user.id,
       filter,
+      null, //not_filters
       this.onLoadBookmarkAnnotations.bind(this)
     );
   }
 
   onLoadBookmarkAnnotations(data) {
-    this.setState({bookmarks : data.annotations || []});
+    this.setState({bookmarks : data || []});
   }
 
   submitNewBookmark(e) {
@@ -37,7 +39,7 @@ class SessionSaver extends React.Component {
     annotation.body = [{
       "annotationType": "classification",
       "vocabulary": "clariahwp5-bookmark-group",
-      "label": this.refs.bookmarkCategory.value,
+      "label": this.bookmarkCategory.value,
       "user": this.props.user.id
     }]
     this.onOutput(annotation);
@@ -79,7 +81,7 @@ class SessionSaver extends React.Component {
               <div className="form-group">
                 <h4>Bookmark category</h4>
                 <input
-                  ref="bookmarkCategory"
+                    ref={input => (this.bookmarkCategory = input)}
                   type="text"
                   className="form-control"
                 />

@@ -5,13 +5,12 @@ import ProjectAPI from '../../../../api/ProjectAPI';
 import IDUtil from '../../../../util/IDUtil';
 import FlexRouter from '../../../../util/FlexRouter';
 
-import { exportDataAsJSON } from '../../helpers/Export';
-
-import ProjectViewWrapper from '../ProjectViewWrapper';
 import SortTable from '../../SortTable';
-
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import ReactTooltip from 'react-tooltip';
+
+import CopyToClipboard from '../../../helpers/CopyToClipboard';
+import MessageHelper from '../../../helpers/MessageHelper';
 
 class ProjectQueriesTable extends React.PureComponent {
 
@@ -88,9 +87,9 @@ class ProjectQueriesTable extends React.PureComponent {
     }
 
     viewQuery(query) {
-        const selectedQuery = this.state.queries.filter(q => q.name == query.name);
+        const selectedQuery = this.state.queries.filter(q => q.name === query.name);
         if(selectedQuery.length > 0) {
-            FlexRouter.routeQueryToSingleSearch(selectedQuery[0].query);
+            FlexRouter.gotoSingleSearch(this.props.project.id + '__' + selectedQuery[0].query.id);
         }
     }
 
@@ -99,11 +98,11 @@ class ProjectQueriesTable extends React.PureComponent {
             const project = this.props.project;
 
             // delete queries from project
-            project.queries = project.queries.filter(s => s != query);
+            project.queries = project.queries.filter(s => s !== query);
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {
@@ -113,15 +112,6 @@ class ProjectQueriesTable extends React.PureComponent {
         }
     }
 
-    compareQueries(queries) {
-        const project = this.props.project;
-        project.queries = project.queries.filter(q => queries.includes(q));
-        console.log(project.queries);
-        // update state
-        this.setState({
-            selectedQueries: project.queries
-        }, console.log(this.state));
-    }
     //deletes multiple queries
     deleteQueries(queries) {
         if (window.confirm('Are you sure you want to delete ' + queries.length + ' queries?')) {
@@ -132,7 +122,7 @@ class ProjectQueriesTable extends React.PureComponent {
 
             // store project
             ProjectAPI.save(this.props.user.id, project, msg => {
-                if (msg && msg.success) {
+                if (msg) {
                     // update data
                     this.loadData();
                 } else {
@@ -140,6 +130,12 @@ class ProjectQueriesTable extends React.PureComponent {
                 }
             });
         }
+    }
+
+    onSelectQuery(item){
+        this.setState({
+            selectedQueries: item
+        })
     }
 
     sortQueries(queries, sort) {
@@ -151,15 +147,14 @@ class ProjectQueriesTable extends React.PureComponent {
         return sort.order === 'desc' ? sorted.reverse() : sorted;
     }
 
+    //MessageHelper.getQueryDetailsForTooltip(query)
+
     render() {
-        let combineQueriesLink = null;
-        if(this.props.compareQueryLink) {
-            combineQueriesLink = (
-                <button className="btn btn-primary combineSavedQueries" onClick={this.props.handleCompareLink.bind(this)}>
-                    {this.props.compareQueryLink.label}
-                </button>
-            )
-        }
+        const bulkActions = this.props.handleCompareLink
+            ? [{ title: 'Delete', onApply: this.deleteQueries.bind(this) },
+            { title: 'Compare', onApply: () => this.props.handleCompareLink(this.state.selectedQueries)}]
+            : [{ title: 'Delete', onApply: this.deleteQueries.bind(this) }];
+
         return (
             <div className={IDUtil.cssClassName('project-queries-table')}>
                 <div className="tools">
@@ -172,49 +167,57 @@ class ProjectQueriesTable extends React.PureComponent {
                             placeholder="Search"
                             value={this.state.filter.keywords}
                             onChange={this.keywordsChange.bind(this)}/>
-                          {combineQueriesLink}
                       </div>
                     </div>
                 </div>
 
-            <SortTable
-                items={this.state.queries}
-                head={[
-                    { field: 'name', content: 'Name', sortable: true },
-                    { field: 'query', content: 'Query', sortable: true },
-                    { field: '', content: '', sortable: false },
-                    { field: '', content: '', sortable: false }
-                ]}
-                row={query => [
-                    {
-                        props: { className: 'primary' },
-                        content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
-                    },
-                    { content: QueryModel.toHumanReadableString(query.query)},
-                    {
-                        content: (
-                            <a className="btn blank warning" onClick={this.deleteQuery.bind(this, query)}>
-                                Delete
-                            </a>
-                        )
-                    },
-                    {
-                        content: (
-                            <a onClick={this.viewQuery.bind(this, query)} className="btn">
-                                Open
-                            </a>
-                        )
-                    }
-                ]}
-                onSort={this.sortQueries.bind(this)}
-                loading={this.state.loading}
-                bulkActions={[
-                    { title: 'Delete', onApply: this.deleteQueries.bind(this) }
-                ]}
-                defaultSort={{
-                    field: 'name',
-                    order: 'asc'
-                }}/>
+                <SortTable
+                    items={this.state.queries}
+                    head={[
+                        { field: 'name', content: 'Name', sortable: true },
+                        { field: 'query', content: 'Query', sortable: true },
+                        { field: '', content: '', sortable: false },
+                        { field: '', content: '', sortable: false }
+                    ]}
+                    row={query => [
+                        {
+                            props: { className: 'primary' },
+                            content:  <a onClick={this.viewQuery.bind(this, query)}>{query.name}</a>
+                        },
+                        { content:
+                                <div>
+                                    <a data-tip data-for={'__qtt__' + query.query.id} data-class="bg__custom-queryTooltip">
+                                        <CopyToClipboard textToSave={QueryModel.queryDetailsToClipboard(query)} />
+                                    </a>
+                                    <ReactTooltip id={'__qtt__' + query.query.id}
+                                        getContent={() => MessageHelper.renderQueryForTooltip(query.query)}>
+                                    </ReactTooltip>
+                                    <span className="bg__searchTerm">{QueryModel.toHumanReadableString(query.query)}</span>
+                                </div>
+                        },
+                        {
+                            content: (
+                                <a className="btn blank warning" onClick={this.deleteQuery.bind(this, query)}>
+                                    Delete
+                                </a>
+                            )
+                        },
+                        {
+                            content: (
+                                <a onClick={this.viewQuery.bind(this, query)} className="btn">
+                                    Open
+                                </a>
+                            )
+                        }
+                    ]}
+                    onSelectQuery={this.onSelectQuery.bind(this)}
+                    onSort={this.sortQueries.bind(this)}
+                    loading={this.state.loading}
+                    bulkActions={bulkActions}
+                    defaultSort={{
+                        field: 'name',
+                        order: 'asc'
+                    }}/>
             </div>
         )
     }
@@ -228,7 +231,7 @@ ProjectQueriesTable.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

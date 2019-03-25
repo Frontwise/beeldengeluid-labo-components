@@ -3,16 +3,12 @@ import QueryModel from '../../model/QueryModel';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import CollectionUtil from '../../util/CollectionUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 
 import CollectionSelector from '../collection/CollectionSelector';
 import QueryBuilder from './QueryBuilder';
 
 import FlexModal from '../FlexModal';
-import FlexBox from '../FlexBox';
-
 import PropTypes from 'prop-types';
-
 /*
 
 OUTPUT:
@@ -75,7 +71,7 @@ class QueryFactory extends React.Component {
 
 	//connected to the onOutput of the CollectionSelector & each QueryBuilder component
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'CollectionSelector') {
+		if(componentClass === 'CollectionSelector') {
 			const oq = this.state.openQueries;
 			const queryId = IDUtil.guid().replace(/-/g, '');
 			oq.push(queryId)
@@ -93,7 +89,7 @@ class QueryFactory extends React.Component {
 				},
 				ComponentUtil.hideModal(this, 'showModal', 'collection__modal', true)
 			);
-		} else if(componentClass == 'QueryBuilder') {
+		} else if(componentClass === 'QueryBuilder') {
 			//output the data to the parent component
 			this.onOutput(data);
 
@@ -115,7 +111,7 @@ class QueryFactory extends React.Component {
 
 		const oqd = this.state.openQueryData;
 		delete oqd[queryId]
-		if(index != -1) {
+		if(index !== -1) {
 			oq.splice(index, 1);
 			this.setState(
 				{
@@ -188,7 +184,7 @@ class QueryFactory extends React.Component {
 		return (
 			<div className={IDUtil.cssClassName('query-factory')}>
 				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
-					Add query&nbsp;<i className="fa fa-plus"></i>
+					Add query&nbsp;<i className="fa fa-plus"/>
 				</button>
 				<div className={IDUtil.cssClassName('scrollwindow', this.CLASS_PREFIX)}>
 					<div className={IDUtil.cssClassName('grid', this.CLASS_PREFIX)}>
@@ -205,7 +201,7 @@ QueryFactory.propTypes = {
 	clientId : PropTypes.string,
 
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })
 
 };

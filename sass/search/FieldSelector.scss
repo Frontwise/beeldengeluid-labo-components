@@ -1,0 +1,11 @@
+.bg__field-category-creator {
+  select {
+    height: 200px;
+  }
+  label {
+    margin: 15px 0px 5px 0px;
+    &:first-child {
+      margin: 0px 0px 5px 0px;
+    }
+  }
+}

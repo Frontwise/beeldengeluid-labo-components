@@ -1,38 +1,25 @@
 import QueryModel from './model/QueryModel';
-
 import QueryFactory from './components/search/QueryFactory';
-
 import SearchAPI from './api/SearchAPI';
-
-import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
-
-import SearchHit from './components/search/SearchHit';
-import Paging from './components/search/Paging';
-import Sorting from './components/search/Sorting';
 
 import IDUtil from './util/IDUtil';
 import ElasticsearchDataUtil from './util/ElasticsearchDataUtil';
 import QueryComparisonLineChart from './components/stats/QueryComparisonLineChart';
+import ComparisonHistogram from './components/stats/ComparisonHistogram';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import ProjectQueriesTable from './components/workspace/projects/query/ProjectQueriesTable';
 import CollectionUtil from './util/CollectionUtil';
 
 import PropTypes from 'prop-types';
 import ComponentUtil from "./util/ComponentUtil";
-import { initHelp } from './components/workspace/helpers/helpDoc';
+import {initHelp} from './components/workspace/helpers/helpDoc';
+import QueryInfoBlock from './components/stats/helpers/QueryInfoBlock';
 
 /*
-Notes about this component:
 
-- Top component receiving the URL parameters
-- Generates search components based on the configured search recipe
-- Passes the URL parameters to search components, who already have implemented the search history
-	- Each search component (e.g. facet search, fragment search) implements its own way of persisting search history
-- FIXME temporarily draws an 'Export' button that hooks up to the annotation export functionality of the recipe
-	- This should be in the user space
-- Holds the annotation box that can be triggered from underlying (search) components
-- Holds the line chart that can be triggered from underlying components
+FIXME: the queries in this component should all be validated using the QueryModel!
+
 */
 
 class QueryComparisonRecipe extends React.Component {
@@ -47,8 +34,11 @@ class QueryComparisonRecipe extends React.Component {
 
         this.state = {
             lineChartData: {},
+            barChartData: {},
             collections : collections,
+            chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
             data : null,
+            selectedQueriesId: null,
             pageSize : 10,
             selectedQueries : [],
             activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
@@ -56,6 +46,7 @@ class QueryComparisonRecipe extends React.Component {
             awaitingProcess : null, //which process is awaiting the output of the project selector
         };
         this.layout = document.querySelector("body");
+        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
     }
 
     componentDidMount(){
@@ -66,13 +57,14 @@ class QueryComparisonRecipe extends React.Component {
     //to pass it to based on the ingredients of the recipe
     //TODO change this, so it knows what to do based on the recipe
     onComponentOutput(componentClass, data) {
-        if(componentClass == 'QueryFactory') {
+        if(componentClass === 'QueryFactory') {
             this.onSearched(data);
-        } else if(componentClass == 'ProjectSelector') {
+        } else if(componentClass === 'ProjectSelector') {
             this.setState(
                 {
                     activeProject: data,
-                    lineChartData: null
+                    lineChartData: null,
+                    barChartData : null
                 },
                 () => {
                     this.onProjectChanged.call(this, data)
@@ -85,7 +77,7 @@ class QueryComparisonRecipe extends React.Component {
     ------------------------------- SEARCH RELATED FUNCTIONS --------------------
     ------------------------------------------------------------------------------- */
     onProjectChanged(project) {
-        ComponentUtil.storeJSONInLocalStorage('activeProject', project)
+        ComponentUtil.storeJSONInLocalStorage('activeProject', project);
         ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
             if(this.state.awaitingProcess) {
                 switch(this.state.awaitingProcess) {
@@ -96,15 +88,13 @@ class QueryComparisonRecipe extends React.Component {
         });
     }
 
-    async getData(key) {
-        const that = this,
-              collectionId = that.state.selectedQueries[key].query.collectionId,
-              clientId = that.props.clientId,
-              user = that.props.user;
-
+    async getData(singleQuery) {
+        const collectionId = singleQuery.query.collectionId,
+              clientId = this.props.clientId,
+              user = this.props.user;
         return new Promise(function(resolve, reject) {
             CollectionUtil.generateCollectionConfig(clientId, user, collectionId, (collectionConfig) => {
-                const desiredFacets = that.state.selectedQueries[key].query.desiredFacets,
+                const desiredFacets = singleQuery.query.desiredFacets,
                     field = collectionConfig.getPreferredDateField() || null;
                 if(field !== null) {
                     desiredFacets.push({
@@ -115,25 +105,12 @@ class QueryComparisonRecipe extends React.Component {
                     });
                 }
 
-                const currentTime = new Date().getTime(),
-                    query = {
-                        ...that.state.selectedQueries[key].query,
-                        dateRange: {
-                            field: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.field :
-                                collectionConfig.getPreferredDateField(),
-                            end: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.end : currentTime,
-                            start: that.state.selectedQueries[key].query.dateRange ?
-                                that.state.selectedQueries[key].query.dateRange.start : collectionConfig.getMinimunYear()
-                        },
-                        fragmentFields: null,
-                        fragmentPath: null,
-                        desiredFacets: desiredFacets,
-                        collectionConfig: collectionConfig
-                    };
+                const query = QueryModel.ensureQuery(singleQuery.query, collectionConfig);
 
-                // TODO : remove call to CKANAPI since the title for the collection is in the collectionConfig
+                query.fragmentFields = null;
+                query.fragmentPath = null;
+                query.desiredFacets = desiredFacets;
+
                 SearchAPI.search(
                     query,
                     collectionConfig,
@@ -151,30 +128,40 @@ class QueryComparisonRecipe extends React.Component {
                     false
                 )
             })
-        }).catch(err => console.log('No data returned from query'));
+        }).catch(err => console.log('No data returned from query', err));
     }
 
     async processData(queries) {
-        const promises = Object.keys(queries).map(this.getData.bind(this));
+        const random = Math.floor(Math.random() * 1000) + 1;
+        const promises = queries.map(query => this.getData(query));
         let queriesData = {};
+        let selectedQueriesWithConfig = [];
         await Promise.all(promises).then(
-            (dataPerQuery) => {
+            dataPerQuery => {
+                queries.forEach(singleQuery => {
+                    singleQuery.collectionConfig = dataPerQuery.find(q => q.query.id === singleQuery.query.id);
+                    selectedQueriesWithConfig.push(singleQuery)
+                });
                 dataPerQuery.map(data => {
                     if(data && data.query) {
                         let queryObj = {};
-                        const objData = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                        queryObj.data = ElasticsearchDataUtil.searchResultsToTimeLineData(
                             data.query,
                             data.aggregations,
                         );
-                        queryObj.data = objData;
                         queryObj.comparisonId = data.query.id;
                         queryObj.query = data.query;
                         queryObj.collectionConfig = data.collectionConfig;
                         queriesData[data.query.id] = queryObj;
+                    } else {
+                        console.debug('no data', data)
                     }
                 });
                 this.setState({
-                    lineChartData: queriesData
+                    lineChartData: queriesData,
+                    barChartData: dataPerQuery,
+                    selectedQueriesId : random,
+                    selectedQueries : selectedQueriesWithConfig
                 }, () => this.layout.classList.remove("spinner"))
             },
         )
@@ -189,38 +176,16 @@ class QueryComparisonRecipe extends React.Component {
             if(data.deleted === true && data.queryId) { //the query factory deleted a query
                 delete csr[data.queryId];
                 delete lineChartData[data.queryId];
+                delete barChartData[data.queryId];
             } else { //the data is the same stuff returned by a QueryBuilder
 
             }
         }
-
-        if (this.state.viewMode !== 'relative') {
-            let relativeData = data.map(
-                dataSet => {
-                    if(dataSet.length > 0) {
-                        dataSet
-                    }
-                }
-            );
-            this.setState({
-                isSearching: false,
-                data: relativeData
-            });
-        }
     }
 
-    compareQueries() {
-        const checkedBoxes = Array.from(document.querySelectorAll(".bg__sort-table > table > tbody input"));
-        this.layout.classList.add("spinner");
-        let queries = [];
-        Object.keys(checkedBoxes).forEach((item, index) => {
-            if (checkedBoxes[item].checked && this.state.activeProject) {
-                queries.push(this.state.activeProject.queries[index])
-            }
-        });
-        this.setState({
-            selectedQueries : queries
-        }, () => this.processData(this.state.selectedQueries))
+    compareQueries(selection) {
+        this.layout.classList.add("spinner")
+        this.processData(selection)
     }
 
     __getBaseUrl() {
@@ -230,32 +195,38 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     goToSingleSearch() {
-        let url = this.__getBaseUrl() + '/tool/single-search';
-        console.log(url)
-        document.location.href = url;
+        document.location.href = this.__getBaseUrl() + '/tool/single-search';
+    }
+
+    switchGraphType() {
+        this.setState({
+            chartType : this.state.chartType === 'lineChart' ? 'histogram' : 'lineChart'
+            }
+        )
     }
 
     render() {
-        const compareLink = {"label": "Combine queries ..."}
-
+        const compareLink = {"label": "Combine queries ..."};
         const chooseProjectBtn = (
             <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
                 Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
             </button>
-        )
-
-                //generates a tabbed pane with a search component for each collection + a collection browser
+        );
+        //generates a tabbed pane with a search component for each collection + a collection browser
         const searchComponent = (
-            <button className="btn btn-primary" onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i
-                className="fa fa-plus"></i></button>
-        )
+            <button className="btn btn-primary"
+                    onClick={this.goToSingleSearch.bind(this)}>Add query&nbsp;<i className="fa fa-plus"/></button>
+        );
 
-        let lineChart = null;
-        let aggregatedHits = null;
+        let chart = null;
+        let queryCollectionDetails = null;
         let projectModal = null;
         let projectQueriesTable = null;
+        let graphTypeBtn = null;
 
         if(this.state.activeProject) {
+            const graphTypeText = this.state.chartType === 'lineChart' ? 'Histogram' : 'Line Chart';
+
             projectQueriesTable = (
                 <div className={IDUtil.cssClassName('project-queries-view')}>
                     <ProjectQueriesTable
@@ -268,13 +239,36 @@ class QueryComparisonRecipe extends React.Component {
             );
 
             if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
-                const ramdom = Math.floor(Math.random() * 1000000);
-                lineChart = (
-                    <QueryComparisonLineChart
-                        data={this.state.lineChartData}
-                        comparisonId={ramdom}
-                    />
-                );
+                graphTypeBtn = (
+                    <button
+                        onClick={this.switchGraphType.bind(this)}
+                        type="button"
+                        className="btn btn-primary btn-xs bg__switch-type-btn">
+                        {graphTypeText}
+                    </button>);
+
+                if(this.state.chartType === 'lineChart') {
+                    chart = (
+                        <QueryComparisonLineChart
+                            data={this.state.lineChartData}
+                            key={this.state.selectedQueriesId}
+                            selectedQueries={this.state.selectedQueries}
+                        />
+                    );
+                } else {
+                    chart = (
+                        <ComparisonHistogram
+                            data={this.state.barChartData}
+                            key={this.state.selectedQueriesId}
+                            selectedQueries={this.state.selectedQueries}
+                        />
+                    );
+                }
+                queryCollectionDetails = <QueryInfoBlock
+                    selectedQueries={this.state.selectedQueries}
+                    lineColour={this.COLORS}
+                    external={external}
+                />;
             }
         }
 
@@ -291,23 +285,9 @@ class QueryComparisonRecipe extends React.Component {
                 </FlexModal>
             )
         }
-
-        //TODO only render when there is linechart data
-        if(this.props.recipe.ingredients.output === 'lineChart') {
-            if(this.state.lineChartData && Object.keys(this.state.lineChartData).length > 0) {
-                lineChart = (
-                    <QueryComparisonLineChart
-                        data={this.state.lineChartData}
-                        comparisonId={this.state.comparisonId}
-                        selectedQueries={this.state.selectedQueries}
-                    />
-                );
-            }
-        }
-
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
-                <div className="overlay"></div>
+                <div className="overlay"/>
                 <div className="row">
                     <div className="bg__queryComparisonRecipe-header-btns">
                         {searchComponent}&nbsp;{chooseProjectBtn}
@@ -316,11 +296,12 @@ class QueryComparisonRecipe extends React.Component {
                     {projectQueriesTable}
                 </div>
                 <div className="row">
-                    <div className="col-md-12">
-                        {lineChart}
+                    <div className="col-md-12 bg__comparative-graphs">
+                        {graphTypeBtn}
+                        {chart}
+                        {queryCollectionDetails}
                     </div>
                 </div>
-                {aggregatedHits}
             </div>
         );
     }

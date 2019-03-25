@@ -1,0 +1,34 @@
+.bg__flex-box {
+
+	.box-toggle {
+		width:100%;
+		height:40px;
+		cursor: pointer;
+		padding: $default-margin $default-margin 0px 0px;
+
+		label {
+			cursor: pointer;
+			float:right;
+		}
+
+		&:hover {
+			background-color: $fill-color;
+		}
+
+		&.closed {
+			label {
+				&:after {
+					content: "\25B2";
+				}
+			}
+		}
+		&.open {
+			label {
+				&:after {
+					content: "\25BC";
+				}
+			}
+		}
+	}
+
+}

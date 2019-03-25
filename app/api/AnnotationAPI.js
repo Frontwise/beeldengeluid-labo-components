@@ -45,8 +45,13 @@ const AnnotationAPI = {
 		}
 	},
 
+	//TODO remove and user deleteUserAnnotation instead
 	deleteAnnotation : function (annotation, callback) {
 		if(annotation.id) {
+			if(annotation.motivation == 'bookmarking') {
+				alert('will not delete a bookmark group annotation!')
+				return;
+			}
 			const url = _config.ANNOTATION_API_BASE + '/annotation/' + annotation.id;
 			const xhr = new XMLHttpRequest();
 			xhr.onreadystatechange = function() {
@@ -64,14 +69,58 @@ const AnnotationAPI = {
 		}
 	},
 
-	//TODO always add the user too!
-	getFilteredAnnotationsOld : function(params, callback) {
+	getFilteredAnnotations : function(userId, filters, not_filters, callback,
+			offset = 0, size = 250, sort = null, dateRange = null) {
 		let url = _config.ANNOTATION_API_BASE + '/annotations/filter';
-		const temp = [];
-		Object.keys(params).forEach((key) => {
-			temp.push(key + '=' + params[key]);
-		})
-		url += '?' + temp.join('&');
+		const params = {
+			filters : filters,
+			not_filters : not_filters,
+			offset : offset,
+			size : size,
+			sort : sort,
+			dateRange : dateRange,
+			user : userId
+		}
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					callback(JSON.parse(xhr.responseText));
+				} else {
+					callback(null);
+				}
+			}
+		}
+		xhr.open("POST", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send(JSON.stringify(params)); //all params with empty values are removed from the params with stringify...
+	},
+
+	getBookmarks : function(userId, projectId, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/bookmarks';
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					const resp = JSON.parse(xhr.responseText)
+					//TODO the server should return the proper status code on error!!
+					if(resp.hasOwnProperty('error')) {
+						callback([]);//return an empty list by default
+					} else {
+						callback(JSON.parse(xhr.responseText));
+					}
+				} else {
+					callback(null);
+				}
+			}
+		}
+		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
+	},
+
+	getAnnotationCounts : function(userId, projectId, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/bookmarks?o=count';
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -87,16 +136,33 @@ const AnnotationAPI = {
 		xhr.send();
 	},
 
-	getFilteredAnnotations : function(filters, callback, offset = 0, size = 250, sort = null, dateRange = null) {
-		let url = _config.ANNOTATION_API_BASE + '/annotations/filter';
-		const postData = {
-			clientId : _clientId,
-			token : _chickenStock,
-			filters : filters,
-			offset : offset,
-			size : size,
-			sort : sort,
-			dateRange : dateRange
+	getAnnotationBodies : function(userId, projectId, annotationType, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId+'/project/'+projectId+'/' + annotationType;
+		const xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if(xhr.status == 200) {
+					const resp = JSON.parse(xhr.responseText)
+					//TODO the server should return the proper status code on error!!
+					if(resp.hasOwnProperty('error')) {
+						callback([]);//return an empty list by default
+					} else {
+						callback(JSON.parse(xhr.responseText));
+					}
+				} else {
+					callback([]);//return an empty list by default
+				}
+			}
+		}
+		xhr.open("GET", url);
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.send();
+	},
+
+	deleteUserAnnotations : function(userId, deletionList, callback) {
+		let url = _config.ANNOTATION_API_BASE + '/user/'+userId + '/annotations';
+		const params = {
+			toDelete : deletionList
 		}
 		const xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
@@ -104,13 +170,17 @@ const AnnotationAPI = {
 				if(xhr.status == 200) {
 					callback(JSON.parse(xhr.responseText));
 				} else {
-					callback(null);
+					callback([]);//return an empty list by default
 				}
 			}
 		}
-		xhr.open("POST", url);
+		xhr.open("DELETE", url);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhr.send(JSON.stringify(postData));
+		if(params) {
+			xhr.send(JSON.stringify(params));
+		} else {
+			xhr.send();
+		}
 	}
 }
 

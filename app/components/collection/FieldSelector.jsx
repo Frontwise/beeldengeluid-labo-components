@@ -1,6 +1,5 @@
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
-import Autosuggest from 'react-autosuggest';
 import classNames from 'classnames';
 
 //this component relies on the collection statistics as input
@@ -21,32 +20,34 @@ class FieldSelector extends React.Component {
     onSort(sortField){
         this.setState({
             sortField,
-            sortOrder: this.state.sortField == sortField ? (this.state.sortOrder === 'asc' ? 'desc' : 'asc') : this.state.sortOrder,
+            sortOrder: this.state.sortField === sortField ? (this.state.sortOrder === 'asc' ? 'desc' : 'asc') : this.state.sortOrder,
         })
     }
 
-    sortFields(fields){
+    // '~'' --> high ASCII, on end of sorting
+    getStringDescriptionOrEmpty(v) {
+        return v ? v.description || '~' : '~';
+    }
+
+    sortFields(fields) {
         // default to id first; to prevent unwanted shuffling
         fields = fields.sort((a,b)=>(a.id > b.id ? -1 : 1));
 
-        switch(this.state.sortField){
-            case 'title':
-                fields = fields.sort((a,b)=>(a.title > b.title ? -1 : 1))
-            break;
-            case 'description':
-                const getStringDescriptionOrEmpty = (v)=> (v ? v.description || '~' : '~'); // '~'' --> high ASCII, on end of sorting
-                fields = fields.sort((a,b)=>(getStringDescriptionOrEmpty(this.props.descriptions[a.id]) > getStringDescriptionOrEmpty(this.props.descriptions[b.id]) ? -1 : 1))
-            break;
-            case 'type':
-                fields = fields.sort((a,b)=>(a.type > b.type ? -1 : 1))
-            break;
-            case 'level':
-                fields = fields.sort((a,b)=>(a.level > b.level ? -1 : 1))
-            break;
-            case 'completeness':
-                const getFloatValueOrZero = (v)=> (v ? parseFloat(v.value) : 0);
-                fields = fields.sort((a,b)=>(getFloatValueOrZero(this.props.completeness[a.id]) < getFloatValueOrZero(this.props.completeness[b.id]) ? -1 : 1))
-            break;
+        if(this.state.sortField === 'title') {
+            fields = fields.sort((a,b)=>(a.title > b.title ? -1 : 1));
+        } else if(this.state.sortField === 'description' && this.props.descriptions) {
+            fields = fields.sort((a,b) => {
+                const s1 = this.getStringDescriptionOrEmpty(this.props.descriptions[a.id]);
+                const s2 = this.getStringDescriptionOrEmpty(this.props.descriptions[b.id]);
+                return s1 > s2 ? -1 : 1
+            });
+        } else if(this.state.sortField === 'type') {
+            fields = fields.sort((a,b)=>(a.type > b.type ? -1 : 1));
+        } else if(this.state.sortField === 'level') {
+            fields = fields.sort((a,b)=>(a.level > b.level ? -1 : 1));
+        } else if(this.state.sortField === 'completeness') {
+            const getFloatValueOrZero = (v)=> (v ? parseFloat(v.value) : 0);
+            fields = fields.sort((a,b)=>(getFloatValueOrZero(this.props.completeness[a.id]) < getFloatValueOrZero(this.props.completeness[b.id]) ? -1 : 1));
         }
 
         switch(this.state.sortOrder){
@@ -58,7 +59,6 @@ class FieldSelector extends React.Component {
     }
 
     filterFields(fields){
-
         if (this.state.filters.keyword){
             const keywords = this.state.filters.keyword.toLowerCase().split(' ');
             keywords.forEach((keyword)=>{
@@ -122,11 +122,12 @@ class FieldSelector extends React.Component {
                                            onChange={this.onKeywordFilter.bind(this)}
                                            value={this.state.filters.keywords}
                                        />
-                                    <span className="input-group-addon btn-effect"><i className="fa fa-search"></i></span>
+                                    <span className="input-group-addon btn-effect"><i className="fa fa-search"/></span>
                                 </div>
                             </form>
                             <table>
                                 <thead>
+                                <tr>
                                     <th onClick={()=>{this.onSort('title')}}
                                         className={classNames('title', { active:this.state.sortField === 'title'})}>
                                         Field
@@ -153,7 +154,8 @@ class FieldSelector extends React.Component {
                                         {this.state.sortField === 'completeness' ? sortArrow : null}
                                         </th>
 
-                                    <th className="select"></th>
+                                    <th className="select"/>
+                                </tr>
                                 </thead>
                                 <tbody>
 
@@ -166,7 +168,7 @@ class FieldSelector extends React.Component {
                                                 {field.level}
                                             </td> : null }
                                             <td className="description">
-                                                {this.props.descriptions !== null ?
+                                                {this.props.descriptions ?
                                                     (this.props.descriptions[field.id] !== undefined ?
                                                         <span>{this.props.descriptions[field.id].description || '-'}</span>
                                                     : '-')

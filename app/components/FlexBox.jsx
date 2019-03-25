@@ -1,13 +1,14 @@
+import PropTypes from 'prop-types';
 import IDUtil from '../util/IDUtil';
 
 //TODO the header sucks a bit, make it better
 class FlexBox extends React.Component {
+
 	constructor(props) {
 		super(props);
 		this.state = {
-			visible: true
-		}
-		this.CLASS_PREFIX = 'fb';
+			visible: props.isVisible !== undefined ? props.isVisible : true
+		};
 	}
 
 	toggle() {
@@ -17,27 +18,14 @@ class FlexBox extends React.Component {
 	}
 
 	render() {
-		const header = (
-			<div className="row fb-header" onClick={this.toggle.bind(this)}>
-				<div className="col-md-12">
-					<div className={
-							this.state.visible ?
-								IDUtil.cssClassName('open', this.CLASS_PREFIX) :
-								IDUtil.cssClassName('closed', this.CLASS_PREFIX)
-						}>
-						{this.props.title}&nbsp;
-					</div>
-				</div>
+        const header = (
+			<div className={this.state.visible ? 'box-toggle open' : 'box-toggle closed'} onClick={this.toggle.bind(this)}>
+				<label>{this.props.title}&nbsp;</label>
 			</div>
-		)
+		);
 
-		//the component's css class names
-		const classNames = [IDUtil.cssClassName('flex-box')]
-		if(!this.state.visible) {
-			classNames.push('closed')
-		}
 		return (
-			<div className={classNames.join(' ')}>
+			<div className={IDUtil.cssClassName('flex-box')}>
 				{header}
 				<div style={{display : this.state.visible ? 'block' : 'none'}}>
 					{this.props.children}
@@ -45,6 +33,11 @@ class FlexBox extends React.Component {
 			</div>
 		)
 	}
+}
+
+FlexBox.propTypes = {
+	title : PropTypes.string,
+	isVisible : PropTypes.bool
 }
 
 export default FlexBox;

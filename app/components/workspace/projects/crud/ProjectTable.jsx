@@ -1,6 +1,5 @@
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
-import AnnotationUtil from '../../../../util/AnnotationUtil';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 
@@ -8,7 +7,6 @@ import AnnotationStore from '../../../../flux/AnnotationStore';
 
 import SortTable from '../../SortTable';
 
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
@@ -19,7 +17,7 @@ class ProjectTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
-        
+
         this.head = [
             { field: 'name', content: 'Name', sortable: true },
             { field: 'description', content: 'Description', sortable: true },
@@ -63,11 +61,9 @@ class ProjectTable extends React.PureComponent {
         this.getProjectRow = this.getProjectRow.bind(this);
     }
 
-
     componentDidMount() {
         this.loadData();
     }
-
 
     componentDidUpdate() {
         if (this.lastFilter !== this.state.filter) {
@@ -129,24 +125,17 @@ class ProjectTable extends React.PureComponent {
 
     //Load bookmark count from annotation store (TODO: This can be optimized by storing the counts in the SessionStorage)
     loadBookmarkCount(project) {
-        AnnotationStore.getUserProjectAnnotations(
-            this.props.user,
-            project,
-            this.setBookmarkCount.bind(this, project)
-        );
-    }
-
-    //set bookmark count to state
-    setBookmarkCount(project, annotationData) {
-        const bookmarks = AnnotationUtil.generateBookmarkCentricList(
-            annotationData.annotations || []
-        );
-        const bookmarkCount = bookmarks ? bookmarks.length : 0;
-        const newCount = {};
-        newCount[project.id] = bookmarkCount;
-        this.setState({
-            bookmarkCount: Object.assign({}, this.state.bookmarkCount, newCount)
-        });
+        AnnotationStore.getUserProjectBookmarks(
+            this.props.user.id,
+            project.id,
+            (bookmarks) => {
+                const newCount = {}
+                newCount[project.id] = bookmarks ? bookmarks.length : 0
+                this.setState({
+                    bookmarkCount: Object.assign({}, this.state.bookmarkCount, newCount)
+                });
+            }
+        )
     }
 
     //filter projects (client side) TODO: server side filtering
@@ -243,10 +232,15 @@ class ProjectTable extends React.PureComponent {
             // after each return calls is decreased
             // when calls is 0, data is reloaded
             // this is async safe
+            // check if project to be deleted is 'activeProject'. If so,
+            // remove it from localStorage.
             projects.forEach((project, index) => {
+                if (project.id === ComponentUtil.getJSONFromLocalStorage('activeProject').id) {
+                    ComponentUtil.removeJSONByKeyInLocalStorage('activeProject');
+                }
                 this.props.api.delete(this.props.user.id, project.id, status => {
                     calls--;
-                    if (calls == 0) {
+                    if (calls === 0) {
                         // after the last delete just retrieve the latest data
                         this.loadData();
                     }
@@ -284,6 +278,10 @@ class ProjectTable extends React.PureComponent {
         return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
+    setActiveProject(project){
+            ComponentUtil.storeJSONInLocalStorage('activeProject', project);
+    }
+
     //Transforms a project to a row needed for the sort table
     //don't like this is passed as a function to the sort table... but let's see first
     getProjectRow(project) {
@@ -292,12 +290,19 @@ class ProjectTable extends React.PureComponent {
         return [
         {
             props: { className: 'primary' },
-            content: (<Link to={'/workspace/projects/' + project.id}>{project.name}
-                      </Link>)
+            content: (
+                <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id}>
+                    {project.name}
+                </Link>
+            )
         },
         {
             props: { className: 'description' },
-            content: (<p><Link to={'/workspace/projects/' + project.id + '/details'}>{this.trunc(project.description, 140)}</Link></p>)
+            content: (
+                <p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>
+                    {this.trunc(project.description, 140)}
+                </Link></p>
+            )
         },
         {
             props: { className: 'number' },
@@ -316,7 +321,7 @@ class ProjectTable extends React.PureComponent {
                 </span>
             )
         },
-        {            
+        {
             content: (project.isPrivate ? "✔" : null)
         },
         {
@@ -328,12 +333,11 @@ class ProjectTable extends React.PureComponent {
             content: project.created.substring(0, 10)
         },
 
-
         {
             props: { className: 'actions' },
             content: project.canOpen(currentUserId) ? (
                 <div>
-                    <Link to={'/workspace/projects/' + project.id} className="btn">
+                    <Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id} className="btn">
                         Open
                     </Link>
 
@@ -396,7 +400,7 @@ ProjectTable.propTypes = {
 
     // current user object used for defining access roles per project
     user: PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     }).isRequired
 };
 

@@ -1,6 +1,6 @@
-import CollectionAPI from '../../api/CollectionAPI';
 import MetadataSchemaUtil from '../../util/MetadataSchemaUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
+import RegexUtil from '../../util/RegexUtil';
 
 /*
 TODO:
@@ -23,14 +23,14 @@ class CollectionConfig {
 		this.collectionInfo = collectionInfo; //CKAN metadata (null for personal collections or outside of CLARIAH)
 
 		this.docType = null;
-		this.stringFields = null;
-		this.textFields = null;
-		this.dateFields = null;
-		this.nonAnalyzedFields = null;
-		this.keywordFields = null;
-		this.longFields = null;
-		this.doubleFields = null;
-		this.nestedFields = null;
+		this.stringFields = [];
+		this.textFields = [];
+		this.dateFields = [];
+		this.nonAnalyzedFields = [];
+		this.keywordFields = [];
+		this.longFields = [];
+		this.doubleFields = [];
+		this.nestedFields = [];
 
 		if(collectionStats && collectionStats.collection_statistics) {
 			let temp = null;
@@ -55,7 +55,10 @@ class CollectionConfig {
 
 				//merged in getNonAnalyzedFields()
 				this.nonAnalyzedFields = temp.fields['not_analyzed'];
-				this.keywordFields = temp.fields['keyword'];
+
+                if(temp.fields['keyword']){
+                    this.keywordFields = temp.fields['keyword'];
+                }
 
 				this.dateFields = temp.fields['date'];
 				this.longFields = temp.fields['long'];
@@ -101,7 +104,7 @@ class CollectionConfig {
 	getSearchIndex() {
 		let searchIndex = this.collectionId;
 		if(this.collectionInfo) {
-			searchIndex = this.collectionInfo.index
+			searchIndex = this.collectionInfo.index;
 			if(!searchIndex && this.collectionInfo.user && this.collectionInfo.id) {
 				searchIndex = 'pc__' + this.clientId + '__' + this.collectionInfo.user + '__' + this.collectionInfo.id;
 			}
@@ -110,19 +113,27 @@ class CollectionConfig {
 	}
 
 	getImageBaseUrl() {
-		return null;
+		return null
 	}
 
 	getVideoBaseUrl() {
-		return null;
+		return null
 	}
 
 	getAudioBaseUrl() {
-		return null;
+		return null
 	}
 
 	requiresPlayoutAccess() {
-		return false;
+		return false
+	}
+
+	hideOffAirContent() {
+		return false
+	}
+
+	getThumbnailContentServerId() {
+		return null;
 	}
 
 	//should always be overloaded
@@ -169,7 +180,7 @@ class CollectionConfig {
 	}
 
 	getStringFields() {
-		let tmp = []
+		let tmp = [];
 		if(this.stringFields) {
 			tmp = tmp.concat(this.stringFields);
 		}
@@ -188,7 +199,7 @@ class CollectionConfig {
 	}
 
 	getNonAnalyzedFields() {
-		let tmp = []
+		let tmp = [];
 		if(this.nonAnalyzedFields) {
 			tmp = tmp.concat(this.nonAnalyzedFields);
 		}
@@ -202,9 +213,18 @@ class CollectionConfig {
 		return this.keywordFields;
 	}
 
+	//checks if the field is a keyword field and makes sure to return the matched keyword field name
+	getMatchedKeywordField(fieldName) {
+		const kwMatch = this.getKeywordFields().find((kw) => kw.indexOf(fieldName) !== -1);
+		if(kwMatch) {
+			return fieldName === kwMatch ? fieldName : fieldName + '.keyword';
+		}
+		return null;
+	}
+
 	//used by the collection analyzer (field analysis pull down)
 	getAllFields() {
-		let tmp = []
+		let tmp = [];
 
 		//console.debug(this.keywordFields);
 
@@ -238,7 +258,7 @@ class CollectionConfig {
 
 		//mark all the nested fields
 		tmp.forEach(f => {
-			if(this.nestedFields && this.nestedFields.indexOf(f.id) != -1) {
+			if(this.nestedFields && this.nestedFields.indexOf(f.id) !== -1) {
 				f.nested = true;
 			}
 		});
@@ -246,14 +266,14 @@ class CollectionConfig {
 		//mark all the fields that are a multi-field keyword field
 		if(this.keywordFields) {
 			tmp.forEach(f => {
-				if(this.keywordFields.indexOf(f.id + '.keyword') != -1) {
+				if(this.keywordFields.indexOf(f.id + '.keyword') !== -1) {
 					f.keywordMultiField = true;
 				}
 			});
 		}
 		if(this.nonAnalyzedFields) {
 			tmp.forEach(f => {
-				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') != -1) {
+				if(this.nonAnalyzedFields.indexOf(f.id + '.raw') !== -1) {
 					f.keywordMultiField = true;
 				}
 			});
@@ -262,7 +282,7 @@ class CollectionConfig {
 		//finally add all the pure keyword fields
 		if(this.keywordFields) {
 			this.keywordFields.forEach(f => {
-				if(f.indexOf('.keyword') == -1) {
+				if(f.indexOf('.keyword') === -1) {
 					tmp.push({id : f, type : 'keyword', keywordMultiField : false, title : this.toPrettyFieldName(f)})
 				}
 			});
@@ -283,6 +303,11 @@ class CollectionConfig {
 		return null;
 	}
 
+	// returns the date as a single value to use in sorting.
+	getInitialDate(date) {
+	    return date ? date : null;
+    }
+
 	//if the data has translations within its metadata
 	getPreferredLanguage() {
 		return null;
@@ -300,7 +325,7 @@ class CollectionConfig {
 	}
 
 	//TODO also fetch some data if there is no structured data
-	getItemDetailData(result, currentDateField) {
+	getItemDetailData(result, currentDateField=null) {
 		//first flatten the pure ES response
 		result = this.formatSearchResult(result);
 
@@ -313,7 +338,7 @@ class CollectionConfig {
 			resourceId : result._id,
 			index : result._index,
 			docType : result._type
-		}
+		};
 
 		//then fetch any data that can be fetched from known schemas (DIDL, DC, ...)
 		const structuredData = MetadataSchemaUtil.extractStructuredData(result);
@@ -359,9 +384,19 @@ class CollectionConfig {
 		return formattedResult
 	}
 
-	//the result object passed here was passed through getItemDetailData, so all possible data has already been extracted (bit ugly)
-	getResultSnippetData(result) {
-		const snippet = {
+	//the result passed is a raw result and needs to be formatted first
+	getResultSnippetData(rawResult, numHighlights) {
+		const result = rawResult;
+
+		//populate the list of media types, merging general collection level media types with result specific types
+		let mediaTypes = this.getCollectionMediaTypes();
+		if(result.mediaTypes) {
+			mediaTypes = mediaTypes.concat(
+				result.mediaTypes.filter(mt => !mediaTypes.includes(mt))
+			);
+		}
+
+	    const snippet = {
 			id : result.resourceId,
 			type : result.docType,
 			title: result.title || 'No title for: ' + result.resourceId + '',
@@ -370,12 +405,22 @@ class CollectionConfig {
 			posterURL : result.posterURL,
 			mediaFragment : result.mediaFragment,
 			tags : result.tags ? result.tags : [],
-			mediaTypes : result.mediaTypes ? result.mediaTypes : []
+			mediaTypes : mediaTypes
 		}
-		if(result.docType == 'media_fragment' && result._source) {
-			result.start = result._source.start ? result._source.start : 0;
-			result.end = result._source.end ? result._source.end : -1;
+		if(result.playableContent && result.playableContent.length > 0) {
+		    snippet['playable'] = true;
+		} else {
+		    snippet['playable']= false;
 		}
+		//finally assign the highlight data to the snippet for the SearchSnippet component
+		snippet['highlightMsg'] = this.getMatchingTermsMsg(numHighlights, true);
+
+		//FIXME not sure if this is still used...
+		if(result.docType === 'media_fragment' && result.rawData) {
+			result.start = result.rawData.start ? result.rawData.start : 0;
+			result.end = result.rawData.end ? result.rawData.end : -1;
+		}
+
 		return snippet;
 	}
 
@@ -405,7 +450,7 @@ class CollectionConfig {
             let isKeywordField = false;
 
             //if the last field is called raw or keyword (ES reserved names), drop it
-            if(tmp[tmp.length -1] == 'raw' || tmp[tmp.length -1] == 'keyword') {
+            if(tmp[tmp.length -1] === 'raw' || tmp[tmp.length -1] === 'keyword') {
                 isKeywordField = true;
                 tmp.pop();
             }
@@ -413,16 +458,27 @@ class CollectionConfig {
             let leaf = tmp.pop();
 
             // move @ to end of fieldname
-            if (leaf.substring(0,1) == '@'){
+            if (leaf.substring(0,1) === '@'){
                 leaf = leaf.substring(1) + '@';
             }
             let origin = tmp.join(".");
-            if (origin){
-                origin = ' => ' + origin;
+            if (origin) {
+            	if(origin.indexOf('@graph') !== -1) {
+            		origin = origin.substring('@graph.'.length);
+            	}
+            	if(origin.length > 0 && leaf !== 'value@') {
+                	origin = ' => ' + origin;
+                }
             }
+            leaf = leaf === 'value@' ? '' : leaf; //always remove value@, since it is not nice to show
             return leaf + origin + (isKeywordField ? ' *' : '');
         }
         return esFieldName;
+    }
+
+    //maps a LD predicate to an ES field name
+    predicateToIndexField(p) {
+    	return p
     }
 
 	//used to prevent graphs to blow up in case the minimum date is really low (because of incorrect data)
@@ -437,6 +493,44 @@ class CollectionConfig {
 	getFieldsToExclude() {
 		return null
 	}
+
+	//FIXME add an extra field (or a separate function) to specify collection-specific "forbidden fields"
+	getHighlights(obj, searchTerm, aggregatedHighlights={}, baseField = null) {
+        for(const field in obj) {
+            if(obj.hasOwnProperty(field) && ["bg:carriers", "bg:publications", "bg:context", "dcterms:isPartOf"].indexOf(field) === -1) {
+                let snippets = [];
+                if (Array.isArray(obj[field])) { // in case the value is a list
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, field); // <- recursive call
+                } else if (typeof obj[field] === 'object') { // in case the value is an object
+                    this.getHighlights(obj[field], searchTerm, aggregatedHighlights, null); // <- recursive call
+                } else { // finally it's possible to add some snippets
+                    snippets = RegexUtil.generateHighlightedText(obj[field], searchTerm);
+                }
+
+                //Save the snippets in the aggregatedHighlights object, which is eventually returned to the caller
+                const keyField = baseField ? baseField : field;
+                if(snippets.length > 0) {
+                    if(!(keyField in aggregatedHighlights)) {
+                        aggregatedHighlights[keyField] = [];
+                    }
+                    aggregatedHighlights[keyField] = aggregatedHighlights[keyField].concat(snippets);
+                }
+
+            }
+        }
+        return aggregatedHighlights
+	}
+
+	/* ---------------------------------- COLLECTION-SPECIFIC STATIC TEXTS -------------------------------- */
+
+	//returns the static text for the search snippet or the highlight overview in the quick viewer
+	getMatchingTermsMsg(numHits, forSnippet) {
+		if(forSnippet) {
+			return numHits > 0 ? numHits + " match(es) in archival metadata |" : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
+		} else {
+        	return numHits <= 0 ? 'No matching terms found in archival metadata' : 'Matching terms in archival metadata';
+        }
+    }
 
 }
 

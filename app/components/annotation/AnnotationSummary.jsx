@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import TimeUtil from '../../util/TimeUtil';
 import AnnotationUtil from '../../util/AnnotationUtil';
 import IconUtil from '../../util/IconUtil';
@@ -39,9 +40,9 @@ class AnnotationSummary extends React.Component {
 		if(this.props.annotation && this.props.annotation.body) {
 
 			//if configured, extract the title based on the start & end times of the segment
-			if(this.props.showTitle) {
+			if(this.props.showTitle && this.props.annotation.target) {
 				//title
-				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(this.props.annotation);
+				const frag = AnnotationUtil.extractTemporalFragmentFromAnnotation(this.props.annotation.target);
 				title = (
 					<h4>
 						{'[' + TimeUtil.formatTime(frag.start) + ' - ' + TimeUtil.formatTime(frag.end) + ']'}
@@ -156,6 +157,7 @@ class AnnotationSummary extends React.Component {
 				<div className={IDUtil.cssClassName('annotation-summary')}>
 					{title}
 					{comments}
+					<br/>
 					{links}
 					{classifications}
 					{cards}
@@ -166,5 +168,9 @@ class AnnotationSummary extends React.Component {
 		}
 	}
 };
+
+AnnotationSummary.propTypes = {
+	annotation : PropTypes.object.isRequired
+}
 
 export default AnnotationSummary;

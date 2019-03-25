@@ -1,0 +1,48 @@
+.bg__search-hit {
+	border-bottom: 1px solid $border-color;
+	margin: 5px;
+	padding: 10px 0;
+	.bg__sh__quickview {
+		float:left;
+		margin-right: $default-margin;
+	}
+	.bg__sh__select {
+		@include checkbox();
+	}
+	.bg__sh__bookmarked {
+	    background-color: #468dcb;
+		border: 1px solid #dedede;
+		color: white;
+		float: left;
+		padding: 9px 12px;
+	}
+	.bg__search-snippet {
+		margin: 5px;
+		.bg__ss__fragment {
+			color: dimgray;
+			font-style:italic;
+			margin-top:5px;
+		}
+
+		.highLightText {
+			color: $highlight-color-snippets;
+			font-weight: bold;
+			font-size: 97%;
+		}
+		.snippet_description:hover {
+			cursor: pointer;
+		}
+	}
+	&.fragment {
+		border-right: 1px solid $highlight-color;
+		margin: 5px;
+		padding: $default-margin;
+	}
+	&.visitedItem {
+		color: $visited-item;
+		.highLightText {
+			color: #f79e8e;
+
+		}
+	}
+}

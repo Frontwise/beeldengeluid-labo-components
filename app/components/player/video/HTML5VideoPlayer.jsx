@@ -7,6 +7,8 @@ Implement the following:
 */
 import PlayerAPI from '../PlayerAPI';
 import IDUtil from '../../../util/IDUtil';
+import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
+import FlexPlayerControls from './FlexPlayerControls';
 
 class HTML5VideoPlayer extends React.Component {
 
@@ -15,6 +17,10 @@ class HTML5VideoPlayer extends React.Component {
 		this.state = {
 			playerAPI : null
 		}
+		this.controlsRef = React.createRef();
+		this.fullScreenWrapperRef = React.createRef();
+		this.alreadyShowing = true;
+		this.alertTimerId = null;
 	}
 
 	componentDidMount() {
@@ -29,24 +35,33 @@ class HTML5VideoPlayer extends React.Component {
 			vid.onloadedmetadata = this.onReady.bind(this, vid);
 		}
 		//needed until React will support the controlsList attribute of the video tag
-		vid.setAttribute("controlsList","nodownload");
+		vid.setAttribute("controlsList", "nodownload");
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) {
-			return false
+		if(nextState.playerAPI != null && this.state.playerAPI == null) { //rerender when the player is ready
+			return true;
 		}
-		return true
+		if(nextState.fullScreen != this.state.fullScreen) { //rerender when full screen is toggled
+			return true;
+		}
+		if(nextProps.mediaObject.assetId == this.props.mediaObject.assetId) { //but only rerender when the media object changed
+			if(this.state.playerAPI && this.props.mediaObject.segments && nextProps.segment.start != this.props.segment.start) {
+				this.state.playerAPI.seek(nextProps.segment.start);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	componentDidUpdate() {
-		this.state.playerAPI.load()
+		this.state.playerAPI.getApi().load()
 	}
 
 	onReady(playerAPI) {
 		if(this.state.playerAPI == null) {
 			this.setState(
-				{playerAPI : playerAPI},
+				{playerAPI : new HTML5VideoPlayerAPI(playerAPI)},
 				() => {
 					this.onSourceLoaded();
 				}
@@ -57,39 +72,110 @@ class HTML5VideoPlayer extends React.Component {
 	}
 
 	onSourceLoaded() {
-		//then seek to the starting point
-		const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
-		if(start > 0) {
-			this.state.playerAPI.seek(start / 1000);
-		}
+		if(this.state.playerAPI) {
+			//then seek to the starting point
+			const start = this.props.mediaObject.start ? this.props.mediaObject.start : 0;
+			if(start > 0) {
+				this.state.playerAPI.seek(start / 1000);
+			}
 
-		//notify the owner
-		if(this.props.onPlayerReady) {
-			this.props.onPlayerReady(new HTML5VideoPlayerAPI(this.state.playerAPI));
+			//skip to the on-air content
+			if(this.props.segment) {
+				this.state.playerAPI.seek(this.props.segment.start);
+			} else if(FlexPlayerUtil.containsOffAirStartOffset(this.props.mediaObject)) {
+				this.state.playerAPI.seek(this.props.mediaObject.resourceStart);
+			}
+
+			//notify the owner
+			if(this.props.onPlayerReady) {
+				this.props.onPlayerReady(this.state.playerAPI);
+			}
+		} else {
+			console.error('No player API? (too many renders?)');
 		}
 	}
 
+	toggleFullScreen(exitFullScreen) {
+		const curMode = exitFullScreen === true ? 'full-screen' : this.fullScreenWrapperRef.current.className;
+		this.fullScreenWrapperRef.current.className = curMode === 'default' ? 'full-screen' : 'default';
+	}
+
+	toggleControls(e) {
+		if(this.controlsRef.current) {
+			if(!this.alreadyShowing) {
+				this.controlsRef.current.setVisible(true);
+				this.alreadyShowing = true;
+			}
+
+	        if (this.alertTimerId == null) {
+	            this.alertTimerId = setTimeout(() => {
+	            	this.alreadyShowing = false;
+					this.controlsRef.current.setVisible(false);
+	            }, 2000);
+	        } else {
+	            clearTimeout(this.alertTimerId);
+	            this.alertTimerId = setTimeout(() => {
+	            	this.alreadyShowing = false;
+	                this.controlsRef.current.setVisible(false);
+	            }, 2000);
+	        }
+	    }
+	}
+
+	renderCustomControls = (playerAPI, hideOffAirContent) => {
+		if(playerAPI && hideOffAirContent) {
+			return (
+				<FlexPlayerControls
+					ref={this.controlsRef}
+					api={playerAPI}
+					mediaObject={this.props.mediaObject}
+					duration={FlexPlayerUtil.onAirDuration(playerAPI.getDuration(), this.props.mediaObject)}
+					toggleFullScreen={this.toggleFullScreen.bind(this)}
+				/>
+			)
+		}
+		return null;
+	}
+
 	render() {
+		//only show the custom controls when absolutely necessary. They are not yet perfect
+		const customControls = this.renderCustomControls(this.state.playerAPI, this.props.hideOffAirContent);
+		const nativeControls = customControls ? {controls : false} : {controls : true, controlsList : 'nodownload', muted : false}
 		return (
-			<video
-				id="video-player"
-				width="100%"
-				className={IDUtil.cssClassName('html5-video-player')}
-				controls controlsList="nodownload" crossOrigin={
-					this.props.useCredentials ? "use-credentials" : null
-				}>
-				<source src={this.props.mediaObject.url}></source>
-				Your browser does not support the video tag
-			</video>
+			<div className={IDUtil.cssClassName('html5-video-player')}>
+				<div
+					id={'__htmlvid__' + this.props.mediaObject.assetId}
+					ref={this.fullScreenWrapperRef}
+					className="default"
+					onMouseMove={this.toggleControls.bind(this)}
+				>
+					<video
+						id="video-player"
+						width="100%"
+						className={IDUtil.cssClassName('html5-video-player')}
+						crossOrigin={
+							this.props.useCredentials ? "use-credentials" : null
+						}
+						{...nativeControls}
+					>
+						<source src={this.props.mediaObject.url}></source>
+						Your browser does not support the video tag
+					</video>
+					{customControls}
+				</div>
+			</div>
 		)
 	}
 
 }
 
+//TODO implement volume & mute functions as well
+//TODO make sure the getPosition, getDuration and isPaused also supports direct returns accross all other players (check Vimeo)
 class HTML5VideoPlayerAPI extends PlayerAPI {
 
 	constructor(playerAPI) {
 		super(playerAPI);
+		this.lastVolume = this.playerAPI.volume;
 	}
 
 	/* ------------ Implemented API calls ------------- */
@@ -103,26 +189,58 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 	}
 
 	seek(secs) {
-		if(secs != isNaN) {
+		if(secs != isNaN && secs != undefined) {
 			this.playerAPI.currentTime = secs;
 		}
 	}
 
-	getPosition(callback) {
+	getPosition(callback=null) {
+		if(!callback) {
+			return this.playerAPI.currentTime;
+		}
 		callback(this.playerAPI.currentTime);
 	}
 
-	getDuration(callback) {
+	getDuration(callback=null) {
+		if(!callback) {
+			return this.playerAPI.duration;
+		}
 		callback(this.playerAPI.duration);
 	}
 
-	isPaused(callback) {
+	isPaused(callback=null) {
+		if(!callback) {
+			return this.playerAPI.paused;
+		}
 		callback(this.playerAPI.paused);
 	}
 
-	/* ----------------------- non-essential player specific calls ----------------------- */
+	setVolume(volume) { //value between 0-1
+		if(volume !== 0) {
+			this.lastVolume = volume;
+		}
+		this.playerAPI.volume = volume;
+	}
 
-	//TODO
+	getVolume() {
+		return this.playerAPI.volume;
+	}
+
+	getLastVolume() {
+		return this.lastVolume
+	}
+
+	toggleMute() {
+		this.playerAPI.muted = !this.playerAPI.muted
+		if(this.isMuted()) {
+			this.lastVolume = this.playerAPI.volume;
+		}
+	}
+
+	isMuted() {
+		return this.playerAPI.muted
+	}
+
 }
 
 export default HTML5VideoPlayer;

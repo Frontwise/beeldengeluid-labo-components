@@ -7,7 +7,8 @@ class BookmarkSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			bookmarks : []
+			allBookmarkGroups : [],
+			selectedGroups : {}
 		}
 	}
 
@@ -18,16 +19,56 @@ class BookmarkSelector extends React.Component {
 			'motivation' : 'bookmarking'
 		}
 		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id,
 			filter,
+			null, //not_filters
 			this.onLoadBookmarkAnnotations.bind(this)
 		);
 	}
 
-	onLoadBookmarkAnnotations(data) {
-		this.setState({bookmarks : data.annotations || []});
+	onLoadBookmarkAnnotations(allGroups) {
+		if(this.props.resourceId) {
+			this.updateGroupMembership(this.props.resourceId, allGroups);
+		} else {
+			this.setState({allBookmarkGroups : allGroups || []});
+		}
 	}
 
-	submitNewBookmark(e) {
+	updateGroupMembership(resourceId, allGroups) {		
+		const filter = {			
+			'target.selector.value.id' : resourceId,
+			'user.keyword' : this.props.user.id,
+			'motivation' : 'bookmarking'
+		}
+		if(this.props.project && this.props.project.id) {
+			filter['project'] = this.props.project.id
+		}
+		AnnotationAPI.getFilteredAnnotations(
+			this.props.user.id, 
+			filter, 
+			null, 
+			this.onUpdateGroupMembership.bind(this, allGroups),
+			0, //offset 
+			250, //size
+			null, //sort direction
+			null //date range
+		);
+	}
+
+	onUpdateGroupMembership(allGroups, resourceGroups) {
+		const selectedGroups = {}		
+		allGroups.forEach(group => {
+			if(resourceGroups.findIndex(resourceGroup => resourceGroup.id === group.id) != -1) {
+				selectedGroups[group.id] = true;
+			}
+		})
+		this.setState({
+			allBookmarkGroups : allGroups, 
+			selectedGroups : selectedGroups
+		});
+	}
+
+	addNewBookmarkGroup(e) {
 		e.preventDefault();
 		let annotation = AnnotationUtil.generateEmptyW3CMultiTargetAnnotation(
 			this.props.user,
@@ -38,27 +79,75 @@ class BookmarkSelector extends React.Component {
 		annotation.body = [{
 			"annotationType": "classification",
 			"vocabulary": "clariahwp5-bookmark-group",
-			"label": this.refs.bookmarkCategory.value,
+			"label": this.setSearchTerm.value,
 			"user": this.props.user.id
 		}]
-		this.onOutput(annotation);
+		//assign a guid, so the multi-select mechanism does not break in this component (context: normally the annotation ID is generated on the server)
+		annotation.id = IDUtil.guid();
+		const allBookmarkGroups = this.state.allBookmarkGroups;
+		allBookmarkGroups.push(annotation);
+
+		//update the state and reset the text field to ''
+		this.setState({
+			allBookmarkGroups : allBookmarkGroups
+		}, () => {this.setSearchTerm.value = ''})
+	}
+
+	//selects or deselects a bunch of groups
+	toggleBookmarkGroup(group) {
+		const selectedGroups = this.state.selectedGroups;
+		if(selectedGroups[group.id] === true) {
+			delete selectedGroups[group.id]
+		} else {
+			selectedGroups[group.id] = true;
+		}
+		this.setState({selectedGroups : selectedGroups});
 	}
 
 	//communicate back a multi-target annotation with a classification body
-	onOutput(annotation) {
+	onOutput() {
 		if(this.props.onOutput) {
-			this.props.onOutput(this.constructor.name, annotation);
+			//returns all bookmark groups (multi-target annotations) + which have been selected
+			this.props.onOutput(
+				this.constructor.name, 
+				{
+					allGroups : this.state.allBookmarkGroups,
+					selectedGroups : this.state.selectedGroups
+				}
+			);
 		}
+	}
+
+	//TODO implement deleting groups from here
+	deleteGroup() {
+		console.debug('TO BE IMPLEMENTED');
 	}
 
 	render() {
 		let bookmarkList = null;
-		if(this.state.bookmarks.length > 0) {
+		if(this.state.allBookmarkGroups.length > 0) {
 			//TODO which part of the body is the name of the bookmark group?
-		 	const options = this.state.bookmarks.map((b, index) => {
-		 		return (<a className="list-group-item" href="#" key={'an__' + index} onClick={this.onOutput.bind(this, b)}>
-		 			{b.body[0].label}
-		 		</a>)
+		 	const options = this.state.allBookmarkGroups.sort((a, b) => {
+				const nameA = a.body[0].label.toUpperCase(); // ignore upper and lowercase
+				const nameB = b.body[0].label.toUpperCase(); // ignore upper and lowercase
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+
+				// names must be equal
+				return 0;
+		 	}).map((group, index) => {
+		 		return (
+		 			<a className="list-group-item" href="#" key={'an__' + index} onClick={this.toggleBookmarkGroup.bind(this, group)}>
+		 				<i className="fa fa-bookmark" style={ this.state.selectedGroups[group.id] === true ? {color: '#468dcb'} : {color: 'white'} }/>
+		 				&nbsp;
+		 				{group.body[0].label}
+		 				<span className="member-count">Bookmarks: {group.target.length}</span> 						 				
+		 			</a>
+		 		)
 		 	});
 		 	bookmarkList = (
 		 		<div className="list-group">
@@ -78,17 +167,24 @@ class BookmarkSelector extends React.Component {
 					<div className="col-md-12">
 						<form>
 							<div className="form-group">
-								<h4>Bookmark category</h4>
-								<input
-									ref="bookmarkCategory"
-									type="text"
-									className="form-control"
-								/>
-								<br/>
-								<button className="btn btn-primary" onClick={this.submitNewBookmark.bind(this)}>Use</button>
+								<h4>Bookmark group</h4>
+								<div className="input-group">
+									<div className="input-group-btn">    
+										<button className="btn btn-default" onClick={this.addNewBookmarkGroup.bind(this)}>New</button>
+									</div>
+									<input
+	                                    ref={input => (this.setSearchTerm = input)}
+										type="text"
+										className="form-control"
+										aria-label="Create new bookmark group"
+									/>									
+								</div>
 							</div>
 						</form>
 					</div>
+				</div>
+				<div className="row">
+					<button className="btn btn-primary btn-save" onClick={this.onOutput.bind(this)}>Save</button>
 				</div>
 			</div>
 		)

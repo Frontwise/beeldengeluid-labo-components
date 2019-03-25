@@ -1,8 +1,12 @@
 import CollectionAPI from '../../api/CollectionAPI';
+
 import IDUtil from '../../util/IDUtil';
+import ComponentUtil from '../../util/ComponentUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
-import Autosuggest from 'react-autosuggest';
+
 import FieldSelector from './FieldSelector';
+
+import PropTypes from 'prop-types';
 
 //this component relies on the collection statistics as input
 class DateFieldSelector extends React.Component {
@@ -13,7 +17,9 @@ class DateFieldSelector extends React.Component {
         this.prefix = 'ms__ca_';
 
         // default values
-        const defaultDateField = window.sessionStorage.getItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId) || this.props.collectionConfig.getPreferredDateField();
+        const defaultDateField = window.sessionStorage.getItem(
+            this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId
+        ) || this.props.collectionConfig.getPreferredDateField();
         this.state = {
             dateField: defaultDateField,
             fields : [], //current list of fields
@@ -21,96 +27,31 @@ class DateFieldSelector extends React.Component {
         }
     }
 
-    componentDidMount(){
+    componentDidMount() {
         // load fields
         this.setState({
-            fields: this.getFields()
+            fields: this.getDateFieldsFromConfig().map(field => (
+                {
+                    id: field,
+                    title: this.props.collectionConfig.toPrettyFieldName(field),
+                    type: 'Date',
+                }
+            ))
         });
 
         if (this.state.dateField){
           this.props.onChange(this.state.dateField);
         }
-
-        this.previewCompleteness();
     }
 
-    getDateFieldsFromConfig(){
+    getDateFieldsFromConfig() {
         return this.props.collectionConfig.getDateFields() || [];
     }
 
-    getFields() {
-        let fields = [];
-
-        // Collect all date field names
-        fields = this.getDateFieldsFromConfig().map((field)=>(
-            {
-                id: field,
-                title: this.props.collectionConfig.toPrettyFieldName(field),
-                type: 'Date',
-            }
-        ));
-        return fields;
-    }
-
-    onDateFieldChange(e){
+    onDateFieldChange(e) {
         window.sessionStorage.setItem(this.prefix + 'defaultDateField' + this.props.collectionConfig.collectionId, e.target.value);
         this.props.onChange(e.target.value);
     }
-
-    previewCompleteness(){
-        let fieldNames = this.getDateFieldsFromConfig();
-
-        // For each fieldname request the completeness and store it to the state and sessionstorage
-        fieldNames.forEach((field)=>{
-                // retrieve from local storage
-                let completeness = window.sessionStorage.getItem(this.prefix + this.props.collectionConfig.collectionId + field);
-                if (completeness !== null){
-                    completeness = JSON.parse(completeness);
-                    this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),
-                            }
-                        });
-                } else{
-                    this.previewAnalysis(field, (data)=>{
-                        const completeness = {
-                            value: data.doc_stats.total > 0 ? (((data.doc_stats.total - data.doc_stats.no_analysis_field)/data.doc_stats.total) * 100).toFixed(2) : 0,
-                            total: data.doc_stats.total,
-                            withValue: (data.doc_stats.total - data.doc_stats.no_analysis_field),
-                        }
-
-                        // store to sessionStorage
-                        window.sessionStorage.setItem(this.prefix + this.props.collectionConfig.collectionId + data.analysis_field, JSON.stringify(completeness));
-
-                        // update state
-                        this.setState((state, props)=>{
-                            const fieldData = {};
-                            fieldData[data.analysis_field] = completeness;
-                            return {
-                                completeness: Object.assign({},state.completeness,fieldData),
-                            }
-                        });
-                });
-            }
-        });
-    }
-
-    previewAnalysis(analysisField, callback){
-        CollectionAPI.analyseField(
-            this.props.collectionConfig.collectionId,
-            this.props.collectionConfig.getDocumentType(),
-            'null__option',
-            analysisField ? analysisField : 'null__option',
-            [], //facets are not yet supported
-            this.props.collectionConfig.getMinimunYear(),
-            (data) => {
-                callback(data);
-            }
-        );
-    }
-
 
     render() {
         let dateFieldBlock = null;
@@ -134,7 +75,7 @@ class DateFieldSelector extends React.Component {
                     return (
                         <option key={dateField.value} value={dateField.value}>
                             {dateField.title}
-                            {dateField.value in this.state.completeness ? ' [' + this.state.completeness[dateField.value].value + '%]' : null}
+                            {dateField.value in this.props.analysedFields ? ' [' + ComponentUtil.formatNumber(this.props.analysedFields[dateField.value].value) + '%]' : null}
                         </option>
                     )
                 });
@@ -152,8 +93,13 @@ class DateFieldSelector extends React.Component {
                         </select>
                     </div>
                 );
-            } else{
-                dateFieldBlock = <p><i className="fa fa-exclamation-triangle"/> This collection doesn't contain any date fields. This means no timeline chart could be generated.</p>
+            } else {
+                dateFieldBlock = (
+                    <p>
+                        <i className="fa fa-exclamation-triangle"/>
+                        This collection doesn't contain any date fields. This means no timeline chart could be generated.
+                    </p>
+                )
             }
         }
 
@@ -164,5 +110,9 @@ class DateFieldSelector extends React.Component {
         )
     }
 };
+
+DateFieldSelector.PropTypes = {
+
+}
 
 export default DateFieldSelector;

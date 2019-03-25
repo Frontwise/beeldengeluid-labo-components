@@ -1,5 +1,4 @@
 import IDUtil from '../../util/IDUtil';
-import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
 import ComponentUtil from '../../util/ComponentUtil';
 import FlexModal from '../FlexModal';
 
@@ -16,31 +15,38 @@ class FieldCategorySelector extends React.Component {
 
 		this.state = {
 			showModal : false
-		}
+		};
 		this.CLASS_PREFIX = 'fcs';
 	}
 
 	onComponentOutput(componentClass, data) {
-		if(componentClass == 'FieldCategoryCreator') {
+		if(componentClass === 'FieldCategoryCreator') {
 			this.onFieldsSelected(data);
 		}
 	}
 
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (nextProps.fieldCategory && this.props.fieldCategory) {
+    //         return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
+    //     }
+    //     return true
+    // }
+
 	onOutput(data) {
 		if(this.props.onOutput) {
-			if(data === null) {
-				this.props.onOutput(this.constructor.name, null);
-			} else {
+			if(data !== null) {
                 this.props.onOutput(this.constructor.name, data);
-			}
+			} else {
+                this.props.onOutput(this.constructor.name, null);
+            }
 		}
 	}
 
     handleChange ({ options }) {
     	let found = false;
-    	let tmp = {}
+    	const tmp = {};
     	for(let i=0;i<options.length;i++) {
-    		let fc = options[i]
+    		const fc = options[i];
     		if(tmp[fc.id]) {
     			found = true;
     			break;
@@ -55,7 +61,7 @@ class FieldCategorySelector extends React.Component {
     isSelected(selection, selectedFields) {
     	let selected = false;
     	for(let i=0;i<selectedFields.length;i++) {
-    		if(selectedFields[i].id == selection.id){
+    		if(selectedFields[i].id === selection.id){
     			selected = true;
     			break;
     		}
@@ -65,9 +71,9 @@ class FieldCategorySelector extends React.Component {
 
     onFieldsSelected(data) {
     	ComponentUtil.hideModal(this, 'showBookmarkModal', 'fields__modal', true, () => {
-    		const fields = this.props.fieldCategory || []
+    		const fields = this.props.fieldCategory || [];
     		if(data) { //when nothing was selected, it is no use to update the owner
-	    		fields.push(data)
+	    		fields.push(data);
 	    		this.onOutput(fields)
 	    	}
     	});
@@ -80,12 +86,40 @@ class FieldCategorySelector extends React.Component {
     	})
     }
 
+    getGroupedOptions(fieldCategories, selectedFields) {
+        const optsMetadata = [];
+        const optsEnrichment = [];
+        const optionsToSelect = fieldCategories.filter((fc) => {
+            return !this.isSelected(fc, selectedFields);
+        });
+
+        optionsToSelect.forEach(fc => {
+            if (fc.enrichment) {
+                optsEnrichment.push(fc)
+            } else {
+                optsMetadata.push(fc)
+            }
+        });
+        if (optsEnrichment.length && optsMetadata.length) {
+            return [{"label": "── Archive's metadata ──", "options": optsMetadata},
+                {"label": "── Enrichments ──", "options": optsEnrichment}]
+        } else if (optsMetadata.length) {
+            return [{"label": "── Archive's metadata ──", "options": optsMetadata}]
+        } else if (optsEnrichment.length) {
+            return [{"label": "── Enrichments ──", "options": optsEnrichment}]
+        } else {
+            return [];
+        }
+    }
+
 	render() {
 		let fieldCategorySelector = null;
-		const includedFields = 'All metadata fields (classified as text field) are included in your search';
-		const selectedFields = this.props.fieldCategory || [];
+        let fieldSelectionModal = null;
+        const selectedFields = this.props.fieldCategory || [];
+        const fieldCategories = this.props.collectionConfig
+            ? this.props.collectionConfig.getMetadataFieldCategories()
+            : null;
 
-		let fieldSelectionModal = null;
 		if(this.state.showModal) {
 			fieldSelectionModal = (
 				<FlexModal
@@ -99,16 +133,14 @@ class FieldCategorySelector extends React.Component {
 			)
 		}
 
-		if(this.props.collectionConfig.getMetadataFieldCategories()) {
-			const optionsToSelect = this.props.collectionConfig.getMetadataFieldCategories().filter((fc)=> {
-				return !this.isSelected(fc, selectedFields);
-			});
-			//console.debug(selectedFields);
+		if(fieldCategories && selectedFields) {
+            const groupedOptions = this.getGroupedOptions(fieldCategories, selectedFields);
+
 			fieldCategorySelector = (
 				<div className={IDUtil.cssClassName('field-category-selector')}>
 					<PowerSelectMultiple
 						key={'__pwsm__' + this.props.queryId}
-						options={optionsToSelect}
+						options={groupedOptions}
 						selected={selectedFields}
 						optionLabelPath="label"
           				optionComponent={
@@ -120,14 +152,14 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="Search in: all fields"
+						placeholder="All metadata fields"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
 									onClick={() => {
 										this.addCustomFields(select);
 									}}>
-					              + Custom category
+					              + Custom field cluster
 								</button>
 							</div>
 						)}
@@ -146,16 +178,17 @@ export default FieldCategorySelector;
 
 export const ListOption = ({ option, collectionConfig }) => (
 	<div title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
-		Search in: {option.label}
+		{option.label}
 	</div>
 );
 
 export const SelectedOption = ({option, queryId, collectionConfig}) => (
-	<li className="PowerSelectMultiple__SelectedOption">
+    <ul className="bg__ul-selectedOption">
+        <li className="PowerSelectMultiple__SelectedOption">
 		<span className="PowerSelectMultiple__SelectedOption__Label"
-			title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
+              title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
 			{option.label}
 		</span>
-
-	</li>
+        </li>
+    </ul>
 );
