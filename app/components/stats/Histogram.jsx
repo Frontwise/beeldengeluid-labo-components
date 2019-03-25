@@ -119,18 +119,22 @@ class Histogram extends React.Component {
                     point["dataType"] = 'absolute';
                     point["strokeColor"] = strokeColors[0];
                     point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow.doc_count;
+                    point["count"] = dataRow ? dataRow.doc_count : 0; //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
                     return point;
                 });
             } else {
                 dataPrettyfied = this.props.data.map((dataRow, i) => {
+                    let count = 0;
+                    if(dataRow && this.state.data[i]) { //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
+                        count = dataRow.doc_count && this.state.data[i].doc_count !== 0
+                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
+                        : 0;
+                    }
                     const point = {};
                     point["dataType"] = 'relative';
                     point["strokeColor"] = strokeColors[1];
                     point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
-                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
-                        : 0;
+                    point["count"] = count;
                     return point;
                 });
             }
