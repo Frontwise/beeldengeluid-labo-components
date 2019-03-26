@@ -88,7 +88,7 @@ class CollectionEditView extends React.PureComponent {
             <div className={IDUtil.cssClassName('project-edit')}>
                 <div className="info-bar">
                     <h2>Edit User Collection</h2>
-                    <p>A user collection contains personal metadata and possibly links to private collection data.</p><p>Currently all user collections are private and cannot be shared with others.</p>
+                    Upload your own dataset with links to externally hosted (private) content.
                 </div>
                 {formOrMessage}
                 {dataEntryTable}

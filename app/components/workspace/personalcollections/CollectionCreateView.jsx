@@ -21,8 +21,10 @@ class CollectionCreateView extends React.PureComponent {
         return (
             <div className={IDUtil.cssClassName('project-create')}>
                 <div className="info-bar">
-                    <h2>Register User Collection</h2>
-                    <p>A user collection can be used to register your own dataset in the Media Suite</p>
+                    <h2>Create personal collection</h2>
+                    <p>
+                        Upload your own dataset with links to externally hosted (private) content.
+                    </p>
                 </div>
                 <CollectionForm
                     submitButton="create"
