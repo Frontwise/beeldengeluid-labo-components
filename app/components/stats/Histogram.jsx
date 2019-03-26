@@ -119,18 +119,22 @@ class Histogram extends React.Component {
                     point["dataType"] = 'absolute';
                     point["strokeColor"] = strokeColors[0];
                     point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow.doc_count;
+                    point["count"] = dataRow ? dataRow.doc_count : 0; //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
                     return point;
                 });
             } else {
                 dataPrettyfied = this.props.data.map((dataRow, i) => {
+                    let count = 0;
+                    if(dataRow && this.state.data[i]) { //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
+                        count = dataRow.doc_count && this.state.data[i].doc_count !== 0
+                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
+                        : 0;
+                    }
                     const point = {};
                     point["dataType"] = 'relative';
                     point["strokeColor"] = strokeColors[1];
                     point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow.doc_count && this.state.data[i].doc_count !== 0
-                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
-                        : 0;
+                    point["count"] = count;
                     return point;
                 });
             }
@@ -152,7 +156,7 @@ class Histogram extends React.Component {
                         	<Label value={this.props.title} offset={0} position="outside"
 								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
 						</XAxis>
-						<YAxis width={100} >
+						<YAxis tickFormatter={ComponentUtil.formatNumber} width={100} >
                             <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
                                    style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
 						</YAxis>
@@ -171,14 +175,14 @@ class CustomTooltip extends React.Component{
         if (active) {
             const payload = this.props.payload,
                 label = payload[0].payload.date,
-                relativeValue = payload[0].value ? payload[0].value.toFixed(2) : 0,
+                relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0,
                 dataType = payload[0].payload.dataType;
             if (dataType === 'relative') {
                 return (
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>Percentage: <span className="rightAlign">{relativeValue}%</span></p>
+                        <p>Percentage: <span className="rightAlign">{ComponentUtil.formatNumber(relativeValue)}%</span></p>
                     </div>
                 );
             } else {
@@ -186,7 +190,7 @@ class CustomTooltip extends React.Component{
                     <div className="ms__custom-tooltip">
                         <h4>{dataType} value</h4>
                         <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                        <p>Total: <span className="rightAlign">{payload[0].value}</span></p>
+                        <p>Total: <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].value)}</span></p>
                     </div>
                 );
             }

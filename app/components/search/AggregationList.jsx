@@ -3,6 +3,7 @@ import FlexModal from '../FlexModal';
 import IDUtil from '../../util/IDUtil';
 import ComponentUtil from "../../util/ComponentUtil";
 import ReactTooltip from 'react-tooltip';
+import classNames from 'classnames';
 
 //this component draws the aggregations (a.k.a. facets) and merely outputs the user selections to the parent component
 class AggregationList extends React.Component {
@@ -31,7 +32,7 @@ class AggregationList extends React.Component {
                 selectedFacets: selectedFacets
             })
         }
-    }
+    };
 
     onComponentOutput = (componentClass, data) => {
         if (componentClass === 'AggregationCreator' && data) {
@@ -40,7 +41,7 @@ class AggregationList extends React.Component {
             this.onOutput(desiredFacets, this.props.selectedFacets);
             ComponentUtil.hideModal(this, 'showModal', 'field_select__modal', true);
         }
-    }
+    };
 
     /* ------------------------------------- FACET SELECTION -------------------------------- */
 
@@ -63,7 +64,7 @@ class AggregationList extends React.Component {
             //output to the parent component
             this.onOutput(this.props.desiredFacets, facets);
         }
-    }
+    };
 
     /* ------------------------------------- SHOW MORE/LESS -------------------------------- */
 
@@ -71,7 +72,7 @@ class AggregationList extends React.Component {
         let states = this.state.showAllModes;
         states[aggr.field] = states[aggr.field] === undefined ? true : !states[aggr.field];
         this.setState({showAllModes : states});
-    }
+    };
 
     /*------------------------------------- REMOVE DIALOG (TODO MAKE NICER) ----------------------------*/
 
@@ -85,7 +86,7 @@ class AggregationList extends React.Component {
             }, {once:true});
             ComponentUtil.showModal(this, 'showModalWarning', 'field_select_facet__modal', true);
         }
-    }
+    };
 
     removeAggregation = () => {
         //first remove the entry from the desiredFacets
@@ -103,14 +104,14 @@ class AggregationList extends React.Component {
 
         ComponentUtil.hideModal(this, 'showModalWarning' , 'field_select_facet__modal', true);
         this.onOutput(desiredFacets, this.props.selectedFacets);
-    }
+    };
 
     /*------------------------------------- EXCLUDE MODE AGGREGATION ----------------------------*/
 
     toggleExcludeFacets = index => {
         this.props.desiredFacets[index]['exclude'] = !this.props.desiredFacets[index]['exclude'];
         this.onOutput(this.props.desiredFacets, this.props.selectedFacets);
-    }
+    };
 
     /*------------------------------------- SORTING FACETS ----------------------------*/
 
@@ -124,7 +125,7 @@ class AggregationList extends React.Component {
             }
         }
         return sortMode;
-    }
+    };
 
     setFacetSortMode = (aggrField, type, direction) => {
         const sortModes = this.state.sortModes;
@@ -133,17 +134,17 @@ class AggregationList extends React.Component {
         curSortMode.active = type;
         sortModes[aggrField] = curSortMode;
         this.setState({sortModes : sortModes})
-    }
+    };
 
     getShowExtraOptions = aggrField => {
         return this.state.showExtraOptions[aggrField] === undefined ? false : this.state.showExtraOptions[aggrField];
-    }
+    };
 
     toggleExtraOptions = aggrField => {
         const showExtraOptions = this.state.showExtraOptions;
         showExtraOptions[aggrField] = showExtraOptions[aggrField] === undefined ? true : !showExtraOptions[aggrField];
         this.setState({showExtraOptions : showExtraOptions})
-    }
+    };
 
     sortFacetList = (a, b, sortType, sortDirection) => {
         if(sortType === 'alpha') {
@@ -168,7 +169,7 @@ class AggregationList extends React.Component {
                 return a.count - b.count;
             }
         }
-    }
+    };
 
     /*------------------------------------- FUNCTION FOR GENERATING UI FRIENDLY DATA OBJECT --------------*/
 
@@ -244,14 +245,14 @@ class AggregationList extends React.Component {
                 facets : facets,
                 exclude : da.exclude === undefined ? false : da.exclude,
                 field : da.field,
-                title : da.title,
+                title : da.title || this.props.collectionConfig.toPrettyFieldName(da.field), // show user generated title or else the automated prettified title
                 empty : isEmptyAggr, //does the aggregation have anything in it
                 index : index, // temporarily needed for guid
                 guid : "facets__" + index
             })
         });
         return uiData;
-    }
+    };
 
     /*------------------------------------- FUNCTIONS FOR RENDERING ----------------------------*/
 
@@ -261,25 +262,22 @@ class AggregationList extends React.Component {
         //first generate the facet (options) to be included in the block later on
         const sortedFacets = aggr.facets.map((f, index) => {
             return (
-                <li key={'facet__' + aggr.index + '__' + index} hidden={f.hidden}
-                    className={IDUtil.cssClassName('facet-item', this.CLASS_PREFIX)}>
-                    <div className="checkbox">
-                        <input id={f.guid}
-                               type="checkbox"
-                               checked={f.selected}
-                               onChange={this.toggleSelectedFacet.bind(this, aggr.field, f.key)}/>
-                        <label>
-                            <span> </span>
-                            {f.key}&nbsp;({f.count})
-                        </label>
-                    </div>
+                <li id={f.guid}
+                    key={'facet__' + aggr.index + '__' + index} 
+                    hidden={f.hidden}
+                    className={classNames({selected: f.selected, exclude: aggr.exclude}, IDUtil.cssClassName('facet-item', this.CLASS_PREFIX))}
+                    onClick={this.toggleSelectedFacet.bind(this, aggr.field, f.key)}
+                    >
+                    <span className={IDUtil.cssClassName('checkbox', this.CLASS_PREFIX)} />
+                    {f.key}
+                    <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{f.count}</span>
                 </li>
             )
         });
 
         //finally return the whole block with all of the (selected) facets and their counts etc...
         return (
-            <div className={IDUtil.cssClassName('hamburger-header', this.CLASS_PREFIX)} key={'facet__' + aggr.index} id={'index__' + aggr.index}>
+            <div className={IDUtil.cssClassName('facet-block', this.CLASS_PREFIX)} key={'facet__' + aggr.index} id={'index__' + aggr.index}>
                 {this.renderHamburgerMenu(aggr)}
 
                 <ul className={IDUtil.cssClassName('facet-group', this.CLASS_PREFIX)}>
@@ -291,7 +289,7 @@ class AggregationList extends React.Component {
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
             </div>
         )
-    }
+    };
 
     renderSortButton = (aggr, sortType) => { //alpha || numeric
         const sortMode = this.getFacetSortMode(aggr.field);
@@ -309,7 +307,7 @@ class AggregationList extends React.Component {
                 <i aria-hidden="true" className={classNames.join(' ')}/>
             </div>
         );
-    }
+    };
 
     renderHamburgerMenu = aggr => {
         const extraOptions = this.getShowExtraOptions(aggr.field) ? (
@@ -321,7 +319,7 @@ class AggregationList extends React.Component {
                         checked={this.props.desiredFacets[aggr.index]['exclude']}
                         onChange={this.toggleExcludeFacets.bind(this, aggr.index)}
                     />
-                    &nbsp;Exclude selection
+                    &nbsp;<label htmlFor={aggr.field}>Exclude selection</label>
                 </div>
                 <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
                     {this.renderSortButton(aggr, 'numeric')}
@@ -352,7 +350,7 @@ class AggregationList extends React.Component {
                 {extraOptions}
             </div>
         );
-    }
+    };
 
     renderToggleShowMore = aggr => {
         const showAll = this.state.showAllModes[aggr.field] === undefined ? false : this.state.showAllModes[aggr.field];
@@ -367,16 +365,16 @@ class AggregationList extends React.Component {
             };
 
         return (
-            <a className="switchView" onClick={this.toggleShowMore.bind(this, aggr)}>
+            <a className={IDUtil.cssClassName('switch-view', this.CLASS_PREFIX)} onClick={this.toggleShowMore.bind(this, aggr)}>
                 <span className="switchViewText">{currentStatus.text}</span>
                 <span className={currentStatus.symbol} aria-hidden="true"/>
             </a>
         );
-    }
+    };
 
     renderEmptyBlocks = (aggr, index) => {
         return (
-            <div className={IDUtil.cssClassName('hamburger-header aggregation-no-results', this.CLASS_PREFIX)}
+            <div className={IDUtil.cssClassName('facet-block aggregation-no-results', this.CLASS_PREFIX)}
                 key={'facet__' + aggr.index}
                 id={'index__' + aggr.index}>
                 <span data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
@@ -391,7 +389,7 @@ class AggregationList extends React.Component {
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
             </div>
         );
-    }
+    };
 
     renderNewFacetModal = () => {
         return (
@@ -406,7 +404,7 @@ class AggregationList extends React.Component {
                     onOutput={this.onComponentOutput}/>
             </FlexModal>
         );
-    }
+    };
 
     renderHideFacetModal = () => {
         return (
@@ -427,7 +425,7 @@ class AggregationList extends React.Component {
                 </div>
             </FlexModal>
         );
-    }
+    };
 
     render() {
         //contains all required data for generating the (empty) aggregation blocks and selected facets
@@ -458,8 +456,8 @@ class AggregationList extends React.Component {
                     count = 0;
                 }
                 selectedFacets.push(
-                    <div className={IDUtil.cssClassName('selected-item', this.CLASS_PREFIX)}>
-                        {title.toUpperCase()} ({count})
+                    <div className={classNames({exclude:curAggr.exclude===true}, IDUtil.cssClassName('selected-item', this.CLASS_PREFIX))}>
+                        {title} <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{count}</span>
                         <span className="fa fa-remove" onClick={this.toggleSelectedFacet.bind(this, curAggr.field, f.key)}/>
                     </div>
                 )
@@ -471,15 +469,22 @@ class AggregationList extends React.Component {
             <div className={IDUtil.cssClassName('aggregation-list checkboxes')}>
                 {aggregationCreatorModal}
                 {aggregationModalWarning}
-                <li key={'new__tab'} className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
-                    <a href="javascript:void(0);" onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
+
+                {/* Create new facet */}
+                <div className={IDUtil.cssClassName('tab-new', this.CLASS_PREFIX)}>
+                    <button className="btn"
+                            onClick={ComponentUtil.showModal.bind(this, this, 'showModal')}>
                         <i className="fa fa-plus"/> Add a new facet
-                    </a>
-                </li>
+                    </button>
+                </div>
+
+                {/* Selected/active facets */}
                 <div className={IDUtil.cssClassName('selected-facets', this.CLASS_PREFIX)}>
                     {selectedFacets}
                     {emptyAggrBlocks}
                 </div>
+
+                {/* Facet list */}
                 {aggregationBlocks}
             </div>
         );

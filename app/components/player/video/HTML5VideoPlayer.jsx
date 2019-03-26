@@ -189,7 +189,7 @@ class HTML5VideoPlayerAPI extends PlayerAPI {
 	}
 
 	seek(secs) {
-		if(secs != isNaN) {
+		if(secs != isNaN && secs != undefined) {
 			this.playerAPI.currentTime = secs;
 		}
 	}

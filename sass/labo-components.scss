@@ -4,6 +4,9 @@
 //then import the component variables that are exposed for clients importing the scss version of this library
 @import "./_variables.scss";
 
+// import image urls
+@import './_images.scss';
+
 //import mixins, containing generic all purpose small elements
 @import "./_mixins.scss";
 

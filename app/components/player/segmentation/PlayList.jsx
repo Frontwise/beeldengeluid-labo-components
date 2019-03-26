@@ -24,6 +24,11 @@ export default class PlayList extends React.PureComponent {
 		this.setState({currentItem : e.target.id});
 	}
 
+	renderNumberOfMatches = (transcriptMatches, mediaObject) => {
+		const numMatches = transcriptMatches && transcriptMatches[mediaObject.assetId] ? '# matches: ' + transcriptMatches[mediaObject.assetId] : null;
+		return numMatches ? <span className={IDUtil.cssClassName('playlist-item-num-matches')}>{numMatches}</span> : null;
+	};
+
 	renderItems = (mediaObject, index) => {
 		let segments = mediaObject.segments;
 		if(!segments) {
@@ -34,9 +39,9 @@ export default class PlayList extends React.PureComponent {
 			}]
 		}
 		const segmentList = segments.map((s, i) => {
-			const className = s.programSegment ? 'segment main' : 'segment';
+			const className = s.programSegment ? IDUtil.cssClassName('segment main') : IDUtil.cssClassName('segment');
 			const timeInfo = !s.programSegment ? (
-				<span className="segment-duration">{
+				<span className={IDUtil.cssClassName('segment-duration')}>{
 					TimeUtil.formatTime(FlexPlayerUtil.timeRelativeToOnAir(s.start, mediaObject)) + ' - ' + TimeUtil.formatTime(FlexPlayerUtil.timeRelativeToOnAir(s.end, mediaObject))
 				}</span>
 			) : null;
@@ -47,15 +52,17 @@ export default class PlayList extends React.PureComponent {
 					onClick={this.selectSegment.bind(this, mediaObject, s)}
 				>
 					{timeInfo}&nbsp;
-					<span className="segment-title">
-						{s.title ? s.title : 'Carrier: ' + mediaObject.assetId}
+					<span className={IDUtil.cssClassName('segment-title')}>
+						{s.title ? s.title : 'Carrier: ' + mediaObject.assetId}&nbsp;{
+							s.programSegment ? this.renderNumberOfMatches(this.props.transcriptMatches, mediaObject) : null
+						}
 					</span>
 				</div>
 			)
 		})
 
 		return (
-			<div className="item" title={'Carrier ID: ' + mediaObject.assetId}>
+			<div className={IDUtil.cssClassName('playlist-item')} title={'Carrier ID: ' + mediaObject.assetId}>
 				{segmentList}
 			</div>
 		)
@@ -66,8 +73,10 @@ export default class PlayList extends React.PureComponent {
 
 		const items = mediaObjects.filter(mo => mo.isRawContent).map(mediaObject => {
 			return (
-				<div className="raw-item" title={'Carrier ID: ' + mediaObject.assetId}>
-					Carrier ID:&nbsp;{mediaObject.assetId}
+				<div className={IDUtil.cssClassName('playlist-item-raw')} title={'Carrier ID: ' + mediaObject.assetId}>
+					Carrier ID:&nbsp;{mediaObject.assetId}&nbsp;{
+						this.renderNumberOfMatches(this.props.transcriptMatches, mediaObject)
+					}
 				</div>
 			)
 		});
@@ -75,7 +84,7 @@ export default class PlayList extends React.PureComponent {
 		if(items.length === 0) return null;
 
 		return (
-			<div className="raw-items">
+			<div className={IDUtil.cssClassName('playlist-items-raw')}>
 				<label>Raw materials</label>
 				{items}
 			</div>
@@ -88,7 +97,7 @@ export default class PlayList extends React.PureComponent {
 
 		return (
 			<div className={IDUtil.cssClassName('playlist')}>
-				<div className="items">
+				<div className={IDUtil.cssClassName('playlist-items')}>
 					{items}
 				</div>
 				{rawItems}
@@ -101,6 +110,10 @@ PlayList.propTypes = {
 
 	mediaObjects: PropTypes.arrayOf(
 		MediaObject.getPropTypes()
-	).isRequired
+	).isRequired,
+
+	transcriptMatches : PropTypes.object, //contains number of transcript matches (with the initial search term) per media object
+
+	onSelect: PropTypes.func.isRequired,
 
 }

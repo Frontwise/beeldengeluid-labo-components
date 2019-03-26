@@ -8,6 +8,25 @@
 }
 
 .bg__single-search-recipe {
+
+     /* Restyle buttons to new format */
+	.btn{
+		text-transform: uppercase;
+		font-weight: 400px;
+		font-size: .96em;
+		font-family: $fontHeading;
+		transition: background-color $transition;
+
+		&.btn-secondary{
+			background-color: $clSecondary;
+			color: white;
+
+			&:hover{
+				background-color: darken($clSecondary,8%);
+			}
+		}
+	}
+
 	.select-all {
 		@include checkbox();
 		margin-top: 6px;
@@ -57,7 +76,7 @@
 		text-align: center;
 	}
 	.result-list {
-		margin-top: 25px;
+		margin-top: 8px;
 	}
 	.table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
@@ -97,6 +116,32 @@
 		}
 		.snippet_description {
 			display: none;
+		}
+	}
+
+	.bg__ssr__tutorial{
+		margin-top: 15px;
+		margin-bottom: 10px;
+		border-radius: 5px;
+		border: 1px solid mix(white, $clPrimary, 70%);
+		background-color: mix(white, $clPrimary, 90%);
+		padding: 10px;
+		text-align: center;
+		line-height: 25px;
+		span{
+			cursor: pointer;
+			margin-left: 10px;
+			background-color: $clPrimary;
+			display: inline-block;
+			vertical-align: top;
+			width: 25px;
+			height: 25px;
+			line-height: 24px;
+			color: white;
+			font-weight: bold;
+			font-family: $fontHeading;
+			vertical-align: center;
+			font-size: 1.3em;
 		}
 	}
 }

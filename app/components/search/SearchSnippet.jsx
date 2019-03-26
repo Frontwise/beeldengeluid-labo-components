@@ -1,9 +1,9 @@
-//Check the collection config getResultSnippetData() function to inspect this.props.data
-
 import IconUtil from '../../util/IconUtil';
 import IDUtil from '../../util/IDUtil';
 import RegexUtil from '../../util/RegexUtil';
 import Classification from '../annotation/Classification';
+
+import PropTypes from 'prop-types';
 
 class SearchSnippet extends React.Component {
 
@@ -11,108 +11,103 @@ class SearchSnippet extends React.Component {
 		super(props);
 		this.CLASS_PREFIX = 'ss';
     }
-	getMediaTypes() {
-		let mediaTypes = this.props.collectionMediaTypes;
-		if(this.props.data.mediaTypes) {
-			mediaTypes = mediaTypes.concat(
-				this.props.data.mediaTypes.filter(mt => !mediaTypes.includes(mt))
-			);
-		}
-		return mediaTypes
-	}
 
     static createMarkup(text){
 		return {__html: text}
 	}
 
+	renderPosterImage = posterURL => {
+		if(!posterURL) return null;
+
+		return (
+			<div style={{width : '200px'}}>
+				<a href="#">
+					<img className="media-object"
+						src="/static/images/placeholder.2b77091b.svg"
+						data-src={posterURL}
+						style={{width:'100%'}}
+						alt="Could not find image"/>
+				</a>
+			</div>
+		);
+	};
+
+	renderMediaIcons = mediaTypes => {
+		if(!mediaTypes) return null;
+
+		return mediaTypes.map(mt => {
+			if(mt === 'video') {
+				return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"/>);
+			} else if(mt === 'audio') {
+				return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"/>);
+			} else if(mt === 'image') {
+				return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"/>);
+			} else if(mt === 'text') {
+				return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"/>);
+			}
+		});
+	};
+
+	renderAccessabilityIcon = isPlayable => {
+		//Note: assigning a media type (to the result data) automatically means it's accessible in the media suite!
+		if(isPlayable) {
+			return (
+				<span
+					className={IconUtil.getMediaObjectAccessIcon(true, true, true, true, false)}
+					title="Media object(s) can be viewed">
+				</span>
+			);
+		} else {
+			return (
+				<span
+					className={IconUtil.getMediaObjectAccessIcon(false, false, true, true, false)}
+					title="Media object(s) not accessible">
+				</span>
+			);
+		}
+	};
+
+	renderTags = tags => {
+		if(!tags) return null;
+
+		return tags.map(t => {
+			return (<Classification classification={{label : t}}/>);
+		})
+	};
+
+	renderFragmentIcon = () => {
+		return (
+			<span className={IconUtil.getMimeTypeIcon('fragment', true, true)} title="Media fragment"/>
+		);
+	};
+
+	renderFragmentSnippet = fragment => {
+		if(!fragment) return null;
+
+		return (
+			<div className={IDUtil.cssClassName('fragment', this.CLASS_PREFIX)}>
+				{fragment.snippet}
+			</div>
+		);
+	};
+
 	//possible default fields: posterURL, title, description, tags
 	render() {
-		let poster = null;
-		let mediaTypes = null;
-		let tags = [];
-		let fragmentIcon = null;
-		let fragmentInfo = null;
+		const poster = this.renderPosterImage(this.props.data.posterURL)
+		const mediaTypes = this.renderMediaIcons(this.props.data.mediaTypes);
+		const accessIcon = this.renderAccessabilityIcon(this.props.data.playable);
+		const tags = this.renderTags(this.props.data.tags);
 
-		//by default no access
-		let accessIcon = (
-			<span
-				className={IconUtil.getMediaObjectAccessIcon(false, false, true, true, false)}
-				title="Media object(s) not accessible">
-			</span>
-		);
-
-		//get the poster of the media object
-		if(this.props.data.posterURL) {
-			poster = (
-				<div style={{width : '200px'}}>
-					<a href="#">
-						<img className="media-object"
-							src="/static/images/placeholder.2b77091b.svg"
-							data-src={this.props.data.posterURL}
-							style={{width:'100%'}}
-							alt="Could not find image"/>
-					</a>
-				</div>
-			)
-		}
-
-		//see if there are any tags added to this search result
-		if(this.props.data.tags) {
-			tags = this.props.data.tags.map(t => {
-				return (<Classification classification={{label : t}}/>);
-			})
-		}
-
-		//show the user what content can be expected
-		if(this.props.data.mediaTypes) {
-			mediaTypes = this.getMediaTypes().map((mt) => {
-				if(mt === 'video') {
-					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"/>);
-				} else if(mt === 'audio') {
-					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"/>);
-				} else if(mt === 'image') {
-					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"/>);
-				} else if(mt === 'text') {
-					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"/>);
- 				}
-			});
-
-			//Note: assigning a media type (to the result data) automatically means it's accessible in the media suite!
-			if(this.props.data.playable) {
-				accessIcon = (
-					<span
-						className={IconUtil.getMediaObjectAccessIcon(true, true, true, true, false)}
-						title="Media object(s) can be viewed">
-					</span>
-				);
-			}
-		}
-
-		//if this hit represents a media fragment, show an extra icon (TODO make sure this is not ugly later on)
+		let fragmentIcon, fragmentSnippet = null;
 		if(this.props.data.type === 'media_fragment') {
-			fragmentIcon = (
-				<span className={IconUtil.getMimeTypeIcon('fragment', true, true)} title="Media fragment"/>
-			);
-
-			if(this.props.data.mediaFragment) {
-				fragmentInfo = (<div className={IDUtil.cssClassName('fragment', this.CLASS_PREFIX)}>
-					{this.props.data.mediaFragment.snippet}
-				</div>)
-			}
+			fragmentIcon = this.renderFragmentIcon();
+			fragmentSnippet = this.renderFragmentSnippet(this.props.data.mediaFragment);
 		}
 
-		//generate main classes
         const classNames = ['media', IDUtil.cssClassName('search-snippet')];
         const title = this.props.data.title ? this.props.data.title + ' ' : '';
         const date = this.props.data.date ? '(' + this.props.data.date + ')' : '';
-        const numberMetadataHits = this.props.data.numHighlights !== 0
-            ? this.props.data.numHighlights + " match(es) in archival metadata |"
-            : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
-        let subHeading = date;
-        if(date !== "") {
-            subHeading += " | ";
-        }
-        subHeading += numberMetadataHits;
+        const subHeading = date !== '' ? date + ' | ' + this.props.data.highlightMsg : this.props.data.highlightMsg;
 
         return (
 			<div className={classNames.join(' ')}>
@@ -136,12 +131,37 @@ class SearchSnippet extends React.Component {
                         	)
 						)
 					}/>
-					{fragmentInfo}
+					{fragmentSnippet}
 					{tags}
 				</div>
 			</div>
 		)
 	}
+}
+
+SearchSnippet.PropTypes = {
+	searchTerm : PropTypes.string.isRequired, //the search term that was used to find this hit
+	data : PropTypes.shape({ //all the data required to draw the information of this result snippet (see getResultSnippetData() in CollectionConfig)
+		id : PropTypes.string.isRequired,
+		title : PropTypes.string.isRequired,
+		description : PropTypes.string,
+		date : PropTypes.string,
+		posterURL : PropTypes.string, //for loading a poster image
+		playable : PropTypes.bool, //for drawing the accessability icon
+		mediaTypes : PropTypes.arrayOf(PropTypes.string), //for drawing media type icons
+		highlightMsg : PropTypes.string.isRequired,
+		tags : PropTypes.string, //for drawing any type of annotations (e.g. based on a the current user)
+
+		//this is only available when the search is configured to return media fragments (inner_hits)
+		mediaFragment : PropTypes.shape({
+			assetId : PropTypes.string,
+			url : PropTypes.string,
+			start : PropTypes.number,
+			end : PropTypes.number,
+			snippet : PropTypes.string,
+			layer : PropTypes.string
+		}),
+	}).isRequired
 }
 
 export default SearchSnippet;

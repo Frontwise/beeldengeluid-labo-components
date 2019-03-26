@@ -32,6 +32,17 @@ const initDOM = () => {
     close.onclick = ()=>{
         container.style.display = 'none';
     }
+
+    // make help callable by event
+    window.addEventListener('BG__SHOW_HELP', () => {
+        container.style.display = 'block';
+    });
+
+    // make help callable by event
+    window.addEventListener('BG__HIDE_HELP', () => {
+        container.style.display = 'none';
+    });
+
     return true;
 }
 
@@ -41,7 +52,6 @@ export const initHelp = (helpTitle, contentUrl) =>{
         // an error occured during init
         return;
     }
-        
     title.innerHTML = helpTitle;
     loadData(contentUrl);
 }

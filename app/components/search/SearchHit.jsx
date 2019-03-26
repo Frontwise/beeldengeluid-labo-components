@@ -75,11 +75,7 @@ class SearchHit extends React.Component {
 
 	render() {
 		//FIXME make sure that this snippet already contains the hightlight data!
-		const snippet = this.props.data.collectionConfig.getResultSnippetData(this.props.data.formattedData);
-
-		//assign the highlight data to the snippet for the SearchSnippet component
-		snippet['numHighlights'] = this.props.data.numHighlights;
-
+		const snippet = this.props.data.collectionConfig.getResultSnippetData(this.props.data.formattedData, this.props.data.numHighlights);
 		const collectionMediaTypes = this.props.data.collectionConfig.getCollectionMediaTypes();
 		const selectedRows = ComponentUtil.getJSONFromLocalStorage('selectedRows');
         const visitedItems = ComponentUtil.getJSONFromLocalStorage('visitedHits');
@@ -129,15 +125,14 @@ class SearchHit extends React.Component {
 			<div className={classNames.join(' ')}>
 				{checkBox}
                 <div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
-					<button className="btn btn-default fa fa-file-text"
-						onClick={this.onQuickView.bind(this)} title="Quick view">
+					<button className="btn btn-default"	onClick={this.onQuickView.bind(this)} title="Quick view">
+						<span className="fa fa-file-text"></span>
 					</button>
 				</div>
                 {bookmarkIcon}
                 <div onClick={this.gotoItemDetails.bind(this)}>
 					<SearchSnippet
 						data={snippet}
-						collectionMediaTypes={collectionMediaTypes}
 						searchTerm={this.props.data.searchTerm}
 					/>
 				</div>

@@ -18,6 +18,8 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
+import Header from './components/search/Header';
+import CollectionBar from './components/search/CollectionBar';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
 import SearchHit from './components/search/SearchHit';
@@ -41,6 +43,7 @@ class SingleSearchRecipe extends React.Component {
 			showProjectModal : false, //for the project selector
 			showBookmarkModal : false, //for the bookmark group selector
 			showQuickViewModal : false, //for the quickview result preview
+            savedBookmarkModal: false,
 
 			showSelectionOverview : false, //show the selected items, instead of the search results
 
@@ -55,10 +58,12 @@ class SingleSearchRecipe extends React.Component {
 			collectionConfig : null, //loaded after mounting, without it nothing works
 			currentOutput: null, //contains the current search results
 			initialQuery : null, //yikes this is only used for storing the initial query
-
+            lastQuerySaved : null,
 			selectedOnPage : {}, // key = resourceId, value = true/false
 			allRowsSelected : false // are all search results selected
 		};
+
+		this.CLASS_PREFIX = "ssr";
 	}
 
 	static elementInViewport(el) {
@@ -199,6 +204,8 @@ class SingleSearchRecipe extends React.Component {
 			this.onBookmarkGroupSelected(data);
 		} else if(componentClass === 'QueryEditor') {
 			this.onQuerySaved(data)
+		} else if(componentClass === 'CollectionBar') {
+			this.onSearched(data);
 		}
 	}
 
@@ -220,6 +227,11 @@ class SingleSearchRecipe extends React.Component {
 				)
 			}
         );
+
+        // store current query, on collection select/change
+        if(!this.props.params.queryId) {
+        	FlexRouter.setBrowserHistory({queryId : 'cache'}, 'single-search-history');
+        }
 	}
 
 	onProjectSelected = (project) => {
@@ -274,11 +286,16 @@ class SingleSearchRecipe extends React.Component {
 		}
 	}
 
-	onQuerySaved = (project) => {
-		ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
-			ComponentUtil.storeJSONInLocalStorage('activeProject', project)
-		});
-	}
+	onQuerySaved = (data) => {
+        ComponentUtil.hideModal(this, 'showQueryModal', 'query__modal', true, () => {
+			ComponentUtil.storeJSONInLocalStorage('activeProject', data.project);
+        });
+
+        this.setState({
+            savedQueryModal : true,
+            lastQuerySaved : data.queryName
+        });
+    };
 
 	/* ------------------------------- SEARCH RELATED FUNCTIONS ----------------------- */
 
@@ -516,12 +533,12 @@ class SingleSearchRecipe extends React.Component {
 		this.setState({
 			selectedOnPage : {},
 			allRowsSelected : false,
-            showSelectionOverview : false
+            showSelectionOverview : false,
+            savedBookmarkModal: true
 		}, () => {
-			alert('Bookmarks were saved successfully');
             ComponentUtil.removeJSONByKeyInLocalStorage('selectedRows');
 		})
-	}
+	};
 
 	/* ------------------------------- QUERY SAVING RELATED FUNCTIONS ----------------------- */
 
@@ -701,13 +718,14 @@ class SingleSearchRecipe extends React.Component {
 	}
 
 	renderQueryModal = (currentOutput, activeProject) => {
+        const projectTitle = `Save query to project: ${activeProject.name}`;
 		return (
 			<FlexModal
 				elementId="query__modal"
 				stateVariable="showQueryModal"
 				owner={this}
 				size="large"
-				title="Enter a name for your query">
+				title={projectTitle}>
 					<QueryEditor
 						query={currentOutput.query}
 						user={this.props.user}
@@ -715,7 +733,7 @@ class SingleSearchRecipe extends React.Component {
 						onOutput={this.onComponentOutput}/>
 			</FlexModal>
 		)
-	}
+	};
 
 	renderBookmarkModal = (collectionConfig, activeProject) => {
 		return (
@@ -735,31 +753,48 @@ class SingleSearchRecipe extends React.Component {
 		)
 	}
 
-	/* --------------------------- RENDER SELECTION BUTTONS --------------------- */
+    renderSavedBookmarkModal = () => (
+        <FlexModal
+            elementId="saved-bookmark__modal"
+            stateVariable="savedBookmarkModal"
+            owner={this}
+            size="large"
+            title="Bookmarks saved successfully">
+			Your selection of bookmarks were saved succesfully to project &quot;{this.state.activeProject.name}&quot;
+        </FlexModal>
+    );
 
 
-	renderSelectionButtons = (activeProject, collectionConfig, showCollectionSelector = true) => {
-		let collectionBtn = null;
-		const projectBtn = (
-			<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
-				Set project ({activeProject ? activeProject.name : 'none selected'})
-			</button>
-		);
+    renderSavedQueryModal = () => (
+        <FlexModal
+            elementId="query-saved__modal"
+            stateVariable="savedQueryModal"
+            owner={this}
+            size="large"
+            title="Query saved successfully">
+            Your query ({this.state.lastQuerySaved}) was saved successfully to project &quot;{this.state.activeProject.name}&quot;
+        </FlexModal>
+    );
 
-		if(showCollectionSelector) {
-			//show the button to open the modal
-			collectionBtn = (
-				<button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}>
-					Set collection ({collectionConfig ? collectionConfig.getCollectionTitle() : 'none selected'})
-				</button>
-			);
-		}
+	/* --------------------------- RENDER RECIPE HEADER --------------------- */
 
-		return (
-			<div>{collectionBtn}&nbsp;{projectBtn}</div>
-		)
-	}
+	renderHeader = (name, activeProject) => (
+			<Header
+				name={name}
+				activeProject={activeProject}
+				selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}
+			/>
+	);
 
+	/* --------------------------- RENDER COLLECTION BAR --------------------- */
+
+	renderCollectionBar = (collectionConfig) => (
+			<CollectionBar
+				collectionConfig={collectionConfig}
+				selectCollection={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}
+				resetSearch={this.onComponentOutput}
+			/>
+	);
 
 	/* --------------------------- RENDER RESULT LIST ----------------------------*/
 
@@ -818,7 +853,7 @@ class SingleSearchRecipe extends React.Component {
                 {tableFooter}
             </div>
         )
-	}
+	};
 
 	/* --------------------------- RENDERING LISTS -------------------------------*/
 
@@ -991,7 +1026,7 @@ class SingleSearchRecipe extends React.Component {
 					key={collectionId} //for resetting all the states held within after selecting a new collection
 					header={true}
 					aggregationView={this.props.recipe.ingredients.aggregationView}
-					dateRangeSelector={this.props.recipe.ingredients.dateRangeSelector}
+					dateRangeSelector={true}
 					showTimeLine={true}
 					query={initialQuery || QueryModel.ensureQuery(null, collectionConfig) }
 					collectionConfig={collectionConfig}
@@ -1012,6 +1047,19 @@ class SingleSearchRecipe extends React.Component {
         	</div>
         )
 	}
+
+	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
+
+    showHelp = () => {
+    	var event = new Event('BG__SHOW_HELP');
+    	window.dispatchEvent(event);
+    }
+
+	renderTutorial = () => (
+		<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
+			 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+		</div>
+	);
 
 	/* ---------------------------- MAIN RENDER FUNCTION -------------------------- */
 
@@ -1040,11 +1088,17 @@ class SingleSearchRecipe extends React.Component {
         	this.state.activeProject
         ) : null;
 
-        const selectionButtons = this.renderSelectionButtons(
-        	this.state.activeProject,
+        const header = this.renderHeader(
+        	this.props.recipe.name,
+        	this.state.activeProject
+        );
+
+        const collectionBar = this.renderCollectionBar(
         	this.state.collectionConfig,
-        	this.props.recipe.ingredients.collectionSelector
-        )
+        );
+
+        const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;
+        const savedBookmarkModal = this.state.savedBookmarkModal ? this.renderSavedBookmarkModal() : null;
 
         //the query builder & loading message
 		const searchComponent = this.renderSearchComponent(
@@ -1057,20 +1111,27 @@ class SingleSearchRecipe extends React.Component {
 		//search result table with paging, sorting and ability to toggle a list of selected items
 		const resultList = this.renderResultTable(this.state, storedSelectedRows, activeBookmarks);
 
+		// show a short introduction/tutorial for this tool
+		const tutorial = this.renderTutorial();
+
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
 					<div className="col-md-12">
-						{selectionButtons}
+						{header}
+						{collectionBar}
 						{searchComponent}
                         {resultList}
 					</div>
 				</div>
+                {tutorial}
 				{collectionModal}
 				{projectModal}
 				{queryModal}
 				{bookmarkModal}
 				{quickViewModal}
+                {savedQueryModal}
+                {savedBookmarkModal}
 			</div>
 		);
 	}

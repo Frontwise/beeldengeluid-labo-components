@@ -16,6 +16,8 @@ const QueryModel = {
 			//what layers to search through (always check them with the collection config)
 			searchLayers: QueryModel.determineSearchLayers(obj, collectionConfig),
 
+			nestedSearchLayers: obj.nestedSearchLayers || collectionConfig.getNestedSearchLayers(),
+
 			//the search term entered by the user
 			term: obj.term || '',
 

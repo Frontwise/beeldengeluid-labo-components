@@ -223,7 +223,6 @@ class ItemDetailsRecipe extends React.Component {
 				annotationTarget : null,
 				found : false
 			});
-			console.debug('this item does not exist');
 		}
 	}
 
@@ -499,6 +498,7 @@ class ItemDetailsRecipe extends React.Component {
 			term : this.props.params.st,
 			desiredFacets : [{
 				field: entity.field,
+				title : this.state.collectionConfig.toPrettyFieldName(entity.field), //FIXME this could be also obtained from a user setting
 				type: "string",
 				exclude : false
 			}],
@@ -560,7 +560,6 @@ class ItemDetailsRecipe extends React.Component {
 
 
 	checkMediaObjectIsSelected(mediaObject) {
-		//console.debug(mediaObject, this.props.params.assetId)
 		if(mediaObject.assetId === this.props.params.assetId) {
 			mediaObject.start = this.props.params.s;
 			mediaObject.end = this.props.params.e;
@@ -614,11 +613,13 @@ class ItemDetailsRecipe extends React.Component {
 		const mediaTabs = tabs.map((tab, index) => {
 			const iconClass = IconUtil.getMimeTypeIcon(tab.type);
 			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
+            const mediaType = tab.type === 'application' ? 'External resource' : tab.type;
+
 			return (
 				<li key={tab.type + '__tab'}
 					className={active ? 'active' : ''}>
 					<a data-toggle="tab" href={'#' + tab.type + '__content'}>
-						<span className={iconClass}/>&nbsp;{tab.type}
+						<span className={iconClass}/>&nbsp;{mediaType}
 					</a>
 				</li>
 			)
@@ -877,7 +878,6 @@ class ItemDetailsRecipe extends React.Component {
         if(userLastQuery && userLastQuery.id) {
             FlexRouter.gotoSingleSearch('cache');
         }
-        console.debug('There is no cached query');
         return false;
     }
 
@@ -1161,7 +1161,7 @@ class ItemDetailsRecipe extends React.Component {
 			);
 
 			//media objects
-			if(this.state.itemData.playableContent) {
+			if(this.state.itemData.playableContent && this.state.itemData.playableContent.length > 0) {
 				mediaPanel = this.getRenderedMediaContent();
 			}
 

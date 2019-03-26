@@ -1,6 +1,11 @@
 
 /* ---------------------------- CALCULATIONS RELATIVE TO ON-AIR DURATION --------------------------------- */
 
+/*
+	IMPORTANT NOTE: media objects that do NOT want to take into account off-air content, should have no resourceStart & resourceEnd params OR should set these to -1
+					Otherwise the whole playout experience gets screwed up (incorrect timelines, invisible transcript etc)
+*/
+
 const FlexPlayerUtil = {
 
 	onAirDuration(realPlayerDuration, mediaObject) {

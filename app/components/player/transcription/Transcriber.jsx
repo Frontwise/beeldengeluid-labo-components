@@ -1,5 +1,6 @@
 import IDUtil from '../../../util/IDUtil';
 import TimeUtil from "../../../util/TimeUtil";
+import RegexUtil from "../../../util/RegexUtil";
 import FlexPlayerUtil from "../../../util/FlexPlayerUtil";
 
 export default class Transcriber extends React.PureComponent {
@@ -119,14 +120,18 @@ export default class Transcriber extends React.PureComponent {
 			let regex = null;
 			let filteredTranscript = [];
 			try {
-				regex = new RegExp(searchTerm, 'gi');
+				//regex = new RegExp(searchTerm, 'gi');
+				regex = RegexUtil.generateRegexForSearchTerm(searchTerm);
+            	matches = text.match(regex);
+            	console.debug('# matches', matches)
+
 			} catch(err) {
 				//in case the user enters an illegal regular expression show 0 hits
 			}
 
 			if(regex) {
 				filteredTranscript = this.props.transcript.filter(item => {
-					return item.words.toLowerCase().search(searchTerm.toLowerCase()) !== -1;
+					return item.words.toLowerCase().search(regex) !== -1; //searchTerm.toLowerCase()
 				}).map(item => {
 					const copiedItem = Object.assign({}, item);
 					copiedItem.words = item.words.replace(

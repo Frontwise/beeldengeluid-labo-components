@@ -1,6 +1,5 @@
 import IDUtil from '../../util/IDUtil';
 import ElasticsearchDataUtil from '../../util/ElasticsearchDataUtil';
-import Autosuggest from 'react-autosuggest';
 import classNames from 'classnames';
 
 //this component relies on the collection statistics as input

@@ -23,6 +23,7 @@ import IDUtil from '../../../util/IDUtil';
 import FlexPlayerUtil from '../../../util/FlexPlayerUtil';
 import AnnotationUtil from '../../../util/AnnotationUtil';
 import IconUtil from '../../../util/IconUtil';
+import RegexUtil from '../../../util/RegexUtil';
 
 import FlexBox from '../../FlexBox';
 
@@ -60,9 +61,12 @@ class FlexPlayer extends React.Component {
 	constructor(props) {
 		super(props);
 
+		const currentMediaObject = this.determineCurrentMediaObject(this.props.mediaObjects, this.props.transcript, this.props.initialSearchTerm);
 		this.state = {
-			currentMediaObject : this.props.mediaObjects[0],//this one can be set per player
-			currentMediaSegment : this.props.mediaObjects[0].segments ? this.props.mediaObjects[0].segments[0] : null,
+			currentMediaObject : currentMediaObject,
+			currentMediaSegment : currentMediaObject.segments || null,
+			transcriptMatches : this.calcTranscriptMatchesPerMediaObject(this.props.mediaObjects, this.props.transcript, this.props.initialSearchTerm),
+
 			playerAPI : null,
 
 			relativePosition : 0, //player pos relative to on-air start time (e.g. on-air starts at 6:01, real player = 8:01, so relative pos = 2:00)
@@ -80,6 +84,43 @@ class FlexPlayer extends React.Component {
 			mediaObjectAnnotation : null //populated in onLoadAnnotations(), there should only be one per user!
 		}
 	}
+
+	//returns the first media object that matches the search term in the accompanied transcript (if any, else it returns the first media object)
+	determineCurrentMediaObject = (mediaObjects, transcript, initialSearchTerm) => {
+		if(!transcript || !initialSearchTerm) return mediaObjects[0];
+		let regex = null;
+		try {
+			regex = RegexUtil.generateRegexForSearchTerm(initialSearchTerm);
+		} catch(err) {
+			console.debug('invalid regex');
+		}
+		const firstMatch = regex ? transcript.find(phrase => {
+			//console.debug(phrase.words.toLowerCase(), this.props.initialSearchTerm)
+			return phrase.words.search(regex) != -1
+		}) : null;
+		return firstMatch ? mediaObjects.find(mo => mo.assetId === firstMatch.carrierId) : mediaObjects[0];
+	};
+
+	//TODO get the number of matches per segment as well!
+	calcTranscriptMatchesPerMediaObject = (mediaObjects, transcript, initialSearchTerm) => {
+		if(!transcript || !initialSearchTerm) return {};
+
+		const matches = {}
+		let regex = null;
+		try {
+			regex = RegexUtil.generateRegexForSearchTerm(initialSearchTerm);
+		} catch(err) {
+			console.debug('invalid regex');
+		}
+		if(regex) {
+			mediaObjects.forEach(mo => {
+				matches[mo.assetId] = this.getTranscript(transcript, mo).filter(phrase => {
+					return phrase.words.search(regex) != -1
+				}).length;
+			});
+		}
+		return matches;
+	};
 
 	//TODO make sure to offer support for rendering different players, now it's just Vimeo (ArtTube needs this)
 	componentDidMount() {
@@ -728,7 +769,7 @@ class FlexPlayer extends React.Component {
 
 		return (
 			<FlexBox title="Play list (including segments)" isVisible={false}>
-				<PlayList mediaObjects={playList} onSelect={this.playTrack.bind(this)}/>
+				<PlayList mediaObjects={playList} transcriptMatches={this.state.transcriptMatches} onSelect={this.playTrack.bind(this)}/>
 			</FlexBox>
 		)
 	}

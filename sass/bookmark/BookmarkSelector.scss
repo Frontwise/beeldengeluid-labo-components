@@ -1,15 +1,28 @@
 .bg__bookmark-selector {
+
+	/* boostrap class override */
 	.list-group-item {
 		&:hover {
-			background-color: #f3f3f3; 
+			background-color: #f3f3f3;
 		}
 		.member-count {
 			float:right;
 		}
 	}
-	.btn-save {
-		float:right;
-		margin-right:10px;
+
+	.bg__bms__new-group {
+		display:flex;
+		input {
+			margin: 0px;
+		}
 	}
-	
+
+	.bg__bms__save {
+		button {
+			float:right;
+		}
+	    margin-top: 10px;
+	    height: 40px;
+	}
+
 }

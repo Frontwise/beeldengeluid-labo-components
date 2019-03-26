@@ -22,7 +22,7 @@ const IconUtil = {
 	},
 
 	getMimeTypeIcon(mimeType, border, muted, interactive) {
-		let iconClass = 'fa fa-question';
+		let iconClass = '';
 		if(mimeType) {
 			if(mimeType.indexOf('video') != -1) {
 				iconClass = 'fa fa-film';

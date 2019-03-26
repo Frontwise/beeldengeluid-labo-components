@@ -1,21 +1,42 @@
 .bg__field-category-selector {
-	.PowerSelectMultiple__SelectedOptions {
-		margin:0;
+	.PowerSelect{
+		border-color: $clGreyTint;
 
-		.PowerSelectMultiple__SelectedOption {
-			background-color: $fill-color;
-			border: 1px solid $border-color;
-			color: white;
-			.bg__ul-selectedOption {
-				list-style-type: none;
-				-moz-padding-start: 0;
-				-webkit-padding-start: 0;
-			}
+		.PowerSelect__Clear{
+			font-size: 1.3em;
+			font-weight: bold;
 		}
 
-		.PowerSelectMultiple__SelectedOption__Close {
-			&:hover {
-				background-color: $hover-color;
+		.PowerSelectMultiple__SelectedOptions {
+			margin: 0;
+
+			.PowerSelectMultiple__SelectedOption__Label {
+				padding-left: 2px;
+				padding-right: 4px;
+			}
+
+			.PowerSelectMultiple__SelectedOption {
+				background-color: $fill-color;
+				border-radius: 5px;
+				border: 0;
+				color: white;
+				.bg__ul-selectedOption {
+					list-style-type: none;
+					padding-left: 0;
+					-moz-padding-start: 0;
+					-webkit-padding-start: 0;
+				}
+			}
+
+			.PowerSelectMultiple__SelectedOption__Close {
+				border-left: 1px solid mix($fill-color, white, 50%);
+				font-weight: bold;
+				font-size: 1.2em;
+				padding-right: 7px;
+				&:hover {
+					background-color: $hover-color;
+					border-radius: 0 5px 5px 0;
+				}
 			}
 		}
 	}
@@ -24,4 +45,9 @@
 .bg__fcs__option-create {
 	margin-top: 8px;
 	padding: 0 5px 5px 10px;
+	button{
+		text-transform: uppercase;
+		font-family: $fontHeading;
+		font-size: 0.9em;
+	}
 } /* NOTE: Also in FieldCategorySelector.jsx */
