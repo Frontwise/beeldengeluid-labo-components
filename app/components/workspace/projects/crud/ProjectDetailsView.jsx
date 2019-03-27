@@ -38,10 +38,6 @@ class ProjectDetailsView extends React.PureComponent {
                         <p>{project.description}</p>
                     </li>
                     <li>
-                        <h5 className="label">Private</h5>
-                        <p>{project.isPrivate ? "✔" : null}</p>
-                    </li>
-                    <li>
                         <h5 className="label">Created</h5>
                         <p>{project.created.substring(0, 10)}</p>
                     </li>

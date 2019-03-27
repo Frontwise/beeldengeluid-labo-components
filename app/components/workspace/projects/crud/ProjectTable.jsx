@@ -27,7 +27,6 @@ class ProjectTable extends React.PureComponent {
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
-            { field: 'isPrivate', content: 'Private', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
             { field: '', content: '', sortable: false }
@@ -311,9 +310,6 @@ class ProjectTable extends React.PureComponent {
                     }
                 </span>
             )
-        },
-        {
-            content: (project.isPrivate ? "✔" : null)
         },
         {
             props: { className: 'access smaller' },

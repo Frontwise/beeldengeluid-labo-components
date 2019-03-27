@@ -21,7 +21,6 @@ class CollectionTable extends React.PureComponent {
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
             { field: '', content: '', sortable: false },
-            //{ field: '', content: '', sortable: false },
             { field: '', content: '', sortable: false }
         ];
 
