@@ -18,10 +18,7 @@ import '../sass/labo-components.scss';
 //CSS must be included in the entry point to allow Webpack
 // to detect and run CSS .
 
-//cooking function
-//TODO the user variable is now filled with the INSTANCE_NAME from settings.py
-//	Instead the user object (with id, name & attributes) will be passed and should be properly handled
-export function cookRecipe (recipe, params, user, elementId, clientId = null, collectionMapping = null) {
+export function cookRecipe (recipe, params, user, elementId, clientId = null) {
 	let component = null;
 
 	switch(recipe.type){
@@ -32,7 +29,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				params={params}
 				user={user}
 				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
 		case 'single-search':
@@ -41,7 +37,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				params={params}
 				user={user}
 				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
         case 'query-comparison':
@@ -50,7 +45,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
                 params={params}
                 user={user}
                 clientId={clientId}
-                collectionMapping={collectionMapping} //TODO move the collection mapping externally
             />;
             break;
 	 	case 'collection-analysis':
@@ -59,7 +53,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				params={params}
 				user={user}
 				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
 
@@ -70,7 +63,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				params={params}
 				user={user}
 				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
 		case 'workspace-collections':
@@ -79,7 +71,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
                 params={params}
                 user={user}
                 clientId={clientId}
-                collectionMapping={collectionMapping} //TODO move the collection mapping externally
             />;
         break;
 
@@ -89,7 +80,6 @@ export function cookRecipe (recipe, params, user, elementId, clientId = null, co
 				params={params}
 				user={user}
 				clientId={clientId}
-				collectionMapping={collectionMapping} //TODO move the collection mapping externally
 			/>;
 		break;
 		default:

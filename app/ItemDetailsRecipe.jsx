@@ -613,11 +613,13 @@ class ItemDetailsRecipe extends React.Component {
 		const mediaTabs = tabs.map((tab, index) => {
 			const iconClass = IconUtil.getMimeTypeIcon(tab.type);
 			const active = this.props.params.fragmentUrl ? tab.active : index === 0;
+            const mediaType = tab.type === 'application' ? 'External resource' : tab.type;
+
 			return (
 				<li key={tab.type + '__tab'}
 					className={active ? 'active' : ''}>
 					<a data-toggle="tab" href={'#' + tab.type + '__content'}>
-						<span className={iconClass}/>&nbsp;{tab.type}
+						<span className={iconClass}/>&nbsp;{mediaType}
 					</a>
 				</li>
 			)

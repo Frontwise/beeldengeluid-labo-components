@@ -159,6 +159,12 @@ class CollectionConfig {
 		return indices;
 	}
 
+	//used whenever you want to search by default in nested documents (only when no field categories/clusters are selected)
+	//should return an object like this: {path : 'layer__asr', fields : ['layer__asr.words']}
+	getNestedSearchLayers() {
+		return null;
+	}
+
 	//the nested path used for forming the ES query in the search API
 	getFragmentPath() {
 		return null
@@ -489,6 +495,10 @@ class CollectionConfig {
 	getMaximumYear() {
 		return -1
 	}
+
+    getFieldDescription(esFieldName) {
+        "-"
+    }
 
 	getFieldsToExclude() {
 		return null

@@ -48,7 +48,7 @@ class QueryBuilder extends React.Component {
 
         };
         this.CLASS_PREFIX = 'qb';
-		this.setSearchTerm = this.props.query.term || null;
+		this.searchTermRef = React.createRef();
 	}
 
 	/*---------------------------------- COMPONENT INIT --------------------------------------*/
@@ -57,7 +57,7 @@ class QueryBuilder extends React.Component {
 	componentDidMount() {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
-            this.setSearchTerm = this.props.query.term;
+            this.searchTermRef.current.value = this.props.query.term || null;
 			//never search with an empty search term on init (FIXME not always desirable)
 			if(this.props.query.term && this.props.query.term.trim() !== '') {
 				this.doSearch(this.props.query);
@@ -110,7 +110,7 @@ class QueryBuilder extends React.Component {
 		}
 		q.selectedFacets = {}; //always reset the facets
 		q.offset = 0;
-		q.term = this.setSearchTerm.value || ''; // make sure the term is always a string, otherwise 0 results by default
+		q.term = this.getCurrentSearchTerm(); // make sure the term is always a string, otherwise 0 results by default
 
         this.doSearch(q, true);
 	}
@@ -128,7 +128,7 @@ class QueryBuilder extends React.Component {
 		//reset certain query properties
 		q.searchLayers = searchLayers;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value || '';
+		q.term = this.getCurrentSearchTerm();
 
 		this.doSearch(q, true);
 	}
@@ -143,7 +143,7 @@ class QueryBuilder extends React.Component {
 			q.desiredFacets = data.desiredFacets;
 			q.selectedFacets = data.selectedFacets;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value || '';
+			q.term = this.getCurrentSearchTerm();
 			this.doSearch(q, true);
 		} else if(componentClass === 'DateRangeSelector') {
 
@@ -152,7 +152,7 @@ class QueryBuilder extends React.Component {
 			//reset the following params
 			q.dateRange = Object.assign(data, {field: q.dateRange ? q.dateRange.field : null });
 			q.offset = 0;
-			q.term = this.setSearchTerm.value || '';
+			q.term = this.getCurrentSearchTerm();
 
 			this.doSearch(q, true)
 		} else if(componentClass === 'DateFieldSelector') {
@@ -187,14 +187,14 @@ class QueryBuilder extends React.Component {
 			q.dateRange = data;
 			q.desiredFacets = df;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value || '';
+			q.term = this.getCurrentSearchTerm();
 
 			this.doSearch(q, true);
 		} else if(componentClass === 'FieldCategorySelector') {
 			const q = this.state.query;
 			q.fieldCategory = data;
 			q.offset = 0;
-			q.term = this.setSearchTerm.value || '';
+			q.term = this.getCurrentSearchTerm();
 
 			this.doSearch(q, true)
 		}
@@ -206,7 +206,7 @@ class QueryBuilder extends React.Component {
 	gotoPage(pageNumber) {
 		const q = this.state.query;
 		q.offset = (pageNumber-1) * this.props.pageSize;
-		q.term = this.setSearchTerm.value || '';
+		q.term = this.getCurrentSearchTerm();
 
 		this.doSearch(q, true);
 	}
@@ -216,7 +216,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.sort = sortParams;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value || '';
+		q.term = this.getCurrentSearchTerm();
 
 		this.doSearch(q, true);
 	}
@@ -225,7 +225,7 @@ class QueryBuilder extends React.Component {
 		const q = this.state.query;
 		q.dateRange = null;
 		q.offset = 0;
-		q.term = this.setSearchTerm.value || '';
+		q.term = this.getCurrentSearchTerm();
 
 		this.doSearch(q, true);
 	}
@@ -334,6 +334,10 @@ class QueryBuilder extends React.Component {
     	this.setState({showTimeLine:!this.state.showTimeLine});
     }
 
+    getCurrentSearchTerm = () => {
+    	return this.searchTermRef && this.searchTermRef.current ? this.searchTermRef.current.value : '';
+    }
+
     render() {
         if (this.props.collectionConfig && this.state.query) {
             let searchIcon = null;
@@ -374,9 +378,6 @@ class QueryBuilder extends React.Component {
 				}
 			}
 
-		    //let countsBasedOnDateRange = null;
-            const currentSearchTerm = (this.setSearchTerm && this.setSearchTerm.value !== '') ? this.setSearchTerm.value : this.props.query.term;
-
             //only draw this when there are search results
 			if(true || this.state.totalHits > 0) {
 				let dateTotalStats = null;
@@ -390,8 +391,6 @@ class QueryBuilder extends React.Component {
 
 				let dateCounts = null;
 				let outOfRangeCount = 0;
-
-
 
 				//populate the aggregation/facet selection area/box
 				if(this.state.aggregations) {
@@ -620,7 +619,7 @@ class QueryBuilder extends React.Component {
 				                        }
 
 				                    	{/* Show chart button */}
-		                        		{(this.state.query.dateRange && this.state.query.dateRange.field) && 
+		                        		{(this.state.query.dateRange && this.state.query.dateRange.field) &&
 		                        			<button className="btn" onClick={this.toggleTimeLine}>
 		                        				{this.state.showTimeLine ? "Hide chart" : "Show chart"}
 	                        				</button>
@@ -677,12 +676,7 @@ class QueryBuilder extends React.Component {
 									onKeyPress={
 										this.searchFormKeyPressed.bind(this)
 									}
-									defaultValue={
-										typeof this.setSearchTerm !== 'object' ? this.setSearchTerm : ''
-									}
-									ref={
-										input => (this.setSearchTerm = input)
-									}
+									ref={this.searchTermRef}
 								/>
 								<span onClick={this.newSearch.bind(this)}>
 									{searchIcon}

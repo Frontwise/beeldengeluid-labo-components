@@ -90,9 +90,43 @@ class ProjectBookmarkView extends React.PureComponent {
 }
 
 ProjectBookmarkView.propTypes = {
-    user: PropTypes.object.isRequired,
-    project: PropTypes.object.isRequired,
-    loadBookmarkCount: PropTypes.func,
+    project: PropTypes.shape({
+        id : PropTypes.string.isRequired,
+        name : PropTypes.string.isRequired,
+        description : PropTypes.string,
+        created : PropTypes.string,
+        user : PropTypes.string,
+        queries : PropTypes.array,
+        sessions : PropTypes.array,
+    }).isRequired,
+
+    user: PropTypes.shape({
+        id : PropTypes.string.isRequired,
+        name : PropTypes.string.isRequired,
+    }).isRequired,
+    loadBookmarkCount : PropTypes.func,
+
+    //the following props are available, but not used
+    clientId : PropTypes.string,
+    params : PropTypes.object,
+    recipe : PropTypes.shape({
+        id : PropTypes.string.isRequired,
+        ingredients : PropTypes.object.isRequired
+    }),
+    renderComponent : PropTypes.func,
+
+    //React Router props
+    history : PropTypes.object.isRequired,
+    match : PropTypes.shape({
+        isExact : PropTypes.bool,
+        path : PropTypes.string.isRequired,
+        params : PropTypes.shape({
+            id : PropTypes.string.isRequired
+        }).isRequired,
+        url : PropTypes.string
+    }).isRequired,
+    location : PropTypes.object,
+    staticContext : PropTypes.object
 };
 
 class WrappedProjectBookmarkView extends React.PureComponent {
