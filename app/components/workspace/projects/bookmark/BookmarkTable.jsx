@@ -15,7 +15,7 @@ import {
 } from '../../helpers/OptionList';
 
 import ResourceViewerModal from '../../ResourceViewerModal';
-
+import FlexRouter from '../../../../util/FlexRouter';
 import BookmarkRow from './BookmarkRow';
 import NestedTable from '../../helpers/NestedTable';
 import classNames from 'classnames';
@@ -324,7 +324,7 @@ class BookmarkTable extends React.PureComponent {
                         partId : targetObject.assetId
                     })
                 })
-            })
+            });
 
             //now delete the whole selection in a single call to the API
             AnnotationAPI.deleteUserAnnotations(
@@ -368,6 +368,11 @@ class BookmarkTable extends React.PureComponent {
         });
     }
 
+    onGotoItemDetails = (item) => {
+        const resource = {index: item.index, resourceId: item.resourceId};
+        FlexRouter.gotoItemDetails('tool/default-item-details', resource, null);
+    };
+
     selectAllChange(selectedItems, e) {
         let newSelection = this.state.selection.slice(); //copy the array
         selectedItems.forEach(item => {
@@ -377,7 +382,7 @@ class BookmarkTable extends React.PureComponent {
             } else if (e.target.checked && found) { // remove the selected item
                 newSelection.splice(found, 1);
             }
-        })
+        });
         this.setState({
             selection: newSelection
         });
@@ -387,10 +392,10 @@ class BookmarkTable extends React.PureComponent {
         let newSelection = this.state.selection.slice(); //copy the array
         const index = newSelection.findIndex(selected => {
             return selected.resourceId === item.resourceId
-        })
-        if(index == -1 && select) { // add it to the selection
+        });
+        if(index === -1 && select) { // add it to the selection
             newSelection.push(item);
-        } else if (!select && index != -1) { // remove the selected item
+        } else if (!select && index !== -1) { // remove the selected item
             newSelection.splice(index, 1);
         }
         this.setState({
@@ -512,7 +517,8 @@ class BookmarkTable extends React.PureComponent {
                             bookmark={bookmark}
                             onDelete={this.deleteBookmark}
                             onExport={exportDataAsJSON}
-                            onView={this.viewBookmark}
+                            onPreview={this.viewBookmark}
+                            onGotoItemDetails={this.onGotoItemDetails}
                             selected={
                                 this.state.selection.find(
                                     item => item.resourceId === bookmark.resourceId
@@ -577,6 +583,8 @@ BookmarkTable.propTypes = {
     user: PropTypes.object.isRequired,
     project: PropTypes.object.isRequired,
     loadBookmarkCount: PropTypes.func.isRequired,
+    onGotoItemDetails: PropTypes.func.isRequired,
+    viewBookmark: PropTypes.func.isRequired
 };
 
 export default BookmarkTable;
