@@ -75,7 +75,7 @@ class CollectionBar extends React.PureComponent {
 				className="btn btn-secondary"
 				onClick={this.resetSearch}
 			>
-				Reset search
+				Clear search
 			</button>
 		) : null;
 

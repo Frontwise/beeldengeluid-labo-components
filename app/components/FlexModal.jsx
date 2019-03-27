@@ -59,7 +59,7 @@ class FlexModal extends React.Component {
 				<div className={classNames.join(' ')} style={{'float' : this.props.float ? this.props.float : 'none'}}>
 					<div className="modal-content">
 						<div className="modal-header">
-							<button type="button" className="close" onClick={this.close.bind(this, true)}>x</button>
+							<button type="button" className="close" onClick={this.close.bind(this, true)}/>
 							<h4 className="modal-title">{this.props.title}</h4>
 						</div>
 						<div className="modal-body">
