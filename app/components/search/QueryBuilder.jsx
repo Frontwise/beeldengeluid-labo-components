@@ -386,7 +386,7 @@ class QueryBuilder extends React.Component {
     renderQueryResultHits = totalHits => {
     	return (
     		<span className={IDUtil.cssClassName('total-count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
-				Results:
+				Results
 				<span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>
 					{ComponentUtil.formatNumber(totalHits)}
 				</span>
