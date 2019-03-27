@@ -92,7 +92,29 @@ class ProjectEditView extends React.PureComponent {
 
 ProjectEditView.propTypes = {
     api: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.shape({
+        id : PropTypes.string.isRequired,
+        name : PropTypes.string.isRequired,
+    }).isRequired,
+    clientId : PropTypes.string,
+    params : PropTypes.object,
+    recipe : PropTypes.shape({
+        id : PropTypes.string.isRequired,
+        ingredients : PropTypes.object.isRequired
+    }),
+
+    //React Router props
+    history : PropTypes.object.isRequired,
+    match : PropTypes.shape({
+        isExact : PropTypes.bool,
+        path : PropTypes.string.isRequired,
+        params : PropTypes.shape({
+            id : PropTypes.string.isRequired
+        }).isRequired,
+        url : PropTypes.string
+    }).isRequired,
+    location : PropTypes.object, //not used, but available
+    staticContext : PropTypes.object //not used, but available
 };
 
 export default ProjectEditView;
