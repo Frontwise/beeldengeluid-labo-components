@@ -38,6 +38,7 @@ class WorkspaceProjects extends Component {
         )
     }
 
+    //FIXME there is an overload of properties being passed to the components, many are not used in individual components (e.g. see ProjectDetailsView.PropTypes)
     render() {
         return(
             <Router>

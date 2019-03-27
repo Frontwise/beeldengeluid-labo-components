@@ -20,7 +20,6 @@ class BookmarkRow extends React.PureComponent {
 
         // bind functions
         this.onDelete = this.onDelete.bind(this);
-        this.onView = this.onView.bind(this);
         this.toggleSubMediaObject = this.toggleSubMediaObject.bind(this);
         this.toggleSubSegment = this.toggleSubSegment.bind(this);
     }
@@ -29,16 +28,25 @@ class BookmarkRow extends React.PureComponent {
         this.props.onDelete([this.props.bookmark.resourceId]);
     }
 
-    onView() {
+    onPreview = () => {
         if(this.props.bookmark.object) {
-            this.props.onView({
+            this.props.onPreview({
                 resourceId : this.props.bookmark.object.id,
                 collectionId : this.props.bookmark.object.dataset,
                 type : this.props.bookmark.object.type,
                 title : this.props.bookmark.object.title
             });
         }
-    }
+    };
+
+    onGotoItemDetails = () => {
+        if(this.props.bookmark.object) {
+            this.props.onGotoItemDetails({
+                resourceId : this.props.bookmark.object.id,
+                index : this.props.bookmark.object.dataset
+            });
+        }
+    };
 
     onSelectChange(e) {
         this.props.onSelect(this.props.bookmark, e.target.checked);
@@ -175,7 +183,7 @@ class BookmarkRow extends React.PureComponent {
                     <div className="sublevel">
                         {this.renderSubMediaObject(bookmark, annotations, true)}
                     </div>
-                )
+                );
             break;
             case this.props.showSubSegment:
                 foldableBlock = (
@@ -205,13 +213,13 @@ class BookmarkRow extends React.PureComponent {
 		);
 		if(bookmark.object.mediaTypes) {
 			mediaIcon = bookmark.object.mediaTypes.map((mt) => {
-				if(mt == 'video') {
+				if(mt === 'video') {
 					return (<span className={IconUtil.getMimeTypeIcon('video', true, true, false)} title="Video content"></span>);
-				} else if(mt == 'audio') {
+				} else if(mt === 'audio') {
 					return (<span className={IconUtil.getMimeTypeIcon('audio', true, true, false)} title="Audio content"></span>);
-				} else if(mt == 'image') {
+				} else if(mt === 'image') {
 					return (<span className={IconUtil.getMimeTypeIcon('image', true, true, false)} title="Image content"></span>);
-				} else if(mt == 'text') {
+				} else if(mt === 'text') {
 					return (<span className={IconUtil.getMimeTypeIcon('text', true, true, false)} title="Textual content"></span>);
  				}
 			});
@@ -237,14 +245,14 @@ class BookmarkRow extends React.PureComponent {
                     </div>
 
                     <div className="image"
-                        title={"Resource ID: " + bookmark.resourceId} onClick={this.onView}
+                        title={"Resource ID: " + bookmark.resourceId} onClick={this.onPreview}
                         style={{backgroundImage: 'url(' + bookmark.object.placeholderImage + ')'}}
                     />
 
                     <ul className="info">
                         <li className="primary content-title">
                             <h4 className="label">Title</h4>
-                            <p onClick={this.onView} title={"Resource ID: " + bookmark.resourceId}>
+                            <p onClick={this.onPreview} title={"Resource ID: " + bookmark.resourceId}>
                                 {bookmark.object.error ? 'error: source catalogue not available' : bookmark.object.title}
                             </p>
                         </li>
@@ -272,7 +280,10 @@ class BookmarkRow extends React.PureComponent {
                     </ul>
 
                     <div className="actions">
-                        <div className="btn primary" onClick={this.onView}>
+                        <div className="btn primary" onClick={this.onPreview} title="Quick view (shows the item in a pop-up)">
+                            <span className="fa fa-file-text"></span>
+                        </div>
+                        <div className="btn primary" onClick={this.onGotoItemDetails} title="View item (go to resource viewer)">
                             View
                         </div>
 
@@ -320,7 +331,8 @@ BookmarkRow.propTypes = {
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
-    onView: PropTypes.func.isRequired,
+    onPreview: PropTypes.func.isRequired,
+    onGotoItemDetails: PropTypes.func.isRequired,
     selected: PropTypes.bool,
     annotationTypeFilter: PropTypes.string
 };

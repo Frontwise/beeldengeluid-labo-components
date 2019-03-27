@@ -15,7 +15,6 @@ class ProjectForm extends React.PureComponent {
         const project = Object.assign({}, this.props.project);
         project.name = this.name.value;
         project.description = this.description.value;
-        project.isPrivate = this.isPrivate.checked;
         this.save(project);
 
         return false;
@@ -55,7 +54,7 @@ class ProjectForm extends React.PureComponent {
                         <input
                             type="text"
                             name="name"
-                            required="true"
+                            required={true}
                             className="project-modal-right"
                             defaultValue={this.props.project.name}
                             ref={elem => (this.name = elem)}/>
@@ -68,19 +67,7 @@ class ProjectForm extends React.PureComponent {
                         defaultValue={this.props.project.description}
                         ref={elem => (this.description = elem)}/>
                     </span>
-                    <span className="bg__new-project-wrapper">
-                    <input
-                        type="checkbox"
-                        name="private"
-                        className="project-modal-left"
-                        defaultChecked={this.props.project.isPrivate}
-                        id="project-private"
-                        ref={elem => (this.isPrivate = elem)}/>
 
-                    <label htmlFor="project-private" className="project-modal-right">
-                        This is a private project that is only visible to you and your collaborators
-                    </label>
-                    </span>
                 </div>
 
                 <div className="actions">
@@ -100,8 +87,7 @@ ProjectForm.PropTypes = {
     cancelLink: PropTypes.string.isRequired,
     project: PropTypes.shape({
         name: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        private: PropTypes.bool.isRequired
+        description: PropTypes.string.isRequired
     }).isRequired,
     projectDidSave: PropTypes.func.isRequired,
     user: PropTypes.shape({

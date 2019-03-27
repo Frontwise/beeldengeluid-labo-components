@@ -27,7 +27,6 @@ class ProjectTable extends React.PureComponent {
                 sortable: true
             },
             { field: 'owner', content: 'Owner', sortable: true },
-            { field: 'isPrivate', content: 'Private', sortable: true },
             { field: 'access', content: 'Access', sortable: true },
             { field: 'created', content: 'Created', sortable: true },
             { field: '', content: '', sortable: false }
@@ -205,15 +204,6 @@ class ProjectTable extends React.PureComponent {
         });
     }
 
-    //triggered upon using the "show only my collections" checkbox
-    currentUserChange(e) {
-        this.setState({
-            filter: Object.assign({}, this.state.filter, {
-                currentUser: e.target.checked
-            })
-        });
-    }
-
     deleteProject(project) {
         if (window.confirm('Are you sure you want to delete project ' + project.name)) {
             this.props.api.delete(this.props.user.id, project.id, status => {
@@ -322,9 +312,6 @@ class ProjectTable extends React.PureComponent {
             )
         },
         {
-            content: (project.isPrivate ? "✔" : null)
-        },
-        {
             props: { className: 'access smaller' },
             content: project.getAccess(currentUserId)
         },
@@ -366,14 +353,6 @@ class ProjectTable extends React.PureComponent {
                                 placeholder="Search User Projects"
                                 value={this.state.filter.keywords}
                                 onChange={this.keywordsChange.bind(this)}/>
-                        </div>
-                        <div className="filter-container">
-                            <input
-                                type="checkbox"
-                                id="current-user"
-                                checked={this.state.filter.currentUser}
-                                onChange={this.currentUserChange.bind(this)}/>
-                            <label htmlFor="current-user">Show only my projects</label>
                         </div>
                     </div>
                 </div>
