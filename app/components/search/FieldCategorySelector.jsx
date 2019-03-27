@@ -120,14 +120,19 @@ class FieldCategorySelector extends React.Component {
             ? this.props.collectionConfig.getMetadataFieldCategories()
             : null;
 
-		if(this.state.showModal) {
+        if (this.state.showModal) {
+            const data = this.props.collectionConfig.getCollectionStats().collection_statistics.document_types[0].fields.text;
+            const dataFormatted = data.map(field => (
+                {'value': field, 'prettyName': this.props.collectionConfig.toPrettyFieldName(field)})
+            );
 			fieldSelectionModal = (
 				<FlexModal
+                    size="large"
 					elementId="fields__modal"
 					stateVariable="showModal"
 					owner={this}
 					title="Create a new cluster of metadata fields to search through">
-					<FieldCategoryCreator collectionConfig={this.props.collectionConfig}
+					<FieldCategoryCreator data={dataFormatted}
 						onOutput={this.onComponentOutput.bind(this)}/>
 				</FlexModal>
 			)
@@ -152,7 +157,7 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="All metadata fields"
+						placeholder="Search in: all metadata fields"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
@@ -178,7 +183,7 @@ export default FieldCategorySelector;
 
 export const ListOption = ({ option, collectionConfig }) => (
 	<div title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
-		{option.label}
+		Search in: {option.label}
 	</div>
 );
 
