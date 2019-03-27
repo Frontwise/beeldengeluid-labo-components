@@ -280,10 +280,10 @@ class BookmarkRow extends React.PureComponent {
                     </ul>
 
                     <div className="actions">
-                        <div className="btn primary" onClick={this.onPreview}>
-                            Preview
+                        <div className="btn primary" onClick={this.onPreview} title="Quick view (shows the item in a pop-up)">
+                            <span className="fa fa-file-text"></span>
                         </div>
-                        <div className="btn primary" onClick={this.onGotoItemDetails}>
+                        <div className="btn primary" onClick={this.onGotoItemDetails} title="View item (go to resource viewer)">
                             View
                         </div>
 
