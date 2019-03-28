@@ -1,16 +1,32 @@
 .bg__search-hit {
-	border-bottom: 1px solid $border-color;
+	border-bottom: 1px solid $clGreyTint;
 	margin: 0 0 0 5px;
-	padding: 10px 40px 10px 0;
+	padding: 0px;
+	padding-right: 70px;
 	position: relative;
+	display:block;
+	min-height: 50px;
 
 	.bg__sh__quickview {
-		float: left;
-		margin-right: $default-margin;
+		position: absolute;
+		bottom: 10px;
+		right: 10px;
+		button {
+			transition: background-color;
+			height: 35px;
+			width: 35px;
+			border: 1px solid $clGreyTint;
+			background-color: $clGrey;
+			background-color: darken($clGrey, 4%);
+		}
 	}
 
 	.bg__sh__select {
 		@include checkbox();
+		margin-top: 25px;
+		input[type="checkbox"] + label span {
+			border-color: darken($clGreyTint, 8%);
+		}
 	}
 
 	.bg__sh__bookmarked {
@@ -20,29 +36,11 @@
 		text-align: center;
 		width: 35px;
 		height: 35px;
-		position:absolute;
-		top: 0;
+		position: absolute;
 		right: 0;
-		i{
+		top: 0;
+		i {
 			line-height: 35px;
-		}
-	}
-
-	.bg__search-snippet {
-		margin: 5px;
-		.bg__ss__fragment {
-			color: dimgray;
-			font-style: italic;
-			margin-top: 5px;
-		}
-
-		.highLightText {
-			color: $highlight-color-snippets;
-			font-weight: bold;
-			font-size: 97%;
-		}
-		.snippet_description:hover {
-			cursor: pointer;
 		}
 	}
 
@@ -53,25 +51,42 @@
 	}
 
 	&.visitedItem {
-		color: $visited-item;
-		.highLightText {
-			color: #f79e8e;
-		}
+		opacity: 0.9;
 	}
 
-	&.bookmarked{
+	.bg__sh__visited-icon{
+		background-image: $iconTimeUrl;
+		position: absolute;
+		right: 50px;
+		bottom: 10px;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 15px;
+		width: 35px;
+		height: 35px;
+	}
+
+	&.bookmarked {
 		border-left: 3px solid $clSecondary;
 		background-color: mix(white, $clSecondary, 90%);
 		margin-left: 2px;
-		.bg__sh__select input[type=checkbox]+label span{
+		.bg__sh__select input[type="checkbox"] + label span {
 			border-color: mix(white, $clSecondary, 60%);
 			background-color: mix(white, $clSecondary, 95%);
 		}
+		.bg__sh__quickview {
+			button {
+				background-color: $clGreyTint;
+				&:hover {
+					background-color: darken($clGreyTint, 4%);
+				}
+			}
+		}
 	}
 
-	.__react_component_tooltip{
+	.__react_component_tooltip {
 		text-align: left;
-		ul{
+		ul {
 			padding-left: 20px;
 		}
 	}

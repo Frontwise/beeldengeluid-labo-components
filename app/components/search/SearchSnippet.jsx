@@ -20,15 +20,11 @@ class SearchSnippet extends React.Component {
 		if (!posterURL) return null;
 
 		return (
-			<div className={IDUtil.cssClassName(
-							"poster",
-							this.CLASS_PREFIX
-						)}>
+			<div className={IDUtil.cssClassName("poster", this.CLASS_PREFIX)}>
 				<img
 					className="media-object"
 					src="/static/images/placeholder.2b77091b.svg"
 					data-src={posterURL}
-					style={{ width: "100%" }}
 					alt="Could not find image"
 				/>
 			</div>
@@ -149,6 +145,10 @@ class SearchSnippet extends React.Component {
 		);
 	};
 
+	trimMsgEnd = (s)=>{
+		return s.replace(new RegExp(/\ \|$/,"g"), "");
+	}
+
 	//possible default fields: posterURL, title, description, tags
 	render() {
 		const poster = this.renderPosterImage(this.props.data.posterURL);
@@ -167,25 +167,27 @@ class SearchSnippet extends React.Component {
 			);
 		}
 
-		const classNames = ["media", IDUtil.cssClassName("search-snippet")];
+		const classNames = [IDUtil.cssClassName("search-snippet")];
 		const title = this.props.data.title ? this.props.data.title + " " : "";
-		const date = this.props.data.date
-			? "(" + this.props.data.date + ")"
-			: "";
-		const subHeading =
-			date !== ""
-				? date + " | " + this.props.data.highlightMsg
-				: this.props.data.highlightMsg;
+		const date = this.props.data.date ? this.props.data.date : "";
+		const subHeading = (
+			<div>
+				{date && <i>{date}</i>}
+				<span>{this.trimMsgEnd(this.props.data.highlightMsg)}</span>
+			</div>
+		);
 
 		return (
-			<div className={classNames.join(" ")}>
-
+			<div className={classNames.join(" ")} onClick={this.props.onClick}>
 				{poster}
 
-				<div className={IDUtil.cssClassName(
-							"media-body",
-							this.CLASS_PREFIX
-						)}>
+				<div
+					className={IDUtil.cssClassName(
+						"media-body",
+						this.CLASS_PREFIX
+					)}
+				>
+					{/* Title */}
 					<h3
 						className={IDUtil.cssClassName(
 							"title",
@@ -203,13 +205,8 @@ class SearchSnippet extends React.Component {
 						/>
 					</h3>
 
-					<span className="icons-snippet">
-						{subHeading}
-						&nbsp;{mediaTypes}&nbsp;{accessIcon}&nbsp;{fragmentIcon}
-					</span>
-					<br />
-
-					<span
+					{/* Text Snippet */}
+					<div
 						className={IDUtil.cssClassName(
 							"snippet-description",
 							this.CLASS_PREFIX
@@ -225,7 +222,29 @@ class SearchSnippet extends React.Component {
 							)
 						)}
 					/>
+
 					{fragmentSnippet}
+
+					{/* Info heading/icons */}
+					<div
+						className={IDUtil.cssClassName(
+							"info",
+							this.CLASS_PREFIX
+						)}
+					>
+						{subHeading}
+
+						{/* Icons */}
+						<div className={IDUtil.cssClassName(
+							"icons",
+							this.CLASS_PREFIX
+						)}>
+							{mediaTypes}
+							{accessIcon}
+							{fragmentIcon}
+						</div>
+					</div>
+
 					{tags}
 				</div>
 			</div>
@@ -234,6 +253,7 @@ class SearchSnippet extends React.Component {
 }
 
 SearchSnippet.PropTypes = {
+	onClick: PropTypes.func.isRequired, // click callback
 	searchTerm: PropTypes.string.isRequired, //the search term that was used to find this hit
 	data: PropTypes.shape({
 		//all the data required to draw the information of this result snippet (see getResultSnippetData() in CollectionConfig)

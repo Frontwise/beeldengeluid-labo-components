@@ -78,6 +78,8 @@ class SingleSearchRecipe extends React.Component {
 		for (let i=0; i<imgDefer.length; i++) {
 			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
 				imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-src'));
+				// prevent multiple conversions
+				imgDefer[i].removeAttribute('data-src');
 			}
 		}
 	}

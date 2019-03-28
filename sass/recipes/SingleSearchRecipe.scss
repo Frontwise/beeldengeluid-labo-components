@@ -80,12 +80,12 @@
 		.btn-default.active {
 			background-color: $clGrey;
 		}
+	}
 
-		.bg__paging {
-			.btn-default.active {
-				background-color: $clPrimary;
-				color: white;
-			}
+	.bg__paging {
+		.btn-default.active {
+			background-color: $clPrimary;
+			color: white;
 		}
 	}
 
@@ -108,7 +108,7 @@
 			color: white;
 			font-family: $fontHeading;
 			font-weight: bold;
-			background-color: $clSecondary;
+			background-color: $clPrimary;
 			span {
 				margin-left: 4px;
 				margin-right: 4px;
