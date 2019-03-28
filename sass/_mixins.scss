@@ -57,7 +57,7 @@
 		vertical-align: middle;
 		width: 20px;
 		height: 20px;
-		border: 1px solid #ccc;
+		border: 1px solid $clGreyTint;
 		border-radius: 2px;
 	}
 	input[type="checkbox"] + label span::before {
