@@ -39,14 +39,14 @@ class CollectionBar extends React.PureComponent {
 	render() {
 		const collectionConfig = this.props.collectionConfig;
 
-		const collectionButton = (
+		const collectionButton = !collectionConfig ? (
 			<button
 				className="btn btn-primary"
 				onClick={this.props.selectCollection}
 			>
 				{collectionConfig ? "Change collection" : "Select collection"}
 			</button>
-		);
+		) : null;
 
 		const infoButton =
 			collectionConfig && collectionConfig.collectionInfo && collectionConfig.collectionInfo.ckanUrl ? (
@@ -59,7 +59,7 @@ class CollectionBar extends React.PureComponent {
 			) : null;
 
 		const title = collectionConfig ? (
-				<h2>{collectionConfig.getCollectionTitle()}</h2>
+				<h2 onClick={this.props.selectCollection}>{collectionConfig.getCollectionTitle()}</h2>
 			) : null;
 
 		const hits = collectionConfig ? (
@@ -76,10 +76,20 @@ class CollectionBar extends React.PureComponent {
 
 		const resetButton = collectionConfig ? (
 			<button
-				className="btn btn-secondary"
+				className="btn btn-default"
 				onClick={this.resetSearch}
 			>
 				Clear search
+			</button>
+		) : null;
+
+		const saveButton = collectionConfig ? (
+			<button
+				className="btn btn-secondary"
+				onClick={this.resetSearch}
+				title="Save the query to the active project"
+			>
+				Save Query
 			</button>
 		) : null;
 
@@ -116,7 +126,7 @@ class CollectionBar extends React.PureComponent {
 							"buttons",
 							this.CLASS_PREFIX
 						)}>
-							{collectionButton}
+							{saveButton}
 							{resetButton}
 						</div>
 					</div>
