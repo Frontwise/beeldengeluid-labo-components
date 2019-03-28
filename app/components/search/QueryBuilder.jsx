@@ -491,9 +491,9 @@ class QueryBuilder extends React.Component {
                     	Histogram
                     </button>
                     <QuerySingleLineChart
+                    	query={query}
                         data={dateAggregation}
-                        comparisonId={searchId}
-						query={query}
+						searchId={searchId}
 						collectionConfig={collectionConfig}
 					/>
                 </div>
@@ -508,14 +508,11 @@ class QueryBuilder extends React.Component {
                     	Line chart
                     </button>
                     <Histogram
-                        queryId={query.id}
                         query={query}
-                        comparisonId={searchId}
-                        dateRange={query.dateRange}
                         data={dateAggregation}
-                        title={collectionConfig.toPrettyFieldName(query.dateRange.field)}
                         searchId={searchId}
                         collectionConfig={collectionConfig}
+                        title={collectionConfig.toPrettyFieldName(query.dateRange.field)}
                     />
                 </div>
             );

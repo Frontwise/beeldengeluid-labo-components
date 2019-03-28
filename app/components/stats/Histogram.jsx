@@ -3,21 +3,11 @@ import ComponentUtil from '../../util/ComponentUtil'
 import { Label, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Legend, Bar } from 'recharts';
 import SearchAPI from "../../api/SearchAPI";
 import TimeUtil from "../../util/TimeUtil";
-/*
-See:
-	- http://rawgraphs.io/
-	- https://bl.ocks.org/mbostock/3048450
-	- http://alignedleft.com/tutorials/d3/scales/
-	- https://github.com/d3/d3-scale/blob/master/README.md#time-scales
-	- http://www.d3noob.org/2012/12/setting-scales-domains-and-ranges-in.html
+import PropTypes from 'prop-types';
 
-	- https://github.com/d3/d3-selection/blob/master/README.md#selection_data
-	- https://bost.ocks.org/mike/join/
-	- http://recharts.org/#/en-US Recharts is the React-D3 component used to render graphs.
-*/
-
-
-//TODO add a bar for the dates that are out of range
+//TODO create stacked bar chart to indicate which part of the documents are out of range
+//TODO move same functions as in QuerySingleLineChart into something else
+//TODO add PropTypes
 class Histogram extends React.Component {
 
 	constructor(props) {
@@ -28,11 +18,6 @@ class Histogram extends React.Component {
             isSearching: false
         }
 	}
-
-	//only update if the search id is different or the data has changed (relative values)
-	// shouldComponentUpdate(nextProps, nextState) {
-	// 	return (nextProps.searchId !== this.props.searchId || nextState.viewMode !== this.state.viewMode);
-	// }
 
     calcDateInRange = aggregation => {
         let startMillis = null;
@@ -48,7 +33,7 @@ class Histogram extends React.Component {
         return true;
     };
 
-    toggleDisplayMode() {
+    toggleDisplayMode = () => {
         if (this.state.viewMode === 'relative') {
             this.setState({viewMode: 'absolute'});
         } else {
@@ -104,7 +89,7 @@ class Histogram extends React.Component {
                 dataPrettyfied = this.props.data.map((absData, i) => {
                     const point = {};
                     point["dataType"] = 'absolute';
-                    point["fill"] = this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
+                    point["fill"] = strokeColors[0]; //this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
                     point["date"] = TimeUtil.getYearFromDate(absData.date_millis);
                     point["count"] = absData ? absData.doc_count : 0;
                     return point;
@@ -114,7 +99,7 @@ class Histogram extends React.Component {
                     const relData = this.state.relativeData.find(x => x.key === absData.key);
                     const point = {};
                     point["dataType"] = 'relative';
-                    point["fill"] = this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
+                    point["fill"] = strokeColors[0]; //this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
                     point["date"] = TimeUtil.getYearFromDate(absData.date_millis);
                     point["count"] = relData ? this.calcRelativePercentage(absData.doc_count, relData.doc_count) : 0; //FIXME this should never happen, but still...
                     return point;
@@ -127,14 +112,14 @@ class Histogram extends React.Component {
         if(dataPrettyfied) {
             const hitsOutsideRange = this.props.data.filter(aggr => !this.calcDateInRange(aggr)).reduce((acc, cur) => acc += cur.doc_count, 0);
             const totalHits = this.props.data.reduce((acc, cur) => acc += cur.doc_count, 0);
-            let legendTitle = 'Timeline chart of search results ';
+            let legendTitle = 'Histogram of query results ';
             if(hitsOutsideRange > 0) {
                 legendTitle += '(' + ComponentUtil.formatNumber(hitsOutsideRange) + " / " + ComponentUtil.formatNumber(totalHits) + ' hits out of range)';
             }
             return (
             	<div className={IDUtil.cssClassName('histogram')}>
     				<span className="ms_toggle_btn" >
-                        <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.toggleDisplayMode.bind(this)}/>
+                        <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.toggleDisplayMode}/>
                         <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
                     </span>
     				<ResponsiveContainer width="100%" minHeight="360px" height="40%">
@@ -196,4 +181,11 @@ class CustomTooltip extends React.Component{
         return null;
     }
 }
+
+CustomTooltip.propTypes = {
+    dataType: PropTypes.string,
+    payload: PropTypes.array,
+    label: PropTypes.number
+};
+
 export default Histogram;
