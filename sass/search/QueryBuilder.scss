@@ -115,6 +115,13 @@
 		font-family: $fontHeading;
 	}
 
+	.bg__qb__no-results-message{
+		margin: 20px;
+		width: 70%;
+		box-sizing: border-box;
+		margin-left: calc(25% + 20px);
+	}
+
 	.bg__qb__result-dates {
 		border-radius: 5px;
 		border: 1px solid $clGreyTint;

@@ -374,7 +374,7 @@ class QueryBuilder extends React.Component {
     // 		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
     // 		if(!currentDateAggregation) {
 				return (
-					<div className="alert alert-danger">
+					<div className={classNames("alert alert-danger",IDUtil.cssClassName('no-results-message', this.CLASS_PREFIX))}>
 						{MessageHelper.renderNoSearchResultsMessage(query, onClearSearch)}
 					</div>
 				)
@@ -682,7 +682,7 @@ class QueryBuilder extends React.Component {
 
             const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? this.renderQueryResultHits(this.state.totalHits) : null;
 
-			const aggregationBox = this.state.aggregations && this.state.searchId && this.state.totalHits > 0 ? this.renderAggregationList(
+			const aggregationBox = this.state.aggregations && this.state.searchId ? this.renderAggregationList(
 				this.state.searchId,
 				this.state.query,
 				this.state.aggregations,
