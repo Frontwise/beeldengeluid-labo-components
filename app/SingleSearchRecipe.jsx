@@ -1106,6 +1106,7 @@ class SingleSearchRecipe extends React.Component {
         //if the search API returned a paging out of bounds error, return a helpful message for the user
         const pagingOutOfBounds = this.state.isPagingOutOfBounds ? (
             <div className="col-md-9">
+            	<br/>
                 <div className="alert alert-danger">
                     {MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
                 </div>
