@@ -82,8 +82,8 @@ class FieldCategoryCreator extends React.PureComponent {
         let errMsgName = null;
         let errMsgFields = null;
         if (this.state.validationError) {
-            errMsgName = this.clusterName.current.value.length === 0 ? this.errorMsg('Cluster name is required!') : null;
-            errMsgFields = this.state.selectedItems.length === 0 ? this.errorMsg('No fields selected!') : null;
+            errMsgName = this.clusterName.current.value.length === 0 ? this.errorMsg('Please provide a name') : null;
+            errMsgFields = this.state.selectedItems.length === 0 ? this.errorMsg('Please select a number of fields') : null;
         }
 
         let selected = null;
