@@ -24,148 +24,144 @@ class Histogram extends React.Component {
 		super(props);
 		this.state = {
             viewMode: 'absolute', // Sets default view mode to absolute.
-            query: this.props.query,
-            data: this.props.data || null,
+            relativeData : null, //loaded for the first time after switching to 'relative'
             isSearching: false
         }
 	}
 
 	//only update if the search id is different or the data has changed (relative values)
-	shouldComponentUpdate(nextProps, nextState) {
-		return (nextProps.searchId !== this.props.searchId || nextState.data !== this.props.data);
-	}
+	// shouldComponentUpdate(nextProps, nextState) {
+	// 	return (nextProps.searchId !== this.props.searchId || nextState.viewMode !== this.state.viewMode);
+	// }
 
-	//this also checks if the retrieved dates are outside of the user's range selection
-	getGraphData() {
-		let startMillis = null;
-		let endMillis = null;
-		if(this.props.query.dateRange) {
-			startMillis = this.props.query.dateRange.start
-			endMillis = this.props.query.dateRange.end
-		}
-		return this.props.data.map(aggr => {
-			let inRange = true;
-			if ((startMillis != null && aggr.date_millis < startMillis) ||
-				endMillis != null && aggr.date_millis > endMillis) {
-				inRange = false;
-			}
-			return {
-				year : new Date(aggr.date_millis).getFullYear(),
-				count : aggr.doc_count,
-				inRange : inRange
-			}
-		});
-	}
-    doSearch(query, updateUrl = false) {
-        this.setState(
-            {isSearching : true},
+    calcDateInRange = aggregation => {
+        let startMillis = null;
+        let endMillis = null;
+        if(this.props.query.dateRange) {
+            startMillis = this.props.query.dateRange.start
+            endMillis = this.props.query.dateRange.end
+        }
+        if ((startMillis != null && aggregation.date_millis < startMillis) ||
+            endMillis != null && aggregation.date_millis > endMillis) {
+            return false;
+        }
+        return true;
+    };
+
+    toggleDisplayMode() {
+        if (this.state.viewMode === 'relative') {
+            this.setState({viewMode: 'absolute'});
+        } else {
+            if(this.state.relativeData === null) {
+                this.fetchRelativeData({
+                    ...this.props.query,
+                    term: '',
+                    selectedFacets: {},
+                    dateRange: {
+                        ...this.props.query.dateRange,
+                        end:null,
+                        start:null
+                    }
+                });
+            } else {
+                this.setState({viewMode: 'relative'});
+            }
+        }
+    }
+
+    fetchRelativeData(query, updateUrl = false) {
+        this.setState({
+            isSearching : true
+        }, () => {
             SearchAPI.search(
                 query,
                 this.props.collectionConfig,
-                this.onOutput.bind(this),
+                this.onRelativeDataFetched,
                 updateUrl
-            )
-        )
-    }
-    commonData(relative, absolute) {
-        return  absolute.map((x,y) => {
-            return relative.find(function(element) {
-                return element.key === x.key;
-            });
+            );
         });
     }
-    onOutput(data) {
-        if (data && !data.error) {
-            this.setState({
-                isSearching: false,
-                data: this.commonData(data.aggregations[data.query.dateRange.field], this.state.data)
+
+    onRelativeDataFetched = data => {
+        if (data && data.aggregations && !data.error) {
+            const totalDateRangeCounts = data.aggregations[data.query.dateRange.field];
+            const commonData = totalDateRangeCounts.filter(aggr => {
+                return this.props.data.find(absAggr => absAggr.key === aggr.key) != null;
             });
+            this.setState({isSearching: false, relativeData: commonData, viewMode: 'relative'});
         }
-    }
-    getRelativeValues(){
-        if (this.state.viewMode === 'relative') {
-            this.setState({
-                    viewMode: 'absolute'
-                }
-            )
-        } else {
-            this.setState({
-                    viewMode: 'relative',
-                    query: {
-                        ...this.state.query,
-                        term: '',
-                        selectedFacets: {},
-                        dateRange: {
-                            ...this.state.query.dateRange,
-                            end:null,
-                            start:null
-                        }
-                    }
-                }, () => {
-                    this.doSearch(this.state.query, false)
-                }
-            )
-        }
-    }
-    //TODO better ID!! (include some unique part based on the query)
+    };
+
+    calcRelativePercentage = (absCount, totalCount) => {
+        return absCount !== 0 && totalCount !== 0 ? ((absCount / totalCount) * 100) : 0;
+    };
+
     render() {
-        const strokeColors = ['#8884d8', 'green'];
-        const data = this.getGraphData();
+        const strokeColors = ['#468dcb', 'crimson'];
         let dataPrettyfied = null;
         if(this.props.data) {
             if(this.state.viewMode === 'absolute') {
-                dataPrettyfied = this.props.data.map((dataRow, i) => {
+                dataPrettyfied = this.props.data.map((absData, i) => {
                     const point = {};
                     point["dataType"] = 'absolute';
-                    point["strokeColor"] = strokeColors[0];
-                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = dataRow ? dataRow.doc_count : 0; //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
+                    point["fill"] = this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
+                    point["date"] = TimeUtil.getYearFromDate(absData.date_millis);
+                    point["count"] = absData ? absData.doc_count : 0;
+                    return point;
+                });
+            } else if(this.state.relativeData) {
+                dataPrettyfied = this.props.data.map((absData, i) => {
+                    const relData = this.state.relativeData.find(x => x.key === absData.key);
+                    const point = {};
+                    point["dataType"] = 'relative';
+                    point["fill"] = this.calcDateInRange(absData) ? strokeColors[0] : strokeColors[1];
+                    point["date"] = TimeUtil.getYearFromDate(absData.date_millis);
+                    point["count"] = relData ? this.calcRelativePercentage(absData.doc_count, relData.doc_count) : 0; //FIXME this should never happen, but still...
                     return point;
                 });
             } else {
-                dataPrettyfied = this.props.data.map((dataRow, i) => {
-                    let count = 0;
-                    if(dataRow && this.state.data[i]) { //FIXME somehow the dataRow is empty sometimes... (when switching from absolute -> relative)
-                        count = dataRow.doc_count && this.state.data[i].doc_count !== 0
-                        ? ((dataRow.doc_count / this.state.data[i].doc_count) * 100)
-                        : 0;
-                    }
-                    const point = {};
-                    point["dataType"] = 'relative';
-                    point["strokeColor"] = strokeColors[1];
-                    point["date"] = TimeUtil.getYearFromDate(dataRow.date_millis);
-                    point["count"] = count;
-                    return point;
-                });
+                console.error('this should never happen')
             }
         }
 
-        const totalHitsPerQuery = data.reduce((acc, cur) => acc += cur.count, 0);
-        const graphTitle = "Timeline chart of query results (" + ComponentUtil.formatNumber(totalHitsPerQuery) + ")";
-        return (
-        	<div className={IDUtil.cssClassName('histogram')}>
-				<span className="ms_toggle_btn" >
-                    <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.getRelativeValues.bind(this)}/>
-                    <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
-                </span>
-				<ResponsiveContainer width="100%" minHeight="360px" height="40%">
-					<BarChart width={830} height={250} data={dataPrettyfied} barCategoryGap="1%">
-                        <Legend verticalAlign="top" height={36}/>
-						<CartesianGrid strokeDasharray="1 6"/>
-						<XAxis dataKey="date" height={100}>
-                        	<Label value={this.props.title} offset={0} position="outside"
-								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
-						</XAxis>
-						<YAxis tickFormatter={ComponentUtil.formatNumber} width={100} >
-                            <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
-                                   style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
-						</YAxis>
-						<Tooltip content={<CustomTooltip/>}/>
-						<Bar dataKey="count" fill="#3173ad" name={graphTitle}/>
-					</BarChart>
-				</ResponsiveContainer>
-			</div>
-        )
+        if(dataPrettyfied) {
+            const hitsOutsideRange = this.props.data.filter(aggr => !this.calcDateInRange(aggr)).reduce((acc, cur) => acc += cur.doc_count, 0);
+            const totalHits = this.props.data.reduce((acc, cur) => acc += cur.doc_count, 0);
+            let legendTitle = 'Timeline chart of search results ';
+            if(hitsOutsideRange > 0) {
+                legendTitle += '(' + ComponentUtil.formatNumber(hitsOutsideRange) + " / " + ComponentUtil.formatNumber(totalHits) + ' hits out of range)';
+            }
+            return (
+            	<div className={IDUtil.cssClassName('histogram')}>
+    				<span className="ms_toggle_btn" >
+                        <input id="toggle-1" className="checkbox-toggle checkbox-toggle-round" type="checkbox" onClick={this.toggleDisplayMode.bind(this)}/>
+                        <label htmlFor="toggle-1" data-on="Relative" data-off="Absolute"/>
+                    </span>
+    				<ResponsiveContainer width="100%" minHeight="360px" height="40%">
+    					<BarChart width={830} height={250} data={dataPrettyfied} barCategoryGap="1%">
+                            <Legend verticalAlign="top" height={36}/>
+    						<CartesianGrid strokeDasharray="1 6"/>
+    						<XAxis dataKey="date" height={100}>
+                            	<Label value={this.props.title} offset={0} position="outside"
+    								   style={{fontSize: 1.4 + 'rem', fontWeight:'bold'}}/>
+    						</XAxis>
+    						<YAxis tickFormatter={ComponentUtil.formatNumber} width={100} >
+                                <Label value="Number of records" offset={10} position="insideBottomLeft" angle={-90}
+                                       style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
+    						</YAxis>
+    						<Tooltip content={<CustomTooltip/>}/>
+    						<Bar dataKey="count" fill="#468dcb" name={legendTitle}/>
+    					</BarChart>
+    				</ResponsiveContainer>
+    			</div>
+            )
+        } else {
+            return (
+                <div className={IDUtil.cssClassName('histogram')}>
+                    Loading data...
+                </div>
+            )
+        }
     }
 }
 
@@ -173,10 +169,10 @@ class CustomTooltip extends React.Component{
     render() {
         const {active} = this.props;
         if (active) {
-            const payload = this.props.payload,
-                label = payload[0].payload.date,
-                relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0,
-                dataType = payload[0].payload.dataType;
+            const payload = this.props.payload;
+            const label = payload[0].payload.date;
+            const relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0;
+            const dataType = payload[0].payload.dataType;
             if (dataType === 'relative') {
                 return (
                     <div className="ms__custom-tooltip">
