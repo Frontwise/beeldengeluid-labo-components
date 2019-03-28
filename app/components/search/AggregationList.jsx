@@ -179,12 +179,9 @@ class AggregationList extends React.Component {
         //will be ultimately returned containing a list of ui data per "desired aggregation"
         const uiData = [];
 
-        //first filter out the histogram aggregations: they are not supported in this list view
-        const desiredFacets = !this.props.desiredFacets ? [] : this.props.desiredFacets.filter(
-            aggr => aggr.type !== 'date_histogram'
-        );
+        const desiredFacets = this.props.desiredFacets ? this.props.desiredFacets : [];
 
-        //Check if all selected facets are in the desired aggragtion list, if not, add doc_count 0
+        //Check if all selected facets are in the desired aggregation list, if not, add doc_count 0
         Object.keys(this.props.selectedFacets).forEach(field => {
             this.props.selectedFacets[field].forEach(facetValue => {
                 const found = this.props.aggregations[field].find(aggr => aggr['key'] === facetValue);
@@ -196,6 +193,13 @@ class AggregationList extends React.Component {
 
         //loop through the desired facets, available in the state
         desiredFacets.forEach((da, index) => {
+            // skip the date_histogram types, as they shouldn't be converted to a list
+            // however, they should be included in this loop in order to keep the facet 
+            // index intact
+            if (da.type === 'date_histogram'){
+                return;
+            }
+
             //first check if the aggregation has anything in it
             const isEmptyAggr = !(this.props.aggregations[da.field] && this.props.aggregations[da.field].length > 0);
 
@@ -440,7 +444,6 @@ class AggregationList extends React.Component {
 
         const aggregationBlocks = []; //contains aggregations WITH results
         const selectedFacets = []; //holds the list of selected facets to be displayed at the top
-
         //loop through the non-empty "desired aggregations" (non-histogram only)
         uiData.filter(aggr => !aggr.empty).forEach(curAggr => {
 
