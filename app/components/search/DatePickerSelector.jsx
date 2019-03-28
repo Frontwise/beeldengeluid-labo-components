@@ -10,7 +10,7 @@ class DatePickerSelector extends React.Component {
 
     getStartDate() {
         if (this.props.dateRange) {
-            if (this.props.dateRange.start) {
+            if (this.props.dateRange.start !== null) {
                 return moment(this.props.dateRange.start);
             }
         }
@@ -19,7 +19,7 @@ class DatePickerSelector extends React.Component {
 
     getEndDate() {
         if (this.props.dateRange) {
-            if (this.props.dateRange.end) {
+            if (this.props.dateRange.end !== null) {
                 return moment(this.props.dateRange.end);
             }
         }

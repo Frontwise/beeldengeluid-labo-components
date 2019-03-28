@@ -6,24 +6,37 @@
 	padding: 5px 5px 5px 40px;
 	min-height: 40px;
 	margin-bottom: 20px;
-
-	.bg__scb__title {
-		font-size: 1.2em;
-		line-height: 30px;
-		display: inline-block;
-		margin: 0;
-		margin-top: 2px;
-	}
+	display: flex;
 
 	.bg__scb__active {
-		button {
-			float: right;
-			margin-left: 15px;
-			&.btn-secondary {
-				background-color: $clGrey;
-				color: black;
-				&:hover {
-					background-color: darken($clGrey, 4%);
+		display: flex;
+		justify-content: stretch;
+		width: 100%;
+		@media screen and (max-width: $break-small) {
+			flex-wrap: wrap;
+		}
+
+		.bg__scb__collection-info {
+			flex-grow: 1;
+			h2{
+				font-size: 1.2em;
+				line-height: 30px;
+				display: inline-block;
+				margin: 0;
+				margin-top: 2px;
+			}
+		}
+		.bg__scb__buttons{
+			flex-grow: 1;
+			button {
+				float: right;
+				margin-left: 15px;
+				&.btn-secondary {
+					background-color: $clGrey;
+					color: black;
+					&:hover {
+						background-color: darken($clGrey, 4%);
+					}
 				}
 			}
 		}

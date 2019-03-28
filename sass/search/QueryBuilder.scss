@@ -1,4 +1,6 @@
 .bg__query-builder {
+	clear:both;
+
 	.separator {
 		height: 1em;
 	}
@@ -7,10 +9,8 @@
 	}
 
 	.bg__qb__breadcrumbs {
-		padding: 10px;
+		padding: 0px 10px 10px 10px;
 		text-align: center;
-		margin-top: -30px;
-		border-top: 1px solid $clGreyTint;
 
 		.bg__qb__crumb {
 			display: inline-block;
@@ -22,10 +22,6 @@
 				}
 			}
 		}
-	}
-
-	.bg__qb__query-row {
-		display: flex;
 	}
 
 	.bg__qb__graph > button {
@@ -54,54 +50,53 @@
 		font-family: $fontHeading;
 	}
 
-	.bg__qb__total-count{
+	.bg__qb__total-count {
 		margin-left: 20px;
 		font-family: $fontHeading;
 		font-size: 16px;
-		font-weight: bold;
 		line-height: 20px;
 		margin-top: 5px;
 		display: inline-block;
-		.bg__qb__count{
+		.bg__qb__count {
 			background-color: $clPrimary;
 			color: white;
-			margin-top:0;
+			margin-top: 0;
 			vertical-align: middle;
+			margin-left: 10px;
 		}
 	}
 
-	.bg__qb__search-holder {
+	.bg__qb__query-row {
 		display: flex;
-		flex-grow: 0.6;
-		margin-right: 10px;
-		& > span {
-			cursor: pointer;
-			background-color: $clPrimary;
-			color: white;
-			border-radius: 0 5px 5px 0;
-			display: inline-block;
-			width: 50px;
-			height: 34px;
-			text-align: center;
-			line-height: 34px;
-			& > i,
+		justify-content: stretch;
+
+		.bg__qb__search-holder {
+			display: flex;
+			flex-grow: 1;
 			& > span {
+				cursor: pointer;
+				background-color: $clPrimary;
+				color: white;
+				border-radius: 0 5px 5px 0;
+				display: inline-block;
+				width: 50px;
+				height: 34px;
+				text-align: center;
 				line-height: 34px;
+				& > i,
+				& > span {
+					line-height: 34px;
+				}
 			}
 		}
-	}
 
-	.bg__qb__selector-holder {
-		flex-grow: 1;
-		display: flex;
-		margin-right: 10px;
-		.bg__qb__in-label {
-			margin-right: 10px;
-			line-height: 35px;
-		}
-
-		.bg__field-category-selector {
+		.bg__qb__selector-holder {
 			flex-grow: 1;
+			display: flex;
+			.bg__qb__in-label {
+				margin: 0 10px;
+				line-height: 35px;
+			}
 		}
 	}
 
@@ -116,6 +111,13 @@
 		line-height: 17px;
 		vertical-align: top;
 		font-family: $fontHeading;
+	}
+
+	.bg__qb__no-results-message{
+		margin: 20px;
+		width: 70%;
+		box-sizing: border-box;
+		margin-left: calc(25% + 20px);
 	}
 
 	.bg__qb__result-dates {
@@ -185,7 +187,9 @@
 		.bg__qb__result-dates-content {
 			background-color: mix($clGreyTint, $clGrey, 50%);
 			.bg__qb__date-graph {
-				padding: 20px 10px 0 10px;
+				padding: 20px 10px 0px 10px;
+    			border-bottom: 1px solid $clGreyTint;
+    			margin-bottom: 10px;
 			}
 		}
 

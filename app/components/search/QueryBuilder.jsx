@@ -115,7 +115,7 @@ class QueryBuilder extends React.Component {
         this.doSearch(q, true);
 	}
 
-	clearSearch() {
+	clearSearch = () => {
 		this.onOutput(null);
 	}
 
@@ -230,21 +230,58 @@ class QueryBuilder extends React.Component {
 		this.doSearch(q, true);
 	}
 
-    totalDatesOutsideOfRange() {
-    	if(this.state.aggregations && this.state.query.dateRange &&
-    		this.state.aggregations[this.state.query.dateRange.field]) {
-    		const startMillis = this.state.query.dateRange.start;
-    		const endMillis = this.state.query.dateRange.end;
-    		return this.state.aggregations[this.state.query.dateRange.field].filter(x => {
-    			if(startMillis != null && x.date_millis < startMillis) {
-    				return true;
-    			}
-    			return endMillis !== null && x.date_millis > endMillis;
+	toggleTimeLine = () => {
+    	this.setState({showTimeLine:!this.state.showTimeLine});
+    };
 
-    		});
+	/* ----------------------------------------- DATA FUNCTIONS FOR THE RENDER ------------------------------ */
+
+	//FIXME not a pure function
+    calcTotalDatesOutsideOfRange = (currentDateAggregation, dateRange) => {
+    	if(!currentDateAggregation || dateRange) return 0;
+
+		const startMillis = dateRange.start;
+		const endMillis = dateRange.end;
+		const datesOutsideOfRange = currentDateAggregation.filter(x => {
+			if(startMillis != null && x.date_millis < startMillis) {
+				return true;
+			}
+			return endMillis !== null && x.date_millis > endMillis;
+
+		});
+
+		if(datesOutsideOfRange.length > 0) {
+            return datesOutsideOfRange.map((x => x.doc_count)).reduce(function(accumulator, currentValue) {
+    			return accumulator + currentValue;
+			});
+        }
+
+        return 0;
+    }
+
+    calcDateCounts = dateAggregation => {
+    	if(!dateAggregation || dateAggregation.length === 0) {
+			return -1;
+		}
+		return dateAggregation.map(
+			(x => x.doc_count)).reduce(function(accumulator, currentValue) {
+				return accumulator + currentValue;
+			}
+		);
+    };
+
+    getCurrentDateAggregation = (aggregations, dateRange) => {
+    	if(dateRange && dateRange.field !== 'null_option' && aggregations[dateRange.field] !== undefined) {
+    		return aggregations[dateRange.field];
     	}
     	return null;
-    }
+    };
+
+	getCurrentSearchTerm = () => {
+    	return this.searchTermRef && this.searchTermRef.current ? this.searchTermRef.current.value : '';
+    };
+
+     /* ----------------------------------------- COMPONENT OUTPUT FUNCTION ------------------------------ */
 
     //communicates all that is required for a parent component to draw hits & statistics
     onOutput(data) {
@@ -298,7 +335,7 @@ class QueryBuilder extends React.Component {
         }
     }
 
-    filterWeirdDates(aggregations, dateRange) {
+    filterWeirdDates = (aggregations, dateRange) => {
     	if(dateRange && aggregations) {
 	    	const buckets = aggregations[dateRange.field];
 	        if(buckets && buckets.length > 0) {
@@ -327,340 +364,338 @@ class QueryBuilder extends React.Component {
                 }
 	        }
 	    }
-	    return aggregations
-    }
+	    return aggregations;
+    };
 
-    toggleTimeLine = () => {
-    	this.setState({showTimeLine:!this.state.showTimeLine});
-    }
+    /* ----------------------------------------- RENDER FUNCTIONS ------------------------------ */
 
-    getCurrentSearchTerm = () => {
-    	return this.searchTermRef && this.searchTermRef.current ? this.searchTermRef.current.value : '';
+    renderNoResultsMessage = (aggregations, query, onClearSearch) => {
+    	if(aggregations && query) {
+    // 		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
+    // 		if(!currentDateAggregation) {
+				return (
+					<div className={classNames("alert alert-danger",IDUtil.cssClassName('no-results-message', this.CLASS_PREFIX))}>
+						{MessageHelper.renderNoSearchResultsMessage(query, onClearSearch)}
+					</div>
+				)
+			// }
+    	}
+    	return null;
+    };
+
+    renderQueryResultHits = totalHits => {
+    	return (
+    		<span className={IDUtil.cssClassName('total-count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
+				Results
+				<span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>
+					{ComponentUtil.formatNumber(totalHits)}
+				</span>
+			</span>
+		);
+    };
+
+    renderFieldCategorySelector = (query, collectionConfig, onOutput) => {
+    	return (
+			<FieldCategorySelector
+				queryId={query.id}
+				fieldCategory={query.fieldCategory}
+				collectionConfig={collectionConfig}
+				onOutput={onOutput}
+			/>
+		);
+    };
+
+    renderDateFieldSelector = (searchId, query, aggregations, collectionConfig, onOutput) => {
+    	if(collectionConfig.getDateFields() == null) return null;
+
+    	return (
+            <DateFieldSelector
+            	searchId={searchId} //for determining when the component should rerender
+            	queryId={query.id} //used for the guid (is it still needed?)
+                dateRange={query.dateRange} //for activating the selected date field
+                aggregations={aggregations} //to fetch the date aggregations
+                collectionConfig={collectionConfig} //for determining available date fields & aggregations
+                onOutput={onOutput} //for communicating output to the  parent component
+            />
+        );
+    };
+
+    renderDateRangeSelector = (searchId, query, aggregations, collectionConfig, onOutput) => {
+    	if(collectionConfig.getDateFields() == null) return null;
+
+    	return (
+            <DateRangeSelector
+            	searchId={searchId} //for determining when the component should rerender
+            	queryId={query.id} //used for the guid (is it still needed?)
+                dateRange={query.dateRange} //for activating the selected date field
+                aggregations={aggregations} //to fetch the date aggregations
+                collectionConfig={collectionConfig} //for determining available date fields & aggregations
+                onOutput={onOutput} //for communicating output to the  parent component
+            />
+        );
+    };
+
+    renderAggregationList = (searchId, query, aggregations, collectionConfig, onComponentOutput) => {
+		return (
+			<div className="col-md-3 aggregation-list">
+                <AggregationList
+					searchId={searchId} //for determining when the component should rerender
+					queryId={query.id} //TODO implement in the list component
+					aggregations={aggregations} //part of the search results
+	                desiredFacets={query.desiredFacets}
+					selectedFacets={query.selectedFacets}
+	                collectionConfig={collectionConfig} //for the aggregation creator only
+					onOutput={onComponentOutput} //for communicating output to the  parent component
+				/>
+            </div>
+        )
+    };
+
+    //FIXME for motu & arttube this is needed. Now it is deactivated though!
+    //renders the checkboxes for selecting layers
+    renderSearchLayerOptions = () => {
+		if(this.state.query.searchLayers && 1===2) { //DEACTIVATED
+			const layers = Object.keys(this.state.query.searchLayers).map((layer, index) => {
+				return (
+					<label key={'layer__' + index} className="checkbox-inline">
+						<input id={layer} type="checkbox" checked={this.state.query.searchLayers[layer] === true}
+							onChange={this.toggleSearchLayer.bind(this)}/>
+							{CollectionUtil.getSearchLayerName(this.props.collectionConfig.getSearchIndex(), layer)}
+					</label>
+				)
+			});
+			if(layers) {
+				return (
+			 		<div className={IDUtil.cssClassName('search-layers', this.CLASS_PREFIX)}>
+			 			{layers}
+			 		</div>
+			 	)
+			}
+		}
+		return null;
+    };
+
+    renderTimeLine = (dateAggregation, graphType, searchId, query, collectionConfig) => {
+    	if(!dateAggregation) {
+    		return null;
+    	} else if (dateAggregation.length === 0) {
+		    return MessageHelper.renderNoDocumentsWithDateFieldMessage();
+    	}
+        if (graphType === 'lineChart') {
+            return (
+                <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
+                    <button
+                    	onClick={this.switchGraphType.bind(this, 'histogram')}
+                    	type="button"
+                    	className="btn btn-primary btn-xs">
+                    	Histogram
+                    </button>
+                    <QuerySingleLineChart
+                        data={dateAggregation}
+                        comparisonId={searchId}
+						query={query}
+						collectionConfig={collectionConfig}
+					/>
+                </div>
+            );
+        } else {
+            return (
+                <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
+                    <button
+                    	onClick={this.switchGraphType.bind(this, 'lineChart')}
+                    	type="button"
+                    	className="btn btn-primary btn-xs">
+                    	Line chart
+                    </button>
+                    <Histogram
+                        queryId={query.id}
+                        query={query}
+                        comparisonId={searchId}
+                        dateRange={query.dateRange}
+                        data={dateAggregation}
+                        title={collectionConfig.toPrettyFieldName(query.dateRange.field)}
+                        searchId={searchId}
+                        collectionConfig={collectionConfig}
+                    />
+                </div>
+            );
+        }
+    };
+
+    renderDateRangeCrumb = (query, onResetDateRange) => {
+    	let info = '';
+    	const tmp = [];
+        if(query.dateRange.start) {
+        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(query.dateRange.start));
+        } else {
+        	tmp.push('everything before');
+        }
+        if(query.dateRange.end) {
+        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(query.dateRange.end));
+        } else {
+        	tmp.push('up until now');
+        }
+        if(tmp.length > 0) {
+        	info = tmp.join(tmp.length === 2 ? ' till ' : '');
+        	info += ' (using: '+query.dateRange.field+')';
+        }
+    	return (
+    		<div className={IDUtil.cssClassName('breadcrumbs', this.CLASS_PREFIX)}>
+				<div key="date_crumb" className={IDUtil.cssClassName('crumb', this.CLASS_PREFIX)}
+					title="Clear current date range">
+					<em>Selected date range:&nbsp;</em>
+					{info}
+					&nbsp;
+					<i className="fa fa-close" onClick={onResetDateRange}/>
+				</div>
+			</div>
+    	);
+    };
+
+    renderDateTotalStats = (dateCounts, query) => {
+    	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
+    	info += '<br/>making it possible that there are more dates found than the number of search results';
+
+    	return (
+    		<div>
+        		<span title="Total number of dates found based on selected date field" className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}>
+        			{ComponentUtil.formatNumber(dateCounts)}
+        		</span>
+    			&nbsp;
+    			<span data-for={'__qb__tt' + query.id}
+    				data-tip={info}
+    				data-html={true}>
+					<i className="fa fa-info-circle"/>
+				</span>
+				<ReactTooltip id={'__qb__tt' + query.id}/>
+			</div>
+		);
+    };
+
+    renderDateRangeStats = (dateCounts, outOfRangeCount) => {
+    	return (
+    		<div className={IDUtil.cssClassName('date-range-stats', this.CLASS_PREFIX)}>
+    			<span>
+    				Inside range:
+    				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
+    				      title="Number of dates found inside selected date range">
+    					{ComponentUtil.formatNumber(dateCounts - outOfRangeCount)}
+    				</span>
+    			</span>
+    			<span>
+    				Outside range:
+    				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
+    				      title="Number of dates found outside selected date range">
+    					{ComponentUtil.formatNumber(outOfRangeCount)}
+					</span>
+				</span>
+    		</div>
+    	);
+    };
+
+    renderDateControls = (aggregations, query, collectionConfig, searchId, totalHits, showTimeLine, graphType, onOutput) => {
+    	if(searchId == null || (!query.dateRange && totalHits === 0)) return null; //date range & results are mandatory
+
+    	const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
+
+		const dateFieldSelector = this.renderDateFieldSelector(searchId, query, aggregations, collectionConfig, onOutput);
+		const dateRangeSelector = this.renderDateRangeSelector(searchId, query,	aggregations, collectionConfig,	onOutput);
+
+
+		let dateRangeCrumb = null;
+		let outOfRangeCount = 0;
+		const dateCounts = this.calcDateCounts(currentDateAggregation);
+
+		if(query.dateRange && (query.dateRange.start || query.dateRange.end)) {
+			outOfRangeCount = this.calcTotalDatesOutsideOfRange(currentDateAggregation, query.dateRange);
+        	dateRangeCrumb = this.renderDateRangeCrumb(query, this.resetDateRange.bind(this)); //TODO pass param
+        }
+
+        //render date stats
+		const dateTotalStats = dateCounts !== -1 ? this.renderDateTotalStats(dateCounts, query) : null;
+		const dateRangeStats = dateCounts !== -1 ? this.renderDateRangeStats(dateCounts, outOfRangeCount) : null;
+
+		const graph = showTimeLine ? this.renderTimeLine(currentDateAggregation, graphType,	searchId, query, collectionConfig) : null;
+
+    	return (
+        	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
+        		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
+
+                	<div className={IDUtil.cssClassName('date-field', this.CLASS_PREFIX)}>
+                		<i className="fa fa-calendar" aria-hidden="true" />
+                		{dateFieldSelector}{dateTotalStats && " ► "}
+                		{dateTotalStats}
+                	</div>
+
+                	{(query.dateRange && query.dateRange.field) &&
+                    	(<div className={IDUtil.cssClassName('date-range', this.CLASS_PREFIX)}>
+                			Date range
+                			{dateRangeSelector}
+                			{dateRangeStats && " ► "}
+                			{dateRangeStats}
+                		</div>)
+                    }
+
+                	{/* Show chart button */}
+            		{(query.dateRange && query.dateRange.field) &&
+            			<button className="btn" onClick={this.toggleTimeLine}>
+            				{showTimeLine ? "Hide chart" : "Show chart"}
+        				</button>
+            		}
+                </div>
+
+	            {(showTimeLine && query.dateRange && query.dateRange.field) &&
+	            	<div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
+	            		<div className={IDUtil.cssClassName('date-graph', this.CLASS_PREFIX)}>
+	                		{graph}
+	                	</div>
+	                	{dateRangeCrumb}
+	            	</div>
+	        	}
+			</div>
+		)
     }
 
     render() {
         if (this.props.collectionConfig && this.state.query) {
-            let searchIcon = null;
-            let layerOptions = null;
-            let resultBlock = null;
-            let ckanLink = null;
+        	const layerOptions = this.renderSearchLayerOptions(); //FIXME always returns null (keeping it for other clients to fix later on)
+
+            const searchIcon = this.state.isSearching ? (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"/>) : (<i className="fa fa-search"/>);
 
 			//draw the field category selector
-			const fieldCategorySelector = (
-				<FieldCategorySelector
-					queryId={this.state.query.id}
-					fieldCategory={this.state.query.fieldCategory}
-					collectionConfig={this.props.collectionConfig}
-					onOutput={this.onComponentOutput.bind(this)}
-				/>
+			const fieldCategorySelector = this.renderFieldCategorySelector(
+				this.state.query,
+				this.props.collectionConfig,
+				this.onComponentOutput.bind(this)
 			);
 
-			//draw the checkboxes for selecting layers
-			if(this.state.query.searchLayers && 1===2) {
-				const layers = Object.keys(this.state.query.searchLayers).map((layer, index) => {
-					return (
-						<label key={'layer__' + index} className="checkbox-inline">
-							<input id={layer} type="checkbox" checked={this.state.query.searchLayers[layer] === true}
-								onChange={this.toggleSearchLayer.bind(this)}/>
-								{CollectionUtil.getSearchLayerName(this.props.collectionConfig.getSearchIndex(), layer)}
-						</label>
-					)
-				});
-				// Hide collection metadata tickbox from current search interface.
-				//https://github.com/CLARIAH/wp5_mediasuite/issues/130
-				// it could be enabled once we have more options to provide.
-				if(layers) {
-					layerOptions = (
-				 		<div className={IDUtil.cssClassName('search-layers', this.CLASS_PREFIX)}>
-				 			{layers}
-				 		</div>
-				 	)
-				}
-			}
+			const dateControls = this.props.dateRangeSelector ? this.renderDateControls(
+				this.state.aggregations,
+				this.state.query,
+				this.props.collectionConfig,
+				this.state.searchId,
+				this.state.totalHits,
+				this.state.showTimeLine,
+				this.state.graphType,
+				this.onComponentOutput.bind(this)
+			) : null;
 
-            //only draw this when there are search results
-			if(true || this.state.totalHits > 0) {
-				let dateTotalStats = null;
-				let dateRangeStats = null;
-				let graph = null;
-				let aggrView = null; //either a box or list (TODO the list might not work properly anymore!)
-				let aggregationBox = null;
-				let dateFieldSelector = null;
-				let dateRangeSelector = null;
-				let dateRangeCrumb = null;
+            const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? this.renderQueryResultHits(this.state.totalHits) : null;
 
-				let dateCounts = null;
-				let outOfRangeCount = 0;
+			const aggregationBox = this.state.aggregations && this.state.searchId ? this.renderAggregationList(
+				this.state.searchId,
+				this.state.query,
+				this.state.aggregations,
+				this.props.collectionConfig,
+				this.onComponentOutput.bind(this)
+			) : null;
 
-				//populate the aggregation/facet selection area/box
-				if(this.state.aggregations) {
-					aggrView = (
-						<AggregationList
-							searchId={this.state.searchId} //for determining when the component should rerender
-							queryId={this.state.query.id} //TODO implement in the list component
-							aggregations={this.state.aggregations} //part of the search results
-                            desiredFacets={this.state.query.desiredFacets}
-							selectedFacets={this.state.query.selectedFacets}
-                            collectionConfig={this.props.collectionConfig} //for the aggregation creator only
-							onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-						/>
-					)
+            const noResultsMessage = this.state.isSearching === false && this.state.searchId != null && this.state.totalHits === 0 ? this.renderNoResultsMessage(
+        		this.state.aggregations,
+        		this.state.query,
+        		this.clearSearch
+        	) : null;
 
-					aggregationBox = (
-						<div className="col-md-3 aggregation-list">
-                            {aggrView}
-                        </div>
-                    )
-
-					// Display the graph only if an option other than the default is selected
-					// and the length of the data is greater than 0.
-					//TODO fix the ugly if/else statements!!
-					if(this.state.query.dateRange && this.state.aggregations[this.state.query.dateRange.field] !== undefined) {
-
-						//draw the time line
-						if(this.state.showTimeLine) {
-							if (this.state.aggregations[this.state.query.dateRange.field].length !== 0) {
-
-	                            // Display graph based on its type. Defaults to bar chart.
-	                            if (this.state.graphType === 'lineChart') {
-	                                graph = (
-	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
-	                                        <button
-	                                        	onClick={this.switchGraphType.bind(this, 'histogram')}
-	                                        	type="button"
-	                                        	className="btn btn-primary btn-xs">
-	                                        	Histogram
-	                                        </button>
-	                                        <QuerySingleLineChart
-	                                            data={this.state.aggregations[this.state.query.dateRange.field]}
-	                                            comparisonId={this.state.searchId}
-												query={this.state.query}
-												collectionConfig={this.props.collectionConfig}
-											/>
-	                                    </div>
-	                                );
-	                            } else {
-	                                graph = (
-	                                    <div className={IDUtil.cssClassName('graph', this.CLASS_PREFIX)}>
-	                                        <button
-	                                        	onClick={this.switchGraphType.bind(this, 'lineChart')}
-	                                        	type="button"
-	                                        	className="btn btn-primary btn-xs">
-	                                        	Line chart
-	                                        </button>
-	                                        <Histogram
-	                                            queryId={this.state.query.id}
-                                                query={this.state.query}
-                                                comparisonId={this.state.searchId}
-	                                            dateRange={this.state.query.dateRange}
-	                                            data={this.state.aggregations[this.state.query.dateRange.field]}
-	                                            title={this.props.collectionConfig.toPrettyFieldName(this.state.query.dateRange.field)}
-	                                            searchId={this.state.searchId}
-                                                collectionConfig={this.props.collectionConfig}
-                                            />
-	                                    </div>
-	                                );
-	                            }
-							} else if (this.state.aggregations[this.state.query.dateRange.field].length === 0) {
-							    graph = MessageHelper.renderNoDocumentsWithDateFieldMessage();
-							}
-						} //END OF drawing the time line
-
-						// draw the date summary stuff
-
-						if(this.state.aggregations && this.state.query.dateRange.field !== 'null_option') {
-                        	if(this.state.aggregations[this.state.query.dateRange.field].length > 0) {
-		            			dateCounts = this.state.aggregations[this.state.query.dateRange.field].map(
-		            				(x => x.doc_count)).reduce(function(accumulator, currentValue) {
-		                				return accumulator + currentValue;
-		            				}
-		            			);
-		            		}
-
-	            			if(this.state.query.dateRange.start || this.state.query.dateRange.end) {
-								//count the dates that are out of range
-		                    	const outOfRange = this.totalDatesOutsideOfRange();
-		                    	if(outOfRange.length > 0) {
-			                        outOfRangeCount = outOfRange.map((x => x.doc_count)).reduce(function(accumulator, currentValue) {
-			                			return accumulator + currentValue;
-			            			});
-			                    }
-
-		                    	let info = '';
-		                    	const tmp = [];
-		                        if(this.state.query.dateRange.start) {
-		                        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.start));
-		                        } else {
-		                        	tmp.push('everything before');
-		                        }
-		                        if(this.state.query.dateRange.end) {
-		                        	tmp.push(TimeUtil.UNIXTimeToPrettyDate(this.state.query.dateRange.end));
-		                        } else {
-		                        	tmp.push('up until now');
-		                        }
-		                        if(tmp.length > 0) {
-		                        	info = tmp.join(tmp.length === 2 ? ' till ' : '');
-		                        	info += ' (using: '+this.state.query.dateRange.field+')';
-		                        }
-		                    	dateRangeCrumb = (
-		                    		<div className={IDUtil.cssClassName('breadcrumbs', this.CLASS_PREFIX)}>
-										<div key="date_crumb" className={IDUtil.cssClassName('crumb', this.CLASS_PREFIX)}
-											title="Clear current date range">
-											<em>Selected date range:&nbsp;</em>
-											{info}
-											&nbsp;
-											<i className="fa fa-close" onClick={this.resetDateRange.bind(this)}/>
-										</div>
-									</div>
-		                    	)
-		                    }
-	            		} //END OF drawing the date range summery
-
-					} //END OF THE date range aggregation
-
-                    if (this.props.dateRangeSelector && this.props.collectionConfig.getDateFields() != null) {
-                    	//draw the date field selector
-                    	dateFieldSelector = (
-                            <DateFieldSelector
-                            	queryId={this.state.query.id} //used for the guid (is it still needed?)
-                                searchId={this.state.searchId} //for determining when the component should rerender
-                                collectionConfig={this.props.collectionConfig} //for determining available date fields & aggregations
-                                dateRange={this.state.query.dateRange} //for activating the selected date field
-                                aggregations={this.state.aggregations} //to fetch the date aggregations
-                                onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-                            />
-                        );
-
-                    	//draw the date range selector
-                    	dateRangeSelector = (
-                            <DateRangeSelector
-                            	queryId={this.state.query.id} //used for the guid (is it still needed?)
-                                searchId={this.state.searchId} //for determining when the component should rerender
-                                collectionConfig={this.props.collectionConfig} //for determining available date fields & aggregations
-                                dateRange={this.state.query.dateRange} //for activating the selected date field
-                                aggregations={this.state.aggregations} //to fetch the date aggregations
-                                onOutput={this.onComponentOutput.bind(this)} //for communicating output to the  parent component
-                            />
-                        );
-
-	                    //populate the date related stats
-			            if(dateCounts != null) {
-
-			            	// Total date stats
-			            	let info = 'Please note that each record possibly can have multiple occurrences of the selected date field,';
-			            	info += '<br/>making it possible that there are more dates found than the number of search results';
-
-			            	dateTotalStats = (<div>
-			            		<span title="Total number of dates found based on selected date field" className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}>{ComponentUtil.formatNumber(dateCounts)}</span>
-			            			&nbsp;
-			            			<span data-for={'__qb__tt' + this.state.query.id}
-			            				data-tip={info}
-			            				data-html={true}>
-										<i className="fa fa-info-circle"/>
-									</span>
-									<ReactTooltip id={'__qb__tt' + this.state.query.id}/>
-								</div>
-							)
-
-			            	// Range stats
-			            	dateRangeStats = (
-			            		<div className={IDUtil.cssClassName('date-range-stats', this.CLASS_PREFIX)}>
-			            			<span>
-			            				Inside range:
-			            				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
-			            				      title="Number of dates found inside selected date range">
-			            					{ComponentUtil.formatNumber(dateCounts - outOfRangeCount)}
-			            				</span>
-			            			</span>
-			            			<span>
-			            				Outside range:
-			            				<span className={IDUtil.cssClassName('date-count', this.CLASS_PREFIX)}
-			            				      title="Number of dates found outside selected date range">
-			            					{ComponentUtil.formatNumber(outOfRangeCount)}
-		            					</span>
-	            					</span>
-			            		</div>
-			            	)
-			            }
-                    } //END OF date range selector rendering
-
-                } //END OF the big code block of rendering aggregations
-
-
-				// number of query results if available
-	            const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? (
-	                <span className={IDUtil.cssClassName('total-count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
-	                    Results: <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{ComponentUtil.formatNumber(this.state.totalHits)}</span>
-	                </span>
-	            ) : null;
-
-                //draw the result block
-                resultBlock = (
-                    <div>
-                    	{ (this.props.dateRangeSelector && this.state.searchId != null && !(!this.state.query.dateRange && this.state.totalHits === 0)) && (
-	                    	<div className={IDUtil.cssClassName('result-dates', this.CLASS_PREFIX)}>
-		                    		<div className={IDUtil.cssClassName('result-dates-header', this.CLASS_PREFIX)}>
-
-										{/* Date field */}
-			                        	<div className={IDUtil.cssClassName('date-field', this.CLASS_PREFIX)}>
-			                        		<i className="fa fa-calendar" aria-hidden="true" />
-			                        		{dateFieldSelector}{dateTotalStats && " ► "}
-			                        		{dateTotalStats}
-			                        	</div>
-
-										{/* Date range */}
-			                        	{(this.state.query.dateRange && this.state.query.dateRange.field) &&
-				                        	(<div className={IDUtil.cssClassName('date-range', this.CLASS_PREFIX)}>
-			                        			Date range
-			                        			{dateRangeSelector}
-			                        			{dateRangeStats && " ► "}
-			                        			{dateRangeStats}
-			                        		</div>)
-				                        }
-
-				                    	{/* Show chart button */}
-		                        		{(this.state.query.dateRange && this.state.query.dateRange.field) &&
-		                        			<button className="btn" onClick={this.toggleTimeLine}>
-		                        				{this.state.showTimeLine ? "Hide chart" : "Show chart"}
-	                        				</button>
-		                        		}
-			                        </div>
-
-		                        {(this.state.showTimeLine && this.state.query.dateRange && this.state.query.dateRange.field) &&
-		                        	<div className={IDUtil.cssClassName('result-dates-content', this.CLASS_PREFIX)}>
-		                        		<div className={IDUtil.cssClassName('date-graph', this.CLASS_PREFIX)}>
-		                            		{graph}
-		                            	</div>
-		                            	{dateRangeCrumb}
-		                        	</div>
-		                    	}
-	                        </div>
-	                    )}
-                        <div className="separator"/>
-
-                        {queryResultCount}
-
-                        {
-                        	this.state.searchId != null && this.state.isSearching === false && this.state.totalHits === 0 ?
-		                	(
-		                    	<div className="alert alert-danger">
-		                    		{MessageHelper.renderNoSearchResultsMessage(this.state.query, this.clearSearch.bind(this))}
-		                    	</div>
-		                	) :
-                        		this.state.searchId != null && aggregationBox
-		            	}
-                    </div>
-                )
-			}
-
-			//determine which icon to show after the search input
-			if(this.state.isSearching === true) {
-				searchIcon = (<span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"/>)
-			} else {
-				searchIcon = (<i className="fa fa-search"/>)
-			}
-
-			//render the stuff on screen
 			return (
 				<div className={IDUtil.cssClassName('query-builder')}>
 					<form onSubmit={this.blockSearch.bind(this)}>
@@ -673,9 +708,7 @@ class QueryBuilder extends React.Component {
 									id="search_term"
 									className={classNames("form-control input-search", IDUtil.cssClassName('input-search', this.CLASS_PREFIX))}
 									placeholder='Search'
-									onKeyPress={
-										this.searchFormKeyPressed.bind(this)
-									}
+									onKeyPress={this.searchFormKeyPressed.bind(this)}
 									ref={this.searchTermRef}
 								/>
 								<span onClick={this.newSearch.bind(this)}>
@@ -690,9 +723,14 @@ class QueryBuilder extends React.Component {
 							</div>
 						</div>
 					</form>
-
 					{layerOptions}
-					{resultBlock}
+					<div>
+	                	{dateControls}
+	                    <div className="separator"/>
+	                    {queryResultCount}
+	                    {aggregationBox}
+	                    {noResultsMessage}
+	                </div>
 				</div>
 			)
 		} else {
