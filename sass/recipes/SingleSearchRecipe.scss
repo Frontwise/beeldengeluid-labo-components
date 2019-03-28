@@ -29,15 +29,15 @@
 	.select-all {
 		@include checkbox();
 		margin-top: 6px;
+		margin-left: 3px;
 	}
 
 	.table-actions-header {
 		background-color: white;
 		border-top: 1px solid $clGreyTint;
 		border-bottom: 1px solid $clGreyTint;
-		margin: 5px;
+		margin: 5px 0 0 2px;
 		min-height: 53px;
-		min-width: 100%;
 		padding: 10px 5px 10px 0;
 
 		.table-actions {

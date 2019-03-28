@@ -63,7 +63,7 @@ class SearchHit extends React.Component {
     	if(this.props.bookmark.segments) {
     		this.props.bookmark.segments.forEach(segment => bodyCount += segment.annotations ? segment.annotations.length : 0)
     	}
-    	html += '<h5><u>Number of annotations</u>: '+bodyCount+'</h5>';
+    	html += '<h5><u>Annotations</u>: '+bodyCount+'</h5>';
         return html;
     }
 
@@ -96,23 +96,6 @@ class SearchHit extends React.Component {
 			</div>
 		);
 
-		//draw an icon with tooltip if this item was bookmarked
-		if(this.props.bookmark) {
-			bookmarkIcon = (
-	            <div data-for={'__qb__tt' +this.props.bookmark.id} data-tip={this.renderToolTipContent(this)}
-	                 data-html={true} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
-	                <i className="fa fa-bookmark"/>
-	                <ReactTooltip id={'__qb__tt' + this.props.bookmark.id}/>
-	            </div>
-	        )
-		} else {
-			bookmarkIcon = (
-            	<div style={{opacity: '0'}} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
-					<i className="fa fa-bookmark"/>
-				</div>
-        	)
-		}
-
 		const classNames = [IDUtil.cssClassName('search-hit')];
 		if(snippet.type === 'media_fragment') {
 			classNames.push('fragment')
@@ -121,15 +104,37 @@ class SearchHit extends React.Component {
             classNames.push('visitedItem')
 		}
 
+		if(this.props.bookmark) {
+			// add bookmarked class
+			classNames.push('bookmarked');
+
+			//draw an icon with tooltip if this item was bookmarked
+			bookmarkIcon = (
+	            <div data-for={'__qb__tt' +this.props.bookmark.id} data-tip={this.renderToolTipContent(this)}
+	                 data-html={true} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+	                <i className="fa fa-bookmark"/>
+	                <ReactTooltip id={'__qb__tt' + this.props.bookmark.id}/>
+	            </div>
+	        )
+		} else {
+			// TODO: It would be nice if the searchhit could be bookmarked directly, without selecting it
+			bookmarkIcon = (
+            	<div style={{opacity: '0'}} className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+					<i className="fa fa-bookmark"/>
+				</div>
+        	)
+		}
+
+
 		return (
 			<div className={classNames.join(' ')}>
 				{checkBox}
+                {bookmarkIcon}
                 <div className={IDUtil.cssClassName('quickview', this.CLASS_PREFIX)}>
 					<button className="btn btn-default"	onClick={this.onQuickView.bind(this)} title="Quick view">
 						<span className="fa fa-file-text"></span>
 					</button>
 				</div>
-                {bookmarkIcon}
                 <div onClick={this.gotoItemDetails.bind(this)}>
 					<SearchSnippet
 						data={snippet}
@@ -161,7 +166,7 @@ SearchHit.PropTypes = {
 
 	onQuickView : PropTypes.func, //what to do when the user clicks the clickview item
 
-	onOutput: PropTypes.func //outputs data to the owner after the user selectes or deselects
+	onOutput: PropTypes.func //outputs data to the owner after the user selects or deselects
 
 }
 

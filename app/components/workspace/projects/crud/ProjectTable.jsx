@@ -1,5 +1,6 @@
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
+import trunc from '../../../../util/Trunc';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 
@@ -262,10 +263,6 @@ class ProjectTable extends React.PureComponent {
             return this.state.bookmarkCount[projectId];
         }
         return '...';
-    }
-
-    trunc(s, n){
-        return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
     }
 
     setActiveProject(project){

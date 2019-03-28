@@ -1,27 +1,39 @@
 .bg__search-hit {
 	border-bottom: 1px solid $border-color;
-	margin: 5px;
-	padding: 10px 0;
+	margin: 0 0 0 5px;
+	padding: 10px 40px 10px 0;
+	position: relative;
+
 	.bg__sh__quickview {
-		float:left;
+		float: left;
 		margin-right: $default-margin;
 	}
+
 	.bg__sh__select {
 		@include checkbox();
 	}
+
 	.bg__sh__bookmarked {
-	    background-color: #468dcb;
-		border: 1px solid #dedede;
+		background-color: $clSecondary;
+		border: 0;
 		color: white;
-		float: left;
-		padding: 9px 12px;
+		text-align: center;
+		width: 35px;
+		height: 35px;
+		position:absolute;
+		top: 0;
+		right: 0;
+		i{
+			line-height: 35px;
+		}
 	}
+
 	.bg__search-snippet {
 		margin: 5px;
 		.bg__ss__fragment {
 			color: dimgray;
-			font-style:italic;
-			margin-top:5px;
+			font-style: italic;
+			margin-top: 5px;
 		}
 
 		.highLightText {
@@ -33,16 +45,34 @@
 			cursor: pointer;
 		}
 	}
+
 	&.fragment {
 		border-right: 1px solid $highlight-color;
 		margin: 5px;
 		padding: $default-margin;
 	}
+
 	&.visitedItem {
 		color: $visited-item;
 		.highLightText {
 			color: #f79e8e;
+		}
+	}
 
+	&.bookmarked{
+		border-left: 3px solid $clSecondary;
+		background-color: mix(white, $clSecondary, 90%);
+		margin-left: 2px;
+		.bg__sh__select input[type=checkbox]+label span{
+			border-color: mix(white, $clSecondary, 60%);
+			background-color: mix(white, $clSecondary, 95%);
+		}
+	}
+
+	.__react_component_tooltip{
+		text-align: left;
+		ul{
+			padding-left: 20px;
 		}
 	}
 }

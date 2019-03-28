@@ -1,5 +1,16 @@
 .bg__search-snippet {
-  .media-heading {
-    @include multiLineEllipsis($lineHeight: 1.2em, $lineCount: 6, $bgColor: white);
-  }
+	display: flex;
+	border-right: 10px solid hsl(random(360), 50,75);
+	.bg__ss__poster{
+		max-width: 200px;
+		max-height: 300px;
+	}
+	.bg__ss__media-body{
+		padding-left: 10px;
+		.bg__ss__title{
+			margin-top: 0;
+			padding-top: 0;
+			font-size: 20px;
+		}
+	}
 }
