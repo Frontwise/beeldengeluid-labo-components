@@ -953,8 +953,8 @@ class SingleSearchRecipe extends React.Component {
 		const allChecked = currentOutput.results.map(item => currentSelectedIds.findIndex(it => it === item._id));
 		const isChecked = allChecked.findIndex(item => item === -1) === -1;
 		return (
-            <div onClick={this.toggleSelectAllItems} className="select-all">
-                <input type="checkbox" defaultChecked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
+            <div title={"Select " + (isChecked ? "none" : "all")} onClick={this.toggleSelectAllItems} className="select-all">
+                <input type="checkbox" checked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
                 <label htmlFor={'cb__select-all'}><span/></label>
             </div>
         );
