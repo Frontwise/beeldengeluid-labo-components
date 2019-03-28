@@ -131,9 +131,8 @@ class FieldCategorySelector extends React.Component {
 					elementId="fields__modal"
 					stateVariable="showModal"
 					owner={this}
-					title="Create a new cluster of metadata fields to search through">
-					<FieldCategoryCreator data={dataFormatted}
-						onOutput={this.onComponentOutput.bind(this)}/>
+					title="Create a new cluster of metadata fields to narrow down search">
+					<FieldCategoryCreator data={dataFormatted} onOutput={this.onComponentOutput.bind(this)}/>
 				</FlexModal>
 			)
 		}

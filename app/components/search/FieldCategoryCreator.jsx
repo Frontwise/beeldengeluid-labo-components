@@ -2,15 +2,17 @@ import IDUtil from '../../util/IDUtil';
 import PropTypes from 'prop-types';
 
 class FieldCategoryCreator extends React.PureComponent {
+
 	constructor(props) {
 		super(props);
         this.state = {
             dataNormalized: this.props.data,
             filteredCategories: this.props.data,
             selectedItems: [],
-            errMsg: null
+            validationError: false
         };
         this.clusterName = React.createRef();
+        this.CLASS_PREFIX = 'fcc';
     }
 
     onClickHandler = (e) => {
@@ -18,7 +20,7 @@ class FieldCategoryCreator extends React.PureComponent {
         let filteredCategories = this.state.filteredCategories;
         let selectedItems = this.state.selectedItems;
 
-        if (e.target.parentNode.id === 'sourceOpts') {
+        if (e.target.parentNode.id === 'source-opts') {
             dataNormalized = this.removeFromObj(dataNormalized, e.target.text);
             filteredCategories = this.removeFromObj(filteredCategories, e.target.text);
             selectedItems.push({'value': e.target.value, 'prettyName': e.target.text});
@@ -27,9 +29,9 @@ class FieldCategoryCreator extends React.PureComponent {
                 dataNormalized,
                 filteredCategories,
                 selectedItems,
-                errMsg: false
+                validationError: false
             })
-        } else if (e.target.parentNode.id === 'selectedOpts') {
+        } else if (e.target.parentNode.id === 'selected-opts') {
             dataNormalized.push({'value': e.target.value, 'prettyName': e.target.text});
             filteredCategories.push({'value': e.target.value, 'prettyName': e.target.text});
             selectedItems = this.removeFromObj(selectedItems, e.target.text);
@@ -38,7 +40,7 @@ class FieldCategoryCreator extends React.PureComponent {
                 dataNormalized,
                 filteredCategories,
                 selectedItems,
-                errMsg: false
+                validationError: false
             })
         }
     };
@@ -47,19 +49,18 @@ class FieldCategoryCreator extends React.PureComponent {
 
     filterFields = (arr, str) => arr.filter(item => item.prettyName.toLowerCase().includes(str.toLowerCase()));
 
-
     onKeywordFilter = (e) => {
         const newCategorySet = this.filterFields(this.state.dataNormalized, e.target.value);
         this.setState({
             filteredCategories: newCategorySet,
-            errMsg: false
-        })
+            validationError: false
+        });
     };
 
     submitForm = () => {
         if (this.clusterName.current.value.length === 0 || this.state.selectedItems.length === 0) {
             this.setState({
-                errMsg: true
+                validationError: true
             })
         } else {
             const selectedValues = this.state.selectedItems.map(item => item.value);
@@ -73,70 +74,79 @@ class FieldCategoryCreator extends React.PureComponent {
     };
 
     errorMsg = (msg) => {
-        return <div className="errMsg">{msg}</div>
+        return <div className={IDUtil.cssClassName('validation-error', this.CLASS_PREFIX)}>{msg}</div>
     };
 
 
     render() {
         let errMsgName = null;
         let errMsgFields = null;
-        if (this.state.errMsg) {
+        if (this.state.validationError) {
             errMsgName = this.clusterName.current.value.length === 0 ? this.errorMsg('Cluster name is required!') : null;
             errMsgFields = this.state.selectedItems.length === 0 ? this.errorMsg('No fields selected!') : null;
         }
 
         let selected = null;
         if (this.state.selectedItems.length > 0) {
-            selected = this.state.selectedItems.map(
-                (item, index) => <option className="move-backward" onClick={this.onClickHandler}
-                                         onDoubleClick={this.onDoubleClickHandler} key={index} id={index}
-                                         value={item.value}>
-                    {item.prettyName}</option>
-            );
+            selected = this.state.selectedItems.map((item, index) => {
+                return (
+                    <option
+                        key={index}
+                        id={index}
+                        className={IDUtil.cssClassName('right', this.CLASS_PREFIX)}
+                        onClick={this.onClickHandler}
+                        value={item.value}>
+                        {item.prettyName}
+                    </option>
+                );
+            });
         }
 
         let options = this.state.filteredCategories.length > 0 ? this.state.filteredCategories : [];
         if (options.length > 0) {
             options.sort((a, b) => (a.prettyName > b.prettyName) ? 1 : -1);
-            options = this.state.filteredCategories.map((field, index) =>
-                <option className="move-forward" onClick={this.onClickHandler} onDoubleClick={this.onDoubleClickHandler}
-                        key={index}  value={field.value}>{field.prettyName}</option>
-            );
+            options = this.state.filteredCategories.map((field, index) => {
+                return (
+                    <option
+                        key={index}
+                        className={IDUtil.cssClassName('left', this.CLASS_PREFIX)}
+                        onClick={this.onClickHandler}
+                        value={field.value}>
+                        {field.prettyName}
+                    </option>
+                );
+            });
         }
 
         return (
             <div className={IDUtil.cssClassName('field-category-creator')}>
-                <div className="bg__container">
-                    <div className="field-selection">
-                        <p>Select one or more fields to include</p>
-                        <input
-                            className="search-box fa fa-search"
-                            type="text"
-                            placeholder="Search.."
-                            name="search"
-                            onChange={this.onKeywordFilter}
-                        />
-                        <div className="selection-lists">
-                            <select name="sourceOpts" onChange={this.sel} id="sourceOpts" multiple>
-                                {options}
-                            </select>
-                            <select name="selectedOpts" multiple id="selectedOpts">
-                                {selected}
-                            </select>
-                        </div>
-                        <p className="cluster-name">Cluster name</p>
-                        <input
-                            type="text"
-                            placeholder="cluster name"
-                            name="name"
-                            className="selection-group-name"
-                            ref={this.clusterName}
-                        />
-                        <button className="submit-btn" onClick={this.submitForm} type="button">Choose</button>
-                        {errMsgName}
-                        {errMsgFields}
-                    </div>
+                <h5>Select one or more fields to include</h5>
+                <input
+                    className={IDUtil.cssClassName('search-box', this.CLASS_PREFIX)}
+                    type="text"
+                    placeholder="Search.."
+                    name="search"
+                    onChange={this.onKeywordFilter}
+                />
+                <div className={IDUtil.cssClassName('selection-wrapper', this.CLASS_PREFIX)}>
+                    <select id="source-opts" multiple>
+                        {options}
+                    </select>
+                    <select id="selected-opts" multiple>
+                        {selected}
+                    </select>
                 </div>
+                <h5>Cluster name</h5>
+                <input
+                    className={IDUtil.cssClassName('name', this.CLASS_PREFIX)}
+                    type="text"
+                    placeholder="cluster name"
+                    name="name"
+                    ref={this.clusterName}
+                />
+                <button onClick={this.submitForm} type="button">Choose</button>
+                {errMsgName}
+                {errMsgFields}
             </div>
         );
     }
