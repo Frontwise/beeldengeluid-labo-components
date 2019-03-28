@@ -384,7 +384,10 @@ class SingleSearchRecipe extends React.Component {
 	showSelectionOverview = () => {
         this.setState({
             showSelectionOverview : !this.state.showSelectionOverview
-        });
+        }, ()=>{
+        	// show media visible on screen
+			SingleSearchRecipe.afterRenderingHits();
+		});
     }
 
 	//checks if the search results contain resources that were already selected in another query
