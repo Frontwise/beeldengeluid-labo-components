@@ -371,14 +371,14 @@ class QueryBuilder extends React.Component {
 
     renderNoResultsMessage = (aggregations, query, onClearSearch) => {
     	if(aggregations && query) {
-    		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
-    		if(!currentDateAggregation) {
+    // 		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
+    // 		if(!currentDateAggregation) {
 				return (
 					<div className="alert alert-danger">
 						{MessageHelper.renderNoSearchResultsMessage(query, onClearSearch)}
 					</div>
 				)
-			}
+			// }
     	}
     	return null;
     };
