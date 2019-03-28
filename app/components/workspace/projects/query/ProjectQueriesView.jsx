@@ -14,7 +14,7 @@ class ProjectQueriesView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "queries");
 
-        initHelp('Queries', '/feature-doc/workspace/user-projects/queries');
+        initHelp('Queries', '/feature-doc/howtos/user-projects/queries');
     }
 
     render() {

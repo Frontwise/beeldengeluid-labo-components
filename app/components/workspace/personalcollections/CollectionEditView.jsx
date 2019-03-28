@@ -42,7 +42,7 @@ class CollectionEditView extends React.PureComponent {
             });
         });
 
-        initHelp('User Collection Edit', '/feature-doc/workspace/user-collections/edit');
+        initHelp('User Collection Edit', '/feature-doc/howtos/user-collections/edit');
     }
 
     render() {

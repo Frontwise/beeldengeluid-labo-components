@@ -14,7 +14,7 @@ class CollectionCreateView extends React.PureComponent {
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
 
-        initHelp('User Collection Create', '/feature-doc/workspace/user-collections/create');
+        initHelp('User Collection Create', '/feature-doc/howtos/user-collections/create');
     }
 
     render() {

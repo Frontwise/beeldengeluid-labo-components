@@ -50,7 +50,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     componentDidMount(){
-        initHelp("Compare", "/feature-doc/tools/query-comparison");
+        initHelp("Compare", "/feature-doc/howtos/query-comparison");
     }
 
     //this function receives all output of components that generate output and orchestrates where

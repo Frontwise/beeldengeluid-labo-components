@@ -41,7 +41,7 @@ class ProjectEditView extends React.PureComponent {
                 project
             });
         });
-        initHelp('User Project Create','/feature-doc/workspace/user-projects/edit');
+        initHelp('User Project Create','/feature-doc/howtos/user-projects/edit');
 
     }
 
