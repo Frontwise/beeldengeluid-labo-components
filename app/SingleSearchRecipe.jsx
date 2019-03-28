@@ -184,6 +184,9 @@ class SingleSearchRecipe extends React.Component {
 					);
 					FlexRouter.gotoSingleSearch('cache')
 				}
+
+				// show media visible on screen
+				SingleSearchRecipe.afterRenderingHits();
 			}
 		);
 	}
