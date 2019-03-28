@@ -117,8 +117,8 @@ class CollectionBar extends React.PureComponent {
 							)}
 						>
 							{title}
-							{infoButton}
 							{hits}
+							{infoButton}
 						</div>
 
 						{/* Buttons */}

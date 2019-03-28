@@ -8,6 +8,15 @@
 	margin-bottom: 20px;
 	display: flex;
 
+	.btn-default {
+		border: 0;
+		background-color: $clGrey;
+		color: black;
+		&:hover {
+			background-color: darken($clGrey, 4%);
+		}
+	}
+
 	.bg__scb__active {
 		display: flex;
 		justify-content: stretch;
@@ -18,7 +27,7 @@
 
 		.bg__scb__collection-info {
 			flex-grow: 1;
-			h2{
+			h2 {
 				font-size: 1.2em;
 				line-height: 30px;
 				display: inline-block;
@@ -29,24 +38,16 @@
 				background-repeat: no-repeat;
 				padding: 3px 30px 3px 5px;
 
-				&:hover{
+				&:hover {
 					background-color: $clGrey;
 				}
 			}
 		}
-		.bg__scb__buttons{
+		.bg__scb__buttons {
 			flex-grow: 1;
 			button {
 				float: right;
 				margin-left: 15px;
-				border: 0;
-				&.btn-default {
-					background-color: $clGrey;
-					color: black;
-					&:hover {
-						background-color: darken($clGrey, 4%);
-					}
-				}
 			}
 		}
 	}
@@ -63,7 +64,7 @@
 		background-image: $iconLinkUrl;
 		background-position: center;
 		background-repeat: no-repeat;
-		margin-left: 10px;
+		margin-left: 15px;
 		margin-top: 3px;
 		transition: background-color $transition;
 		background-size: 19px;
@@ -74,7 +75,7 @@
 
 	.bg__scb__count {
 		margin-top: 5px;
-		margin-left: 10px;
+		margin-left: 5px;
 		background-color: $clGrey;
 		font-size: 1em;
 		border-radius: 25px;
