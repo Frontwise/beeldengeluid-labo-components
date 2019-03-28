@@ -83,11 +83,11 @@ class CollectionBar extends React.PureComponent {
 			</button>
 		) : null;
 
-		const saveButton = collectionConfig ? (
+		const saveButton = collectionConfig && this.props.saveQuery ? (
 			<button
 				className="btn btn-secondary"
-				onClick={this.resetSearch}
-				title="Save the query to the active project"
+				onClick={this.props.saveQuery}
+				title="Save current query to the active project"
 			>
 				Save Query
 			</button>
@@ -143,6 +143,7 @@ CollectionBar.propTypes = {
 	}),
 	selectCollection: PropTypes.func.isRequired, // show modal to select collection
 	resetSearch: PropTypes.func.isRequired, // reset search
+	saveQuery: PropTypes.func.isRequired, // save query, optional (only when project is selected)
 };
 
 export default CollectionBar;

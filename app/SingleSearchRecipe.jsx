@@ -791,11 +791,12 @@ class SingleSearchRecipe extends React.Component {
 
 	/* --------------------------- RENDER COLLECTION BAR --------------------- */
 
-	renderCollectionBar = (collectionConfig) => (
+	renderCollectionBar = (collectionConfig, activeProject) => (
 			<CollectionBar
 				collectionConfig={collectionConfig}
 				selectCollection={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}
 				resetSearch={this.onComponentOutput}
+				saveQuery={activeProject ? this.saveQuery : null}
 			/>
 	);
 
@@ -986,18 +987,6 @@ class SingleSearchRecipe extends React.Component {
                 </div>
             );
 		}
-		//always add the save query button
-		actions.push(
-            <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.saveQuery}
-                title="Save current query to the active project">
-                &nbsp;
-                <i className="fa fa-save" style={{color: 'white'}}/>
-                &nbsp;
-            </button>
-        );
 
 		return (
 			<div className="table-actions">
@@ -1087,6 +1076,7 @@ class SingleSearchRecipe extends React.Component {
 
         const collectionBar = this.renderCollectionBar(
         	this.state.collectionConfig,
+        	this.state.activeProject
         );
 
         const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;
