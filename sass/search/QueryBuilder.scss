@@ -9,10 +9,8 @@
 	}
 
 	.bg__qb__breadcrumbs {
-		padding: 10px;
+		padding: 0px 10px 10px 10px;
 		text-align: center;
-		margin-top: -30px;
-		border-top: 1px solid $clGreyTint;
 
 		.bg__qb__crumb {
 			display: inline-block;
@@ -189,7 +187,9 @@
 		.bg__qb__result-dates-content {
 			background-color: mix($clGreyTint, $clGrey, 50%);
 			.bg__qb__date-graph {
-				padding: 20px 10px 0 10px;
+				padding: 20px 10px 0px 10px;
+    			border-bottom: 1px solid $clGreyTint;
+    			margin-bottom: 10px;
 			}
 		}
 

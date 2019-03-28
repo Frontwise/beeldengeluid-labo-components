@@ -50,7 +50,7 @@ class SingleSearchRecipe extends React.Component {
 			activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
 
 			awaitingProcess : null, //which process is awaiting the output of the project selector
-
+            isPagingOutOfBounds: false,
             isSearching : false, //awaiting the search API
 			pageSize : 20, //amount of search results on page
 
@@ -813,17 +813,6 @@ class SingleSearchRecipe extends React.Component {
 			return null
 		}
 
-		//if the search API returned a paging out of bounds error, return a helpful message for the user
-		if(state.isPagingOutOfBounds) {
-			return (
-				<div className="col-md-9">
-					<div className="alert alert-danger">
-	            		{MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
-	            	</div>
-	            </div>
-            )
-		}
-
 		let listComponent = null;
 
 		if (state.showSelectionOverview) {//storedSelectedRows && storedSelectedRows.length > 0
@@ -1117,6 +1106,16 @@ class SingleSearchRecipe extends React.Component {
 		// show a short introduction/tutorial for this tool
 		const tutorial = this.renderTutorial();
 
+        //if the search API returned a paging out of bounds error, return a helpful message for the user
+        const pagingOutOfBounds = this.state.isPagingOutOfBounds ? (
+            <div className="col-md-9">
+            	<br/>
+                <div className="alert alert-danger">
+                    {MessageHelper.renderPagingOutOfBoundsMessage(this.gotoPage.bind(this, undefined, 1))}
+                </div>
+            </div>
+        ) : null;
+
 		return (
 			<div className={IDUtil.cssClassName('single-search-recipe')}>
 				<div className="row">
@@ -1125,6 +1124,7 @@ class SingleSearchRecipe extends React.Component {
 						{collectionBar}
 						{searchComponent}
                         {resultList}
+                        {pagingOutOfBounds}
 					</div>
 				</div>
                 {tutorial}
