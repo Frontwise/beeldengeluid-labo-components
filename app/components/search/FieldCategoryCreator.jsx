@@ -140,7 +140,7 @@ class FieldCategoryCreator extends React.PureComponent {
                 <input
                     className={IDUtil.cssClassName('name', this.CLASS_PREFIX)}
                     type="text"
-                    placeholder="cluster name"
+                    placeholder=""
                     name="name"
                     ref={this.clusterName}
                 />

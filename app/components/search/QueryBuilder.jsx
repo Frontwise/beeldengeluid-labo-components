@@ -371,14 +371,14 @@ class QueryBuilder extends React.Component {
 
     renderNoResultsMessage = (aggregations, query, onClearSearch) => {
     	if(aggregations && query) {
-    		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
-    		if(!currentDateAggregation) {
+    // 		const currentDateAggregation = this.getCurrentDateAggregation(aggregations, query.dateRange);
+    // 		if(!currentDateAggregation) {
 				return (
-					<div className="alert alert-danger">
+					<div className={classNames("alert alert-danger",IDUtil.cssClassName('no-results-message', this.CLASS_PREFIX))}>
 						{MessageHelper.renderNoSearchResultsMessage(query, onClearSearch)}
 					</div>
 				)
-			}
+			// }
     	}
     	return null;
     };
@@ -386,7 +386,7 @@ class QueryBuilder extends React.Component {
     renderQueryResultHits = totalHits => {
     	return (
     		<span className={IDUtil.cssClassName('total-count', this.CLASS_PREFIX)} title="Total number of results based on keyword and selected filters">
-				Results:
+				Results
 				<span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>
 					{ComponentUtil.formatNumber(totalHits)}
 				</span>
@@ -679,7 +679,7 @@ class QueryBuilder extends React.Component {
 
             const queryResultCount = this.state.totalHits === 0 || this.state.totalHits ? this.renderQueryResultHits(this.state.totalHits) : null;
 
-			const aggregationBox = this.state.aggregations && this.state.searchId && this.state.totalHits > 0 ? this.renderAggregationList(
+			const aggregationBox = this.state.aggregations && this.state.searchId ? this.renderAggregationList(
 				this.state.searchId,
 				this.state.query,
 				this.state.aggregations,

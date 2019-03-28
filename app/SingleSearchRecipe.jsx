@@ -91,7 +91,7 @@ class SingleSearchRecipe extends React.Component {
 		initHelp("Search", "/feature-doc/tools/single-search");
 
 		//makes sure that the images are loaded only when visible
-		window.onscroll = () => {SingleSearchRecipe.afterRenderingHits()};
+		window.addEventListener('scroll', () => {SingleSearchRecipe.afterRenderingHits()});
 
 		/*
 			Loads the collectionID + initial query from either the:
@@ -184,6 +184,9 @@ class SingleSearchRecipe extends React.Component {
 					);
 					FlexRouter.gotoSingleSearch('cache')
 				}
+
+				// show media visible on screen
+				SingleSearchRecipe.afterRenderingHits();
 			}
 		);
 	}

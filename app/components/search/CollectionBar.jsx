@@ -86,29 +86,37 @@ class CollectionBar extends React.PureComponent {
 				{collectionConfig === null ? (
 					/* Select a collection first */
 					<div>
-						{/* <h2 onClick={this.props.selectCollection}>Start by selecting a collection</h2> */}
 						{collectionButton}
 					</div>
 				) : (
-					/* Collection info + change */
+					/* Collection info + buttons */
 					<div
 						className={IDUtil.cssClassName(
 							"active",
 							this.CLASS_PREFIX
 						)}
 					>
-						<h2
-							className={IDUtil.cssClassName(
-								"title",
+						{/* Collection info */}
+						<div className={IDUtil.cssClassName(
+								"collection-info",
 								this.CLASS_PREFIX
 							)}
 						>
-							{collectionConfig.getCollectionTitle()}
-						</h2>
-						{hits}
-						{ckanUrl}
-						{collectionButton}
-						{resetButton}
+							<h2>
+								{collectionConfig.getCollectionTitle()}
+							</h2>
+							{hits}
+							{ckanUrl}
+						</div>
+
+						{/* Buttons */}
+						<div className={IDUtil.cssClassName(
+							"buttons",
+							this.CLASS_PREFIX
+						)}>
+							{collectionButton}
+							{resetButton}
+						</div>
 					</div>
 				)}
 			</div>
