@@ -48,7 +48,7 @@ class CollectionBar extends React.PureComponent {
 			</button>
 		);
 
-		const ckanUrl =
+		const infoButton =
 			collectionConfig && collectionConfig.collectionInfo && collectionConfig.collectionInfo.ckanUrl ? (
 				<a
 					className={IDUtil.cssClassName("link", this.CLASS_PREFIX)}
@@ -56,6 +56,10 @@ class CollectionBar extends React.PureComponent {
 					href={collectionConfig.collectionInfo.ckanUrl}
 					target="_blank"
 				/>
+			) : null;
+
+		const title = collectionConfig ? (
+				<h2>{collectionConfig.getCollectionTitle()}</h2>
 			) : null;
 
 		const hits = collectionConfig ? (
@@ -102,11 +106,9 @@ class CollectionBar extends React.PureComponent {
 								this.CLASS_PREFIX
 							)}
 						>
-							<h2>
-								{collectionConfig.getCollectionTitle()}
-							</h2>
+							{title}
+							{infoButton}
 							{hits}
-							{ckanUrl}
 						</div>
 
 						{/* Buttons */}
