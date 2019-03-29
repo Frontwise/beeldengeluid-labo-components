@@ -315,7 +315,7 @@ class AggregationList extends React.Component {
 
     renderHamburgerMenu = aggr => {
         const extraOptions = this.getShowExtraOptions(aggr.field) ? (
-            <div className={IDUtil.cssClassName('sort-exclude-wrapper', this.CLASS_PREFIX)}>
+            <div className={IDUtil.cssClassName('extra-options', this.CLASS_PREFIX)}>
                 <div className={IDUtil.cssClassName('exclude-btn', this.CLASS_PREFIX)}>
                     <input
                         type="checkbox"
@@ -325,6 +325,12 @@ class AggregationList extends React.Component {
                     />
                     &nbsp;<label htmlFor={aggr.field}>Exclude selection</label>
                 </div>
+                <button className={classNames("btn",IDUtil.cssClassName('hide-button', this.CLASS_PREFIX))}
+                        onClick={
+                            this.showRemoveDialog.bind(this, aggr.field, aggr.index)
+                        }>
+                        Hide Facet
+                </button>
                 <div className={IDUtil.cssClassName('sort-btn-wrapper', this.CLASS_PREFIX)}>
                     {this.renderSortButton(aggr, 'numeric')}
                     {this.renderSortButton(aggr, 'alpha')}
@@ -333,23 +339,18 @@ class AggregationList extends React.Component {
         ) : null;
 
         return (
-            <div className={IDUtil.cssClassName('hamburger-menu', this.CLASS_PREFIX)}>
+            <div className={IDUtil.cssClassName('facet-header', this.CLASS_PREFIX)}>
 
                 <label htmlFor={aggr.guid}>
 
-                    <span className="bg__facet-title" data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
-                        <i className="fa fa-info-circle"/> {aggr.title}
+                    <span className="bg__facet-title" onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
+                        {aggr.title} <i className="fa fa-info-circle" data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true} />
                     </span>
-
-                    <span className="fa fa-remove" onClick={
-                        this.showRemoveDialog.bind(this, aggr.field, aggr.index)
-                    }/>
 
                     <div className="hb" onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
                         <div className="hb-line hb-line-top"/>
                         <div className="hb-line hb-line-center"/>
                     </div>
-
                 </label>
                 {extraOptions}
             </div>

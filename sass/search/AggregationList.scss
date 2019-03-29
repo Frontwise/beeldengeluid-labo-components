@@ -1,12 +1,12 @@
 .bg__aggregation-list {
-	$aggrBoxShadow: 0 1px 5px rgba(black, 0.1);
 	.bg__agl__tab-new {
 		margin-bottom: 1rem;
 		& > button {
-			background-color: $clGrey;
+			color: $clPrimary;
+			background-color: white;
 			transition: background-color $transition;
 			&:hover {
-				background-color: mix($clGrey, $clGreyTint);
+				color: darken($clPrimary,8%);
 			}
 		}
 	}
@@ -30,7 +30,6 @@
 			border: 1px solid $clGreyTint;
 			border-radius: 2px;
 			border-left: 3px solid $clPrimary;
-			box-shadow: $aggrBoxShadow;
 			margin-bottom: 3px;
 			padding: 6px 2px 6px 1rem;
 			word-wrap: break-word;
@@ -48,7 +47,7 @@
 				background-color: $clGrey;
 			}
 
-			&.exclude{
+			&.exclude {
 				border-left: 3px solid $clRed;
 			}
 		}
@@ -67,7 +66,7 @@
 			font-size: 1.3rem;
 			list-style-type: none;
 			margin-bottom: 1px;
-			padding: 8px 6px;
+			padding: 8px 6px 8px 8px;
 			position: relative;
 
 			cursor: pointer;
@@ -151,11 +150,10 @@
 	}
 
 	.bg__agl__facet-block {
-		background-color: $clGrey;
-		border-bottom: 1px solid $clGreyTint;
-		border-radius: 2px;
-		box-shadow: $aggrBoxShadow;
-		margin-bottom: 12px;
+		background-color: white;
+		border-radius: 5px;
+		margin-bottom: 15px;
+		border: 1px solid $clGreyTint;
 
 		h4 {
 			padding: 10px 0 8px 0;
@@ -163,10 +161,10 @@
 		}
 
 		&.aggregation-no-results {
-			background-color: #468dcb;
+			background-color: $clGrey;
 			border-radius: 0;
 
-			color: #fff;
+			color: black;
 			h4 {
 				display: inline-block;
 				font-size: 16px;
@@ -185,23 +183,10 @@
 			}
 		}
 
-		.fa-remove {
-			cursor: pointer;
-			float: right;
-			margin-right: 1rem;
-		}
-
-		.fa-info-circle {
-			float: left;
-			margin-left: 1.4rem;
-			margin-right: 1rem;
-			padding-top: 4px;
-		}
-
 		.bg__agl__switch-view {
 			background-color: $clGrey;
 			border-radius: 0 0 2px 2px;
-			color: #666;
+			color: $clPrimary;
 			display: block;
 			border-top: 1px solid mix($clGrey, $clGreyTint, 50%);
 			padding: 5px 8px 5px 5px;
@@ -209,8 +194,7 @@
 			cursor: pointer;
 			text-decoration: none;
 			&:hover {
-				color: $clPrimary;
-
+				color: darken($clPrimary, 8%);
 			}
 
 			& > .switchViewText {
@@ -226,11 +210,16 @@
 		}
 	}
 
-	// hamburger menu
-	.bg__agl__hamburger-menu {
-		background-color: $clPrimary;
+	// facet-header
+	.bg__agl__facet-header {
+		border-bottom: 1px solid $clGreyTint;
+		background-color: $clGrey;
 		border-radius: 2px 2px 0 0;
 		position: relative;
+		color: black;
+		&:hover {
+			background-color: mix($clGrey, $clGreyTint, 50%);
+		}
 
 		.hb {
 			cursor: pointer;
@@ -240,7 +229,7 @@
 		}
 
 		.hb-line {
-			background-color: #fff;
+			background-color: $clPrimary;
 			border-radius: 10px;
 			height: 3px;
 			position: absolute;
@@ -254,7 +243,7 @@
 			top: 16px;
 		}
 		.hb-line-center::after {
-			background-color: #fff;
+			background-color: $clPrimary;
 			border-radius: 10px;
 			content: "";
 			height: 3px;
@@ -274,20 +263,29 @@
 			width: 100%;
 		}
 
-		.bg__agl__sort-exclude-wrapper {
+		.bg__agl__extra-options {
 			display: flex;
-			color: #fff;
-			padding: 5px;
+			color: black;
+			padding: 10px 5px;
+			background-color: $clGreyTint;
 
 			.bg__agl__exclude-btn {
 				cursor: pointer;
 				flex-grow: 8;
+				font-size: 13px;
+				margin-top: 3px;
+
 				& > input {
-					margin: 0px 2px 2px 6px;
+					margin: 0px 2px 2px 4px;
 					vertical-align: middle;
 				}
-				& > label{
+				& > label {
 					font-weight: normal;
+					text-transform: uppercase;
+					font-family: $fontHeading;
+					&:hover {
+						color: $clPrimary;
+					}
 				}
 			}
 			.bg__agl__sort-btn-wrapper {
@@ -296,16 +294,16 @@
 				flex-direction: row-reverse;
 				.bg__agl__sort-btn {
 					cursor: pointer;
-					color: mix(white, $clPrimary, 50%);
+					color: $clDarkGrey;
 					padding: 3px 5px;
 					.bg__agl__sort-active {
-						color: white;
-						&:hover{
+						color: black;
+						&:hover {
 							opacity: 0.7;
 						}
 					}
-					&:hover{
-						color: white;
+					&:hover {
+						color: black;
 					}
 				}
 			}
@@ -318,36 +316,37 @@
 			margin-left: 10px;
 			right: 0;
 		}
-		.fa-remove {
-			color: white;
-			font-size: 18px;
-			position: absolute;
-			right: 0;
-			top: 8px;
-			z-index: 12;
+		.bg__agl__hide-button {
+			padding: 2px 10px;
+			background-color: transparent;
+			float: left;
+			&:hover {
+				color: $clPrimary;
+			}
 		}
-		span {
-			&.bg__facet-title {
-				color: #fff;
-				font-size: 16px;
-				font-family: $fontHeading;
-				text-transform: uppercase;
-				left: 20px;
-				overflow: hidden;
-				position: absolute;
-				text-overflow: ellipsis;
-				top: 6px;
-				white-space: nowrap;
-				max-width: calc(100% - 70px);
-				z-index: 10;
-				font-weight: normal;
 
-				.fa-info-circle {
-					float: left;
-					font-size: 13px;
-					margin-right: 4px;
-					padding-top: 5px;
-				}
+		.bg__facet-title {
+			cursor: pointer;
+			color: black;
+			font-size: 17px;
+			font-family: $fontHeading;
+			left: 35px;
+			overflow: hidden;
+			position: absolute;
+			text-overflow: ellipsis;
+			top: 6px;
+			white-space: nowrap;
+			max-width: calc(100% - 70px);
+			z-index: 10;
+			font-weight: normal;
+			font-weight: normal;
+
+			.fa-info-circle {
+				float: right;
+				font-size: 13px;
+				padding-top: 6px;
+				margin-left: 8px;
+				margin-right: 5px;
 			}
 		}
 	}
