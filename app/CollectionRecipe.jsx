@@ -3,6 +3,7 @@ import FlexRouter from './util/FlexRouter';
 import ComponentUtil from './util/ComponentUtil';
 import CollectionUtil from './util/CollectionUtil';
 import ReadMoreLink from './components/helpers/ReadMoreLink';
+import ToolHeader from './components/shared/ToolHeader';
 
 import CollectionAPI from './api/CollectionAPI';
 
@@ -380,6 +381,7 @@ class CollectionRecipe extends React.Component {
 
 		return (
 			<div className={IDUtil.cssClassName('collection-recipe')}>
+				<ToolHeader name={"Collection inspector"} />
 				{collectionModal}
 				<div className="row">
 					<div className="col-md-6">
