@@ -24,11 +24,12 @@ class ToolHeader extends React.PureComponent {
 					{ active: activeProject }
 				)}
 				onClick={this.props.selectProject}
+				title={activeProject ? "Current user project. Click to change." : ""}
 			>
 				{activeProject ? (
 					<span>{activeProject.name}</span>
 				) : (
-					<button className="btn btn-secondary">Set project</button>
+					<button className="btn btn-secondary">Set active user project</button>
 				)}
 			</div>
 		) : null;
