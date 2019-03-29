@@ -341,17 +341,14 @@ class AggregationList extends React.Component {
         return (
             <div className={IDUtil.cssClassName('facet-header', this.CLASS_PREFIX)}>
 
-                <label htmlFor={aggr.guid}>
-
-                    <span className="bg__facet-title" onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
+                <div className={IDUtil.cssClassName('facet-title-bar', this.CLASS_PREFIX)}
+                    onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
+                    <span className="bg__facet-title">
                         {aggr.title} <i className="fa fa-info-circle" data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true} />
                     </span>
 
-                    <div className="hb" onClick={this.toggleExtraOptions.bind(this, aggr.field)}>
-                        <div className="hb-line hb-line-top"/>
-                        <div className="hb-line hb-line-center"/>
-                    </div>
-                </label>
+                    <div className="icon-menu">⋮</div>
+                </div>
                 {extraOptions}
             </div>
         );

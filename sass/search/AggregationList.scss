@@ -221,38 +221,21 @@
 			background-color: mix($clGrey, $clGreyTint, 50%);
 		}
 
-		.hb {
+		.bg__agl__facet-title-bar{
+			padding: 8px 10px 9px 10px;
 			cursor: pointer;
-			height: 36px;
-			padding: 10px 0 8px 8px;
-			position: relative;
+
+			.icon-menu{
+				position:absolute;
+				right: 0;
+				top: 2px;
+				padding: 7px 6px;
+				margin: 0;
+				font-weight: bold;
+				font-size: 16px;
+			}
 		}
 
-		.hb-line {
-			background-color: $clPrimary;
-			border-radius: 10px;
-			height: 2px;
-			position: absolute;
-			width: 16px;
-		}
-		.hb-line-top {
-			top: 10px;
-		}
-		.hb-line-center {
-			position: absolute;
-			top: 16px;
-		}
-		.hb-line-center::after {
-			background-color: $clPrimary;
-			border-radius: 10px;
-			content: "";
-			height: 2px;
-			position: absolute;
-			top: 6px;
-			width: 16px;
-		}
-
-		.hamburger-toggle,
 		ul {
 			display: none;
 		}
@@ -327,15 +310,11 @@
 		}
 
 		.bg__facet-title {
-			cursor: pointer;
 			color: black;
 			font-size: 16px;
 			font-family: $fontHeading;
-			left: 35px;
 			overflow: hidden;
-			position: absolute;
 			text-overflow: ellipsis;
-			top: 6px;
 			white-space: nowrap;
 			max-width: calc(100% - 70px);
 			z-index: 10;
@@ -343,7 +322,6 @@
 			font-weight: normal;
 
 			.fa-info-circle {
-				float: right;
 				font-size: 13px;
 				padding-top: 6px;
 				margin-left: 8px;
