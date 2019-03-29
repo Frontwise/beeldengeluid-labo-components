@@ -31,7 +31,7 @@ import { initHelp } from './components/workspace/helpers/helpDoc';
 
 import MessageHelper from './components/helpers/MessageHelper';
 import LoadingSpinner from './components/helpers/LoadingSpinner';
-
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 class SingleSearchRecipe extends React.Component {
@@ -845,7 +845,7 @@ class SingleSearchRecipe extends React.Component {
 		);
 
         return (
-            <div className="col-md-9 result-list">
+            <div className={classNames(IDUtil.cssClassName('result-list', this.CLASS_PREFIX))}>
                 {tableHeader}
                 {listComponent}
                 {tableFooter}

@@ -97,8 +97,14 @@
 		padding: 10px;
 		text-align: center;
 	}
-	.result-list {
-		margin-top: 8px;
+	.bg__ssr__result-list {
+		margin-top: 13px;
+		width: 72%;
+		margin-left: 28%;
+		@media screen and (max-width: $break-medium) {
+			width: 100%;
+			margin-left: 0;
+		}
 	}
 	.table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
