@@ -18,7 +18,7 @@
 	& > .bg__th__project {
 		display: inline-block;
 		float: right;
-		padding: 5px 10px 5px 35px;
+		padding: 6px 10px 6px 35px;
 		background-image: $iconProjectUrl;
 		background-repeat: no-repeat;
 		background-position: 7px center;
@@ -27,9 +27,27 @@
 		line-height: 30px;
 		cursor: pointer;
 
+		& > button{
+			/* Restyle buttons to new format */
+			text-transform: uppercase;
+			font-weight: 400px;
+			font-size: 0.96em;
+			font-family: $fontHeading;
+			transition: background-color $transition;
+
+			&.btn-secondary {
+				background-color: $clSecondary;
+				color: white;
+
+				&:hover {
+					background-color: darken($clSecondary, 8%);
+				}
+			}
+		}
+
 		&.active {
-			//border-bottom: 3px solid $clSecondary;
-   		    border-radius: 2px;
+			border-bottom: 2px solid $clSecondary;
+   		    border-radius: 2px 2px 0 0;
 
 			&:hover {
 				background-color: $clGrey;
