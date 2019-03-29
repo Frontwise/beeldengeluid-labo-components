@@ -1,9 +1,9 @@
-.bg__single-search-header {
+.bg__tool-header {
 	width: 100%;
 	margin: 45px 0 10px;
 	border-bottom: 1px solid #eee;
 
-	.bg__ssh__title {
+	.bg__th__title {
 		display: inline-block;
 		margin: 0;
 		padding: 10px 0 10px 38px;
@@ -15,10 +15,10 @@
 	}
 
 	// project info/selector
-	& > .bg__ssh__project {
+	& > .bg__th__project {
 		display: inline-block;
 		float: right;
-		padding: 5px 10px 5px 33px;
+		padding: 5px 10px 5px 35px;
 		background-image: $iconProjectUrl;
 		background-repeat: no-repeat;
 		background-position: 7px center;
@@ -28,20 +28,44 @@
 		cursor: pointer;
 
 		&.active {
-			border-bottom: 3px solid $clSecondary;
-   		    border-radius: 5px 5px 0 0;
+			//border-bottom: 3px solid $clSecondary;
+   		    border-radius: 2px;
 
 			&:hover {
 				background-color: $clGrey;
 			}
 
 			span {
+				font-family: $fontHeading;
 				display: inline-block;
 				padding-right: 25px;
 				background-image: $arrowDownDarkUrl;
 				background-position: right 4px center;
 				background-repeat: no-repeat;
+				font-size: 1.1em;
 			}
+		}
+	}
+
+	& > .bg__th__project-link {
+		float:right;
+		display: inline-block;
+		font-size: 0;
+		background-color: $clSecondary;
+		color: white;
+		border-radius: 2px;
+		min-width: 30px;
+		height: 28px;
+		vertical-align: top;
+		background-image: $iconLinkUrl;
+		background-position: center;
+		background-repeat: no-repeat;
+		margin-left: 3px;
+		margin-top: 6px;
+		transition: background-color $transition;
+		background-size: 18px;
+		&:hover {
+			background-color: darken($clSecondary, 8%);
 		}
 	}
 }

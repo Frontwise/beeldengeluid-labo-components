@@ -18,7 +18,7 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
-import Header from './components/search/Header';
+import ToolHeader from './components/shared/ToolHeader';
 import CollectionBar from './components/search/CollectionBar';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
@@ -784,10 +784,10 @@ class SingleSearchRecipe extends React.Component {
         </FlexModal>
     );
 
-	/* --------------------------- RENDER RECIPE HEADER --------------------- */
+	/* --------------------------- RENDER HEADER --------------------- */
 
 	renderHeader = (name, activeProject) => (
-			<Header
+			<ToolHeader
 				name={name}
 				activeProject={activeProject}
 				selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}

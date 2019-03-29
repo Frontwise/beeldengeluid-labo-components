@@ -17,6 +17,10 @@
 		}
 	}
 
+	.btn-primary{
+		margin-top: 2px;
+	}
+
 	.bg__scb__active {
 		display: flex;
 		justify-content: stretch;
@@ -46,6 +50,7 @@
 		.bg__scb__buttons {
 			flex-grow: 1;
 			button {
+				margin-top: 2px;
 				float: right;
 				margin-left: 15px;
 			}
@@ -67,7 +72,7 @@
 		margin-left: 15px;
 		margin-top: 3px;
 		transition: background-color $transition;
-		background-size: 19px;
+		background-size: 18px;
 		&:hover {
 			background-color: darken($clPrimary, 8%);
 		}
