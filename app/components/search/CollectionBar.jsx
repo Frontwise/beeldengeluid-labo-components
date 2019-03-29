@@ -39,16 +39,16 @@ class CollectionBar extends React.PureComponent {
 	render() {
 		const collectionConfig = this.props.collectionConfig;
 
-		const collectionButton = (
+		const collectionButton = !collectionConfig ? (
 			<button
 				className="btn btn-primary"
 				onClick={this.props.selectCollection}
 			>
 				{collectionConfig ? "Change collection" : "Select collection"}
 			</button>
-		);
+		) : null;
 
-		const ckanUrl =
+		const infoButton =
 			collectionConfig && collectionConfig.collectionInfo && collectionConfig.collectionInfo.ckanUrl ? (
 				<a
 					className={IDUtil.cssClassName("link", this.CLASS_PREFIX)}
@@ -56,6 +56,10 @@ class CollectionBar extends React.PureComponent {
 					href={collectionConfig.collectionInfo.ckanUrl}
 					target="_blank"
 				/>
+			) : null;
+
+		const title = collectionConfig ? (
+				<h2 onClick={this.props.selectCollection}>{collectionConfig.getCollectionTitle()}</h2>
 			) : null;
 
 		const hits = collectionConfig ? (
@@ -72,10 +76,20 @@ class CollectionBar extends React.PureComponent {
 
 		const resetButton = collectionConfig ? (
 			<button
-				className="btn btn-secondary"
+				className="btn btn-default"
 				onClick={this.resetSearch}
 			>
 				Clear search
+			</button>
+		) : null;
+
+		const saveButton = collectionConfig && this.props.saveQuery ? (
+			<button
+				className="btn btn-secondary"
+				onClick={this.props.saveQuery}
+				title="Save current query to the active project"
+			>
+				Save Query
 			</button>
 		) : null;
 
@@ -102,11 +116,9 @@ class CollectionBar extends React.PureComponent {
 								this.CLASS_PREFIX
 							)}
 						>
-							<h2>
-								{collectionConfig.getCollectionTitle()}
-							</h2>
+							{title}
 							{hits}
-							{ckanUrl}
+							{infoButton}
 						</div>
 
 						{/* Buttons */}
@@ -114,7 +126,7 @@ class CollectionBar extends React.PureComponent {
 							"buttons",
 							this.CLASS_PREFIX
 						)}>
-							{collectionButton}
+							{saveButton}
 							{resetButton}
 						</div>
 					</div>
@@ -131,6 +143,7 @@ CollectionBar.propTypes = {
 	}),
 	selectCollection: PropTypes.func.isRequired, // show modal to select collection
 	resetSearch: PropTypes.func.isRequired, // reset search
+	saveQuery: PropTypes.func.isRequired, // save query, optional (only when project is selected)
 };
 
 export default CollectionBar;
