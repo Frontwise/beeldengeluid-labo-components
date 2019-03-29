@@ -231,7 +231,7 @@
 		.hb-line {
 			background-color: $clPrimary;
 			border-radius: 10px;
-			height: 3px;
+			height: 2px;
 			position: absolute;
 			width: 16px;
 		}
@@ -246,7 +246,7 @@
 			background-color: $clPrimary;
 			border-radius: 10px;
 			content: "";
-			height: 3px;
+			height: 2px;
 			position: absolute;
 			top: 6px;
 			width: 16px;
@@ -291,6 +291,7 @@
 			.bg__agl__sort-btn-wrapper {
 				flex-grow: 2;
 				display: flex;
+				margin-top: 3px;
 				flex-direction: row-reverse;
 				.bg__agl__sort-btn {
 					cursor: pointer;
@@ -328,7 +329,7 @@
 		.bg__facet-title {
 			cursor: pointer;
 			color: black;
-			font-size: 17px;
+			font-size: 16px;
 			font-family: $fontHeading;
 			left: 35px;
 			overflow: hidden;
