@@ -374,21 +374,26 @@ class AggregationList extends React.Component {
         );
     };
 
+
+
     renderEmptyBlocks = (aggr, index) => {
         return (
             <div className={IDUtil.cssClassName('facet-block aggregation-no-results', this.CLASS_PREFIX)}
                 key={'facet__' + aggr.index}
                 id={'index__' + aggr.index}>
-                <span data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true}>
-                    <i className="fa fa-info-circle"/>
-                </span>
-                <h4 className="bg__empty-facet">
-                    (0) {aggr.title}
-                </h4>
-                <span className="fa fa-remove" onClick={
-                    this.showRemoveDialog.bind(this, aggr.field, aggr.index)
-                }/>
+                <div className={IDUtil.cssClassName('facet-header', this.CLASS_PREFIX)}>
+
+                <div className={IDUtil.cssClassName('facet-title-bar', this.CLASS_PREFIX)}>
+                    <span className="bg__facet-title">
+                        (0) {aggr.title} <i className="fa fa-info-circle" data-for={'tooltip__' + aggr.index} data-tip={aggr.field} data-html={true} />
+                    </span>
+                    <span className="fa fa-remove rightAlign" onClick={
+                        this.showRemoveDialog.bind(this, aggr.field, aggr.index)
+                    }/>
+                </div>
                 <ReactTooltip id={'tooltip__' + aggr.index}/>
+
+            </div>
             </div>
         );
     };
@@ -482,11 +487,13 @@ class AggregationList extends React.Component {
                 {/* Selected/active facets */}
                 <div className={IDUtil.cssClassName('selected-facets', this.CLASS_PREFIX)}>
                     {selectedFacets}
-                    {emptyAggrBlocks}
                 </div>
 
                 {/* Facet list */}
                 {aggregationBlocks}
+
+                {/* Empty facets */}
+                {emptyAggrBlocks}
             </div>
         );
     }
