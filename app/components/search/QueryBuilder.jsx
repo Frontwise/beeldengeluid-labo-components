@@ -36,10 +36,12 @@ class QueryBuilder extends React.Component {
 	constructor(props) {
 		super(props);
 
+
+
 		this.state = {
 			//UI option/toggles
 			displayFacets : this.props.collectionConfig.facets ? true : false,
-			showTimeLine: this.props.showTimeLine,
+			showTimeLine: localStorage.getItem("qb-show-timeline") !== undefined ? (localStorage.getItem("qb-show-timeline") === "true" ? true : false) : this.props.showTimeLine,
 			graphType : null,
 			isSearching : false,
 			query : this.props.query, //this is only set by the owner after choosing a collection or loading the page
@@ -231,8 +233,9 @@ class QueryBuilder extends React.Component {
 	}
 
 	toggleTimeLine = () => {
+		localStorage.setItem("qb-show-timeline",!this.state.showTimeLine ? "true" : "false");
     	this.setState({showTimeLine:!this.state.showTimeLine});
-    };
+    }
 
 	/* ----------------------------------------- DATA FUNCTIONS FOR THE RENDER ------------------------------ */
 
