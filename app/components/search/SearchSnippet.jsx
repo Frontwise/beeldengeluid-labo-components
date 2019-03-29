@@ -90,18 +90,9 @@ class SearchSnippet extends React.Component {
 	renderAccessabilityIcon = isPlayable => {
 		//Note: assigning a media type (to the result data) automatically means it's accessible in the media suite!
 		if (isPlayable) {
-			return (
-				<span
-					className={IconUtil.getMediaObjectAccessIcon(
-						true,
-						true,
-						true,
-						true,
-						false
-					)}
-					title="Media object(s) can be viewed"
-				/>
-			);
+			// Data  should be visible by default, so prevent any clutter
+			// by showing for all items they are visible.
+			return null;
 		} else {
 			return (
 				<span
@@ -145,7 +136,8 @@ class SearchSnippet extends React.Component {
 		);
 	};
 
-	trimMsgEnd = (s)=>{
+	fixMsg = (s)=>{
+		// remove " |" from string end
 		return s.replace(new RegExp(/\ \|$/,"g"), "");
 	}
 
@@ -173,7 +165,7 @@ class SearchSnippet extends React.Component {
 		const subHeading = (
 			<div>
 				{date && <i>{date}</i>}
-				<span>{this.trimMsgEnd(this.props.data.highlightMsg)}</span>
+				<span>{this.fixMsg(this.props.data.highlightMsg)}</span>
 			</div>
 		);
 
@@ -203,6 +195,13 @@ class SearchSnippet extends React.Component {
 								)
 							)}
 						/>
+						{/* Icons access */}
+						<span className={IDUtil.cssClassName(
+							"icon-access",
+							this.CLASS_PREFIX
+						)}>
+							{accessIcon}
+						</span>
 					</h3>
 
 					{/* Text Snippet */}
@@ -232,17 +231,16 @@ class SearchSnippet extends React.Component {
 							this.CLASS_PREFIX
 						)}
 					>
-						{subHeading}
-
-						{/* Icons */}
+						{/* Icons type */}
 						<div className={IDUtil.cssClassName(
-							"icons",
+							"icon-type",
 							this.CLASS_PREFIX
 						)}>
-							{mediaTypes}
-							{accessIcon}
-							{fragmentIcon}
+							{mediaTypes}{fragmentIcon}
 						</div>
+						{subHeading}
+
+						
 					</div>
 
 					{tags}
