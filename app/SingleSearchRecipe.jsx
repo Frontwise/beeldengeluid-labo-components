@@ -90,7 +90,7 @@ class SingleSearchRecipe extends React.Component {
 
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
-		initHelp("Search", "/feature-doc/tools/single-search");
+		initHelp("Search", "/feature-doc/howtos/single-search");
 
 		//makes sure that the images are loaded only when visible
 		window.addEventListener('scroll', () => {SingleSearchRecipe.afterRenderingHits()});
@@ -1043,7 +1043,7 @@ class SingleSearchRecipe extends React.Component {
 
 	renderTutorial = () => (
 		<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
-			 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+			 A detailed explanation and HowTos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
 		</div>
 	);
 
