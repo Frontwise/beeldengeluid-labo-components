@@ -51,7 +51,6 @@
 		float:right;
 		display: inline-block;
 		font-size: 0;
-		background-color: $clSecondary;
 		color: white;
 		border-radius: 2px;
 		min-width: 30px;
@@ -60,12 +59,13 @@
 		background-image: $iconLinkUrl;
 		background-position: center;
 		background-repeat: no-repeat;
-		margin-left: 3px;
+		margin-left: 0;
 		margin-top: 6px;
-		transition: background-color $transition;
+		transition: opacity $transition;
 		background-size: 18px;
+		opacity: 0.7;
 		&:hover {
-			background-color: darken($clSecondary, 8%);
+			opacity: 1.0;
 		}
 	}
 }
