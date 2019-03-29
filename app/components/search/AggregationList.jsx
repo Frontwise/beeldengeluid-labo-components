@@ -481,14 +481,19 @@ class AggregationList extends React.Component {
                     )}
                     onClick={this.toggleExtraOptions.bind(this, aggr.field)}
                 >
-                    <span className="bg__facet-title">
-                        {aggr.title}{" "}
+                    <span
+                        className={IDUtil.cssClassName(
+                            "facet-title",
+                            this.CLASS_PREFIX
+                        )}
+                    >
                         <i
                             className="fa fa-info-circle"
                             data-for={"tooltip__" + aggr.index}
                             data-tip={aggr.field}
                             data-html={true}
                         />
+                        <span>{aggr.title}{" "}</span>
                     </span>
 
                     <div className="icon-menu">⋮</div>
@@ -549,14 +554,19 @@ class AggregationList extends React.Component {
                             this.CLASS_PREFIX
                         )}
                     >
-                        <span className="bg__facet-title">
-                            (0) {aggr.title}{" "}
+                        <span
+                            className={IDUtil.cssClassName(
+                                "facet-title",
+                                this.CLASS_PREFIX
+                            )}
+                        >
                             <i
                                 className="fa fa-info-circle"
                                 data-for={"tooltip__" + aggr.index}
                                 data-tip={aggr.field}
                                 data-html={true}
                             />
+                            <span>(0) {aggr.title}{" "}</span>
                         </span>
                         <span
                             className="fa fa-remove rightAlign"
