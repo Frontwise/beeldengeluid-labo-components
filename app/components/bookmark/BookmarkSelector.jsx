@@ -4,6 +4,7 @@ import AnnotationAPI from '../../api/AnnotationAPI';
 
 
 class BookmarkSelector extends React.Component {
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -158,6 +159,7 @@ class BookmarkSelector extends React.Component {
 		}
 		return (
 			<div className={IDUtil.cssClassName('bookmark-selector')}>
+				<h4>Select one or more, or create a new bookmark group</h4>
 				{bookmarkList}
 
 				<h4>New bookmark group</h4>

@@ -60,10 +60,7 @@ class QueryBuilder extends React.Component {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
             this.searchTermRef.current.value = this.props.query.term || null;
-			//never search with an empty search term on init (FIXME not always desirable)
-			if(this.props.query.term && this.props.query.term.trim() !== '') {
-				this.doSearch(this.props.query);
-			}
+			this.doSearch(this.props.query);
 		}
 	}
 

@@ -687,8 +687,8 @@ class SingleSearchRecipe extends React.Component {
 						showSelect={true}
 						showBrowser={true}/>
 			</FlexModal>
-		)
-	}
+		);
+	};
 
 	renderQuickViewModal = (storedSelectedRows, selectedOnPage, quickViewData) => {
 		const selected = storedSelectedRows.findIndex(elem => elem._id === quickViewData.formattedData.resourceId) >= 0;
@@ -709,8 +709,8 @@ class SingleSearchRecipe extends React.Component {
 				    isLastResource={this.state.isLastResource}
 				/>
 			</FlexModal>
-		)
-	}
+		);
+	};
 
 	renderProjectModal = () => {
 		return (
@@ -722,8 +722,8 @@ class SingleSearchRecipe extends React.Component {
 				title="Set the active project">
 					<ProjectSelector onOutput={this.onComponentOutput} user={this.props.user}/>
 			</FlexModal>
-		)
-	}
+		);
+	};
 
 	renderQueryModal = (currentOutput, activeProject) => {
         const projectTitle = `Save query to project: ${activeProject.name}`;
@@ -740,17 +740,18 @@ class SingleSearchRecipe extends React.Component {
 						project={activeProject}
 						onOutput={this.onComponentOutput}/>
 			</FlexModal>
-		)
+		);
 	};
 
 	renderBookmarkModal = (collectionConfig, activeProject) => {
+		const title = `Bookmark selection to project: ${activeProject.name}`
 		return (
 			<FlexModal
 				elementId="bookmark__modal"
 				stateVariable="showBookmarkModal"
 				owner={this}
 				size="large"
-				title="Select one or more bookmark groups for your selection of resources">
+				title={title}>
 					<BookmarkSelector
 						onOutput={this.onComponentOutput}
 						user={this.props.user}
@@ -758,8 +759,8 @@ class SingleSearchRecipe extends React.Component {
 						collectionId={collectionConfig.collectionId}
 						/>
 			</FlexModal>
-		)
-	}
+		);
+	};
 
     renderSavedBookmarkModal = () => (
         <FlexModal

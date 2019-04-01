@@ -51,7 +51,7 @@ class ProjectSessionView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "sessions");
 
-        initHelp('Tool Sessions', '/feature-doc/workspace/user-projects/tool-sessions');
+        initHelp('Tool Sessions', '/feature-doc/howtos/user-projects/tool-sessions');
     }
 
     componentDidUpdate() {

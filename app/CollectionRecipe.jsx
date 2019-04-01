@@ -48,7 +48,7 @@ class CollectionRecipe extends React.Component {
 			);
 		}
 
-        initHelp("Collection Inspector", "/feature-doc/tools/collection-inspector");
+        initHelp("Collection Inspector", "/feature-doc/howtos/collection-inspector");
 	}
 
 	onConfigsLoaded = configs => {

@@ -39,7 +39,7 @@ class ProjectBookmarkView extends React.PureComponent {
         // store tab to sessionStorage
         window.sessionStorage.setItem("bg__project-tab", "bookmarks");
 
-        initHelp('Bookmarks', '/feature-doc/workspace/user-projects/bookmarks');
+        initHelp('Bookmarks', '/feature-doc/howtos/user-projects/bookmarks');
     }
 
     componentWillUnmount() {

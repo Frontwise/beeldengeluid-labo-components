@@ -14,7 +14,7 @@ class ProjectCreateView extends React.PureComponent {
 
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
-        initHelp('User Project Create','/feature-doc/workspace/user-projects/create');
+        initHelp('User Project Create','/feature-doc/howtos/user-projects/create');
     }
 
     render() {
