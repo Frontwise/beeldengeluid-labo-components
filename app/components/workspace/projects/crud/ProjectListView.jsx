@@ -21,7 +21,7 @@ class ProjectListView extends React.PureComponent {
     componentDidMount() {
         setBreadCrumbsFromMatch(this.props.match);
 
-        initHelp('User Projects List', '/feature-doc/workspace/user-projects');
+        initHelp('User Projects List', '/feature-doc/howtos/user-projects');
     }
 
     render() {
