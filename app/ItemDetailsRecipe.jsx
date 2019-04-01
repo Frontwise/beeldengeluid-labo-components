@@ -948,8 +948,8 @@ class ItemDetailsRecipe extends React.Component {
 			<button
 				className="btn btn-secondary"
 				onClick={this.bookmark.bind(this)}
-				title="Control the bookmark groups this resource is associated with">
-				Bookmark groups ({numBookmarkGroups})
+				title="Adds this resource to one or more bookmark groups (the number of groups is showing in brackets)">
+				Bookmark resource ({numBookmarkGroups})
 			</button>
 		)
 
@@ -967,16 +967,18 @@ class ItemDetailsRecipe extends React.Component {
 
         //draw the button for annotating the resource (only when annotation support is activated)
 		const resourceAnnotationBtn = annotationSupport ? (
-			<button className="btn btn-secondary" onClick={this.annotateResource.bind(this)}>
+			<button
+				className="btn btn-secondary"
+				onClick={this.annotateResource.bind(this)}
+				title={`Annotate the (abstract) resource that represents all information on this page (ID = ${this.state.itemData.resourceId})`}>
 				Annotate resource
-				{hasResourceAnnotation ? <i className="fa fa-star"/> : null}
 			</button>
 		) : null;
 
         return (
         	<div className={IDUtil.cssClassName('project-buttons', this.CLASS_PREFIX)}>
-				{bookmarkBtn}
 				{resourceAnnotationBtn}
+				{bookmarkBtn}
 				{bookmarkIcon}
 			</div>
 		);

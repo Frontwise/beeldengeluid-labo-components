@@ -149,7 +149,7 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="All metadata fields"
+						placeholder="All"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
