@@ -877,7 +877,7 @@ class FlexPlayer extends React.Component {
 						<div className="btn-toolbar" role="toolbar">
 							<div className="btn-group" role="group">
 								<button className="btn btn-default" type="button"
-									title="Add annotation to the whole video (SHIFT+A)"
+									title="Add annotation to the current media object / carrier (SHIFT+A)"
 									onClick={this.editMediaObjectAnnotation.bind(this)}>
 									<span className={IconUtil.getUserActionIcon('annotate')}></span>
 								</button>
