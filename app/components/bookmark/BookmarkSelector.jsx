@@ -159,7 +159,7 @@ class BookmarkSelector extends React.Component {
 		}
 		return (
 			<div className={IDUtil.cssClassName('bookmark-selector')}>
-				<h4>Select one or more, or create a new bookmark group (see HowTos in the help menu)</h4>
+				<h4>Select one or more, or create a new bookmark group</h4>
 				{bookmarkList}
 
 				<h4>New bookmark group</h4>
