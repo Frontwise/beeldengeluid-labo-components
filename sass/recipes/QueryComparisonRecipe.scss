@@ -1,6 +1,14 @@
 @include spinner();
 
 .bg__comparative-search-recipe {
+	.bg__queryComparisonRecipe-header-btns{
+		margin: 20px 0;
+		button{
+			font-family: $fontHeading;
+			text-transform: uppercase;
+		}
+	}
+
 	.bg__project-queries-view {
 		@import '../workspace/index';
 		.tools {

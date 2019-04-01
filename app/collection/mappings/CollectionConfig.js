@@ -536,7 +536,7 @@ class CollectionConfig {
 	//returns the static text for the search snippet or the highlight overview in the quick viewer
 	getMatchingTermsMsg(numHits, forSnippet) {
 		if(forSnippet) {
-			return numHits > 0 ? numHits + " match(es) in archival metadata |" : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
+			return numHits > 0 ? (numHits + " match" + (numHits === 1 ? "" : "es") + " in archival metadata") : ' No matches in the archival metadata, matching terms found in the automatic enrichments';
 		} else {
         	return numHits <= 0 ? 'No matching terms found in archival metadata' : 'Matching terms in archival metadata';
         }

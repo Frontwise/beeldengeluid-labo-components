@@ -8,21 +8,20 @@
 }
 
 .bg__single-search-recipe {
-
-     /* Restyle buttons to new format */
-	.btn{
+	/* Restyle buttons to new format */
+	.btn {
 		text-transform: uppercase;
 		font-weight: 400px;
-		font-size: .96em;
+		font-size: 0.96em;
 		font-family: $fontHeading;
 		transition: background-color $transition;
 
-		&.btn-secondary{
+		&.btn-secondary {
 			background-color: $clSecondary;
 			color: white;
 
-			&:hover{
-				background-color: darken($clSecondary,8%);
+			&:hover {
+				background-color: darken($clSecondary, 8%);
 			}
 		}
 	}
@@ -30,18 +29,21 @@
 	.select-all {
 		@include checkbox();
 		margin-top: 6px;
+		margin-left: 3px;
 	}
+
 	.table-actions-header {
-		background-color: #2d343a;
-		border-radius: 6px;
-		margin: 5px;
-		min-height:53px;
-		min-width: 100%;
-		padding: 10px;
+		background-color: white;
+		border-top: 1px solid $clGreyTint;
+		border-bottom: 1px solid $clGreyTint;
+		margin: 5px 0 0 2px;
+		min-height: 53px;
+		padding: 10px 5px 10px 0;
+
 		.table-actions {
-			float:left;
+			float: left;
 			.btn {
-				margin-right:2px;
+				margin-right: 2px;
 				.fa-bookmark {
 					font-weight: bold;
 					&:before {
@@ -50,16 +52,17 @@
 				}
 			}
 		}
+
 		&.bookmarked-results {
 			background-color: transparent;
 			margin: 0 0 0 6px;
 			padding: 0;
-			animation: .6s ease-in 0s 1 slideInFromLeft;
+			animation: 0.6s ease-in 0s 1 slideInFromLeft;
 			.header-selected-items {
-				background-color: #468dcb;
+				background-color: $clPrimary;
 				color: white;
 				margin: 0;
-				padding: 7px 7px 7px 25px;
+				padding: 7px 7px 7px 20px;
 				.fa-remove {
 					float: right;
 					padding: 0 10px;
@@ -69,9 +72,24 @@
 				}
 			}
 		}
+
+		.btn-default:hover {
+			background-color: $clGreyTint;
+		}
+
+		.btn-default.active {
+			background-color: $clGrey;
+		}
 	}
 
-	.alert{
+	.bg__paging {
+		.btn-default.active {
+			background-color: $clPrimary;
+			color: white;
+		}
+	}
+
+	.alert {
 		margin-top: 10px;
 	}
 
@@ -79,41 +97,55 @@
 		padding: 10px;
 		text-align: center;
 	}
-	.result-list {
-		margin-top: 8px;
+	.bg__ssr__result-list {
+		margin-top: 13px;
+		width: 72%;
+		margin-left: 28%;
+		@media screen and (max-width: $break-medium) {
+			width: 100%;
+			margin-left: 0;
+		}
 	}
 	.table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
 		margin-right: 5px;
-		button {
-			background-color: #468dcb;
-			color: white;
-			text-align: left;
-			width: 100%;
-		}
-		#dropdownMenuLink {
-			padding: 9px;
-		}
-		.dropdown-menu {
-			background-color: #468dcb;
-		}
-		.dropdown-item {
-			border-color: #468dcb;
-			margin: 3px 0;
 
-			&:hover {
-				color: #d3d3d3;
+		.dropdown-toggle {
+			color: white;
+			font-family: $fontHeading;
+			font-weight: bold;
+			background-color: $clPrimary;
+			span {
+				margin-left: 4px;
+				margin-right: 4px;
+			}
+		}
+
+		.dropdown-menu {
+			min-width: 200px;
+			padding:0;
+			border: 1px solid $clGreyTint;
+			button {
+				background-color: white;
+				text-align: left;
+				width: 100%;
+				border: 0;
+				color: black;
+				padding: 10px;
+				border-bottom: 1px solid $clGreyTint;
+				&:hover {
+					background-color: $clGrey;
+				}
 			}
 		}
 	}
 	.selected-items {
-		background-color: #efefef;
-		border-radius: 6px;
-		box-shadow: 0 6px 4px -6px #000;
+		background-color: $clGrey;
+		border-radius: 5px;
 		margin-bottom: 12px;
-		max-height: 380px;
+		max-height: 1000px;
 		position: relative;
-		overflow: scroll;
+		overflow-y: auto;
 
 		h4 {
 			font-size: 14px;
@@ -123,7 +155,7 @@
 		}
 	}
 
-	.bg__ssr__tutorial{
+	.bg__ssr__tutorial {
 		margin-top: 15px;
 		margin-bottom: 10px;
 		border-radius: 5px;
@@ -132,7 +164,7 @@
 		padding: 10px;
 		text-align: center;
 		line-height: 25px;
-		span{
+		span {
 			cursor: pointer;
 			margin-left: 10px;
 			background-color: $clPrimary;
