@@ -21,6 +21,8 @@
 
 	.react-datepicker{
 		font-size: 13px;
+		min-height: 21.5rem;
+	    height: auto;
 		.react-datepicker__navigation{
 			// somehow the prev/next buttons don't render correctly
 			// apply some quick fixes
@@ -28,12 +30,14 @@
 			height: 10px;
 			margin-top: 6px;
 			background-color: transparent;
+		}
 
-			.react-datepicker__navigation--previous{
+		.react-datepicker__month-container{
+			height: auto;
+		}
 
-			}
-			.react-datepicker__navigation--next{
-			}
+		.react-datepicker__day--outside-month{
+			color: $clDarkGrey;
 		}
 	}
 } /* DateRangeSelector.jsx */
