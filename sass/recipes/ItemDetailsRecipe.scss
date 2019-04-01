@@ -1,8 +1,41 @@
 .bg__item-details-recipe {
 
-	.bookmarked {
-    	float: left;
-    	padding: 9px 12px;
+	button {
+		text-transform: uppercase;
+		font-family: Maven Pro,sans-serif;
+	}
+
+	.bg__rcp__id__paging-buttons {
+		float:left;
+	}
+
+	.bg__rcp__id__project-buttons {
+		float:right;
+		margin-right:35px;
+		button {
+			margin-top: 2px;
+    		float: right;
+			margin-left: 15px;
+			border: 0;
+			background-color: #f26c50;
+			color: #fff;
+		}
+
+		.bg__rcp__id__bookmarked {
+		    background-color: #f26c50;
+		    border: 0;
+		    color: #fff;
+		    text-align: center;
+		    width: 35px;
+		    height: 35px;
+		    position: absolute;
+		    right: 0;
+		    top: 0;
+		    i {
+		    	line-height: 35px;
+		    }
+		}
+
 	}
 
 	.bg__rcp__id__media-player {}

@@ -13,12 +13,13 @@ class MetadataTable extends React.Component {
 		let source = null;
 		let specialProperties = null;
 		//get the special properties that are important to show for this collection
+		//TODO implement links within the special properties without using dangerouslysetinnerhtml
 		if(this.props.data.specialProperties) {
 			specialProperties = Object.keys(this.props.data.specialProperties).map((key, index)=> {
 				return (
 					<tr className={IDUtil.cssClassName('special-props', this.CLASS_PREFIX)} key={'props__' + index}>
 						<td><label>{key}:</label></td>
-						<td dangerouslySetInnerHTML={{__html : this.props.data.specialProperties[key]}}></td>
+						<td>{this.props.data.specialProperties[key]}</td>
 					</tr>
 				);
 			});

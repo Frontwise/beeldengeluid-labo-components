@@ -34,6 +34,7 @@ class AnnotationList extends React.Component {
 			annotations : [],
 			expanded : false
 		}
+		this.CLASS_PREFIX = 'anl';
 	}
 
 	componentDidMount() {
@@ -58,10 +59,10 @@ class AnnotationList extends React.Component {
 			   	this.onLoadAnnotations.bind(this),
 			);
 		}
-	}	
+	}
 
 	//this sets the annotations in the state object
-	onLoadAnnotations(annotationList) {		
+	onLoadAnnotations(annotationList) {
 		this.setState({annotations : annotationList || []});
 	}
 
@@ -70,6 +71,8 @@ class AnnotationList extends React.Component {
 	}
 
 	render() {
+		if(this.props.annotationTarget == null) return null;
+
 		let annotationItems = null;
 		let annotationList = null;
 		if(this.state.annotations) {
@@ -87,19 +90,22 @@ class AnnotationList extends React.Component {
 			}, this);
 
 			annotationList = (
-				<div style={this.state.expanded ? {display :'block'} : {display:'none'}}>
+				<div className={IDUtil.cssClassName('list', this.CLASS_PREFIX)} style={this.state.expanded ? {display :'block'} : {display:'none'}}>
 					<ul className="list-group">
 						{annotationItems}
 					</ul>
 				</div>
 			);
 		}
+		const title = this.props.annotationTarget.type === 'Resource' ? 'Annotations to main resource' : 'Annotations to selected media object';
 		return (
 			<div className={IDUtil.cssClassName('annotation-list')}>
-				<button className={this.state.annotations.length > 0 ? 'btn btn-danger' : 'btn btn-default'}
-					onClick={this.toggleAnnotations.bind(this)}>
-					Saved annotations&nbsp;{this.state.annotations.length}&nbsp;
-					<span className={IconUtil.getUserActionIcon('annotate')}></span>
+				<button
+					className={this.state.annotations.length > 0 ? 'btn btn-danger' : 'btn btn-default'}
+					onClick={this.toggleAnnotations.bind(this)}
+					title={'Annotations related to: ' + this.props.annotationTarget.source}
+				>
+					{title}&nbsp;({this.state.annotations.length})&nbsp;<span className={IconUtil.getUserActionIcon('annotate')}></span>
 				</button>
 				<br/>
 				{annotationList}
@@ -120,6 +126,12 @@ AnnotationList.PropTypes = {
 
 	activeAnnotation : PropTypes.shape({
 		id: PropTypes.string.isRequired
+	}),
+
+	annotationTarget : PropTypes.shape({
+		type : PropTypes.string.isRequired,
+		source : PropTypes.string.isRequired,
+		selector : PropTypes.object
 	}),
 
 	filter : PropTypes.object.isRequired

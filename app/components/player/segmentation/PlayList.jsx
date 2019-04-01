@@ -7,6 +7,7 @@ import IDUtil from '../../../util/IDUtil';
 import MediaObject from '../../../model/MediaObject';
 
 //TODO now that the playlist is in this nice separate component, let's make it less like a pile of shit
+//TODO implement shouldComponentUpdate. Now it's rendered every time update!
 export default class PlayList extends React.PureComponent {
 
 	constructor(props) {

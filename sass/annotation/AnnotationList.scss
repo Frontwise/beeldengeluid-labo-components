@@ -1,1 +1,11 @@
-.bg__annotation-list {} /* AnnotationList.jsx */
+.bg__annotation-list {
+
+	.bg__anl__list {
+		margin-top: 10px;
+	}
+
+	.btn-danger { /*FIXME ugly override of bootstrap class*/
+		background-color: #f26c50;
+	}
+
+} /* AnnotationList.jsx */

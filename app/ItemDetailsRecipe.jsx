@@ -894,6 +894,7 @@ class ItemDetailsRecipe extends React.Component {
     	if(!userLastQuery || !searchResults || !queryOutput) {
     		return null;
     	}
+
         const currentIndex = searchResults.findIndex(elem => elem.resourceId === this.props.params.id);
 
     	// Search for resourceId in current page (resultSet), if not available it continues in bookmarked items.
@@ -929,9 +930,57 @@ class ItemDetailsRecipe extends React.Component {
 
 
         return (
-        	<span>{previousResourceBtn}&nbsp;{nextResourceBtn}&nbsp;{backToSearchBtn}</span>
+        	<div className={IDUtil.cssClassName('paging-buttons', this.CLASS_PREFIX)}>
+        		{previousResourceBtn}&nbsp;{nextResourceBtn}&nbsp;{backToSearchBtn}
+        	</div>
         )
-    }
+    };
+
+	renderProjectButtons = (resourceAnnotations, annotationSupport, projectsDisabled) => {
+    	if(projectsDisabled) return null;
+
+    	const numBookmarkGroups = resourceAnnotations ? resourceAnnotations.filter(a => a.motivation === 'bookmarking').length : 0;
+    	const numResourceAnnotations = resourceAnnotations ? resourceAnnotations.length : 0;
+		const hasResourceAnnotation = this.getResourceAnnotation() ? true : false; //FIXME strange check
+
+		//draw the bookmark group button always (with the number of bookmark groups)
+		const bookmarkBtn = (
+			<button
+				className="btn btn-secondary"
+				onClick={this.bookmark.bind(this)}
+				title="Control the bookmark groups this resource is associated with">
+				Bookmark groups ({numBookmarkGroups})
+			</button>
+		)
+
+		//draw the bookmark icon if there are ANY annotations or bookmark groups attached to this resource
+        const bookmarkIcon = numResourceAnnotations > 0 ? (
+        	 <div
+        	 	data-for="__res_anno"
+        	 	data-tip={this.renderResourceAnnotationsTooltip()}
+        	 	data-html={true}
+        	 	className={IDUtil.cssClassName('bookmarked', this.CLASS_PREFIX)}>
+				<i className="fa fa-bookmark"/>
+				<ReactTooltip id={'__res_anno'}/>
+			</div>
+        ) : null;
+
+        //draw the button for annotating the resource (only when annotation support is activated)
+		const resourceAnnotationBtn = annotationSupport ? (
+			<button className="btn btn-secondary" onClick={this.annotateResource.bind(this)}>
+				Annotate resource
+				{hasResourceAnnotation ? <i className="fa fa-star"/> : null}
+			</button>
+		) : null;
+
+        return (
+        	<div className={IDUtil.cssClassName('project-buttons', this.CLASS_PREFIX)}>
+				{bookmarkBtn}
+				{resourceAnnotationBtn}
+				{bookmarkIcon}
+			</div>
+		);
+    };
 
 
     /* ------------------------------------ ALL THE MODALS ----------------------------- */
@@ -1084,9 +1133,15 @@ class ItemDetailsRecipe extends React.Component {
 			const projectModal = this.renderProjectModal(this.state.showProjectModal); //disabled when there is ingredients.disableProject = true
 			const bookmarkModal = this.renderBookmarkModal(this.state.showBookmarkModal, this.state.activeProject, this.state.itemData);
 
+			const projectButtons = this.renderProjectButtons(
+				this.state.resourceAnnotations,
+				this.props.recipe.ingredients.annotationSupport,
+				this.props.recipe.ingredients.disableProjects
+			);
+
 			let bookmarkIcon = null;
 			let bookmarkBtn = null;
-			let resourceAnnotationBtn = null;
+
             let resourceListPagingButtons = null;
 
 			//on the top level we only check if there is any form of annotationSupport
@@ -1105,48 +1160,15 @@ class ItemDetailsRecipe extends React.Component {
 					);
 				}
 
-				//draw the button for annotating the resource as a whole
-				const hasResourceAnnotation = this.getResourceAnnotation() ? true : false;
-				resourceAnnotationBtn = (
-					<button className="btn btn-primary" onClick={this.annotateResource.bind(this)}>
-						Annotate resource
-						&nbsp;
-						<i className="fa fa-star" style={ hasResourceAnnotation ? {color: 'red'} : {color: 'white'} }/>
-					</button>
-				);
 			}
 			if(this.props.params.bodyClass !== 'noHeader') {
 				resourceListPagingButtons = this.renderResultListPagingButtons();
 			}
 
-			let header = (<ToolHeader name="Resource viewer" activeProject={this.state.activeProject} selectProject={this.triggerProjectSelector.bind(this)} /> );
-
+			//render the header depending on whether projects are activated or not
+			let header = (<ToolHeader name="Resource viewer" activeProject={null} selectProject={null} /> );
 			if(!this.props.recipe.ingredients.disableProjects) {
-
-				let header= (<ToolHeader name="Resource viewer" project={this.state.activeProject} />);
-
-				if(this.state.resourceAnnotations) {
-					//draw the bookmark group button
-					bookmarkBtn = (
-						<button
-							className="btn btn-primary"
-							onClick={this.bookmark.bind(this)}
-							title="Control the bookmark groups this resource is associated with">
-							Groups
-							({this.state.resourceAnnotations.filter(a => a.motivation === 'bookmarking').length})
-						</button>
-					)
-
-					//draw the bookmark icon
-		            bookmarkIcon = (
-		            	 <div data-for="__res_anno" data-tip={this.renderResourceAnnotationsTooltip()} data-html={true} className="bookmarked">
-							<i className="fa fa-bookmark" style={
-								this.state.resourceAnnotations.length > 0 ? {color: '#468dcb'} : {color: 'white'}
-							}/>
-							<ReactTooltip id={'__res_anno'}/>
-						</div>
-		            )
-		        }
+				header = (<ToolHeader name="Resource viewer" activeProject={this.state.activeProject} selectProject={this.triggerProjectSelector.bind(this)} /> );
 			}
 
 			//render the complete metadata block, which includes unique and basic metadata
@@ -1174,13 +1196,8 @@ class ItemDetailsRecipe extends React.Component {
 					{header}
 					<div className="row">
 						<div className="col-md-12">
-							{bookmarkIcon}
-							&nbsp;
-							{bookmarkBtn}
-							&nbsp;
-							{resourceAnnotationBtn}
-                            &nbsp;
                             {resourceListPagingButtons}
+							{projectButtons}
 							<br/>
 							<br/>
 							{mediaPanel}
