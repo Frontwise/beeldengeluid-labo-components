@@ -18,7 +18,7 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
-import Header from './components/search/Header';
+import ToolHeader from './components/shared/ToolHeader';
 import CollectionBar from './components/search/CollectionBar';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
@@ -31,7 +31,7 @@ import { initHelp } from './components/workspace/helpers/helpDoc';
 
 import MessageHelper from './components/helpers/MessageHelper';
 import LoadingSpinner from './components/helpers/LoadingSpinner';
-
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 class SingleSearchRecipe extends React.Component {
@@ -90,7 +90,7 @@ class SingleSearchRecipe extends React.Component {
 
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
-		initHelp("Search", "/feature-doc/tools/single-search");
+		initHelp("Search", "/feature-doc/howtos/single-search");
 
 		//makes sure that the images are loaded only when visible
 		window.addEventListener('scroll', () => {SingleSearchRecipe.afterRenderingHits()});
@@ -784,10 +784,10 @@ class SingleSearchRecipe extends React.Component {
         </FlexModal>
     );
 
-	/* --------------------------- RENDER RECIPE HEADER --------------------- */
+	/* --------------------------- RENDER HEADER --------------------- */
 
 	renderHeader = (name, activeProject) => (
-			<Header
+			<ToolHeader
 				name={name}
 				activeProject={activeProject}
 				selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}
@@ -845,7 +845,7 @@ class SingleSearchRecipe extends React.Component {
 		);
 
         return (
-            <div className="col-md-9 result-list">
+            <div className={classNames(IDUtil.cssClassName('result-list', this.CLASS_PREFIX))}>
                 {tableHeader}
                 {listComponent}
                 {tableFooter}
@@ -1043,7 +1043,7 @@ class SingleSearchRecipe extends React.Component {
 
 	renderTutorial = () => (
 		<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
-			 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+			 A detailed explanation and HowTos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
 		</div>
 	);
 

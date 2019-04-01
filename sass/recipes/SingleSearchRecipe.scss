@@ -59,10 +59,10 @@
 			padding: 0;
 			animation: 0.6s ease-in 0s 1 slideInFromLeft;
 			.header-selected-items {
-				background-color: $clSecondary;
+				background-color: $clPrimary;
 				color: white;
 				margin: 0;
-				padding: 7px 7px 7px 25px;
+				padding: 7px 7px 7px 20px;
 				.fa-remove {
 					float: right;
 					padding: 0 10px;
@@ -97,8 +97,14 @@
 		padding: 10px;
 		text-align: center;
 	}
-	.result-list {
-		margin-top: 8px;
+	.bg__ssr__result-list {
+		margin-top: 13px;
+		width: 72%;
+		margin-left: 28%;
+		@media screen and (max-width: $break-medium) {
+			width: 100%;
+			margin-left: 0;
+		}
 	}
 	.table-actions > .bookmark-dropdown-menu {
 		display: inline-block;
@@ -134,13 +140,12 @@
 		}
 	}
 	.selected-items {
-		background-color: #efefef;
-		border-radius: 6px;
-		box-shadow: 0 6px 4px -6px #000;
+		background-color: $clGrey;
+		border-radius: 5px;
 		margin-bottom: 12px;
-		max-height: 380px;
+		max-height: 1000px;
 		position: relative;
-		overflow: scroll;
+		overflow-y: auto;
 
 		h4 {
 			font-size: 14px;

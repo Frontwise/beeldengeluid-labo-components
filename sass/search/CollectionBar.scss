@@ -17,6 +17,10 @@
 		}
 	}
 
+	.btn-primary{
+		margin-top: 2px;
+	}
+
 	.bg__scb__active {
 		display: flex;
 		justify-content: stretch;
@@ -46,8 +50,10 @@
 		.bg__scb__buttons {
 			flex-grow: 1;
 			button {
+				margin-top: 2px;
 				float: right;
 				margin-left: 15px;
+				border:0;
 			}
 		}
 	}
@@ -55,7 +61,6 @@
 	.bg__scb__link {
 		display: inline-block;
 		font-size: 0;
-		background-color: $clPrimary;
 		color: white;
 		border-radius: 2px;
 		min-width: 30px;
@@ -64,12 +69,13 @@
 		background-image: $iconLinkUrl;
 		background-position: center;
 		background-repeat: no-repeat;
-		margin-left: 15px;
+		margin-left: 10px;
 		margin-top: 3px;
-		transition: background-color $transition;
-		background-size: 19px;
+		transition: opacity $transition;
+		background-size: 18px;
+		opacity: 0.7;
 		&:hover {
-			background-color: darken($clPrimary, 8%);
+			opacity: 1.0;
 		}
 	}
 

@@ -4,6 +4,7 @@ import ComponentUtil from './util/ComponentUtil';
 
 import QueryModel from './model/QueryModel';
 
+import ToolHeader from './components/shared/ToolHeader';
 import FlexBox from './components/FlexBox';
 import FlexModal from './components/FlexModal';
 import FlexPlayer from './components/player/video/FlexPlayer';
@@ -1083,7 +1084,6 @@ class ItemDetailsRecipe extends React.Component {
 			const projectModal = this.renderProjectModal(this.state.showProjectModal); //disabled when there is ingredients.disableProject = true
 			const bookmarkModal = this.renderBookmarkModal(this.state.showBookmarkModal, this.state.activeProject, this.state.itemData);
 
-			let projectSelectorBtn = null;
 			let bookmarkIcon = null;
 			let bookmarkBtn = null;
 			let resourceAnnotationBtn = null;
@@ -1119,15 +1119,11 @@ class ItemDetailsRecipe extends React.Component {
 				resourceListPagingButtons = this.renderResultListPagingButtons();
 			}
 
+			let header = (<ToolHeader name="Resource viewer" activeProject={this.state.activeProject} selectProject={this.triggerProjectSelector.bind(this)} /> );
+
 			if(!this.props.recipe.ingredients.disableProjects) {
 
-				//project selector button
-				projectSelectorBtn = (
-					<button className="btn btn-primary" onClick={this.triggerProjectSelector.bind(this)}>
-						Projects ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
-					</button>
-				);
-
+				let header= (<ToolHeader name="Resource viewer" project={this.state.activeProject} />);
 
 				if(this.state.resourceAnnotations) {
 					//draw the bookmark group button
@@ -1175,10 +1171,10 @@ class ItemDetailsRecipe extends React.Component {
 					{annotationModal}
 					{projectModal}
 					{bookmarkModal}
+					{header}
 					<div className="row">
 						<div className="col-md-12">
 							{bookmarkIcon}
-							{projectSelectorBtn}
 							&nbsp;
 							{bookmarkBtn}
 							&nbsp;
