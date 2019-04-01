@@ -18,7 +18,7 @@ import CollectionSelector from './components/collection/CollectionSelector';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import BookmarkSelector from './components/bookmark/BookmarkSelector';
 
-import Header from './components/search/Header';
+import ToolHeader from './components/shared/ToolHeader';
 import CollectionBar from './components/search/CollectionBar';
 import QueryBuilder from './components/search/QueryBuilder';
 import QueryEditor from './components/search/QueryEditor';
@@ -31,7 +31,7 @@ import { initHelp } from './components/workspace/helpers/helpDoc';
 
 import MessageHelper from './components/helpers/MessageHelper';
 import LoadingSpinner from './components/helpers/LoadingSpinner';
-
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 class SingleSearchRecipe extends React.Component {
@@ -78,6 +78,8 @@ class SingleSearchRecipe extends React.Component {
 		for (let i=0; i<imgDefer.length; i++) {
 			if(imgDefer[i].getAttribute('data-src') && SingleSearchRecipe.elementInViewport(imgDefer[i])) {
 				imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-src'));
+				// prevent multiple conversions
+				imgDefer[i].removeAttribute('data-src');
 			}
 		}
 	}
@@ -88,7 +90,7 @@ class SingleSearchRecipe extends React.Component {
 
 	componentDidMount() {
 		//init user docs (FIXME shouldn't this be part of the media suite code base?)
-        initHelp("Search", "/feature-doc/howtos/single-search");
+		initHelp("Search", "/feature-doc/howtos/single-search");
 
 		//makes sure that the images are loaded only when visible
 		window.addEventListener('scroll', () => {SingleSearchRecipe.afterRenderingHits()});
@@ -384,7 +386,10 @@ class SingleSearchRecipe extends React.Component {
 	showSelectionOverview = () => {
         this.setState({
             showSelectionOverview : !this.state.showSelectionOverview
-        });
+        }, ()=>{
+        	// show media visible on screen
+			SingleSearchRecipe.afterRenderingHits();
+		});
     }
 
 	//checks if the search results contain resources that were already selected in another query
@@ -779,10 +784,10 @@ class SingleSearchRecipe extends React.Component {
         </FlexModal>
     );
 
-	/* --------------------------- RENDER RECIPE HEADER --------------------- */
+	/* --------------------------- RENDER HEADER --------------------- */
 
 	renderHeader = (name, activeProject) => (
-			<Header
+			<ToolHeader
 				name={name}
 				activeProject={activeProject}
 				selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}
@@ -791,11 +796,12 @@ class SingleSearchRecipe extends React.Component {
 
 	/* --------------------------- RENDER COLLECTION BAR --------------------- */
 
-	renderCollectionBar = (collectionConfig) => (
+	renderCollectionBar = (collectionConfig, activeProject) => (
 			<CollectionBar
 				collectionConfig={collectionConfig}
 				selectCollection={ComponentUtil.showModal.bind(this, this, 'showCollectionModal')}
 				resetSearch={this.onComponentOutput}
+				saveQuery={activeProject ? this.saveQuery : null}
 			/>
 	);
 
@@ -839,7 +845,7 @@ class SingleSearchRecipe extends React.Component {
 		);
 
         return (
-            <div className="col-md-9 result-list">
+            <div className={classNames(IDUtil.cssClassName('result-list', this.CLASS_PREFIX))}>
                 {tableHeader}
                 {listComponent}
                 {tableFooter}
@@ -952,8 +958,8 @@ class SingleSearchRecipe extends React.Component {
 		const allChecked = currentOutput.results.map(item => currentSelectedIds.findIndex(it => it === item._id));
 		const isChecked = allChecked.findIndex(item => item === -1) === -1;
 		return (
-            <div onClick={this.toggleSelectAllItems} className="select-all">
-                <input type="checkbox" defaultChecked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
+            <div title={"Select " + (isChecked ? "none" : "all")} onClick={this.toggleSelectAllItems} className="select-all">
+                <input type="checkbox" readOnly={true} checked={isChecked ? 'checked' : ''} id={'cb__select-all'}/>
                 <label htmlFor={'cb__select-all'}><span/></label>
             </div>
         );
@@ -986,18 +992,6 @@ class SingleSearchRecipe extends React.Component {
                 </div>
             );
 		}
-		//always add the save query button
-		actions.push(
-            <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.saveQuery}
-                title="Save current query to the active project">
-                &nbsp;
-                <i className="fa fa-save" style={{color: 'white'}}/>
-                &nbsp;
-            </button>
-        );
 
 		return (
 			<div className="table-actions">
@@ -1049,7 +1043,7 @@ class SingleSearchRecipe extends React.Component {
 
 	renderTutorial = () => (
 		<div className={IDUtil.cssClassName('tutorial',this.CLASS_PREFIX)}>
-			 A detailed explanation and how tos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
+			 A detailed explanation and HowTos for this tool, can be found in the help menu <span onClick={this.showHelp}>?</span>
 		</div>
 	);
 
@@ -1087,6 +1081,7 @@ class SingleSearchRecipe extends React.Component {
 
         const collectionBar = this.renderCollectionBar(
         	this.state.collectionConfig,
+        	this.state.activeProject
         );
 
         const savedQueryModal = this.state.savedQueryModal ? this.renderSavedQueryModal() : null;

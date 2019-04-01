@@ -25,13 +25,6 @@ class FieldCategorySelector extends React.Component {
 		}
 	}
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (nextProps.fieldCategory && this.props.fieldCategory) {
-    //         return (nextProps.fieldCategory.length !== this.props.fieldCategory.length) || nextState.showModal;
-    //     }
-    //     return true
-    // }
-
 	onOutput(data) {
 		if(this.props.onOutput) {
 			if(data !== null) {
@@ -156,7 +149,7 @@ class FieldCategorySelector extends React.Component {
           						collectionConfig={this.props.collectionConfig}/>
           				}
 						onChange={this.handleChange.bind(this)}
-						placeholder="Search in: all metadata fields"
+						placeholder="All metadata fields"
 						afterOptionsComponent={({ select }) => (
 							<div className={IDUtil.cssClassName('option-create', this.CLASS_PREFIX)}>
 					            <button className="btn btn-sm btn-primary"
@@ -182,7 +175,7 @@ export default FieldCategorySelector;
 
 export const ListOption = ({ option, collectionConfig }) => (
 	<div title={option.fields.map((f) => collectionConfig.toPrettyFieldName(f)).join('\n')}>
-		Search in: {option.label}
+		{option.label}
 	</div>
 );
 

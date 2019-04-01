@@ -1,0 +1,89 @@
+.bg__tool-header {
+	width: 100%;
+	margin: 45px 0 10px;
+	border-bottom: 1px solid #eee;
+
+	.bg__th__title {
+		display: inline-block;
+		margin: 0;
+		padding: 10px 0 10px 38px;
+		font-size: 1.5em;
+		background-image: $iconRecipeUrl;
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 27px;
+	}
+
+	// project info/selector
+	& > .bg__th__project {
+		display: inline-block;
+		float: right;
+		padding: 6px 10px 6px 35px;
+		background-image: $iconProjectUrl;
+		background-repeat: no-repeat;
+		background-position: 7px center;
+		background-size: 17px;
+		min-height: 30px;
+		line-height: 30px;
+		cursor: pointer;
+
+		& > button{
+			/* Restyle buttons to new format */
+			text-transform: uppercase;
+			font-weight: 400px;
+			font-size: 0.96em;
+			font-family: $fontHeading;
+			transition: background-color $transition;
+
+			&.btn-secondary {
+				background-color: $clSecondary;
+				color: white;
+
+				&:hover {
+					background-color: darken($clSecondary, 8%);
+				}
+			}
+		}
+
+		&.active {
+			border-bottom: 2px solid $clSecondary;
+   		    border-radius: 2px 2px 0 0;
+
+			&:hover {
+				background-color: $clGrey;
+			}
+
+			span {
+				font-family: $fontHeading;
+				display: inline-block;
+				padding-right: 25px;
+				background-image: $arrowDownDarkUrl;
+				background-position: right 4px center;
+				background-repeat: no-repeat;
+				font-size: 1.1em;
+			}
+		}
+	}
+
+	& > .bg__th__project-link {
+		float:right;
+		display: inline-block;
+		font-size: 0;
+		color: white;
+		border-radius: 2px;
+		min-width: 30px;
+		height: 28px;
+		vertical-align: top;
+		background-image: $iconLinkUrl;
+		background-position: center;
+		background-repeat: no-repeat;
+		margin-left: 0;
+		margin-top: 6px;
+		transition: opacity $transition;
+		background-size: 18px;
+		opacity: 0.7;
+		&:hover {
+			opacity: 1.0;
+		}
+	}
+}

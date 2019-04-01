@@ -36,10 +36,12 @@ class QueryBuilder extends React.Component {
 	constructor(props) {
 		super(props);
 
+
+
 		this.state = {
 			//UI option/toggles
 			displayFacets : this.props.collectionConfig.facets ? true : false,
-			showTimeLine: this.props.showTimeLine,
+			showTimeLine: localStorage.getItem("qb-show-timeline") !== undefined ? (localStorage.getItem("qb-show-timeline") === "true" ? true : false) : this.props.showTimeLine,
 			graphType : null,
 			isSearching : false,
 			query : this.props.query, //this is only set by the owner after choosing a collection or loading the page
@@ -58,10 +60,7 @@ class QueryBuilder extends React.Component {
 		//do an initial search in case there are search params in the URL
         if(this.props.query) {
             this.searchTermRef.current.value = this.props.query.term || null;
-			//never search with an empty search term on init (FIXME not always desirable)
-			if(this.props.query.term && this.props.query.term.trim() !== '') {
-				this.doSearch(this.props.query);
-			}
+			this.doSearch(this.props.query);
 		}
 	}
 
@@ -231,8 +230,9 @@ class QueryBuilder extends React.Component {
 	}
 
 	toggleTimeLine = () => {
+		localStorage.setItem("qb-show-timeline",!this.state.showTimeLine ? "true" : "false");
     	this.setState({showTimeLine:!this.state.showTimeLine});
-    };
+    }
 
 	/* ----------------------------------------- DATA FUNCTIONS FOR THE RENDER ------------------------------ */
 

@@ -3,10 +3,23 @@
 	background-repeat: no-repeat;
 	background-position: 5px center;
 	background-size: 18px;
-	padding: 5px 5px 5px 40px;
+	padding-left: 35px;
 	min-height: 40px;
 	margin-bottom: 20px;
 	display: flex;
+
+	.btn-default {
+		border: 0;
+		background-color: $clGrey;
+		color: black;
+		&:hover {
+			background-color: darken($clGrey, 4%);
+		}
+	}
+
+	.btn-primary{
+		margin-top: 2px;
+	}
 
 	.bg__scb__active {
 		display: flex;
@@ -18,26 +31,29 @@
 
 		.bg__scb__collection-info {
 			flex-grow: 1;
-			h2{
+			h2 {
 				font-size: 1.2em;
 				line-height: 30px;
 				display: inline-block;
 				margin: 0;
-				margin-top: 2px;
+				cursor: pointer;
+				background-image: $arrowDownDarkUrl;
+				background-position: right 10px center;
+				background-repeat: no-repeat;
+				padding: 3px 30px 3px 5px;
+
+				&:hover {
+					background-color: $clGrey;
+				}
 			}
 		}
-		.bg__scb__buttons{
+		.bg__scb__buttons {
 			flex-grow: 1;
 			button {
+				margin-top: 2px;
 				float: right;
 				margin-left: 15px;
-				&.btn-secondary {
-					background-color: $clGrey;
-					color: black;
-					&:hover {
-						background-color: darken($clGrey, 4%);
-					}
-				}
+				border:0;
 			}
 		}
 	}
@@ -45,26 +61,27 @@
 	.bg__scb__link {
 		display: inline-block;
 		font-size: 0;
-		background-color: $clPrimary;
 		color: white;
-		border-radius: 10px;
-		min-width: 20px;
-		height: 20px;
+		border-radius: 2px;
+		min-width: 30px;
+		height: 28px;
 		vertical-align: top;
-		background-image: $iconInfoUrl;
+		background-image: $iconLinkUrl;
 		background-position: center;
 		background-repeat: no-repeat;
 		margin-left: 10px;
-		margin-top: 7px;
-		transition: background-color $transition;
+		margin-top: 3px;
+		transition: opacity $transition;
+		background-size: 18px;
+		opacity: 0.7;
 		&:hover {
-			background-color: darken($clPrimary, 8%);
+			opacity: 1.0;
 		}
 	}
 
 	.bg__scb__count {
 		margin-top: 5px;
-		margin-left: 10px;
+		margin-left: 5px;
 		background-color: $clGrey;
 		font-size: 1em;
 		border-radius: 25px;

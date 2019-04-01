@@ -1,5 +1,91 @@
 .bg__search-snippet {
-  .media-heading {
-    @include multiLineEllipsis($lineHeight: 1.2em, $lineCount: 6, $bgColor: white);
-  }
+	display: flex;
+	padding: 20px 10px 20px 10px;
+	cursor: pointer;
+	&:hover {
+		.bg__ss__title {
+			text-decoration: underline;
+		}
+	}
+
+	.bg__ss__poster {
+		padding-right: 20px;
+		img {
+			width: 200px;
+			max-width: 200px;
+			max-height: 200px;
+		}
+	}
+
+	.bg__ss__media-body {
+
+		.bg__ss__title {
+			margin-top: 0;
+			padding-top: 0;
+			font-size: 20px;
+			line-height: 1.35em;
+
+			.bg__ss__icon-access{
+				span{
+					color: black;
+					border: 0;
+					margin-left: 5px;
+					padding-left: 10px;
+					border-left: 1px solid black;
+					border-radius: 0;
+				}
+			}
+		}
+
+		.highLightText {
+			color: $highlight-color-snippets;
+			font-weight: bold;
+			font-size: 97%;
+		}
+
+		.bg__ss__snippet-description {
+			cursor: pointer;
+			font-style: italic;
+			font-size: 14px;
+		}
+
+		.bg__ss__info {
+			display: flex;
+			margin: 10px 0;
+			font-size: 12px;
+			line-height: 26px;
+			color: lighten(black, 50%);
+
+
+			& > div {
+				margin-right: 10px;
+				i {
+					font-size: 13px;
+					display: inline-block;
+					margin-right: 10px;
+					font-style: normal;
+					color: black;
+				}
+			}
+
+			.bg__ss__icon-type {
+				span {
+					color: black;
+					font-size: 18px;
+					border: 0;
+				}
+			}
+		}
+
+		.label-success {
+			background-color: $clDarkGrey;
+			color: white;
+		}
+
+		.bg__ss__fragment {
+			color: dimgray;
+			font-style: italic;
+			margin-top: 5px;
+		}
+	}
 }

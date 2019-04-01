@@ -9,6 +9,7 @@ import QueryComparisonLineChart from './components/stats/QueryComparisonLineChar
 import ComparisonHistogram from './components/stats/ComparisonHistogram';
 import ProjectSelector from './components/workspace/projects/ProjectSelector';
 import ProjectQueriesTable from './components/workspace/projects/query/ProjectQueriesTable';
+import ToolHeader from './components/shared/ToolHeader';
 import CollectionUtil from './util/CollectionUtil';
 
 import PropTypes from 'prop-types';
@@ -205,13 +206,19 @@ class QueryComparisonRecipe extends React.Component {
         )
     }
 
+    /* --------------------------- RENDER HEADER --------------------- */
+
+    renderHeader = (name, activeProject) => (
+            <ToolHeader
+                name={name}
+                activeProject={activeProject}
+                selectProject={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}
+            />
+    );
+
     render() {
         const compareLink = {"label": "Combine queries ..."};
-        const chooseProjectBtn = (
-            <button className="btn btn-primary" onClick={ComponentUtil.showModal.bind(this, this, 'showProjectModal')}>
-                Set project ({this.state.activeProject ? this.state.activeProject.name : 'none selected'})
-            </button>
-        );
+
         //generates a tabbed pane with a search component for each collection + a collection browser
         const searchComponent = (
             <button className="btn btn-primary"
@@ -285,12 +292,15 @@ class QueryComparisonRecipe extends React.Component {
                 </FlexModal>
             )
         }
+
+        const header = this.renderHeader("Compare", this.state.activeProject);
         return (
             <div className={IDUtil.cssClassName('comparative-search-recipe')}>
                 <div className="overlay"/>
                 <div className="row">
+                    {header}
                     <div className="bg__queryComparisonRecipe-header-btns">
-                        {searchComponent}&nbsp;{chooseProjectBtn}
+                        {searchComponent}
                     </div>
                     {projectModal}
                     {projectQueriesTable}

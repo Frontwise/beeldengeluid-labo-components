@@ -1,5 +1,6 @@
 import IDUtil from '../../../../util/IDUtil';
 import ComponentUtil from '../../../../util/ComponentUtil';
+import trunc from '../../../../util/Trunc';
 
 import { exportDataAsJSON } from '../../helpers/Export';
 
@@ -264,10 +265,6 @@ class ProjectTable extends React.PureComponent {
         return '...';
     }
 
-    trunc(s, n){
-        return s ? s.substr(0,n-1)+(s.length>n?'…':'') : '';
-    }
-
     setActiveProject(project){
             ComponentUtil.storeJSONInLocalStorage('activeProject', project);
     }
@@ -290,7 +287,7 @@ class ProjectTable extends React.PureComponent {
             props: { className: 'description' },
             content: (
                 <p><Link onClick={this.setActiveProject.bind(this, project)} to={'/workspace/projects/' + project.id + '/details'}>
-                    {this.trunc(project.description, 140)}
+                    {trunc(project.description, 140)}
                 </Link></p>
             )
         },
