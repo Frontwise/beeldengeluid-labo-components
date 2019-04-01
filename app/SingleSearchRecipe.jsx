@@ -973,8 +973,9 @@ class SingleSearchRecipe extends React.Component {
                 <div className="dropdown bookmark-dropdown-menu">
                     <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownBookmarking"
                             data-toggle="dropdown"
+                            title="Selected items to bookmark"
                             aria-haspopup="true" aria-expanded="false">
-                        <i className="fa fa-bookmark" style={{color: 'white'}} />{storedSelectedRows.length}
+                        <i className="fa fa-check-square" style={{color: 'white', fontSize:'16px', paddingRight:'12px'}} />{storedSelectedRows.length}
                     </button>
                     <div className="dropdown-menu" aria-labelledby="dropdownBookmarking">
                         <button className="dropdown-item" type="button" onClick={this.showSelectionOverview}>
