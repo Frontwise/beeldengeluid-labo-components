@@ -3,33 +3,39 @@ import IDUtil from '../../../util/IDUtil';
 
 export default class QueryInfoBlock extends React.Component {
 
-    getStyle = (p) => {
-        return {
-            color: p,
-            listStyle: 'none',
-            padding: '10px 20px'
-        }
+    constructor(props) {
+        super(props);
+        this.CLASS_PREFIX = 'qib';
     }
 
-    toQueryInfoData = (selectedQueries) => {
-        if(!selectedQueries) return null;
+    getStyle = colour => {
+        return {
+            color: colour,
+            listStyle: 'none',
+            padding: '10px 20px'
+        };
+    };
 
-        return selectedQueries.map((query, index) => {
+    toQueryInfoData = (items, colours, queryStats) => {
+        if(!items) return null;
+
+        return items.map((item, index) => {
             return {
-                savedQueryName: query.name,
-                collectionTitle: (query.collectionConfig && query.collectionConfig.collectionConfig.collectionInfo)
-                    ? query.collectionConfig.collectionConfig.collectionInfo.title
+                savedQueryName: item.name,
+                collectionTitle: (item.collectionConfig && item.collectionConfig.collectionConfig.collectionInfo)
+                    ? item.collectionConfig.collectionConfig.collectionInfo.title
                     : null,
-                queryTerm: query.query.term,
-                dateRange: query.query.dateRange,
-                selectedFacets: query.query.selectedFacets,
-                fieldCategory: query.query.fieldCategory,
-                lineColour: this.props.lineColour[index]
+                queryTerm: item.query.term,
+                dateRange: item.query.dateRange,
+                selectedFacets: item.query.selectedFacets,
+                fieldCategory: item.query.fieldCategory,
+                lineColour: colours[index],
+                stats: queryStats[item.query.id]
             }
         })
     }
 
-    renderQueryInfoBlocks = (queryInfoData) => {
+    renderQueryInfoBlocks = queryInfoData => {
         if(!queryInfoData) return null;
 
         return queryInfoData.map((item, index) => {
@@ -42,7 +48,12 @@ export default class QueryInfoBlock extends React.Component {
             let dateEnd = null;
 
             if (item.fieldCategory && item.fieldCategory.length > 0) {
-                fieldCategoryList = item.fieldCategory.map(field => <li>{field.label}</li>)
+                fieldCategoryList = (
+                    <ul>
+                        {item.fieldCategory.map(field => <li>{field.label}</li>)}
+                    </ul>
+                );
+
             }
             if (item.dateRange) {
                 dateRangeFields = Object.keys(item.dateRange).map(dateObj => {
@@ -78,20 +89,31 @@ export default class QueryInfoBlock extends React.Component {
 
             return (
                 <div className="query-details" onClick={this.toggleLine}>
-                    <h4 style={this.getStyle(item.lineColour)}>Query #{index+1}: {item.savedQueryName}</h4>
-                    <p><b>Collection name:</b> {item.collectionTitle}</p>
-                    <p><b>Query term (Search term):</b> {item.queryTerm}</p>
+                    <h4 style={this.getStyle(item.lineColour)}>
+                        Query #{index+1}: {item.savedQueryName}
+                    </h4>
+                    <strong>Collection name:</strong> {item.collectionTitle}
+
+                    <strong>Query term (Search term):</strong> {item.queryTerm}
+
                     {fieldClusterHeader}
-                    <ul>{fieldCategoryList}</ul>
+                    {fieldCategoryList}
                     {dateRangeHeader}
                     {dateRangeFields}
+
+                    <strong>Total hits:</strong> {item.stats ? item.stats.totalHits : 0}
+
+                    <div className={IDUtil.cssClassName('error', this.CLASS_PREFIX)}>
+                        {item.stats && item.stats.noDateInformation === true ? 'No date information could be retreived' : null}
+                        {item.stats && item.stats.error === true ? 'This query could not be executed' : null}
+                    </div>
                 </div>
             )
         })
     }
 
     render() {
-        const queryInfoData = this.toQueryInfoData(this.props.selectedQueries);
+        const queryInfoData = this.toQueryInfoData(this.props.queries, this.props.colours, this.props.queryStats);
         if (queryInfoData) {
             return (
                 <div className={IDUtil.cssClassName('query-info-block')}>

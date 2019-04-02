@@ -36,10 +36,10 @@ const SearchAPI = {
 
 							callback(data);
 						} else {
-							callback({searchId : searchId, error : 'Server returned no results'});
+							callback({searchId : searchId, error : 'Server returned no results', query : query});
 						}
 					} else {
-						callback({searchId : searchId, error : 'Server returned an error response'});
+						callback({searchId : searchId, error : 'Server returned an error response', query : query});
 					}
 				}
 			}

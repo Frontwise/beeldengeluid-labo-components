@@ -7,6 +7,7 @@
 	flex-wrap: wrap;
 
 	.query-details {
+		color: black;
 		flex-wrap: wrap;
 		flex: 2 2 30em;
 		padding: 15px;
@@ -25,6 +26,10 @@
 		li {
 		   color: #2D343A;
 			list-style-type: none;
+		}
+		.bg__qib__error {
+			color: crimson;
+			padding:5px;
 		}
 	}
 }

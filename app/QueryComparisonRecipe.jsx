@@ -30,6 +30,8 @@ class QueryComparisonRecipe extends React.Component {
             lineChartData: {},
             barChartData: {},
 
+            queryStats : {},
+
             chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
 
             selectedQueriesId: null,
@@ -93,6 +95,7 @@ class QueryComparisonRecipe extends React.Component {
                     collectionConfig,
                     data => {
                         //just resolve everything, even if the data is null or has errors. Handle this later
+                        console.debug(data)
                         resolve(data);
                     },
                     false
@@ -109,20 +112,28 @@ class QueryComparisonRecipe extends React.Component {
         )
     };
 
-    //check if there is a selected date field and if it is also part of the aggregations
-    filterEmptyDateRanges = data => {
-        if(data.query && data.aggregations) {
+    hasDateInformation = item => {
+        if(item.query && item.aggregations) {
 
-            return data.query.dateRange &&
-                data.query.dateRange.field &&
-                data.aggregations[data.query.dateRange.field] &&
-                data.aggregations[data.query.dateRange.field].length > 0;
+            return item.query.dateRange != null &&
+                item.query.dateRange.field != null &&
+                item.aggregations[item.query.dateRange.field] != null &&
+                item.aggregations[item.query.dateRange.field].length > 0;
         }
         return false;
     }
 
     generateChartData = (data, selectedQueries) => {
-        const barChartData = data.filter(this.filterEmptyDateRanges); //barchart data is simply the returned data (with date aggregations)
+        const queryStats = {} //keep status information for the QueryInfoBlock
+        data.forEach(item => {
+            queryStats[item.query.id] = {
+                noDateInformation : this.hasDateInformation(item),
+                error : !item || item.error ? true : false,
+                totalHits : item ? item.totalHits || 0 : 0
+            }
+        })
+
+        const barChartData = data.filter(this.hasDateInformation); //barchart data is simply the returned data (with date aggregations)
         const lineChartData = {};
 
         //the line chart data needs to be prepared differently (TODO synchronise with bar chart data model)
@@ -139,15 +150,12 @@ class QueryComparisonRecipe extends React.Component {
                         query: data.query,
                         collectionConfig : data.collectionConfig
                     };
-                } else {
-                    console.debug('no date aggregation data', data.aggregations)
                 }
-            } else {
-                console.debug('no data', data)
             }
         });
 
         this.setState({
+            queryStats: queryStats,
             lineChartData: lineChartData,
             barChartData: barChartData,
             selectedQueriesId : IDUtil.guid(),
@@ -223,7 +231,6 @@ class QueryComparisonRecipe extends React.Component {
                     </button>);
 
                 if(this.state.chartType === 'lineChart') {
-                    console.debug(this.state.lineChartData);
                     chart = (
                         <QueryComparisonLineChart
                             data={this.state.lineChartData}
@@ -242,11 +249,13 @@ class QueryComparisonRecipe extends React.Component {
                 }
             }
 
-            queryCollectionDetails = this.state.selectedQueries ?  (<QueryInfoBlock
-                selectedQueries={this.state.selectedQueries}
-                lineColour={this.COLORS}
-                external={external}
-            />) : null;
+            queryCollectionDetails = this.state.selectedQueries.length > 0 ?  (
+                <QueryInfoBlock
+                    queries={this.state.selectedQueries}
+                    colours={this.COLORS}
+                    queryStats={this.state.queryStats}
+                />
+            ) : null;
         }
 
         //project modal
