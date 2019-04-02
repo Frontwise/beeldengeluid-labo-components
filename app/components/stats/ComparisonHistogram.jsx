@@ -98,19 +98,21 @@ export default class ComparisonHistogram extends React.Component {
         const minYear = new Date(__endYear(relGraphData, Math.min)).getFullYear();
         const maxYear = new Date(__endYear(relGraphData, Math.max)).getFullYear();
         const validRange = __getValidRange(minYear, maxYear);
-
-        return validRange.map(year => {
+        const graphData = validRange.map(year => {
             let tempObj = {};
 
             relGraphData.forEach(set => {
                 const matchData = set.find(it => new Date(it.date_millis).getFullYear() === year);
                 if(matchData !== undefined) {
                     tempObj = {...tempObj, ...matchData};
+                } else {
+                    tempObj = {...tempObj, ...{'date': year}};
                 }
-
             });
             return tempObj
         });
+
+        return graphData;
     }
 
     getRelValues = (absoluteValues, relativeValues) => {

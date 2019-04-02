@@ -52,8 +52,8 @@ class QueryComparisonLineChart extends React.Component {
                     const relVal = relativeValues[prop].find(obj => {
                         return obj.year === point.year
                     });
-
-                    relPoint[prop] = (relVal[prop] === 0 || point[prop] === 0
+                    relPoint[prop] = ((relVal !== 'undefined' && relVal[prop] === 0)
+                        || (point !== 'undefined' && point[prop] === 0)
                         ? 0
                         : point[prop] / relVal[prop] * 100
                     );
@@ -172,6 +172,8 @@ class QueryComparisonLineChart extends React.Component {
                 const matchData = set.find(it => it.year === year);
                 if(matchData !== undefined) {
                     tempObj = {...tempObj, ...matchData};
+                } else {
+                    tempObj = {...tempObj, ...{'year': year}};
                 }
 
             });
