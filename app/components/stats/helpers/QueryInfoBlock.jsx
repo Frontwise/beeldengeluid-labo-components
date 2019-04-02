@@ -8,7 +8,7 @@ export default class QueryInfoBlock extends React.Component {
         this.CLASS_PREFIX = 'qib';
     }
 
-    toQueryInfoData = (items, colours, queryStats) => {
+    toQueryInfoData = (items, queryStats) => {
         if(!items) return null;
         return items.map((item, index) => {
             return {
@@ -17,7 +17,6 @@ export default class QueryInfoBlock extends React.Component {
                 dateRange: item.query.dateRange,
                 selectedFacets: item.query.selectedFacets,
                 fieldCategory: item.query.fieldCategory,
-                lineColour: colours[index],
                 stats: queryStats[item.query.id]
             }
         })
@@ -37,7 +36,6 @@ export default class QueryInfoBlock extends React.Component {
         if(!queryInfoData) return null;
 
         return queryInfoData.map((item, index) => {
-            const collectionConfig = item.stats ? item.stats.collectionConfig : null;
             let fieldCategoryList = null;
             let fieldClusterHeader = null;
             let dateRangeHeader = null;
@@ -89,11 +87,13 @@ export default class QueryInfoBlock extends React.Component {
             return (
                 <div className={IDUtil.cssClassName('block', this.CLASS_PREFIX)} onClick={this.toggleLine}>
                     <div className={IDUtil.cssClassName('query', this.CLASS_PREFIX)}>
-                        <h4 style={{color: item.lineColour}}>
-                            Query #{index+1}: {item.savedQueryName}
+                        <h4 style={{color: item.stats.color}}>
+                            Query #{item.stats.queryIndex}: {item.savedQueryName}
                         </h4>
 
-                        <strong>Collection name:</strong> {collectionConfig && collectionConfig.collectionInfo ? collectionConfig.collectionInfo.title : 'Unknown'}<br/>
+                        <strong>Collection name:</strong> {
+                            item.stats.collectionConfig && item.stats.collectionConfig.collectionInfo ? item.stats.collectionConfig.collectionInfo.title : 'Unknown'
+                        }<br/>
                         <strong>Query term (Search term):</strong> {item.queryTerm}<br/>
 
                         {fieldClusterHeader}
@@ -101,7 +101,7 @@ export default class QueryInfoBlock extends React.Component {
                         {dateRangeHeader}
                         {dateRangeFields}
 
-                        <strong>Total hits:</strong> {item.stats ? item.stats.totalHits : 0}<br/>
+                        <strong>Total hits:</strong> {item.stats.totalHits}<br/>
                     </div>
                     {this.renderError(item.stats)}
                 </div>
@@ -110,7 +110,7 @@ export default class QueryInfoBlock extends React.Component {
     }
 
     render() {
-        const queryInfoData = this.toQueryInfoData(this.props.queries, this.props.colours, this.props.queryStats);
+        const queryInfoData = this.toQueryInfoData(this.props.queries, this.props.queryStats);
         if (queryInfoData) {
             return (
                 <div className={IDUtil.cssClassName('query-info-block')}>

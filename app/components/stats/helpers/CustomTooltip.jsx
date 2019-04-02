@@ -5,8 +5,8 @@ import ComponentUtil from '../../../util/ComponentUtil';
 
 export default class CustomTooltip extends React.Component{
 
-    getStyle = (p) => ({
-        color: p.color,
+    getStyle = color => ({
+        color: color,
         display: 'flex',
         right: '0',
         margin: '0',
@@ -37,10 +37,10 @@ export default class CustomTooltip extends React.Component{
                         </div>
                     );
                 } else {
-                    const point = payload.map((p,index) => {
+                    const point = payload.map((p, index) => {
                         return (
-                            <span className="bg__tooltip-spaceBetween" style={this.getStyle(p)}>
-                                <span>Query#{this.props.colorIndexes[index]+1}</span>
+                            <span className="bg__tooltip-spaceBetween" style={this.getStyle(this.props.queryStats[p.dataKey].color)}>
+                                <span>Query#{this.props.queryStats[p.dataKey].queryIndex}</span>
                                 <span className="bg__tooltip-spaceBetween">{p.value ? ComponentUtil.formatNumber(p.value) : 0}</span>
                             </span>
                         )
@@ -70,5 +70,5 @@ CustomTooltip.propTypes = {
 
     //custom props
     viewMode: PropTypes.string, //relative or absolute
-    colorIndexes: PropTypes.array //array of colors to match with the colors of the lines drawn in the line/bar chart
+    queryStats: PropTypes.object //array of colors to match with the colors of the lines drawn in the line/bar chart
 };

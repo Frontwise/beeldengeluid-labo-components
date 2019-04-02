@@ -150,32 +150,33 @@ class Histogram extends React.Component {
     }
 }
 
-class CustomTooltip extends React.Component{
+class CustomTooltip extends React.Component {
     render() {
         const {active} = this.props;
         if (active) {
             const payload = this.props.payload;
-            const label = payload[0].payload.date;
-            const relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0;
-            const dataType = payload[0].payload.dataType;
-            if (dataType === 'relative') {
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>{dataType} value</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span></p>
-                        <p>Percentage: <span className="rightAlign">{ComponentUtil.formatNumber(relativeValue)}%</span></p>
-                    </div>
-                );
-            } else {
-                return (
-                    <div className="ms__custom-tooltip">
-                        <h4>{dataType} value</h4>
-                        <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
-                        <p>Total: <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].value)}</span></p>
-                    </div>
-                );
+            if(payload && payload[0]) {
+                const label = payload[0].payload.date;
+                const relativeValue = payload[0].value ? parseFloat(payload[0].value.toFixed(2)) : 0;
+                const dataType = payload[0].payload.dataType;
+                if (dataType === 'relative') {
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>{dataType} value</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span></p>
+                            <p>Percentage: <span className="rightAlign">{ComponentUtil.formatNumber(relativeValue)}%</span></p>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className="ms__custom-tooltip">
+                            <h4>{dataType} value</h4>
+                            <p>Year: <span className="rightAlign">{`${label}`}</span> </p>
+                            <p>Total: <span className="rightAlign">{ComponentUtil.formatNumber(payload[0].value)}</span></p>
+                        </div>
+                    );
+                }
             }
-
         }
 
         return null;

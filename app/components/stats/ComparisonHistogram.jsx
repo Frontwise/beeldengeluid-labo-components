@@ -18,7 +18,6 @@ export default class ComparisonHistogram extends React.Component {
             queriesIds: this.getQueriesIds(this.props.data) || null,
             isSearching: false
         };
-        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
     }
 
@@ -180,11 +179,11 @@ export default class ComparisonHistogram extends React.Component {
         return indexes
     }
 
-    renderStackBars = dataKeys => dataKeys.map((id, index) => (
+    renderStackBars = dataKeys => dataKeys.map((queryId, index) => (
         <Bar
             isAnimationActive={true}
-            dataKey={id}
-            fill={this.COLORS[index]}
+            dataKey={queryId}
+            fill={this.props.queryStats[queryId].color}
             stackId="a"
             name=""
         />)
@@ -226,9 +225,7 @@ export default class ComparisonHistogram extends React.Component {
                                 angle={-90}
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}/>
                         </YAxis>
-                        <Tooltip
-                            content={<CustomTooltip colorIndexes={colorIndexes}/>}
-                            viewMode={this.state.viewMode}/>
+                        <Tooltip content={<CustomTooltip queryStats={this.props.queryStats} viewMode={this.state.viewMode}/>}/>
                         {bars}
                     </BarChart>
                 </ResponsiveContainer>

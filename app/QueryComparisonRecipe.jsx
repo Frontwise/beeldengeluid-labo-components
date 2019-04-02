@@ -30,7 +30,7 @@ class QueryComparisonRecipe extends React.Component {
             lineChartData: {},
             barChartData: {},
 
-            queryStats : {},
+            queryStats : {}, //contains all the retrieved stats per queryId (for all queries)
 
             chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
 
@@ -125,12 +125,14 @@ class QueryComparisonRecipe extends React.Component {
 
     generateChartData = (data, selectedQueries) => {
         const queryStats = {} //keep status information for the QueryInfoBlock
-        data.forEach(item => {
+        data.forEach((item, index) => {
             queryStats[item.query.id] = {
                 hasDateInformation : this.hasDateInformation(item),
                 error : !item || item.error ? true : false,
                 totalHits : item ? item.totalHits || 0 : 0,
-                collectionConfig : item && item.collectionConfig ? item.collectionConfig : null
+                collectionConfig : item && item.collectionConfig ? item.collectionConfig : null,
+                color : this.COLORS[index],
+                queryIndex : index + 1
             }
         })
 
@@ -237,6 +239,7 @@ class QueryComparisonRecipe extends React.Component {
                             data={this.state.lineChartData}
                             key={this.state.selectedQueriesId}
                             selectedQueries={this.state.selectedQueries}
+                            queryStats={this.state.queryStats}
                         />
                     );
                 } else {
@@ -245,6 +248,7 @@ class QueryComparisonRecipe extends React.Component {
                             data={this.state.barChartData}
                             key={this.state.selectedQueriesId}
                             selectedQueries={this.state.selectedQueries}
+                            queryStats={this.state.queryStats}
                         />
                     );
                 }
@@ -253,7 +257,6 @@ class QueryComparisonRecipe extends React.Component {
             queryCollectionDetails = this.state.selectedQueries.length > 0 ?  (
                 <QueryInfoBlock
                     queries={this.state.selectedQueries}
-                    colours={this.COLORS}
                     queryStats={this.state.queryStats}
                 />
             ) : null;

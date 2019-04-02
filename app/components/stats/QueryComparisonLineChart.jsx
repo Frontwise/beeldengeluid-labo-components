@@ -19,7 +19,6 @@ class QueryComparisonLineChart extends React.Component {
             absData : this.getJoinedData(this.props.data),
             relData : null
         };
-        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
         this.layout = document.querySelector("body");
     }
 
@@ -34,15 +33,15 @@ class QueryComparisonLineChart extends React.Component {
     onRelativeDataReceived = (relData) => {
         const relativeValues = this.getRelValues(this.state.absData, relData);
         this.setState({
-                viewMode: 'relative',
-                isSearching: false,
-                relData: relativeValues
-            }, () => {
-                this.layout.classList.remove("spinner")
-            }
-        );
+            viewMode: 'relative',
+            isSearching: false,
+            relData: relativeValues
+        }, () => {
+            this.layout.classList.remove("spinner")
+        });
     }
 
+    //TODO fix this!
     getRelValues = (absoluteValues, relativeValues) => {
         return absoluteValues.map(point => {
             const relPoint = {"year": point["year"]};
@@ -87,9 +86,9 @@ class QueryComparisonLineChart extends React.Component {
         const data = this.props.data || null;
         const promises = Object.keys(data).map(this.getData.bind(this));
         await Promise.all(promises).catch(d => console.log(d)).then(
-            dataPerQuery => {
+            queryResults => {
                 const relValues = {};
-                dataPerQuery.forEach( data => {
+                queryResults.forEach( data => {
                     relValues[data.query.id] = ElasticsearchDataUtil.searchResultsToTimeLineData(
                         data.query,
                         data.aggregations,
@@ -106,15 +105,14 @@ class QueryComparisonLineChart extends React.Component {
             })
         } else {
             this.setState({
-                    isSearching: true,
-                    viewMode: 'relative'
-                }, () => {
-                    if (this.state.relData === null) {
-                        this.processData();
-                        this.layout.classList.add("spinner");
-                    }
+                isSearching: true,
+                viewMode: 'relative'
+            }, () => {
+                if (this.state.relData === null) {
+                    this.processData();
+                    this.layout.classList.add("spinner");
                 }
-            )
+            });
         }
     }
 
@@ -184,19 +182,19 @@ class QueryComparisonLineChart extends React.Component {
     }
 
     renderLines = () => {
-        return Object.keys(this.props.data).map((k, index) => {
-            const random = Math.floor(Math.random() * 1000) + 1;
+        return Object.keys(this.props.data).map((queryId, index) => {
+            const color = this.props.queryStats[queryId].color;
             return (
                 <Line
-                    key={random}
+                    key={IDUtil.guid()}
                     isAnimationActive={true}
                     label={<LabelAsPoint/>} //the LabelAsPoint class handles the onclick of a dot
-                    name={this.props.data[k].label}
+                    name={this.props.data[queryId].label}
                     type="monotone"
-                    dataKey={k} //is equal to the queryId
-                    stroke={this.COLORS[index]}
-                    dot={{stroke: this.COLORS[index], strokeWidth: 2}}
-                    activeDot={{stroke: this.COLORS[index], strokeWidth: 6, r: 3}}
+                    dataKey={queryId}
+                    stroke={color}
+                    dot={{stroke: color, strokeWidth: 2}}
+                    activeDot={{stroke: color, strokeWidth: 6, r: 3}}
                 />
             );
         })
@@ -245,7 +243,7 @@ class QueryComparisonLineChart extends React.Component {
                                 style={{fontSize: 1.4 + 'rem', fontWeight:'bold', height: 460 + 'px', width: 100 + 'px' }}
                             />
                         </YAxis>
-                        <Tooltip content={<CustomTooltip colorIndexes={colorIndexes} viewMode={this.state.viewMode}/>}/>
+                        <Tooltip content={<CustomTooltip queryStats={this.props.queryStats} viewMode={this.state.viewMode}/>}/>
                     </LineChart>
                 </ResponsiveContainer>
             </div>
