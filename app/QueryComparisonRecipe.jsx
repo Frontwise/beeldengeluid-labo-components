@@ -1,5 +1,4 @@
 import QueryModel from './model/QueryModel';
-import QueryFactory from './components/search/QueryFactory';
 import SearchAPI from './api/SearchAPI';
 import FlexModal from './components/FlexModal';
 
@@ -26,25 +25,19 @@ FIXME: the queries in this component should all be validated using the QueryMode
 class QueryComparisonRecipe extends React.Component {
     constructor(props) {
         super(props);
-        let collections = null;
-        if(this.props.params.cids) {
-            collections = this.props.params.cids.split(',');
-        } else if(this.props.recipe.ingredients.collections) {
-            collections = this.props.recipe.ingredients.collections;
-        }
 
         this.state = {
             lineChartData: {},
             barChartData: {},
-            collections : collections,
+
             chartType : this.props.recipe.ingredients.output ? this.props.recipe.ingredients.output : 'lineChart',
-            data : null,
+
             selectedQueriesId: null,
-            pageSize : 10,
             selectedQueries : [],
+
             activeProject : ComponentUtil.getJSONFromLocalStorage('activeProject'),
-            showModal : false, //for the collection selector
-            awaitingProcess : null, //which process is awaiting the output of the project selector
+
+            showProjectModal : false //for the project selector
         };
         this.layout = document.querySelector("body");
         this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
@@ -58,9 +51,7 @@ class QueryComparisonRecipe extends React.Component {
     //to pass it to based on the ingredients of the recipe
     //TODO change this, so it knows what to do based on the recipe
     onComponentOutput(componentClass, data) {
-        if(componentClass === 'QueryFactory') {
-            this.onSearched(data);
-        } else if(componentClass === 'ProjectSelector') {
+        if(componentClass === 'ProjectSelector') {
             this.setState(
                 {
                     activeProject: data,
@@ -80,51 +71,29 @@ class QueryComparisonRecipe extends React.Component {
     onProjectChanged(project) {
         ComponentUtil.storeJSONInLocalStorage('activeProject', project);
         ComponentUtil.hideModal(this, 'showProjectModal', 'project__modal', true, () => {
-            if(this.state.awaitingProcess) {
-                switch(this.state.awaitingProcess) {
-                    case 'bookmark' : this.selectBookmarkGroup(); break;
-                    case 'saveQuery' : this.showQueryModal(); break;
-                }
-            }
+            this.setState({selectedQueries : []});
         });
     }
 
     getData(singleQuery) {
-        const collectionId = singleQuery.query.collectionId,
-              clientId = this.props.clientId,
-              user = this.props.user;
-        return new Promise(function(resolve, reject) {
-            CollectionUtil.generateCollectionConfig(clientId, user, collectionId, (collectionConfig) => {
-                const desiredFacets = singleQuery.query.desiredFacets,
-                    field = collectionConfig.getPreferredDateField() || null;
-                if(field !== null) {
-                    desiredFacets.push({
-                        "field": field,
-                        "id": field,
-                        "title": collectionConfig.toPrettyFieldName(field),
+        return new Promise((resolve, reject) => {
+            CollectionUtil.generateCollectionConfig(this.props.clientId, this.props.user, singleQuery.query.collectionId, (collectionConfig) => {
+                const dateField = collectionConfig.getPreferredDateField() || null;
+                if(singleQuery.query.dateRange == null && dateField !== null) {
+                    singleQuery.query.desiredFacets.push({
+                        "field": dateField,
+                        "id": dateField,
+                        "title": collectionConfig.toPrettyFieldName(dateField),
                         "type": "date_histogram"
                     });
                 }
-
                 const query = QueryModel.ensureQuery(singleQuery.query, collectionConfig);
-
-                query.fragmentFields = null;
-                query.fragmentPath = null;
-                query.desiredFacets = desiredFacets;
-
                 SearchAPI.search(
                     query,
                     collectionConfig,
                     data => {
-                        if (data === null && typeof data === "object") {
-                            reject(data => {
-                                    if (data === null)
-                                        return 'rejected'
-                                }
-                            )
-                        } else {
-                            resolve(data)
-                        }
+                        //just resolve everything, even if the data is null or has errors. Handle this later
+                        resolve(data);
                     },
                     false
                 )
@@ -132,69 +101,63 @@ class QueryComparisonRecipe extends React.Component {
         }).catch(err => console.log('No data returned from query', err));
     }
 
-    filterQueries = async query => {
-        const noDateRange = [];
-        if(query.query.dateRange) {
-            return await this.getData(query);
-        } else {
-            noDateRange.push(query)
-        }
-        this.setState({
-            selectedQueries :noDateRange
-        })
-    };
-
     fetchData = async (queries) => {
-        return await Promise.all(queries.map(query => this.filterQueries(query)))
+        return await Promise.all(
+            queries.filter(q => q.query).map(q => {
+                return this.getData(q);
+            })
+        )
     };
 
-    processReturnedData = (dataReturned, selection) => {
-        const random = Math.floor(Math.random() * 1000) + 1;
-        let queriesData = {};
+    //check if there is a selected date field and if it is also part of the aggregations
+    filterEmptyDateRanges = data => {
+        if(data.query && data.aggregations) {
 
-        dataReturned.forEach(data => {
+            return data.query.dateRange &&
+                data.query.dateRange.field &&
+                data.aggregations[data.query.dateRange.field] &&
+                data.aggregations[data.query.dateRange.field].length > 0;
+        }
+        return false;
+    }
+
+    generateChartData = (data, selectedQueries) => {
+        const barChartData = data.filter(this.filterEmptyDateRanges); //barchart data is simply the returned data (with date aggregations)
+        const lineChartData = {};
+
+        //the line chart data needs to be prepared differently (TODO synchronise with bar chart data model)
+        barChartData.forEach(data => {
             if(data && data.query) {
-                let queryObj = {};
-                queryObj.data = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                const timelineData = ElasticsearchDataUtil.searchResultsToTimeLineData(
                     data.query,
                     data.aggregations,
                 );
-                queryObj.comparisonId = data.query.id;
-                queryObj.query = data.query;
-                queryObj.collectionConfig = data.collectionConfig;
-                queriesData[data.query.id] = queryObj;
+                if(timelineData) { //avoid feeding the graph with null data
+                    lineChartData[data.query.id] = {
+                        data : timelineData,
+                        comparisonId : data.query.id,
+                        query: data.query,
+                        collectionConfig : data.collectionConfig
+                    };
+                } else {
+                    console.debug('no date aggregation data', data.aggregations)
+                }
             } else {
                 console.debug('no data', data)
             }
         });
 
         this.setState({
-            lineChartData: queriesData,
-            barChartData: dataReturned,
-            selectedQueriesId : random,
-            selectedQueries :selection
+            lineChartData: lineChartData,
+            barChartData: barChartData,
+            selectedQueriesId : IDUtil.guid(),
+            selectedQueries : selectedQueries
         }, () => this.layout.classList.remove("spinner"))
     };
 
-    onOutput(data) {
-         if(!data) { //if there are no results
-            console.log('Your query did not yield any results');
-        } else if(data.pagingOutOfBounds) { //due to ES limitations
-            console.log('The last page cannot be retrieved, please refine your search');
-        } else {
-            if(data.deleted === true && data.queryId) { //the query factory deleted a query
-                delete csr[data.queryId];
-                delete lineChartData[data.queryId];
-                delete barChartData[data.queryId];
-            } else { //the data is the same stuff returned by a QueryBuilder
-
-            }
-        }
-    }
-
-    compareQueries = selection => {
+    compareQueries = selectedQueries => {
         this.layout.classList.add("spinner")
-        this.fetchData(selection).then(data => this.processReturnedData(data, selection));
+        this.fetchData(selectedQueries).then(data => this.generateChartData(data, selectedQueries));
     };
 
     __getBaseUrl() {
@@ -208,10 +171,7 @@ class QueryComparisonRecipe extends React.Component {
     }
 
     switchGraphType() {
-        this.setState({
-            chartType : this.state.chartType === 'lineChart' ? 'histogram' : 'lineChart'
-            }
-        )
+        this.setState({chartType : this.state.chartType === 'lineChart' ? 'histogram' : 'lineChart'});
     }
 
     /* --------------------------- RENDER HEADER --------------------- */
@@ -263,6 +223,7 @@ class QueryComparisonRecipe extends React.Component {
                     </button>);
 
                 if(this.state.chartType === 'lineChart') {
+                    console.debug(this.state.lineChartData);
                     chart = (
                         <QueryComparisonLineChart
                             data={this.state.lineChartData}

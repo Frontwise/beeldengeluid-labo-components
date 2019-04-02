@@ -8,9 +8,9 @@ const ElasticsearchDataUtil = {
 	//TODO make sure the different date formats can be handled!
 	searchResultsToTimeLineData : function(query, aggregations) {
 		if(query && aggregations) {
-		 	const timelineData = []
 		 	//check if there is a selected date field and if it is also part of the aggregations
-		 	if(query.dateRange && query.dateRange.field && aggregations[query.dateRange.field]) {
+		 	if(query.dateRange && query.dateRange.field && aggregations[query.dateRange.field] && aggregations[query.dateRange.field].length > 0) {
+		 		const timelineData = []
 				aggregations[query.dateRange.field].forEach((a) => {
 					const y = new Date(a.date_millis).getFullYear();
 					if (!(isNaN(y))) {
@@ -21,8 +21,8 @@ const ElasticsearchDataUtil = {
 						timelineData.push(td);
 					}
 				});
+				return timelineData;
 			}
-			return timelineData;
 		}
 		return null;
 	},
