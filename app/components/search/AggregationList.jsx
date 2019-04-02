@@ -293,7 +293,7 @@ class AggregationList extends React.Component {
                 );
                 // filter out the selected ones
                 facets = facets.filter(f => !f.selected);
-                facets.push(...selectedFacets);
+                facets.unshift(...selectedFacets);
             }
 
             //then add them to the convenient UI object (together with the exclusion property)
