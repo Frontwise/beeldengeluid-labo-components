@@ -6,30 +6,34 @@
 	display: flex;
 	flex-wrap: wrap;
 
-	.query-details {
-		color: black;
+	.bg__qib__block {
 		flex-wrap: wrap;
 		flex: 2 2 30em;
-		padding: 15px;
-		background-color: #fefefe;
-		border: 1px solid #DEDEDA;
-		border-radius: 4px;
+		border: 1px solid #dededa;
 		box-shadow: 1px 1px 1px 0 #999;
-		margin: 1rem 10px 1rem 0;
-		width: 49%;
-		vertical-align: top;
-		p {
-			color: #2D343A;
-			padding: 0 20px;
-			line-height: 1.2rem;
+		margin: 10px 0px 0px 10px;
+
+		.bg__qib__query {
+			padding:10px;
+			color: black;
+			height: 350px;
+			overflow-y: auto;
+			background-color: #fefefe;
+			vertical-align: top;
+			h4 {
+				padding:0px;
+				text-align: center;
+			}
+			li {
+				color: #2D343A;
+				list-style-type: none;
+			}
 		}
-		li {
-		   color: #2D343A;
-			list-style-type: none;
-		}
+
 		.bg__qib__error {
-			color: crimson;
-			padding:5px;
+			background-color: #f26c50;
+			color: white;
+			padding: 6px 10px;
 		}
 	}
 }

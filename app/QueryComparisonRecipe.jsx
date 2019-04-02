@@ -42,7 +42,7 @@ class QueryComparisonRecipe extends React.Component {
             showProjectModal : false //for the project selector
         };
         this.layout = document.querySelector("body");
-        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue'];
+        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue', 'blue'];
     }
 
     componentDidMount(){
@@ -95,7 +95,7 @@ class QueryComparisonRecipe extends React.Component {
                     collectionConfig,
                     data => {
                         //just resolve everything, even if the data is null or has errors. Handle this later
-                        console.debug(data)
+                        //console.debug(data)
                         resolve(data);
                     },
                     false
@@ -114,11 +114,11 @@ class QueryComparisonRecipe extends React.Component {
 
     hasDateInformation = item => {
         if(item.query && item.aggregations) {
-
-            return item.query.dateRange != null &&
-                item.query.dateRange.field != null &&
-                item.aggregations[item.query.dateRange.field] != null &&
-                item.aggregations[item.query.dateRange.field].length > 0;
+            if(item.query.dateRange && item.query.dateRange.field) {
+                if(item.aggregations[item.query.dateRange.field] != null && item.aggregations[item.query.dateRange.field].length > 0) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -127,9 +127,10 @@ class QueryComparisonRecipe extends React.Component {
         const queryStats = {} //keep status information for the QueryInfoBlock
         data.forEach(item => {
             queryStats[item.query.id] = {
-                noDateInformation : this.hasDateInformation(item),
+                hasDateInformation : this.hasDateInformation(item),
                 error : !item || item.error ? true : false,
-                totalHits : item ? item.totalHits || 0 : 0
+                totalHits : item ? item.totalHits || 0 : 0,
+                collectionConfig : item && item.collectionConfig ? item.collectionConfig : null
             }
         })
 

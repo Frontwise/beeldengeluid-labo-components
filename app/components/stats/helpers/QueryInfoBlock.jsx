@@ -8,23 +8,11 @@ export default class QueryInfoBlock extends React.Component {
         this.CLASS_PREFIX = 'qib';
     }
 
-    getStyle = colour => {
-        return {
-            color: colour,
-            listStyle: 'none',
-            padding: '10px 20px'
-        };
-    };
-
     toQueryInfoData = (items, colours, queryStats) => {
         if(!items) return null;
-
         return items.map((item, index) => {
             return {
                 savedQueryName: item.name,
-                collectionTitle: (item.collectionConfig && item.collectionConfig.collectionConfig.collectionInfo)
-                    ? item.collectionConfig.collectionConfig.collectionInfo.title
-                    : null,
                 queryTerm: item.query.term,
                 dateRange: item.query.dateRange,
                 selectedFacets: item.query.selectedFacets,
@@ -35,10 +23,21 @@ export default class QueryInfoBlock extends React.Component {
         })
     }
 
+    renderError = stats => {
+        if(stats.hasDateInformation === true && stats.error === false) return null;
+        return (
+            <div className={IDUtil.cssClassName('error', this.CLASS_PREFIX)}>
+                {stats.error === true ? 'This query could not be executed' : null}
+                {stats.error === false && stats.hasDateInformation === false ? 'No date information could be retreived' : null}
+            </div>
+        );
+    };
+
     renderQueryInfoBlocks = queryInfoData => {
         if(!queryInfoData) return null;
 
         return queryInfoData.map((item, index) => {
+            const collectionConfig = item.stats ? item.stats.collectionConfig : null;
             let fieldCategoryList = null;
             let fieldClusterHeader = null;
             let dateRangeHeader = null;
@@ -88,25 +87,23 @@ export default class QueryInfoBlock extends React.Component {
             }
 
             return (
-                <div className="query-details" onClick={this.toggleLine}>
-                    <h4 style={this.getStyle(item.lineColour)}>
-                        Query #{index+1}: {item.savedQueryName}
-                    </h4>
-                    <strong>Collection name:</strong> {item.collectionTitle}
+                <div className={IDUtil.cssClassName('block', this.CLASS_PREFIX)} onClick={this.toggleLine}>
+                    <div className={IDUtil.cssClassName('query', this.CLASS_PREFIX)}>
+                        <h4 style={{color: item.lineColour}}>
+                            Query #{index+1}: {item.savedQueryName}
+                        </h4>
 
-                    <strong>Query term (Search term):</strong> {item.queryTerm}
+                        <strong>Collection name:</strong> {collectionConfig && collectionConfig.collectionInfo ? collectionConfig.collectionInfo.title : 'Unknown'}<br/>
+                        <strong>Query term (Search term):</strong> {item.queryTerm}<br/>
 
-                    {fieldClusterHeader}
-                    {fieldCategoryList}
-                    {dateRangeHeader}
-                    {dateRangeFields}
+                        {fieldClusterHeader}
+                        {fieldCategoryList}
+                        {dateRangeHeader}
+                        {dateRangeFields}
 
-                    <strong>Total hits:</strong> {item.stats ? item.stats.totalHits : 0}
-
-                    <div className={IDUtil.cssClassName('error', this.CLASS_PREFIX)}>
-                        {item.stats && item.stats.noDateInformation === true ? 'No date information could be retreived' : null}
-                        {item.stats && item.stats.error === true ? 'This query could not be executed' : null}
+                        <strong>Total hits:</strong> {item.stats ? item.stats.totalHits : 0}<br/>
                     </div>
+                    {this.renderError(item.stats)}
                 </div>
             )
         })
