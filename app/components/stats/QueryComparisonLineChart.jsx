@@ -155,10 +155,16 @@ class QueryComparisonLineChart extends React.Component {
         // @params: starting year and number of years until the end
         */
         const __getValidRange = (min, max) => Array.from(new Array(max - min + 1),(val,index)=>index+min);
+
         const relGraphData = __getGraphData(dataSet);
+        if(relGraphData && relGraphData.length <= 0) {
+            return null;
+        }
+
         const minYear = __endYear(relGraphData, Math.min);
         const maxYear = __endYear(relGraphData, Math.max);
         const validRange = __getValidRange(minYear, maxYear);
+
 
         const dataForGraph = validRange.map(year => {
             let tempObj = {};
