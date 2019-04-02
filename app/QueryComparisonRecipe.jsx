@@ -89,7 +89,7 @@ class QueryComparisonRecipe extends React.Component {
         });
     }
 
-    async getData(singleQuery) {
+    getData(singleQuery) {
         const collectionId = singleQuery.query.collectionId,
               clientId = this.props.clientId,
               user = this.props.user;
@@ -132,41 +132,49 @@ class QueryComparisonRecipe extends React.Component {
         }).catch(err => console.log('No data returned from query', err));
     }
 
-    async processData(queries) {
+    filterQueries = async query => {
+        const noDateRange = [];
+        if(query.query.dateRange) {
+            return await this.getData(query);
+        } else {
+            noDateRange.push(query)
+        }
+        this.setState({
+            selectedQueries :noDateRange
+        })
+    };
+
+    fetchData = async (queries) => {
+        return await Promise.all(queries.map(query => this.filterQueries(query)))
+    };
+
+    processReturnedData = (dataReturned, selection) => {
         const random = Math.floor(Math.random() * 1000) + 1;
-        const promises = queries.map(query => this.getData(query));
         let queriesData = {};
-        let selectedQueriesWithConfig = [];
-        await Promise.all(promises).then(
-            dataPerQuery => {
-                queries.forEach(singleQuery => {
-                    singleQuery.collectionConfig = dataPerQuery.find(q => q.query.id === singleQuery.query.id);
-                    selectedQueriesWithConfig.push(singleQuery)
-                });
-                dataPerQuery.map(data => {
-                    if(data && data.query) {
-                        let queryObj = {};
-                        queryObj.data = ElasticsearchDataUtil.searchResultsToTimeLineData(
-                            data.query,
-                            data.aggregations,
-                        );
-                        queryObj.comparisonId = data.query.id;
-                        queryObj.query = data.query;
-                        queryObj.collectionConfig = data.collectionConfig;
-                        queriesData[data.query.id] = queryObj;
-                    } else {
-                        console.debug('no data', data)
-                    }
-                });
-                this.setState({
-                    lineChartData: queriesData,
-                    barChartData: dataPerQuery,
-                    selectedQueriesId : random,
-                    selectedQueries : selectedQueriesWithConfig
-                }, () => this.layout.classList.remove("spinner"))
-            },
-        )
-    }
+
+        dataReturned.forEach(data => {
+            if(data && data.query) {
+                let queryObj = {};
+                queryObj.data = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                    data.query,
+                    data.aggregations,
+                );
+                queryObj.comparisonId = data.query.id;
+                queryObj.query = data.query;
+                queryObj.collectionConfig = data.collectionConfig;
+                queriesData[data.query.id] = queryObj;
+            } else {
+                console.debug('no data', data)
+            }
+        });
+
+        this.setState({
+            lineChartData: queriesData,
+            barChartData: dataReturned,
+            selectedQueriesId : random,
+            selectedQueries :selection
+        }, () => this.layout.classList.remove("spinner"))
+    };
 
     onOutput(data) {
          if(!data) { //if there are no results
@@ -184,10 +192,10 @@ class QueryComparisonRecipe extends React.Component {
         }
     }
 
-    compareQueries(selection) {
+    compareQueries = selection => {
         this.layout.classList.add("spinner")
-        this.processData(selection)
-    }
+        this.fetchData(selection).then(data => this.processReturnedData(data, selection));
+    };
 
     __getBaseUrl() {
         const temp = window.location.href;
@@ -271,12 +279,13 @@ class QueryComparisonRecipe extends React.Component {
                         />
                     );
                 }
-                queryCollectionDetails = <QueryInfoBlock
-                    selectedQueries={this.state.selectedQueries}
-                    lineColour={this.COLORS}
-                    external={external}
-                />;
             }
+
+            queryCollectionDetails = this.state.selectedQueries ?  (<QueryInfoBlock
+                selectedQueries={this.state.selectedQueries}
+                lineColour={this.COLORS}
+                external={external}
+            />) : null;
         }
 
         //project modal
