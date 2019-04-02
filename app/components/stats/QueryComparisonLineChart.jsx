@@ -205,6 +205,7 @@ class QueryComparisonLineChart extends React.Component {
     render() {
         const lines = this.renderLines();
         const timelineData = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
+        const yaxisLabel = this.state.viewMode === 'relative' ? '% compared to year' : 'Number of records';
         const colorIndexes = this.getColorIndexes(this.props.data);
 
         return (
@@ -236,7 +237,7 @@ class QueryComparisonLineChart extends React.Component {
                         </XAxis>
                         <YAxis width={100} tickFormatter={ComponentUtil.formatNumber}>
                             <Label
-                                value="Number of records"
+                                value={yaxisLabel}
                                 offset={10}
                                 position="insideBottomLeft"
                                 angle={-90}

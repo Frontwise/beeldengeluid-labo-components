@@ -22,9 +22,11 @@ export default class CustomTooltip extends React.Component{
                     const valueLabel = payload.length > 1 ? 'Values' : 'Value';
                     const point = payload.map((p, index) => {
                         return (
-                            <span style={this.getStyle(p)}>
-                                <span>Query#{index+1}</span>
-                                <span>{p.value ? ComponentUtil.formatNumber(parseFloat(p.value.toFixed(2))) : 0}%</span>
+                            <span className="bg__tooltip-spaceBetween" style={this.getStyle(this.props.queryStats[p.dataKey].color)}>
+                                <span>Query#{this.props.queryStats[p.dataKey].queryIndex}</span>
+                                <span className="bg__tooltip-spaceBetween">
+                                    {p.value ? ComponentUtil.formatNumber(parseFloat(p.value.toFixed(2))) : 0}%
+                                </span>
                             </span>
                         )
                     });

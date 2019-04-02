@@ -192,6 +192,7 @@ export default class ComparisonHistogram extends React.Component {
     render() {
         const random = Math.floor(Math.random() * 1000) + 1;
         const dataToPrint = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
+        const yaxisLabel = this.state.viewMode === 'relative' ? '% compared to year' : 'Number of records';
         const colorIndexes = this.getColorIndices(this.props.data);
         const bars = this.state.queriesIds ? this.renderStackBars(this.state.queriesIds) : null;
 
@@ -219,7 +220,7 @@ export default class ComparisonHistogram extends React.Component {
                         </XAxis>
                         <YAxis width={100} >
                             <Label
-                                value="Number of records"
+                                value={yaxisLabel}
                                 offset={10}
                                 position="insideBottomLeft"
                                 angle={-90}
