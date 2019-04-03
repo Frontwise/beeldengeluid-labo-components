@@ -1,10 +1,10 @@
 .bg__query-info-block {
-	margin: 4rem 0;
-	padding: 1rem 0;
-	text-transform: capitalize;
 	display: flex;
 	flex-wrap: wrap;
 	font-family: Maven Pro,sans-serif;
+	margin: 4rem 0;
+	padding: 1rem 0;
+	text-transform: capitalize;
 
 	label {
 		font-weight: normal;
@@ -12,70 +12,84 @@
 	}
 
 	.bg__qib__block {
-		flex-wrap: wrap;
-		flex: 2 2 30em;
 		background-color: #faf6f6;
-    	border-radius: 5px;
-    	border: 1px solid #eee3e1;
-		margin: 10px 0px 0px 10px;
-		width:520px;
+		border-radius: 5px;
+		border: 1px solid #eee3e1;
+		display: flex;
+		flex: 2 2 30em;
+		flex-wrap: wrap;
+		margin: 10px 0 0 10px;
 
 		.bg__qib__query {
-			padding:10px;
-			color: black;
-			height: 350px;
-			overflow-y: auto;
 			background-color: #faf6f6;
+			color: black;
+			overflow-y: auto;
+			padding:10px;
 			vertical-align: top;
+
 			h4 {
-				padding:0px;
+				margin-bottom: 20px;
+				padding:0;
 				text-align: center;
-				margin-bottom:2px;
 			}
-			li {
-				color: #2D343A;
-				list-style-type: none;
+			ul {
+				padding-left: 20px;
+
+				li {
+					color: #2D343A;
+					list-style-type: none;
+				}
 			}
+
 		}
 
 		.bg__qib__error {
+			align-self: flex-end;
 			background-color: #f26c50;
 			color: white;
 			padding: 6px 10px;
+			width: 100%;
+		}
+		@media screen and (min-width: $break-medium-result-list) {
+			max-width: 48%;
+		}
+		@media screen and (min-width: $break-large) {
+			max-width: 32%;
 		}
 	}
 
 	.bg__qib__value {
 	    display: inline-block;
 	    width:100%;
+
 	    label {
-	    	width:50%;
+	    	width:40%;
 	    }
 	    span {
-	    	width:50%;
-	    	float:right;
 			border-left: 1px solid grey;
+	    	float:right;
     		padding-left: 5px;
+			width:60%;
 	    }
 	}
 
 	.bg__qib__count {
 		background-color: #fff;
+		border-radius: 25px;
+		display: inline-block;
+		font-family: Maven Pro,sans-serif;
 	    font-size: .9em;
-	    border-radius: 25px;
-	    display: inline-block;
+		float: right;
+		min-width: 15px;
 	    padding: 2px 4px;
-	    min-width: 15px;
 	    vertical-align: middle;
-	    font-family: Maven Pro,sans-serif;
-	    float: right;
 	}
 
 	.bg__qib__color {
-	    display: inline-block;
-	    width: 12px;
-	    height: 12px;
-	    border: 1px solid #eee3e1;
-	    margin-left:5px;
+		border: 1px solid #eee3e1;
+		display: inline-block;
+		height: 12px;
+		margin-left:5px;
+		width: 12px;
 	}
 }
