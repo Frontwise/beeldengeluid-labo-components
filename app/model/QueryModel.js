@@ -59,7 +59,9 @@ const QueryModel = {
 			innerHitsSize: obj.innerHitsSize || 5,
 
 			//remove certain fields from the returned data
-			exclude: obj.exclude || collectionConfig ? collectionConfig.getFieldsToExclude() : null
+			exclude: obj.exclude || collectionConfig ? collectionConfig.getFieldsToExclude() : null,
+
+			searchId : obj.searchId || null
 		};
 	},
 

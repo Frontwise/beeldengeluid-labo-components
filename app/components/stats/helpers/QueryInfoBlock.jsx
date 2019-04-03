@@ -10,6 +10,7 @@ export default class QueryInfoBlock extends React.Component {
 
     toQueryInfoData = (items, queryStats) => {
         if(!items) return null;
+
         return items.map((item, index) => {
             return {
                 savedQueryName: item.name,
@@ -17,7 +18,7 @@ export default class QueryInfoBlock extends React.Component {
                 dateRange: item.query.dateRange,
                 selectedFacets: item.query.selectedFacets,
                 fieldCategory: item.query.fieldCategory,
-                stats: queryStats[item.query.id]
+                stats: queryStats[item.query.searchId]
             }
         })
     }
@@ -27,7 +28,7 @@ export default class QueryInfoBlock extends React.Component {
         return (
             <div className={IDUtil.cssClassName('error', this.CLASS_PREFIX)}>
                 {stats.error === true ? 'This query could not be executed' : null}
-                {stats.error === false && stats.hasDateInformation === false ? 'No date information could be retreived' : null}
+                {stats.error === false && stats.hasDateInformation === false ? 'No date information could be retreived, try adding a (different) date field' : null}
             </div>
         );
     };
@@ -40,19 +41,25 @@ export default class QueryInfoBlock extends React.Component {
             let fieldClusterHeader = null;
             let dateRangeHeader = null;
             let dateRangeFields = null;
-            let dateField = null;
-            let dateStart = null;
-            let dateEnd = null;
 
             if (item.fieldCategory && item.fieldCategory.length > 0) {
                 fieldCategoryList = (
                     <ul>
-                        {item.fieldCategory.map(field => <li>{field.label}</li>)}
+                        {
+                            item.fieldCategory.map(field => {
+                                return (
+                                    <li>{field.label}</li>
+                                )
+                            })
+                        }
                     </ul>
                 );
 
             }
             if (item.dateRange) {
+                let dateField = null;
+                let dateStart = null;
+                let dateEnd = null;
                 dateRangeFields = Object.keys(item.dateRange).map(dateObj => {
                     switch (dateObj) {
                         case 'field':
@@ -68,40 +75,58 @@ export default class QueryInfoBlock extends React.Component {
                     if (dateField && dateStart && dateEnd) {
                         return (
                             <ul>
-                                <li><u>Selected date field:</u> {dateField}</li>
-                                <li><u>Initial date:</u> {dateStart}</li>
-                                <li><u>End date:</u> {dateEnd}</li>
+                                <li className={IDUtil.cssClassName('value', this.CLASS_PREFIX)}>
+                                    <label>Selected date field:</label>
+                                    <span>{
+                                        item.stats.collectionConfig ? item.stats.collectionConfig.toPrettyFieldName(dateField) : dateField
+                                    }</span>
+                                </li>
+                                <li className={IDUtil.cssClassName('value', this.CLASS_PREFIX)}>
+                                    <label>Initial date:</label>
+                                    <span>{dateStart}</span>
+                                </li>
+                                <li className={IDUtil.cssClassName('value', this.CLASS_PREFIX)}>
+                                    <label>End date:</label>
+                                    <span>{dateEnd}</span>
+                                </li>
                             </ul>
                         )
                     }
                 })
 
             }
-            if (dateRangeFields) {
-                dateRangeHeader = <p><b>Date Range:</b></p>
-            }
-            if (fieldCategoryList) {
-                fieldClusterHeader = <p><b>Field cluster:</b></p>
-            }
 
             return (
                 <div className={IDUtil.cssClassName('block', this.CLASS_PREFIX)} onClick={this.toggleLine}>
                     <div className={IDUtil.cssClassName('query', this.CLASS_PREFIX)}>
-                        <h4 style={{color: item.stats.color}}>
+                        <h4>
                             Query #{item.stats.queryIndex}: {item.savedQueryName}
+                            <span className={IDUtil.cssClassName('color', this.CLASS_PREFIX)} style={{backgroundColor: item.stats.color}}></span>
                         </h4>
 
-                        <strong>Collection name:</strong> {
-                            item.stats.collectionConfig && item.stats.collectionConfig.collectionInfo ? item.stats.collectionConfig.collectionInfo.title : 'Unknown'
-                        }<br/>
-                        <strong>Query term (Search term):</strong> {item.queryTerm}<br/>
+                        <div className={IDUtil.cssClassName('value', this.CLASS_PREFIX)}>
+                            <label>Collection:</label>
+                            <span>
+                                {
+                                    item.stats.collectionConfig && item.stats.collectionConfig.collectionInfo ?
+                                    item.stats.collectionConfig.collectionInfo.title : 'Unknown'
+                                }
+                            </span>
+                        </div>
 
-                        {fieldClusterHeader}
+                        <div className={IDUtil.cssClassName('value', this.CLASS_PREFIX)}>
+                            <label>Query term:</label>
+                            <span>
+                                {item.queryTerm}
+                            </span>
+                        </div>
+
+                        {fieldCategoryList ? <label>Field clusters:</label> : null}
                         {fieldCategoryList}
-                        {dateRangeHeader}
+                        {dateRangeFields ? <label>Date range:</label> : null}
                         {dateRangeFields}
 
-                        <strong>Total hits:</strong> {item.stats.totalHits}<br/>
+                        <strong>Total hits:</strong> <span className={IDUtil.cssClassName('count', this.CLASS_PREFIX)}>{item.stats.totalHits}</span><br/>
                     </div>
                     {this.renderError(item.stats)}
                 </div>

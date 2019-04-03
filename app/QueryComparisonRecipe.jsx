@@ -42,7 +42,8 @@ class QueryComparisonRecipe extends React.Component {
             showProjectModal : false //for the project selector
         };
         this.layout = document.querySelector("body");
-        this.COLORS = ['#468dcb', 'rgb(255, 127, 14)', 'rgba(44, 160, 44, 14)', 'wheat', 'crimson', 'dodgerblue', 'blue'];
+        this.COLORS = ['darkturquoise', 'goldenrod', 'deeppink', 'cadetblue', 'crimson', 'lime', 'violet', 'seagreen',
+        'yellowgreen', 'dodgerblue', 'mediumpurple', 'blue', 'lightcoral', 'olivedrab', 'sienna', 'gold', 'darkslategrey'];
     }
 
     componentDidMount(){
@@ -89,13 +90,11 @@ class QueryComparisonRecipe extends React.Component {
                         "type": "date_histogram"
                     });
                 }
-                const query = QueryModel.ensureQuery(singleQuery.query, collectionConfig);
                 SearchAPI.search(
-                    query,
+                    QueryModel.ensureQuery(singleQuery.query, collectionConfig),
                     collectionConfig,
                     data => {
                         //just resolve everything, even if the data is null or has errors. Handle this later
-                        //console.debug(data)
                         resolve(data);
                     },
                     false
@@ -126,13 +125,14 @@ class QueryComparisonRecipe extends React.Component {
     generateChartData = (data, selectedQueries) => {
         const queryStats = {} //keep status information for the QueryInfoBlock
         data.forEach((item, index) => {
-            queryStats[item.query.id] = {
+            queryStats[item.searchId] = {
                 hasDateInformation : this.hasDateInformation(item),
                 error : !item || item.error ? true : false,
                 totalHits : item ? item.totalHits || 0 : 0,
                 collectionConfig : item && item.collectionConfig ? item.collectionConfig : null,
-                color : this.COLORS[index],
-                queryIndex : index + 1
+                color : this.COLORS[index] || 'black',
+                queryIndex : index + 1,
+                searchId : item.searchId
             }
         })
 
@@ -140,23 +140,23 @@ class QueryComparisonRecipe extends React.Component {
         const lineChartData = {};
 
         //the line chart data needs to be prepared differently (TODO synchronise with bar chart data model)
-        barChartData.forEach(data => {
-            if(data && data.query) {
+        barChartData.forEach(item => {
+            if(item && item.query) {
                 const timelineData = ElasticsearchDataUtil.searchResultsToTimeLineData(
-                    data.query,
-                    data.aggregations,
+                    item.searchId,
+                    item.query,
+                    item.aggregations
                 );
                 if(timelineData) { //avoid feeding the graph with null data
-                    lineChartData[data.query.id] = {
+                    lineChartData[item.searchId] = {
                         data : timelineData,
-                        comparisonId : data.query.id,
-                        query: data.query,
-                        collectionConfig : data.collectionConfig
+                        comparisonId : item.searchId,
+                        query: item.query,
+                        collectionConfig : item.collectionConfig
                     };
                 }
             }
         });
-
         this.setState({
             queryStats: queryStats,
             lineChartData: lineChartData,
@@ -167,6 +167,10 @@ class QueryComparisonRecipe extends React.Component {
     };
 
     compareQueries = selectedQueries => {
+        selectedQueries = selectedQueries.map(item => {
+            Object.assign(item.query, {searchId : IDUtil.guid()})
+            return item;
+        });
         this.layout.classList.add("spinner")
         this.fetchData(selectedQueries).then(data => this.generateChartData(data, selectedQueries));
     };

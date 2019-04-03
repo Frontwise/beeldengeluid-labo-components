@@ -6,7 +6,8 @@ const ElasticsearchDataUtil = {
 	/* ----------------------------- Used by: ComparativeSearchRecipe ------------------------------------------------ */
 
 	//TODO make sure the different date formats can be handled!
-	searchResultsToTimeLineData : function(query, aggregations) {
+	searchResultsToTimeLineData : function(searchId, query, aggregations) {
+		console.debug('SEARCH ID', searchId)
 		if(query && aggregations) {
 		 	//check if there is a selected date field and if it is also part of the aggregations
 		 	if(query.dateRange && query.dateRange.field && aggregations[query.dateRange.field] && aggregations[query.dateRange.field].length > 0) {
@@ -17,7 +18,7 @@ const ElasticsearchDataUtil = {
 						const td = {
 							year: y
 						}
-						td[query.id] = a.doc_count
+						td[searchId] = a.doc_count
 						timelineData.push(td);
 					}
 				});

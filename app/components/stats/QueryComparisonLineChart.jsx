@@ -89,9 +89,10 @@ class QueryComparisonLineChart extends React.Component {
             queryResults => {
                 const relValues = {};
                 queryResults.forEach( data => {
-                    relValues[data.query.id] = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                    relValues[data.searchId] = ElasticsearchDataUtil.searchResultsToTimeLineData(
+                        data.searchId,
                         data.query,
-                        data.aggregations,
+                        data.aggregations
                     );
                 });
                 this.onRelativeDataReceived(relValues);
@@ -162,7 +163,6 @@ class QueryComparisonLineChart extends React.Component {
         const minYear = __endYear(relGraphData, Math.min);
         const maxYear = __endYear(relGraphData, Math.max);
         const validRange = __getValidRange(minYear, maxYear);
-
 
         const dataForGraph = validRange.map(year => {
             let tempObj = {};

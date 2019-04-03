@@ -15,7 +15,7 @@ export default class ComparisonHistogram extends React.Component {
             viewMode: 'absolute', // Sets default view mode to absolute.
             relData: null,
             absData: this.getJoinedData(this.props.data) || null,
-            queriesIds: this.getQueriesIds(this.props.data) || null,
+            searchIds: this.getSearchIds(this.props.data) || null,
             isSearching: false
         };
         this.layout = document.querySelector("body");
@@ -48,7 +48,7 @@ export default class ComparisonHistogram extends React.Component {
         })
     }
 
-    getQueriesIds = dataSets => dataSets.map(set => set.query.id)
+    getSearchIds = dataSets => dataSets.map(item => item.query.searchId)
 
     /*
         Gets an object with query info with queryId as key.
@@ -61,14 +61,14 @@ export default class ComparisonHistogram extends React.Component {
             let tempDataSet = k.aggregations[k.query.dateRange.field];
             tempDataSet.forEach(point => {
                 if(point) {
-                    point[`${k.query.id}`] = point.doc_count;
+                    point[`${k.searchId}`] = point.doc_count;
                     point['date'] = new Date(point.date_millis).getFullYear();
                 }
             });
            if(returnedType === 'arr') {
                dataArr.push(tempDataSet)
            } else {
-               dataObj[`${k.query.id}`] = tempDataSet
+               dataObj[`${k.searchId}`] = tempDataSet
            }
         });
         return returnedType === 'arr' ? dataArr : dataObj;
@@ -179,11 +179,11 @@ export default class ComparisonHistogram extends React.Component {
         return indexes
     }
 
-    renderStackBars = dataKeys => dataKeys.map((queryId, index) => (
+    renderStackBars = dataKeys => dataKeys.map((searchId, index) => (
         <Bar
             isAnimationActive={true}
-            dataKey={queryId}
-            fill={this.props.queryStats[queryId].color}
+            dataKey={searchId}
+            fill={this.props.queryStats[searchId].color}
             stackId="a"
             name=""
         />)
@@ -194,7 +194,7 @@ export default class ComparisonHistogram extends React.Component {
         const dataToPrint = this.state.viewMode === 'relative' ? this.state.relData : this.state.absData;
         const yaxisLabel = this.state.viewMode === 'relative' ? '% compared to year' : 'Number of records';
         const colorIndexes = this.getColorIndices(this.props.data);
-        const bars = this.state.queriesIds ? this.renderStackBars(this.state.queriesIds) : null;
+        const bars = this.state.searchIds ? this.renderStackBars(this.state.searchIds) : null;
 
         return (
             <div className={IDUtil.cssClassName('query-comparison-histogram')}>

@@ -10,7 +10,7 @@ const SearchAPI = {
 		if(query.offset + query.size <= 10000) {
 			let url = _config.SEARCH_API_BASE + '/layered_search/' + query.collectionId;
 			const xhr = new XMLHttpRequest();
-			const searchId = IDUtil.guid();
+			const searchId = query.searchId || IDUtil.guid();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === XMLHttpRequest.DONE) {
 					if(xhr.status === 200) {
