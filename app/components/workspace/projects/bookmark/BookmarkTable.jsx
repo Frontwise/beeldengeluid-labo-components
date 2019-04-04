@@ -374,7 +374,7 @@ class BookmarkTable extends React.PureComponent {
     };
 
     selectAllChange(selectedItems, e) {
-        let newSelection = this.state.selection.slice(); //copy the array
+        const newSelection = this.state.selection.slice().filter((i)=>(selectedItems.includes(i))); //copy the array
         selectedItems.forEach(item => {
             const found = newSelection.find(selected => selected.resourceId === item.resourceId)
             if(!found && e.target.checked) { // add it to the selection

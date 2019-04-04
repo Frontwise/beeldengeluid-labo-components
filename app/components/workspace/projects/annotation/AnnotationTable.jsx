@@ -330,7 +330,7 @@ class AnnotationTable extends React.PureComponent {
 
     //TODO test this function
     selectAllChange(selectedItems, e) {
-        const newSelection = this.state.selection.slice(); //copy the array
+        const newSelection = this.state.selection.slice().filter((i)=>(selectedItems.includes(i))); //copy the array
         selectedItems.forEach(item => {
             const found = newSelection.find(selected => selected.annotationId === item.annotationId)
             if(!found && e.target.checked) { // add it to the selection
