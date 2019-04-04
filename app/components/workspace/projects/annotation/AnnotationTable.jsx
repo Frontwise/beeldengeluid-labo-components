@@ -28,7 +28,7 @@ class AnnotationTable extends React.PureComponent {
 
         this.bulkActions = [
             { title: 'Delete', onApply: this.deleteAnnotations.bind(this) },
-            { title: 'Export', onApply: this.exportAnnotationsByIds.bind(this) }
+            { title: 'Export', onApply: this.exportAnnotations.bind(this) }
         ];
 
         this.state = {
@@ -166,9 +166,7 @@ class AnnotationTable extends React.PureComponent {
     //Update Selection list, based on available items
     updateSelection(items) {
         this.setState({
-            selection: items
-            .map(item => item.annotationId)
-            .filter(itemId => this.state.selection.includes(itemId))
+            selection: items.filter(item => this.state.selection.some((i)=>(i.annotationId === item.annotationId)))
         });
     }
 
@@ -287,13 +285,6 @@ class AnnotationTable extends React.PureComponent {
         this.deleteAnnotations([annotation]);
     }
 
-    exportAnnotationsByIds(annotationIds) {
-        const data = this.state.annotations.filter(item =>
-            annotationIds.includes(item.annotationId)
-        );
-        this.exportAnnotations(data);
-    }
-
     exportAnnotations(annotations) {
         let data = this.state.annotations.filter(item =>
             annotations.includes(item)
@@ -344,7 +335,7 @@ class AnnotationTable extends React.PureComponent {
             const found = newSelection.find(selected => selected.annotationId === item.annotationId)
             if(!found && e.target.checked) { // add it to the selection
                 newSelection.push(item);
-            } else if (e.target.checked && found) { // remove the selected item
+            } else if (!e.target.checked && found) { // remove the selected item
                 newSelection.splice(found, 1);
             }
         });
@@ -403,7 +394,7 @@ class AnnotationTable extends React.PureComponent {
                         checked={
                             renderState.visibleItems.length > 0 &&
                             renderState.visibleItems.every(item =>
-                                this.state.selection.includes(item.annotationId)
+                                this.state.selection.some((i)=>(i.annotationId == item.annotationId))
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
