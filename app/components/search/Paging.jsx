@@ -64,7 +64,7 @@ class Paging extends React.Component {
 			}
 			if(showPrevious) {
 				pagingButtons.push(
-					<button key="__previous_pages" type="button" className="btn btn-default" title="Skip 10 pages"
+					<button key="__previous_pages" type="button" className="btn btn-default" title="Back 10 pages"
 						onClick={this.gotoPage.bind(this, this.props.currentPage - this.MAX_BUTTONS)}>
 						Previous
 					</button>);
@@ -86,7 +86,7 @@ class Paging extends React.Component {
 
 			if(showNext) {
 				pagingButtons.push(
-					<button key="__next_pages" type="button" className="btn btn-default next-last-page" title="Back 10 pages"
+					<button key="__next_pages" type="button" className="btn btn-default next-last-page" title="Skip 10 pages"
 						onClick={this.gotoPage.bind(this, this.props.currentPage + this.MAX_BUTTONS)}>
 						Next
 					</button>);
