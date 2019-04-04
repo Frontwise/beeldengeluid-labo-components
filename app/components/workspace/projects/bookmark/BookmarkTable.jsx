@@ -161,8 +161,8 @@ class BookmarkTable extends React.PureComponent {
     //Update Selection list, based on available items
     updateSelection(items) {
         this.setState({
-            selection: items.map(item => item.resourceId).filter(
-                itemId => this.state.selection.includes(itemId)
+            selection: items.filter(
+                item => this.state.selection.some((i)=>(i.resourceId == item.resourceId))
             )
         });
     }
@@ -171,14 +171,14 @@ class BookmarkTable extends React.PureComponent {
         // filter on type
         if (filter.mediaType) {
             bookmarks = bookmarks.filter(bookmark =>
-                bookmark.object.mediaTypes.includes(filter.mediaType)
+                bookmark.object && bookmark.object.mediaTypes && bookmark.object.mediaTypes.includes(filter.mediaType)
             );
         }
 
         // filter on group
         if (filter.group) {
             bookmarks = bookmarks.filter(bookmark =>
-                bookmark.groups.some((g) => (g.annotationId === filter.group))
+                bookmark.groups && bookmark.groups.some((g) => (g.annotationId === filter.group))
             );
         }
 
@@ -345,7 +345,7 @@ class BookmarkTable extends React.PureComponent {
 
     exportBookmarks(selection) {
         const data = this.state.bookmarks.filter(item =>
-            selection.includes(item.resourceId)
+            selection.some((i)=>(i.resourceId == item.resourceId))
             );
         exportDataAsJSON(data);
     }
@@ -379,7 +379,7 @@ class BookmarkTable extends React.PureComponent {
             const found = newSelection.find(selected => selected.resourceId === item.resourceId)
             if(!found && e.target.checked) { // add it to the selection
                 newSelection.push(item);
-            } else if (e.target.checked && found) { // remove the selected item
+            } else if (!e.target.checked && found) { // remove the selected item
                 newSelection.splice(found, 1);
             }
         });
@@ -489,7 +489,7 @@ class BookmarkTable extends React.PureComponent {
                         type="checkbox"
                         checked={
                             renderState.visibleItems.length > 0 && renderState.visibleItems.every(item =>
-                                item && this.state.selection.includes(item.resourceId)
+                                item && this.state.selection.some((i)=>(i.resourceId == item.resourceId))
                             )
                         }
                         onChange={this.selectAllChange.bind(this, renderState.visibleItems)}/>
