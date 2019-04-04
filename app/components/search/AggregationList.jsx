@@ -453,7 +453,7 @@ class AggregationList extends React.Component {
                         aggr.index
                     )}
                 >
-                    Remove Facet
+                    Hide Facet
                 </button>
                 <div
                     className={IDUtil.cssClassName(
@@ -610,7 +610,7 @@ class AggregationList extends React.Component {
             >
                 <div>
                     <p>
-                        You are removing the current facet for "
+                        You are closing (hiding) the current facet for "
                         <u>{
                             this.props.collectionConfig ? this.props.collectionConfig.toPrettyFieldName(this.currentFacet) : this.currentFacet
                         }</u>". You can bring it back by
@@ -623,7 +623,7 @@ class AggregationList extends React.Component {
                         onClick={this.removeAggregation}
                         className="btn btn-primary"
                     >
-                        Remove
+                        Hide
                     </button>
                 </div>
             </FlexModal>
