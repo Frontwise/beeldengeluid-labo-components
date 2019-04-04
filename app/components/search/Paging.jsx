@@ -4,9 +4,7 @@ class Paging extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {
-			MAX_BUTTONS : 10
-		}
+		this.MAX_BUTTONS = 10;
 	}
 
 	gotoPage(pageNumber) {
@@ -17,33 +15,46 @@ class Paging extends React.Component {
 
 	render () {
 		const pagingButtons = []
-		let start = 1
-		let end = this.props.numPages;
+
 		let showPrevious = false;
 		let showFirst = false;
 		let showNext = false;
 		let showLast = false;
 		if(this.props.numPages > 1) { //only show buttons if there is more than one page
-			if(this.props.numPages > this.state.MAX_BUTTONS) {
+
+			//only adjust the start & end if there are more than 10 buttons on the page
+			let start = 1
+			let end = this.props.numPages;
+			if(this.props.numPages > this.MAX_BUTTONS) {
+
+				//determine the start
+
 				if(this.props.currentPage > 5) {
 					start = this.props.currentPage - 3;
 					showFirst = true;
-					if(start > this.state.MAX_BUTTONS) {
+					if(this.props.currentPage > this.MAX_BUTTONS) {
 						showPrevious = true;
 					}
 				}
-				if(start + this.state.MAX_BUTTONS > this.props.numPages) {
+
+				//determine the end
+
+				if(start + this.MAX_BUTTONS > this.props.numPages) {
 					end = this.props.numPages;
 				} else {
-					end = start + this.state.MAX_BUTTONS;
+					end = start + this.MAX_BUTTONS;
 				}
+
+
 				if(end < this.props.numPages) {
 					showLast = true;
 				}
-				if(end + this.state.MAX_BUTTONS < this.props.numPages) {
+				if(end + this.MAX_BUTTONS < this.props.numPages) {
 					showNext = true;
 				}
 			}
+
+
 			if(showFirst) {
 				pagingButtons.push(
 					<button key="__first_page" type="button" className="btn btn-default"
@@ -53,11 +64,13 @@ class Paging extends React.Component {
 			}
 			if(showPrevious) {
 				pagingButtons.push(
-					<button key="__previous_pages" type="button" className="btn btn-default"
-						onClick={this.gotoPage.bind(this, start - this.state.MAX_BUTTONS)}>
+					<button key="__previous_pages" type="button" className="btn btn-default" title="Skip 10 pages"
+						onClick={this.gotoPage.bind(this, this.props.currentPage - this.MAX_BUTTONS)}>
 						Previous
 					</button>);
 			}
+
+			//render the individual page number buttons
 			for(let i=start;i<=end;i++) {
 				let className = 'btn btn-default';
 				if(this.props.currentPage == i) {
@@ -70,10 +83,11 @@ class Paging extends React.Component {
 					</button>
 				);
 			}
+
 			if(showNext) {
 				pagingButtons.push(
-					<button key="__next_pages" type="button" className="btn btn-default next-last-page"
-						onClick={this.gotoPage.bind(this, this.props.currentPage + 1)}>
+					<button key="__next_pages" type="button" className="btn btn-default next-last-page" title="Back 10 pages"
+						onClick={this.gotoPage.bind(this, this.props.currentPage + this.MAX_BUTTONS)}>
 						Next
 					</button>);
 			}
